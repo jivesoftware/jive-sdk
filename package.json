@@ -1,0 +1,37 @@
+{
+  "name": "jive-sdk",
+  "description": "Node.js framework for building purposeful places",
+  "version": "0.0.1",
+  "main": "api.js",
+  "author": {
+    "name": "Jive Software",
+    "email": "mark.weitzel@jivesoftware"
+  },
+  "dependencies": {
+    "walk": "*",
+    "underscore" : "*",
+    "q" : "*"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+     "node": "*"
+   },
+  "contributors": [
+    {
+      "name": "Mark Weitzel",
+      "email": "mark.weitzel@jivesoftware"
+    },
+    {
+      "name": "Aron Racho",
+      "email": "aron.racho@jivesoftware.com"
+    }
+  ],
+  "keywords": [
+    "jive",
+    "framework",
+    "app",
+    "purposeful_places",
+    "api"
+  ]
+}
