@@ -33,12 +33,10 @@ function configureTiles(app) {
 
         data.routes.forEach( function( currentRoute ) {
             var currentTileDir = tilesDir + '/' + data.currentTile + '/routes/' + currentRoute;
-            console.log(currentTileDir);
 
             //Look in the routes directory for the current tile.
             //for each file that is in there that matches an http verb, add it to the app as a route
             proms.push(q.nfcall(fs.readdir, currentTileDir).then(function(verbDirs){
-                console.log(verbDirs);
                 //todo: check to make sure the file you are adding is a legit http verb
                 verbDirs.forEach(function(httpVerbFile){
                     var httpVerb = httpVerbFile.substring(0, httpVerbFile.length - 3);
@@ -47,7 +45,7 @@ function configureTiles(app) {
                     var routeHandlerPath = (currentTileDir + '/' + httpVerb);
                     var routeContextPath = ('/' + data.currentTile + '/' + currentRoute);
 
-                    console.log('adding route', routeContextPath, ' : ', routeHandlerPath );
+                    console.log('adding route', routeContextPath, ' -> ', routeHandlerPath );
                     var routeHandler = require(routeHandlerPath);
                     if (typeof app[httpVerb] == 'function') {
                         app[httpVerb](routeContextPath, routeHandler.route);
@@ -76,7 +74,7 @@ function configureTiles(app) {
                     );
 
                 } else {
-                    console.log( 'tile', tile, 'already in db', dbTile );
+                    console.log( 'tile', tile, 'already in db' );
                 }
             }
         );
@@ -118,7 +116,6 @@ function configureTiles(app) {
     function addClientConfiguration(tile, routePath){
         console.log("Tile Routes for " + tile);
         var routes = q.nfcall(fs.readdir, routePath).then(function(routesToAdd){
-            console.log(routesToAdd);
             addTileRoutesToApp({"routes":routesToAdd, "currentTile":tile});
         });
 
