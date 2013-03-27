@@ -17,7 +17,7 @@
 var fs              = require('fs'),
     q               = require('q'),
     scheduler       = require('./simpleScheduler'),
-    tileRegistry    = require('./tileRegistry');
+    tileRegistry    = require('./registry');
 
 exports.configureTiles = function(app) {
 
@@ -71,7 +71,7 @@ exports.configureTiles = function(app) {
                     );
 
                 } else {
-                    console.log( 'tile', tile, 'already in db' );
+                    console.log( 'Tile', tile, 'loaded from db' );
                 }
             }
         );

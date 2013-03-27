@@ -14,8 +14,7 @@
  *    limitations under the License.
  */
 
-var events = require('events'),
-    util = require('util');
+var events = require('events');
 
 module.exports = Task;
 

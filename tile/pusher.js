@@ -14,8 +14,8 @@
  *    limitations under the License.
  */
 
-var jiveClient = require('./client');
-var jiveApi = require('./api');
+var jiveClient = require('./../client');
+var jiveApi = require('./../api');
 
 var refreshTokenFlow = function (clientId, instance, successCallback, failureCallback) {
     jiveApi.TileInstance.refreshAccessToken(clientId, instance).execute(

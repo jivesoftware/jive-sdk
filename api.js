@@ -17,7 +17,7 @@
 var http                = require('http'),
     persistence         = require('./persistence/dispatcher'),
     jiveClient          = require('./client'),
-    tilePusher          = require('./tilePusher'),
+    tilePusher          = require('./tile/pusher'),
     jiveUtil            = require('./util')
 ;
 
