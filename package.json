@@ -9,7 +9,10 @@
   },
   "dependencies": {
     "underscore" : "*",
-    "q" : "*"
+    "q" : "*",
+    "mongojs": "*",
+    "mongodb": "*"
+
   },
   "devDependencies": {},
   "optionalDependencies": {},
