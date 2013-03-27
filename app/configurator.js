@@ -19,43 +19,78 @@
  * or attempts to register a new application based on jiveclientconfiguration.json if the
  * app doesn't exist.
  * @param app
- * @return {*|Boolean}
  */
 exports.configureApplication = function( app ) {
     var jiveApi = app.settings['jiveApi'];
+    var jiveClient = app.settings['jiveClient'];
     var config = app.settings['jiveClientConfiguration'];
     var appName = config.appName;
 
-    jiveApi.Application.findByAppName(appName).execute( function(foundApp) {
-        if ( foundApp ) {
-            config.clientId = foundApp.clientId;
-            console.log("Finished client config");
-            app.emit('event:clientAppConfigurationComplete', app);
-        } else {
-            // register app, and proceed
-            app.settings['jiveClient'].Application.register(
-                {
-                    'appName' : config.appName,
-                    'appDescription': config.appDescription,
-                    'userEmail': config.userEmail,
-                    'userPassword': config.userPassword,
-                    'callbackURL': config.callbackURL
-                },
-                function( application ) {
-                    // set clientId
-                    config.clientId = application.clientId;
-                    application.name = config.appName;
-                    jiveApi.Application.save( application ).execute(function(){
-                        console.log("Finished client config");
-                        app.emit('event:clientAppConfigurationComplete', app);
-                    });
-                },
-                function(){
-                    console.log("Finished client config");
-                    app.emit('event:clientAppConfigurationFailed', app);
-                }
-            );
-        }
-    });
+    if ( config.clientId && config.clientSecret ) {
+        // client id and secret are specified in configuration file
+
+        jiveApi.Application.findByID(config.clientId).execute( function(foundApp ) {
+            if ( foundApp ) {
+                // exists
+                console.log("Finished client config");
+                app.emit('event:clientAppConfigurationComplete', app);
+            }  else {
+                // check if still valid
+                jiveClient.Application.retrieve( config.clientId,
+                    function(application) {
+                        // persist
+                        jiveApi.Application.save( application ).execute(function(){
+                            config.clientId = application.clientId;
+                            config.clientSecret = application.clientSecret;
+
+                            console.log("Finished client config");
+                            app.emit('event:clientAppConfigurationComplete', app);
+                        });
+                    },
+                    function() {
+                        // invalid client ID
+                        console.log("Failed client config");
+                        app.emit('event:clientAppConfigurationFailed', "Invalid client ID");
+                    }
+                );
+            }
+        });
+
+    } else {
+
+        jiveApi.Application.findByAppName(appName).execute( function(foundApp) {
+            if ( foundApp ) {
+                config.clientId = foundApp.clientId;
+                console.log("Finished client config");
+                app.emit('event:clientAppConfigurationComplete', app );
+            } else {
+                // register app, and proceed
+                jiveClient.Application.register(
+                    {
+                        'appName' : config.appName,
+                        'appDescription': config.appDescription,
+                        'userEmail': config.userEmail,
+                        'userPassword': config.userPassword,
+                        'callbackURL': config.callbackURL
+                    },
+                    function( application ) {
+                        // set clientId
+                        config.clientId = application.clientId;
+                        application.name = config.appName;
+                        jiveApi.Application.save( application ).execute(function(){
+                            console.log("Finished client config");
+                            app.emit('event:clientAppConfigurationComplete', app);
+                        });
+                    },
+                    function(){
+                        console.log("Failed client config");
+                        app.emit('event:clientAppConfigurationFailed', "Unable to register application");
+                    }
+                );
+            }
+        });
+
+    }
+
 };
 
