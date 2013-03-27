@@ -14,14 +14,6 @@
  *    limitations under the License.
  */
 
-/**
- * Created with IntelliJ IDEA.
- * User: matt
- * Date: 3/1/13
- * Time: 11:20 AM
- * To change this template use File | Settings | File Templates.
- */
-
 var tasks = {};
 
 /**
