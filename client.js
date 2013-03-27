@@ -21,8 +21,7 @@
 var http = require('http');
 var url = require('url');
 
-// Define our module.
-var options = {
+var configuration = {
     "jiveid": {
         "servers": {
             "ui": {
@@ -44,7 +43,7 @@ var options = {
 var jiveIDEndpointProvider = function () {
 
     var requestMaker = function (method, server, path, params) {
-        var serverInfo = options.jiveid.servers[server];
+        var serverInfo = configuration.jiveid.servers[server];
         var requestParams = {
             host: serverInfo.host,
             port: serverInfo.port,
@@ -110,7 +109,6 @@ var jiveIDEndpointProvider = function () {
         },
 
         applicationCreate: function (cookie, appName, appDescription) {
-            console.log(cookie);
             return requestMaker("GET", "ui", "/v1/oauth2/application/create?name=" + appName + "&description=" + appDescription, {
                 "headers": {
                     "Cookie": cookie
@@ -145,6 +143,22 @@ var jsonResponseCallbackWrapper = function (response, callback) {
     });
 
 };
+
+/**
+ * Override the default client configuration here, eg. the jiveID server locations
+ * @param _options
+ */
+exports.init = function( _configuration ) {
+    configuration = _configuration;
+};
+
+/**
+ * Return current client configuration
+ * @return configuration JSON
+ **/
+exports.options = function() {
+    return configuration;
+} ;
 
 exports.Application = {
 

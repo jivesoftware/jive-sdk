@@ -8,7 +8,6 @@
     "email": "mark.weitzel@jivesoftware"
   },
   "dependencies": {
-    "walk": "*",
     "underscore" : "*",
     "q" : "*"
   },

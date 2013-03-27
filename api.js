@@ -14,16 +14,13 @@
  *    limitations under the License.
  */
 
-
-//todo: clean up the memory & file persistence. it's a bit confusing here
-var util = require('util')
+var   util = require('util')
     , events = require('events')
-    , memoryPersistence = require('./fspersistence')
-//      , memoryPersistence = require('./memorypersistence')
+    , filePersistence = require('./filePersistence')
     , http = require('http')
     , jiveClient = require('./client')
     , tilePusher = require('./tilePusher')
-    ;
+;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,8 +30,8 @@ var PersistenceDispatcher = function () {
 
     function initListener() {
         if (!persistenceListener) {
-            // default to in memory persistence if one is not registered already
-            exports.Persistence.register(memoryPersistence.persistenceListener);
+            // default to file persistence if one is not registered already
+            exports.Persistence.register(filePersistence.persistenceListener);
         }
     }
 

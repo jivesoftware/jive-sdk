@@ -14,21 +14,18 @@
  *    limitations under the License.
  */
 
-var fs      = require('fs'),
-    __      = require('underscore'),
-    q = require('q'),
-    scheduler = require('./simpleScheduler'),
-    tileRegistry = require('./tileRegistry'),
-    events = require('events'),
-    util = require('util');
+var fs              = require('fs'),
+    q               = require('q'),
+    scheduler       = require('./simpleScheduler'),
+    tileRegistry    = require('./tileRegistry');
 
-function configureTiles(app) {
+exports.configureTiles = function(app) {
+
     var jiveApi = app.settings['jiveApi'];
     var rootDir = app.settings['rootDir'];
     var tilesDir = rootDir + '/tiles';
 
     function addTileRoutesToApp(data){
-        console.log("adding routes");
         var proms = [];
 
         data.routes.forEach( function( currentRoute ) {
@@ -113,8 +110,8 @@ function configureTiles(app) {
         });
     }
 
-    function addClientConfiguration(tile, routePath){
-        console.log("Tile Routes for " + tile);
+    function addTileConfiguration(tile, routePath){
+        console.log("Adding tile routes for " + tile);
         var routes = q.nfcall(fs.readdir, routePath).then(function(routesToAdd){
             addTileRoutesToApp({"routes":routesToAdd, "currentTile":tile});
         });
@@ -124,43 +121,6 @@ function configureTiles(app) {
         return routes;
     }
 
-    function finishClientConfiguration() {
-        var config = app.settings['jiveClientConfiguration'];
-        var appName = config.appName;
-        var prom = q.defer();
-
-        jiveApi.Application.findByAppName(appName).execute( function(foundApp) {
-
-            if ( foundApp ) {
-                config.clientId = foundApp.clientId;
-                prom.resolve();
-            } else {
-                // register app, and proceed
-                app.settings['jiveClient'].Application.register(
-                    {
-                        'appName' : config.appName,
-                        'appDescription': config.appDescription,
-                        'userEmail': config.userEmail,
-                        'userPassword': config.userPassword,
-                        'callbackURL': config.callbackURL
-                    },
-                    function( application ) {
-                        // set clientId
-                        config.clientId = application.clientId;
-                        application.name = config.appName;
-                        jiveApi.Application.save( application ).execute(function(){
-                            prom.resolve();
-                        });
-                    },
-                    function(){
-                        prom.reject.apply(prom, arguments);
-                    }
-                );
-            }
-        });
-        return prom;
-    }
-
     //Find the tiles by walking the tileDir tree
     var tiles = [];
     var tileRoutesPaths = [];
@@ -168,19 +128,15 @@ function configureTiles(app) {
         var proms = [];
         tilesDirContents.forEach(function(item) {
             var tileDirPath = tilesDir + '/' + item + '/routes';
-            proms.push(addClientConfiguration(item, tileDirPath));
+            proms.push(addTileConfiguration(item, tileDirPath));
             tileRoutesPaths.push( tileDirPath );
             tiles.push( item );
         });
-        return q.all(proms).then(finishClientConfiguration).then(function(){
+        return q.all(proms).then(function(){
             //We've added all the routes for the tiles and actions throw the event that indicates we are done
-            console.log("Finished client config");
-            app.emit('event:clientConfigurationComplete', app);
+            console.log("Finished tile config");
+            app.emit('event:tileConfigurationComplete', app);
         });
     }).done();
-}
 
-/*
-This is invoked on an event handler
-*/
-exports.configureTiles = configureTiles;
+};
