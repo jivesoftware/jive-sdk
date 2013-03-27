@@ -14,65 +14,16 @@
  *    limitations under the License.
  */
 
-var util = require('util'),
-    events = require('events'),
-    filePersistence = require('./persistence/file'),
-    http = require('http'),
-    jiveClient = require('./client'),
-    tilePusher = require('./tilePusher'),
-    jiveUtil = require('./util')
+var http                = require('http'),
+    persistence         = require('./persistence/dispatcher'),
+    jiveClient          = require('./client'),
+    tilePusher          = require('./tilePusher'),
+    jiveUtil            = require('./util')
 ;
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-var PersistenceDispatcher = function () {
-    events.EventEmitter.call(this);
-
-    function initListener() {
-        if (!persistenceListener) {
-            // default to file persistence if one is not registered already
-            exports.Persistence.register(filePersistence.persistenceListener);
-        }
-    }
-
-    this.save = function (collectionID, key, data, callback) {
-        initListener();
-        this.emit('save', collectionID, key, data, callback);
-    };
-
-    this.findByID = function (collectionID, key, callback) {
-        initListener();
-        this.emit('findByID', collectionID, key, callback);
-    };
-
-    this.findAll = function (collectionID, callback) {
-        initListener();
-        this.emit('findAll', collectionID, callback);
-    };
-
-    this.remove = function (collectionID, key, callback) {
-        initListener();
-        this.emit('remove', collectionID, callback);
-    };
+exports.setPersistenceListener = function( listener ) {
+    persistence.setListener(listener);
 };
-
-util.inherits(PersistenceDispatcher, events.EventEmitter);
-
-var persistenceListener = null;
-var persistenceDispatcher = new PersistenceDispatcher();
-exports.Persistence = {
-    register: function (_persistenceListener) {
-        persistenceListener = new _persistenceListener();
-        persistenceDispatcher.on('save', persistenceListener.save);
-        persistenceDispatcher.on('findByID', persistenceListener.findByID);
-        persistenceDispatcher.on('findAll', persistenceListener.findAll);
-        persistenceDispatcher.on('remove', persistenceListener.remove);
-    }
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.Application = {
 
@@ -80,8 +31,8 @@ exports.Application = {
 
         return {
             execute: function (callback) {
-                persistenceDispatcher.save("application", application.clientId, application, function (saved) {
-                    persistenceDispatcher.save("application_by_name", application.name, application.clientId, function () {
+                persistence.save("application", application.clientId, application, function (saved) {
+                    persistence.save("application_by_name", application.name, application.clientId, function () {
                         callback(saved);
                     })
                 });
@@ -92,7 +43,7 @@ exports.Application = {
     findByID: function (clientId) {
         return {
             execute: function (callback) {
-                persistenceDispatcher.findByID("application", clientId, callback);
+                persistence.findByID("application", clientId, callback);
             }
         };
     },
@@ -100,7 +51,7 @@ exports.Application = {
     findByAppName: function (appname) {
         return {
             execute: function (callback) {
-                persistenceDispatcher.findByID("application_by_name", appname, function (clientId) {
+                persistence.findByID("application_by_name", appname, function (clientId) {
                     if (clientId) {
                         exports.Application.findByID(clientId).execute(function (application) {
                             callback(application);
@@ -116,7 +67,7 @@ exports.Application = {
     findAll: function () {
         return {
             execute: function (callback) {
-                persistenceDispatcher.findAll("application", callback);
+                persistence.findAll("application", callback);
             }
         };
     },
@@ -124,7 +75,7 @@ exports.Application = {
     remove: function (clientId) {
         return {
             execute: function (callback) {
-                persistenceDispatcher.remove("application", clientId, callback);
+                persistence.remove("application", clientId, callback);
             }
         };
     }
@@ -140,7 +91,7 @@ exports.TileInstance = {
 
         return {
             execute: function (callback) {
-                persistenceDispatcher.save("tileInstance", tileInstance.id, tileInstance, callback);
+                persistence.save("tileInstance", tileInstance.id, tileInstance, callback);
             }
         };
     },
@@ -148,7 +99,7 @@ exports.TileInstance = {
     findByID: function (tileInstanceID) {
         return {
             execute: function (callback) {
-                persistenceDispatcher.findByID("tileInstance", tileInstanceID, callback);
+                persistence.findByID("tileInstance", tileInstanceID, callback);
             }
         };
     },
@@ -156,7 +107,7 @@ exports.TileInstance = {
     findByDefinitionName: function (definitionName) {
         return {
             execute: function (callback) {
-                persistenceDispatcher.findAll("tileInstance", function (all) {
+                persistence.findAll("tileInstance", function (all) {
                     // todo - implement a joining table, like we do for application_by_name
                     var byDefinition = [];
                     all.forEach(function (instance) {
@@ -174,7 +125,7 @@ exports.TileInstance = {
     findAll: function () {
         return {
             execute: function (callback) {
-                persistenceDispatcher.findAll("tileInstance", callback);
+                persistence.findAll("tileInstance", callback);
             }
         };
     },
@@ -182,7 +133,7 @@ exports.TileInstance = {
     remove: function (tileInstanceID) {
         return {
             execute: function (callback) {
-                persistenceDispatcher.remove("tileInstance", tileInstanceID, callback);
+                persistence.remove("tileInstance", tileInstanceID, callback);
             }
         };
     },
@@ -264,8 +215,8 @@ exports.TileDefinition = {
 
         return {
             execute: function (callback) {
-                persistenceDispatcher.save("tileDefinition", tileDefinition.id, tileDefinition, function (saved) {
-                    persistenceDispatcher.save("tileDefinition_by_name", tileDefinition.name, tileDefinition.id, function () {
+                persistence.save("tileDefinition", tileDefinition.id, tileDefinition, function (saved) {
+                    persistence.save("tileDefinition_by_name", tileDefinition.name, tileDefinition.id, function () {
                         callback(saved);
                     })
                 });
@@ -276,7 +227,7 @@ exports.TileDefinition = {
     findByID: function (tileDefinitionID) {
         return {
             execute: function (callback) {
-                persistenceDispatcher.findByID("tileDefinition", tileDefinitionID, callback);
+                persistence.findByID("tileDefinition", tileDefinitionID, callback);
             }
         };
     },
@@ -284,7 +235,7 @@ exports.TileDefinition = {
     findByTileName: function (tilename) {
         return {
             execute: function (callback) {
-                persistenceDispatcher.findByID("tileDefinition_by_name", tilename, function (tileDefinitionID) {
+                persistence.findByID("tileDefinition_by_name", tilename, function (tileDefinitionID) {
                     if (tileDefinitionID) {
                         exports.TileDefinition.findByID(tileDefinitionID).execute(function (tileDefinition) {
                             callback(tileDefinition);
@@ -300,7 +251,7 @@ exports.TileDefinition = {
     findAll: function () {
         return {
             execute: function (callback) {
-                persistenceDispatcher.findAll("tileDefinition", callback);
+                persistence.findAll("tileDefinition", callback);
             }
         };
     },
@@ -308,7 +259,7 @@ exports.TileDefinition = {
     remove: function (tileDefinitionID) {
         return {
             execute: function (callback) {
-                persistenceDispatcher.remove("tileDefinition", tileDefinitionID, callback);
+                persistence.remove("tileDefinition", tileDefinitionID, callback);
             }
         };
     }
