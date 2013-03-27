@@ -14,12 +14,13 @@
  *    limitations under the License.
  */
 
-var   util = require('util')
-    , events = require('events')
-    , filePersistence = require('./filePersistence')
-    , http = require('http')
-    , jiveClient = require('./client')
-    , tilePusher = require('./tilePusher')
+var util = require('util'),
+    events = require('events'),
+    filePersistence = require('./persistence/file'),
+    http = require('http'),
+    jiveClient = require('./client'),
+    tilePusher = require('./tilePusher'),
+    jiveUtil = require('./util')
 ;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +135,7 @@ exports.TileInstance = {
 
     save: function (tileInstance) {
         if (!tileInstance.id) {
-            tileInstance.id = guid();
+            tileInstance.id = jiveUtil.guid();
         }
 
         return {
@@ -258,7 +259,7 @@ exports.TileDefinition = {
 
     save: function (tileDefinition) {
         if (!tileDefinition.id) {
-            tileDefinition.id = guid();
+            tileDefinition.id = jiveUtil.guid();
         }
 
         return {
@@ -313,16 +314,3 @@ exports.TileDefinition = {
     }
 
 };
-
-//////////// private helpers
-
-function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
-}
-
-function guid() {
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-        s4() + '-' + s4() + s4() + s4();
-}
