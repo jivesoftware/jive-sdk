@@ -42,7 +42,7 @@ exports.configureTiles = function(app) {
                     var routeHandlerPath = (currentTileDir + '/' + httpVerb);
                     var routeContextPath = ('/' + data.currentTile + '/' + currentRoute);
 
-                    console.log('adding route', routeContextPath, ' -> ', routeHandlerPath );
+                    console.log('Tile route added for ', data.currentTile, ': ', routeContextPath, ' -> ', routeHandlerPath );
                     var routeHandler = require(routeHandlerPath);
                     if (typeof app[httpVerb] == 'function') {
                         app[httpVerb](routeContextPath, routeHandler.route);
@@ -66,12 +66,12 @@ exports.configureTiles = function(app) {
                     // persist tile since its not yet persisted
                     jiveApi.TileDefinition.save( definition).execute(
                         function() {
-                            console.log("Persisted", tileName );
+                            console.log("Tile saved:", tileName );
                         }
                     );
 
                 } else {
-                    console.log( 'Tile', tile, 'loaded from db' );
+                    console.log( 'Tile loaded:', tile );
                 }
             }
         );
@@ -111,12 +111,10 @@ exports.configureTiles = function(app) {
     }
 
     function addTileConfiguration(tile, routePath){
-        console.log("Adding tile routes for " + tile);
         var routes = q.nfcall(fs.readdir, routePath).then(function(routesToAdd){
             addTileRoutesToApp({"routes":routesToAdd, "currentTile":tile});
         });
 
-        console.log("Handling Tile Registration for " + tile);
         handleTileRegistration(tile);
         return routes;
     }
