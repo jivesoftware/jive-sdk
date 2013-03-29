@@ -22,26 +22,6 @@ var persistenceListener = null;
 
 var Dispatcher = function () {
     events.EventEmitter.call(this);
-
-    this.save = function (collectionID, key, data, callback) {
-        lazyInit();
-        this.emit('save', collectionID, key, data, callback);
-    };
-
-    this.findByID = function (collectionID, key, callback) {
-        lazyInit();
-        this.emit('findByID', collectionID, key, callback);
-    };
-
-    this.findAll = function (collectionID, callback) {
-        lazyInit();
-        this.emit('findAll', collectionID, callback);
-    };
-
-    this.remove = function (collectionID, key, callback) {
-        lazyInit();
-        this.emit('remove', collectionID, callback);
-    };
 };
 
 util.inherits(Dispatcher, events.EventEmitter);

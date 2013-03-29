@@ -21,7 +21,7 @@ var refreshTokenFlow = function (clientId, instance, successCallback, failureCal
     jiveApi.TileInstance.refreshAccessToken(clientId, instance).execute(
         function (updated) {
             // success
-            console.log(updated);
+            console.log('Successfully refreshed token.');
             jiveApi.TileInstance.save(updated).execute(successCallback);
         },
 
