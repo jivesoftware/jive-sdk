@@ -64,7 +64,7 @@ exports.findAll = function (collectionID, callback) {
 
 exports.remove = function (collectionID, key, callback) {
     lazyInit();
-    dispatcher.emit('remove', collectionID, callback);
+    dispatcher.emit('remove', collectionID, key, callback);
 };
 
 exports.setListener = setListener;
