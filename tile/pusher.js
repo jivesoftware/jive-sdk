@@ -39,20 +39,26 @@ var push = function (clientId, pushFunction, type, instance, dataToPush, callbac
         if (response.statusCode && response.statusCode >= 400 && response.statusCode < 410) {
             console.log("Got access invalid access: " + response.statusCode + ". Trying refresh flow.");
 
+            if ( !retryIfFail ) {
+                console.log('Not executing refresh token flow.');
+                if ( callback ) {
+                    callback( response );
+                }
+                return;
+            }
+
             refreshTokenFlow(clientId, instance,
                 // success
-                callback ? callback : function () {
+                function () {
+                    console.log("Retrying push.");
+                    // do not retry on next fail
+                    push(clientId, pushFunction, type, instance, dataToPush, callback, false);
                 },
                 // failure
                 function (result) {
-                    if (retryIfFail) {
-                        console.log("Retrying push.");
-                        // do not retry on next fail
-                        push(clientId, pushFunction, type, instance, dataToPush, callback, false);
-                    } else {
-                        if (callback) {
-                            callback(result);
-                        }
+                    console.log("refreshTokenFlow failed.", result);
+                    if (callback) {
+                        callback(result);
                     }
                 }
             );
