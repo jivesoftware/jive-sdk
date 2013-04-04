@@ -37,7 +37,6 @@ var refreshTokenFlow = function (clientId, instance, successCallback, failureCal
 
 var push = function (clientId, pushFunction, type, instance, dataToPush, callback, retryIfFail) {
     pushFunction(instance, dataToPush).execute(function (response) {
-        console.log(type + ' push to', instance.url, response.statusCode, instance.name);
 
         if ( !response.statusCode ) {
             // err?
@@ -81,7 +80,7 @@ var push = function (clientId, pushFunction, type, instance, dataToPush, callbac
 
         } else {
             // successful push
-            tileRegistry.emit("pushedUpdateInstance." + instance['name'], instance, type, dataToPush);
+            tileRegistry.emit("pushedUpdateInstance." + instance['name'], instance, type, dataToPush, response);
         }
     });
 };

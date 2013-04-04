@@ -94,22 +94,12 @@ exports.configureTiles = function(app) {
                     {app: app}
                 );
 
-                // events
-                if ( typeof pusher.task !== 'function' ) {
-                    pusher.task.on("event:pushData", function ( tileInstance, data, callback ) {
-                        jiveApi.TileInstance.pushData( app.settings.jiveClientConfiguration.clientId, tileInstance, data, callback );
-                    } );
-
-                    pusher.task.on("event:pushActivity", function ( client_id, tileInstance, data, callback ) {
-                        jiveApi.TileInstance.pushActivity( app.settings.jiveClientConfiguration.clientId, tileInstance, data, callback );
-                    } );
-                }
             }
         });
 
         ///// lifecycle
 
-        /// global listeners
+        /// global event listeners
         tileRegistry.addListener("newInstance." + definition.name, function(theInstance){
             console.log("a new " + definition.name + " instance was created", theInstance);
         });
@@ -119,8 +109,17 @@ exports.configureTiles = function(app) {
         tileRegistry.addListener("destroyedInstance." + definition.name, function(theInstance){
             console.log("Instance of " + definition.name + " has been destroyed", theInstance);
         });
+        tileRegistry.addListener("pushedUpdateInstance." + definition.name, function(tileInstance, type, pushedData, response ){
+            console.log(type + ' push to', tileInstance.url, response.statusCode, tileInstance.name);
+        });
+        tileRegistry.addListener("pushDataInstance." + definition.name, function(tileInstance, data, callback){
+            jiveApi.TileInstance.pushData( app.settings.jiveClientConfiguration.clientId, tileInstance, data, callback );
+        });
+        tileRegistry.addListener("pushActivityInstance." + definition.name, function(tileInstance, data, callback){
+            jiveApi.TileInstance.pushActivity( app.settings.jiveClientConfiguration.clientId, tileInstance, data, callback );
+        });
 
-        /// specific to definition
+        /// event listeners specific to the definition
         fs.stat(tileDir + '/services/lifecycle.js', function(err, stats){
             if(!err && stats.isFile()){
                 var lifecycle = require(tileDir + '/services/lifecycle');
