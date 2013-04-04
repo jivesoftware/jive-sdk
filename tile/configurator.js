@@ -27,9 +27,9 @@ exports.configureTiles = function(app) {
 
     // configure global routes
     console.log('Configuring global framework routes.');
-    app.get('/tiles', require('jive-sdk/routes/tiles').tiles);
-    app.get('/tilesInstall', require('jive-sdk/routes/tiles').installTiles);
-    app.post('/registration', require('jive-sdk/routes/tiles').registration);
+    app.get('/tiles', require('../routes/tiles').tiles);
+    app.get('/tilesInstall', require('../routes/tiles').installTiles);
+    app.post('/registration', require('../routes/tiles').registration);
 
     function addTileRoutesToApp(data){
         var proms = [];
