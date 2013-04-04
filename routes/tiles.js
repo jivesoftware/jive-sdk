@@ -44,6 +44,30 @@ function getProcessed(conf, all) {
         });
 
         var processedTile = JSON.parse(stringified);
+
+        // defaults
+        if ( !processedTile['published'] ) {
+            processedTile['published'] = "2013-02-28T15:12:16.768-0800";
+        }
+        if ( !processedTile['updated'] ) {
+            processedTile['updated'] = "2013-02-28T15:12:16.768-0800";
+        }
+        if ( !processedTile['action'] ) {
+            processedTile['action'] = host + '/' + name + '/action';
+        }
+        if ( !processedTile['config'] ) {
+            processedTile['config'] = host + '/' + name + '/configure';
+        }
+        if ( !processedTile['register'] ) {
+            processedTile['register'] = host + '/registration';
+        }
+        if ( !processedTile['client_id'] ) {
+            processedTile['client_id'] = conf.clientId;
+        }
+        if ( !processedTile['id'] ) {
+            processedTile['id'] = '{{{tile_id}}}';
+        }
+
         processedTile.description += ' for ' + conf.clientId;
         processed.push( processedTile );
     });
