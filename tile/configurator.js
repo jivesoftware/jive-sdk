@@ -82,23 +82,9 @@ exports.configureTiles = function(app) {
             }
         );
 
-        ///// tasks
-        fs.stat(tileDir + '/services/datapusher.js', function(err, stats){
-            if(!err && stats.isFile()){
-                var pusher = require(tileDir + '/services/datapusher');
-                // schedule task
-                var interval = (pusher.task.getInterval ? pusher.task.getInterval() : undefined ) || pusher.interval || 15000;
-                var key = tile + ".task";
-                scheduler.schedule(key, interval,
-                    typeof pusher.task === 'function' ? pusher.task : pusher.task.getRunnable(),
-                    {app: app}
-                );
-            }
-        });
+        //////////////////////////////////
+        /// attach global event listeners
 
-        ///// lifecycle
-
-        /// global event listeners
         tileRegistry.addListener("newInstance." + definition.name, function(theInstance){
             console.log("a new " + definition.name + " instance was created", theInstance);
         });
@@ -118,14 +104,31 @@ exports.configureTiles = function(app) {
             jiveApi.TileInstance.pushActivity( app.settings.jiveClientConfiguration.clientId, tileInstance, data, callback );
         });
 
-        /// event listeners specific to the definition
-        fs.stat(tileDir + '/services/lifecycle.js', function(err, stats){
-            if(!err && stats.isFile()){
-                var lifecycle = require(tileDir + '/services/lifecycle');
-                if(lifecycle.init){
-                    lifecycle.init(tileRegistry, definition);
+        /////////////////////////////////////////////////////
+        // apply tile specific tasks, life cycle events, etc.
+
+        q.nfcall(fs.readdir, tileDir + '/services' ).then(function(tilesDirContents){
+            tilesDirContents.forEach(function(item) {
+                var theFile = tileDir + '/services/' + item;
+
+                var target = require(theFile);
+
+                // schedule task
+                if ( target.task ) {
+                    var interval = (target.task.getInterval ? target.task.getInterval() : undefined ) || target.interval || 15000;
+                    var key = tile + "." + item + ".task";
+                    scheduler.schedule(key, interval,
+                        typeof target.task === 'function' ? target.task : target.task.getRunnable(),
+                        {app: app}
+                    );
                 }
-            }
+
+                // register life cycle stuff
+                if ( target.registerEvents ) {
+                    target.registerEvents(tileRegistry, definition);
+                }
+            });
+
         });
     }
 
