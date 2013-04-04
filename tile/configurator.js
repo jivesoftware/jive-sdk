@@ -82,6 +82,7 @@ exports.configureTiles = function(app) {
             }
         );
 
+        ///// tasks
         fs.stat(tileDir + '/services/datapusher.js', function(err, stats){
             if(!err && stats.isFile()){
                 var pusher = require(tileDir + '/services/datapusher');
@@ -106,6 +107,14 @@ exports.configureTiles = function(app) {
             }
         });
 
+        ///// lifecycle
+
+        /// global listeners
+        tileRegistry.addListener("newInstance." + definition.name, function(theInstance){
+            console.log("a new " + definition.name + " instance was created", theInstance);
+        });
+
+        /// specific to definition
         fs.stat(tileDir + '/services/lifecycle.js', function(err, stats){
             if(!err && stats.isFile()){
                 var lifecycle = require(tileDir + '/services/lifecycle');

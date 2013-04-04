@@ -16,8 +16,11 @@
 
 var jiveClient = require('./../client');
 var jiveApi = require('./../api');
+var tileRegistry = require('./registry');
 
 var refreshTokenFlow = function (clientId, instance, successCallback, failureCallback) {
+    console.log("Trying refresh flow for ", instance);
+
     jiveApi.TileInstance.refreshAccessToken(clientId, instance).execute(
         function (updated) {
             // success
@@ -36,7 +39,12 @@ var push = function (clientId, pushFunction, type, instance, dataToPush, callbac
     pushFunction(instance, dataToPush).execute(function (response) {
         console.log(type + ' push to', instance.url, response.statusCode, instance.name);
 
-        if (response.statusCode && response.statusCode >= 400 && response.statusCode < 410) {
+        if ( !response.statusCode ) {
+            // err?
+            return;
+        }
+
+        if (response.statusCode >= 400 && response.statusCode < 410) {
             console.log("Got access invalid access: " + response.statusCode + ". Trying refresh flow.");
 
             if ( !retryIfFail ) {
@@ -62,6 +70,12 @@ var push = function (clientId, pushFunction, type, instance, dataToPush, callbac
                     }
                 }
             );
+        } else if ( response.statusCode == 410 ) {
+            // push was rejected with a 'gone'
+            tileRegistry.emit("goneInstance." + instance['name'], instance);
+        } else {
+            // successful push
+            tileRegistry.emit("pushedUpdateInstance." + instance['name'], instance, type, dataToPush);
         }
     });
 };
