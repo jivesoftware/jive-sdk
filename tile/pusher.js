@@ -72,7 +72,13 @@ var push = function (clientId, pushFunction, type, instance, dataToPush, callbac
             );
         } else if ( response.statusCode == 410 ) {
             // push was rejected with a 'gone'
-            tileRegistry.emit("goneInstance." + instance['name'], instance);
+            tileRegistry.emit("destroyingInstance." + instance['name'], instance);
+
+            // destroy the instance
+            jiveApi.TileInstance.remove(instance['id']).execute( function() {
+                tileRegistry.emit("destroyedInstance." + instance['name'], instance);
+            });
+
         } else {
             // successful push
             tileRegistry.emit("pushedUpdateInstance." + instance['name'], instance, type, dataToPush);

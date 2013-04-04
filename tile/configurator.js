@@ -113,6 +113,12 @@ exports.configureTiles = function(app) {
         tileRegistry.addListener("newInstance." + definition.name, function(theInstance){
             console.log("a new " + definition.name + " instance was created", theInstance);
         });
+        tileRegistry.addListener("destroyingInstance." + definition.name, function(theInstance){
+            console.log("Instance of " + definition.name + " is being destroyed", theInstance);
+        });
+        tileRegistry.addListener("destroyedInstance." + definition.name, function(theInstance){
+            console.log("Instance of " + definition.name + " has been destroyed", theInstance);
+        });
 
         /// specific to definition
         fs.stat(tileDir + '/services/lifecycle.js', function(err, stats){
