@@ -28,7 +28,7 @@ exports.schedule = function schedule(key, interval, cb, context){
     }
     this.unschedule(key);
     tasks[key] = setInterval( function() { cb(context) }, interval);
-    console.log("scheduled task: " + key);
+    console.log("scheduled task: " + key, interval);
 };
 
 exports.unschedule = function unschedule(key){

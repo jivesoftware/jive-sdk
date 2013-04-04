@@ -87,13 +87,12 @@ exports.configureTiles = function(app) {
             if(!err && stats.isFile()){
                 var pusher = require(tileDir + '/services/datapusher');
                 // schedule task
-                var interval = pusher.interval || 10000;
+                var interval = (pusher.task.getInterval ? pusher.task.getInterval() : undefined ) || pusher.interval || 15000;
                 var key = tile + ".task";
                 scheduler.schedule(key, interval,
-                    typeof pusher.task === 'function' ? pusher.task : pusher.task.runnable,
+                    typeof pusher.task === 'function' ? pusher.task : pusher.task.getRunnable(),
                     {app: app}
                 );
-
             }
         });
 

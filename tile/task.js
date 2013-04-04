@@ -18,8 +18,13 @@ var events = require('events');
 
 module.exports = Task;
 
-function Task() {
+var interval = 15000;
+var runnable = function() {};
+
+function Task(_runnable, _interval ) {
     events.EventEmitter.call(this);
+    runnable = _runnable;
+    interval = _interval ? _interval : 15000;
 }
 
 Task.super_ = events.EventEmitter;
@@ -29,3 +34,11 @@ Task.prototype = Object.create(events.EventEmitter.prototype, {
         enumerable: false
     }
 });
+
+Task.prototype.getInterval = function() {
+    return interval;
+};
+
+Task.prototype.getRunnable = function() {
+    return runnable;
+};
