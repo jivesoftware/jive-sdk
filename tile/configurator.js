@@ -25,6 +25,12 @@ exports.configureTiles = function(app) {
     var rootDir = app.settings['rootDir'];
     var tilesDir = rootDir + '/tiles';
 
+    // configure global routes
+    console.log('Configuring global framework routes.');
+    app.get('/tiles', require('jive-sdk/routes/tiles').tiles);
+    app.get('/tilesInstall', require('jive-sdk/routes/tiles').installTiles);
+    app.post('/registration', require('jive-sdk/routes/tiles').registration);
+
     function addTileRoutesToApp(data){
         var proms = [];
 
