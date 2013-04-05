@@ -14,6 +14,10 @@
  *    limitations under the License.
  */
 
+var URL = require('url');
+var http = require('http');
+var https = require('https');
+
 function s4() {
     return Math.floor((1 + Math.random()) * 0x10000)
         .toString(16)
@@ -23,4 +27,92 @@ function s4() {
 exports.guid = function() {
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
         s4() + '-' + s4() + s4() + s4();
+};
+
+var jsonResponseCallbackWrapper = function (response, callback) {
+    var str = '';
+    response.on('data', function (chunk) {
+        str += chunk;
+    });
+
+    response.on('end', function () {
+        var entity = JSON.parse(str);
+        callback(entity)
+    });
+
+};
+
+var requestMaker = function (method, serverInfo, path, params, secure) {
+    var requestParams = {
+        host: serverInfo.host,
+        port: serverInfo.port,
+        method: method || 'GET',
+        path: path,
+        headers: params ? params['headers'] : {}
+    };
+
+    var postBody;
+
+    if (method === 'POST' || method === 'PUT') {
+        postBody = '';
+        var contentType = params.headers['Content-Type'];
+        var postObject = params['postObject'];
+
+        if (contentType === 'application/json') {
+            postBody = JSON.stringify(postObject);
+        } else {
+            for (var key in postObject) {
+                if (postObject.hasOwnProperty(key)) {
+                    if (postBody.length > 0) {
+                        postBody += '&';
+                    }
+                    postBody += encodeURIComponent(key) + '=' + encodeURIComponent(postObject[key]);
+                }
+            }
+        }
+
+        requestParams['headers']['Content-Length'] = Buffer.byteLength(postBody, 'utf8');
+    }
+
+    return {
+        execute: function (successCallback, errCallback) {
+            var protocolHandler = secure ? https : http;
+            var request = protocolHandler.request(requestParams, function(response) {
+                jsonResponseCallbackWrapper(response, successCallback);
+            });
+
+            if (postBody) {
+                request.write(postBody);
+            }
+            request.end();
+
+            request.on('error', function (e) {
+                console.log(e);
+                if (errCallback) {
+                    errCallback(e);
+                }
+            });
+        }
+    }
+};
+
+exports.buildRequest = function(url, method, postBody, headers ) {
+    var urlParts = URL.parse(url, true);
+    var path = urlParts.path;
+    var host = urlParts.host;
+    var port = urlParts.port;
+    var protocol = urlParts.protocol;
+
+    var requestParams = {
+        headers : headers,
+        postBody: postBody
+    };
+
+    return requestMaker(method, { host: host, port: port }, path, requestParams, protocol === 'https:' );
+};
+
+exports.proxyJson =  function( handler ) {
+    return function(response) {
+        jsonResponseCallbackWrapper( response, handler )
+    }
 };
