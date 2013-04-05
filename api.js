@@ -222,6 +222,10 @@ exports.TileInstance = {
 
     pushActivity: function (client_id, tileInstance, activity, callback) {
         tilePusher.pushActivity(client_id, tileInstance, activity, callback);
+    },
+
+    pushComment: function (client_id, tileInstance, comment, commentURL, callback) {
+        tilePusher.pushComment(client_id, tileInstance, commentURL, comment, callback);
     }
 
 };

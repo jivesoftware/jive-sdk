@@ -206,12 +206,13 @@ exports.Application = {
 
 };
 
-var tilePush = function (method, tileInstance, data) {
+var tilePush = function (method, tileInstance, data, pushURL ) {
 
     return {
         execute: function (callback) {
             var auth = 'Bearer ' + tileInstance['accessToken'];
-            var urlObject = url.parse(tileInstance['url']);
+            var urlToParse = pushURL || tileInstance['url'];
+            var urlObject = url.parse(urlToParse);
 
             var reqHeaders = {
                 'Content-Type': 'application/json',
@@ -272,6 +273,10 @@ exports.TileInstance = {
 
     pushActivity: function (tileInstance, activity) {
         return tilePush('POST', tileInstance, activity);
+    },
+
+    pushComment: function( tileInstance, comment, commentURL ) {
+        return tilePush('POST', tileInstance, comment, commentURL );
     }
 
 };

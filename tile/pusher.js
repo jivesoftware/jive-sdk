@@ -35,8 +35,8 @@ var refreshTokenFlow = function (clientId, instance, successCallback, failureCal
     );
 };
 
-var push = function (clientId, pushFunction, type, instance, dataToPush, callback, retryIfFail) {
-    pushFunction(instance, dataToPush).execute(function (response) {
+var push = function (clientId, pushFunction, type, instance, dataToPush, pushURL, callback, retryIfFail) {
+    pushFunction(instance, dataToPush, pushURL).execute(function (response) {
 
         if ( !response.statusCode ) {
             // err?
@@ -59,7 +59,7 @@ var push = function (clientId, pushFunction, type, instance, dataToPush, callbac
                 function () {
                     console.log("Retrying push.");
                     // do not retry on next fail
-                    push(clientId, pushFunction, type, instance, dataToPush, callback, false);
+                    push(clientId, pushFunction, type, instance, dataToPush, pushURL, callback, false);
                 },
                 // failure
                 function (result) {
@@ -89,9 +89,13 @@ var push = function (clientId, pushFunction, type, instance, dataToPush, callbac
 };
 
 exports.pushData = function (clientId, instance, dataToPush, callback) {
-    push(clientId, jiveClient.TileInstance.pushData, "data", instance, dataToPush, callback, true);
+    push(clientId, jiveClient.TileInstance.pushData, "data", instance, dataToPush, null, callback, true);
 };
 
 exports.pushActivity = function (clientId, instance, dataToPush, callback) {
-    push(clientId, jiveClient.TileInstance.pushActivity, "activity", instance, dataToPush, callback, true);
+    push(clientId, jiveClient.TileInstance.pushActivity, "activity", instance, dataToPush, null, callback, true);
+};
+
+exports.pushComment = function(clientId, instance, commentURL, dataToPush, callback ) {
+    push(clientId, jiveClient.TileInstance.pushComment, "comment", instance, dataToPush, commentURL, callback, true);
 };
