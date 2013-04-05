@@ -105,19 +105,35 @@ exports.registration = function( req, res ) {
     var clientId = conf.clientId;
     var jiveApi = res.app.settings['jiveApi'];
     var url = req.body['url'];
+    var guid = req.body['guid'];
     var config = req.body['config'];
     var name = req.body['name'];
     var code = req.body['code'];
 
-    jiveApi.TileInstance.register(clientId, url, config, name, code).execute(
-        function( tileInstance ) {
-            console.log("registered tile instance", tileInstance );
+    jiveApi.TileInstance.findByScope( guid ).execute( function(tileInstance) {
+        // the tile instance exists
+        // update the config only
+        if ( tileInstance ) {
+            // update the config
+            tileInstance['config'] = config;
+
             jiveApi.TileInstance.save(tileInstance).execute(function() {
                 console.log( "persisted", tileInstance );
-                tileRegistry.emit("newInstance." + name, tileInstance);
+                tileRegistry.emit("updateInstance." + name, tileInstance);
             });
+
+        } else {
+            jiveApi.TileInstance.register(clientId, url, config, name, code).execute(
+                function( tileInstance ) {
+                    console.log("registered tile instance", tileInstance );
+                    jiveApi.TileInstance.save(tileInstance).execute(function() {
+                        console.log( "persisted", tileInstance );
+                        tileRegistry.emit("newInstance." + name, tileInstance);
+                    });
+                }
+            );
         }
-    );
+    });
 
     // todo -- what if it isn't? err???
     res.status(204);

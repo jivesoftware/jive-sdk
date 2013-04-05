@@ -91,7 +91,11 @@ exports.TileInstance = {
 
         return {
             execute: function (callback) {
-                persistence.save("tileInstance", tileInstance.id, tileInstance, callback);
+                persistence.save("tileInstance", tileInstance.id, tileInstance, function( saved ) {
+                    persistence.save("tileInstance_by_scope", tileInstance['scope'], tileInstance.id, function () {
+                        callback(saved);
+                    })
+                });
             }
         };
     },
@@ -122,6 +126,22 @@ exports.TileInstance = {
         };
     },
 
+    findByScope: function (scope) {
+        return {
+            execute: function (callback) {
+                persistence.findByID("tileInstance_by_scope", scope, function (id) {
+                    if (id) {
+                        exports.TileInstance.findByID(id).execute(function (tileInstance) {
+                            callback(tileInstance);
+                        })
+                    } else {
+                        callback(null);
+                    }
+                });
+            }
+        };
+    },
+
     findAll: function () {
         return {
             execute: function (callback) {
@@ -138,7 +158,7 @@ exports.TileInstance = {
         };
     },
 
-    register: function (client_id, url, config, name, code) {
+    register: function (client_id, url, config, name, code ) {
 
         // todo -- validation?
 
