@@ -65,7 +65,7 @@ var push = function (clientId, pushFunction, type, instance, dataToPush, callbac
                 function (result) {
                     console.log("refreshTokenFlow failed.", result);
                     if (callback) {
-                        callback(result);
+                        callback(response);
                     }
                 }
             );
@@ -80,6 +80,9 @@ var push = function (clientId, pushFunction, type, instance, dataToPush, callbac
 
         } else {
             // successful push
+            if (callback) {
+                callback(response);
+            }
             tileRegistry.emit("pushedUpdateInstance." + instance['name'], instance, type, dataToPush, response);
         }
     });
