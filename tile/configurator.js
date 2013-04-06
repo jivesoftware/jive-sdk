@@ -25,6 +25,10 @@ exports.configureTiles = function(app) {
     var rootDir = app.settings['rootDir'];
     var tilesDir = rootDir + '/tiles';
 
+    var isValidFile = function(file ) {
+        return !(file.indexOf('.') == 0)
+    };
+
     // configure global routes
     console.log('Configuring global framework routes.');
     app.get('/tiles', require('../routes/tiles').tiles);
@@ -37,11 +41,19 @@ exports.configureTiles = function(app) {
         data.routes.forEach( function( currentRoute ) {
             var currentTileDir = tilesDir + '/' + data.currentTile + '/routes/' + currentRoute;
 
+            if ( !isValidFile(currentRoute) ) {
+                return;
+            }
+
             //Look in the routes directory for the current tile.
             //for each file that is in there that matches an http verb, add it to the app as a route
             proms.push(q.nfcall(fs.readdir, currentTileDir).then(function(verbDirs){
                 //todo: check to make sure the file you are adding is a legit http verb
                 verbDirs.forEach(function(httpVerbFile){
+                    if ( !isValidFile(httpVerbFile) ) {
+                        return;
+                    }
+
                     var httpVerb = httpVerbFile.substring(0, httpVerbFile.length - 3);
 
                     //todo: determine how to fix this. it's quite brittle b/c it depends on the location of this file
@@ -109,6 +121,10 @@ exports.configureTiles = function(app) {
 
         q.nfcall(fs.readdir, tileDir + '/services' ).then(function(tilesDirContents){
             tilesDirContents.forEach(function(item) {
+                if ( !isValidFile(item) ) {
+                    return;
+                }
+
                 var theFile = tileDir + '/services/' + item;
 
                 var target = require(theFile);
@@ -147,6 +163,9 @@ exports.configureTiles = function(app) {
     return q.nfcall(fs.readdir, tilesDir).then(function(tilesDirContents){
         var proms = [];
         tilesDirContents.forEach(function(item) {
+            if ( !isValidFile(item) ) {
+                return;
+            }
             var tileDirPath = tilesDir + '/' + item + '/routes';
             proms.push(addTileConfiguration(item, tileDirPath));
             tileRoutesPaths.push( tileDirPath );
