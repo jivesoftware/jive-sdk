@@ -15,6 +15,15 @@
  */
 
 exports.persistenceListener = function() {
+
+    console.log();
+    console.log("******************************");
+    console.log("Memory persistence is configured.");
+    console.log("Please note that this should");
+    console.log("not be used for production!");
+    console.log("******************************");
+    console.log();
+
     var db = {};
 
     var getCollection = function( collectionID ) {

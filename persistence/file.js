@@ -18,6 +18,14 @@ var fs = require('fs');
 
 exports.persistenceListener = function() {
 
+    console.log();
+    console.log("******************************");
+    console.log("File persistence is configured.");
+    console.log("Please note that this should");
+    console.log("not be used for production!");
+    console.log("******************************");
+    console.log();
+
     var loading = {};
     var cache = {};
     var oldestCacheEntry = null;
