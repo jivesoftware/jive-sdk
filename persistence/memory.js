@@ -35,35 +35,36 @@ exports.persistenceListener = function() {
         callback( data );
     };
 
-    this.findByID = function( collectionID, key, callback ) {
-        var collection = getCollection(collectionID);
-        var item = null;
-        for (var colKey in collection) {
-            if (collection.hasOwnProperty(colKey) && colKey === key ) {
-                item = collection[colKey];
-                break;
-            }
-        }
-
-        callback(item);
-    };
-
-    this.findAll = function( collectionID, callback ) {
-        var collection = getCollection(collectionID);
-        var collectionItems = [];
-        for (var colKey in collection) {
-            if (collection.hasOwnProperty(colKey)) {
-                collectionItems.push( collection[colKey] );
-            }
-        }
-
-        callback( collectionItems );
-    };
-
     this.remove = function( collectionID, key, callback ) {
         var collection = getCollection(collectionID );
         delete collection[key];
 
         callback();
+    };
+
+    this.find = function( collectionID, keyValues, callback ) {
+        var collectionItems = [];
+        var findKeys = Object.keys( keyValues );
+        var collection = getCollection(collectionID );
+
+        for (var colKey in collection) {
+            if (collection.hasOwnProperty(colKey)) {
+
+                var entryToInspect = collection[colKey];
+                var match = true;
+                for ( var i in findKeys ) {
+                    var findKey = findKeys[i];
+                    if ( entryToInspect[ findKey ] !== keyValues[ findKey ] ) {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if ( match ) {
+                    collectionItems.push( collection[colKey] );
+                }
+            }
+        }
+        callback( collectionItems );
     };
 };

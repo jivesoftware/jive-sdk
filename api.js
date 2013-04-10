@@ -25,6 +25,15 @@ exports.setPersistenceListener = function( listener ) {
     persistence.setListener(listener);
 };
 
+var returnOne = function(found, callback ) {
+    if ( found == null || found.length < 1 ) {
+        callback( null );
+    } else {
+        // return first one
+        callback( found[0] );
+    }
+};
+
 exports.Application = {
 
     save: function (application) {
@@ -32,44 +41,36 @@ exports.Application = {
         return {
             execute: function (callback) {
                 persistence.save("application", application.clientId, application, function (saved) {
-                    persistence.save("application_by_name", application.name, application.clientId, function () {
-                        callback(saved);
-                    })
+                    callback(saved);
                 });
             }
         };
     },
 
-    findByID: function (clientId) {
+    find: function ( keyValues, expectOne ) {
         return {
             execute: function (callback) {
-                persistence.findByID("application", clientId, callback);
+                persistence.find("application", keyValues, function( found ) {
+                    if ( expectOne ) {
+                        returnOne( found, callback )
+                    } else {
+                        callback ( found );
+                    }
+                } );
             }
         };
     },
 
     findByAppName: function (appname) {
-        return {
-            execute: function (callback) {
-                persistence.findByID("application_by_name", appname, function (clientId) {
-                    if (clientId) {
-                        exports.Application.findByID(clientId).execute(function (application) {
-                            callback(application);
-                        })
-                    } else {
-                        callback(null);
-                    }
-                });
-            }
-        };
+        return exports.Application.find( { "name": appname }, true );
     },
 
     findAll: function () {
-        return {
-            execute: function (callback) {
-                persistence.findAll("application", callback);
-            }
-        };
+        return exports.Application.find( null );
+    },
+
+    findByID: function (clientId) {
+        return exports.Application.find( { "clientId": clientId }, true );
     },
 
     remove: function (clientId) {
@@ -92,62 +93,40 @@ exports.TileInstance = {
         return {
             execute: function (callback) {
                 persistence.save("tileInstance", tileInstance.id, tileInstance, function( saved ) {
-                    persistence.save("tileInstance_by_scope", tileInstance['scope'], tileInstance.id, function () {
-                        callback(saved);
-                    })
+                    callback(saved);
                 });
+            }
+        };
+    },
+
+    find: function ( keyValues, expectOne ) {
+        return {
+            execute: function (callback) {
+                persistence.find("tileInstance", keyValues, function( found ) {
+                    if ( expectOne ) {
+                        returnOne( found, callback )
+                    } else {
+                        callback ( found );
+                    }
+                } );
             }
         };
     },
 
     findByID: function (tileInstanceID) {
-        return {
-            execute: function (callback) {
-                persistence.findByID("tileInstance", tileInstanceID, callback);
-            }
-        };
+        return exports.TileInstance.find( { "id" : tileInstanceID }, true );
     },
 
     findByDefinitionName: function (definitionName) {
-        return {
-            execute: function (callback) {
-                persistence.findAll("tileInstance", function (all) {
-                    // todo - implement a joining table, like we do for application_by_name
-                    var byDefinition = [];
-                    all.forEach(function (instance) {
-                        if (instance.name === definitionName) {
-                            byDefinition.push(instance);
-                        }
-                    });
-
-                    callback(byDefinition);
-                });
-            }
-        };
+        return exports.TileInstance.find( { "name": definitionName } );
     },
 
     findByScope: function (scope) {
-        return {
-            execute: function (callback) {
-                persistence.findByID("tileInstance_by_scope", scope, function (id) {
-                    if (id) {
-                        exports.TileInstance.findByID(id).execute(function (tileInstance) {
-                            callback(tileInstance);
-                        })
-                    } else {
-                        callback(null);
-                    }
-                });
-            }
-        };
+        return exports.TileInstance.find( { "scope" : scope }, true );
     },
 
     findAll: function () {
-        return {
-            execute: function (callback) {
-                persistence.findAll("tileInstance", callback);
-            }
-        };
+        return exports.TileInstance.find( null );
     },
 
     remove: function (tileInstanceID) {
@@ -240,44 +219,36 @@ exports.TileDefinition = {
         return {
             execute: function (callback) {
                 persistence.save("tileDefinition", tileDefinition.id, tileDefinition, function (saved) {
-                    persistence.save("tileDefinition_by_name", tileDefinition.name, tileDefinition.id, function () {
-                        callback(saved);
-                    })
+                    callback(saved);
                 });
+            }
+        };
+    },
+
+    find: function ( keyValues, expectOne ) {
+        return {
+            execute: function (callback) {
+                persistence.find("tileDefinition", keyValues, function( found ) {
+                    if ( expectOne ) {
+                        returnOne( found, callback )
+                    } else {
+                        callback ( found );
+                    }
+                } );
             }
         };
     },
 
     findByID: function (tileDefinitionID) {
-        return {
-            execute: function (callback) {
-                persistence.findByID("tileDefinition", tileDefinitionID, callback);
-            }
-        };
+        return exports.TileDefinition.find( { "id": tileDefinitionID }, true );
     },
 
     findByTileName: function (tilename) {
-        return {
-            execute: function (callback) {
-                persistence.findByID("tileDefinition_by_name", tilename, function (tileDefinitionID) {
-                    if (tileDefinitionID) {
-                        exports.TileDefinition.findByID(tileDefinitionID).execute(function (tileDefinition) {
-                            callback(tileDefinition);
-                        })
-                    } else {
-                        callback(null);
-                    }
-                });
-            }
-        };
+        return exports.TileDefinition.find( { "name": tilename }, true );
     },
 
     findAll: function () {
-        return {
-            execute: function (callback) {
-                persistence.findAll("tileDefinition", callback);
-            }
-        };
+        return exports.TileDefinition.find( null );
     },
 
     remove: function (tileDefinitionID) {

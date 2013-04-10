@@ -32,11 +32,8 @@ exports.persistenceListener = function(app) {
 
     this.save = function( collectionID, key, data, callback) {
         var collection = getCollection(collectionID);
-        var toSave = {};
-        toSave['id'] = key;
-        toSave['data'] = data;
 
-        collection.save( toSave, function(err, saved ) {
+        collection.save( data, function(err, saved ) {
             if( err || !saved ) throw err;
             else {
                 callback( data );
@@ -46,40 +43,19 @@ exports.persistenceListener = function(app) {
         callback( data );
     };
 
-    this.findByID = function( collectionID, key, callback ) {
+    this.find = function( collectionID, keyValues, callback ) {
         var collection = getCollection(collectionID);
         if (!collection ) {
             callback(null);
             return;
         }
 
-        collection.find({"id": key}, function(err, items) {
-            if( err || !items || items.length < 1 ) {
-                callback(null);
-                return;
-            }
-            callback( items[0]['data'] );
-        });
-    };
-
-    this.findAll = function( collectionID, callback ) {
-        var collection = getCollection(collectionID);
-        if (!collection ) {
-            callback(null);
-            return;
-        }
-        var toReturn = [];
-
-        collection.find({}, function(err, items) {
+        collection.find(keyValues, function(err, items) {
             if( err || !items || items.length < 1) {
-                callback(toReturn);
+                callback([]);
             }
 
-            items.forEach( function(item ) {
-                toReturn.push(item['data']);
-            } );
-
-            callback( toReturn );
+            callback( items );
         });
     };
 
@@ -94,4 +70,5 @@ exports.persistenceListener = function(app) {
             callback();
         });
     };
+
 };

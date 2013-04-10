@@ -176,37 +176,41 @@ exports.persistenceListener = function() {
         });
     };
 
-    this.findByID = function( collectionID, key, callback ) {
-        getCacheEntry(collectionID, function(collection) {
-            var item = null;
-            for (var colKey in collection) {
-                if (collection.hasOwnProperty(colKey) && colKey === key ) {
-                    item = collection[colKey];
-                    break;
-                }
-            }
-            callback(item);
-        });
-    };
-
-    this.findAll = function( collectionID, callback ) {
-        getCacheEntry(collectionID, function(collection) {
-            var collectionItems = [];
-            for (var colKey in collection) {
-                if (collection.hasOwnProperty(colKey)) {
-                    collectionItems.push( collection[colKey] );
-                }
-            }
-            callback( collectionItems );
-        });
-    };
-
     this.remove = function( collectionID, key, callback ) {
         getCacheEntry(collectionID, function(collection, entry) {
             delete collection[key];
             entry.setDirty(true);
             entry.add(); // set as most recently used
             callback();
+        });
+    };
+
+    this.find = function( collectionID, keyValues, callback ) {
+
+        getCacheEntry(collectionID, function(collection) {
+            var findKeys = Object.keys( keyValues );
+            var collectionItems = [];
+
+            for (var colKey in collection) {
+                if (collection.hasOwnProperty(colKey)) {
+
+                    var entryToInspect = collection[colKey];
+                    var match = true;
+                    for ( var i in findKeys ) {
+                        var findKey = findKeys[i];
+                        if ( entryToInspect[ findKey ] !== keyValues[ findKey ] ) {
+                            match = false;
+                            break;
+                        }
+                    }
+
+                    if ( match ) {
+                        collectionItems.push( collection[colKey] );
+                    }
+                }
+            }
+
+            callback( collectionItems );
         });
     };
 };

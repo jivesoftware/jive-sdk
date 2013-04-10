@@ -32,8 +32,7 @@ function setListener( listener ) {
     persistenceListener = listener ? listener : filePersistence.persistenceListener();
 
     dispatcher.on('save', persistenceListener.save);
-    dispatcher.on('findByID', persistenceListener.findByID);
-    dispatcher.on('findAll', persistenceListener.findAll);
+    dispatcher.on('find', persistenceListener.find );
     dispatcher.on('remove', persistenceListener.remove);
 }
 
@@ -52,14 +51,9 @@ exports.save = function (collectionID, key, data, callback) {
     dispatcher.emit('save', collectionID, key, data, callback);
 };
 
-exports.findByID = function (collectionID, key, callback) {
+exports.find = function (collectionID, keyValues, callback) {
     lazyInit();
-    dispatcher.emit('findByID', collectionID, key, callback);
-};
-
-exports.findAll = function (collectionID, callback) {
-    lazyInit();
-    dispatcher.emit('findAll', collectionID, callback);
+    dispatcher.emit('find', collectionID, keyValues, callback);
 };
 
 exports.remove = function (collectionID, key, callback) {
