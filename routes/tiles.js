@@ -174,7 +174,7 @@ exports.installTiles = function( req, res ) {
     var app = req.app;
     var conf = res.app.settings['jiveClientConfiguration'];
 
-    var jiveApi = app.settings['jiveApi'];
+    var jiveApi = res.app.settings['jiveApi'] || require("../api");
 
     var url_parts = url.parse(req.url, true);
     var query = url_parts.query;
