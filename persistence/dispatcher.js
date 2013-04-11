@@ -21,13 +21,6 @@ var util            = require('util'),
 
 var persistenceListener = null;
 
-var Dispatcher = function () {
-};
-
-util.inherits(Dispatcher, events.EventEmitter);
-
-var dispatcher = new Dispatcher();
-
 function setListener( listener ) {
     if ( !listener ) {
         throw 'Cannot register an empty persistence listener.';
