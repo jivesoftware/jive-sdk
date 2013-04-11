@@ -16,7 +16,9 @@
 
 var util            = require('util'),
     events          = require('events'),
-    filePersistence = require('./file');
+    filePersistence = require('./file'),
+    jive = require('../api');
+
 
 var persistenceListener = null;
 
@@ -29,7 +31,10 @@ util.inherits(Dispatcher, events.EventEmitter);
 var dispatcher = new Dispatcher();
 
 function setListener( listener ) {
-    persistenceListener = listener ? listener : filePersistence.persistenceListener();
+    if ( !listener ) {
+        throw 'Cannot register an empty persistence listener.';
+    }
+    persistenceListener = listener;
 
     dispatcher.on('save', persistenceListener.save);
     dispatcher.on('find', persistenceListener.find );
@@ -38,7 +43,8 @@ function setListener( listener ) {
 
 function lazyInit() {
     if ( !persistenceListener ) {
-        setListener( new filePersistence.persistenceListener() );
+        var persistence = jive.config.fetch()['persistence'];
+        setListener( persistence || new filePersistence() );
     }
 }
 

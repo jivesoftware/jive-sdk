@@ -19,13 +19,14 @@ exports.start = function( app, __dirname ) {
             console.log(data);
 
             var jiveClientConfiguration = JSON.parse(data);
+            jiveApi.config.save( jiveClientConfiguration );
             app.emit('event:configurationReady', jiveClientConfiguration);
         });
     };
 
     var configureApp = function (data) {
         // Setup for file based persistence
-        jiveApi.setPersistenceListener( new persistence.persistenceListener(app) );
+        jiveApi.setPersistenceListener( new persistence(app) );
 
         app.configure(function () {
             app.engine('html', consolidate.mustache);

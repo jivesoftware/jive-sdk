@@ -14,6 +14,8 @@
  *    limitations under the License.
  */
 
+var jive = require('../api');
+
 /**
  * Loads the application specified by jiveclientconfiguration.json into memory,
  * or attempts to register a new application based on jiveclientconfiguration.json if the
@@ -23,7 +25,7 @@
 exports.configureApplication = function( app ) {
     var jiveApi = app.settings['jiveApi'];
     var jiveClient = app.settings['jiveClient'];
-    var config = app.settings['jiveClientConfiguration'];
+    var config = jive.config.fetch();
     var appName = config.appName;
 
     if ( config.clientId && config.clientSecret ) {

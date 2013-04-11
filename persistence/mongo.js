@@ -14,61 +14,71 @@
  *    limitations under the License.
  */
 
-exports.persistenceListener = function(app) {
+var db;
+
+function Mongo(app) {
     var databaseUrl = "mydb";
     if ( app && app.settings && app.settings['databaseUrl'] ) {
         databaseUrl = app.settings['databaseUrl'];
     }
-    var db = require("mongojs").connect(databaseUrl);
+    db = require("mongojs").connect(databaseUrl);
+}
 
-    var getCollection = function( collectionID ) {
-        var collection = db[collectionID];
-        if ( collection ) {
-            return collection;
-        } else {
-            return db.collection(collectionID);
+Mongo.prototype = Object.create({}, {
+    constructor: {
+        value: Mongo,
+        enumerable: false
+    }
+});
+
+module.exports = Mongo;
+
+var getCollection = function( collectionID ) {
+    var collection = db[collectionID];
+    if ( collection ) {
+        return collection;
+    } else {
+        return db.collection(collectionID);
+    }
+};
+
+Mongo.prototype.save = function( collectionID, key, data, callback) {
+    var collection = getCollection(collectionID);
+
+    collection.save( data, function(err, saved ) {
+        if( err || !saved ) throw err;
+        else {
+            callback( data );
         }
-    };
+    } );
 
-    this.save = function( collectionID, key, data, callback) {
-        var collection = getCollection(collectionID);
+    callback( data );
+};
 
-        collection.save( data, function(err, saved ) {
-            if( err || !saved ) throw err;
-            else {
-                callback( data );
-            }
-        } );
+Mongo.prototype.find = function( collectionID, keyValues, callback ) {
+    var collection = getCollection(collectionID);
+    if (!collection ) {
+        callback(null);
+        return;
+    }
 
-        callback( data );
-    };
-
-    this.find = function( collectionID, keyValues, callback ) {
-        var collection = getCollection(collectionID);
-        if (!collection ) {
-            callback(null);
-            return;
+    collection.find(keyValues, function(err, items) {
+        if( err || !items || items.length < 1) {
+            callback([]);
         }
 
-        collection.find(keyValues, function(err, items) {
-            if( err || !items || items.length < 1) {
-                callback([]);
-            }
+        callback( items );
+    });
+};
 
-            callback( items );
-        });
-    };
+Mongo.prototype.remove = function( collectionID, key, callback ) {
+    var collection = getCollection(collectionID);
+    if (!collection ) {
+        callback();
+        return;
+    }
 
-    this.remove = function( collectionID, key, callback ) {
-        var collection = getCollection(collectionID);
-        if (!collection ) {
-            callback();
-            return;
-        }
-
-        collection.remove({"id": key}, function(err, items) {
-            callback();
-        });
-    };
-
+    collection.remove({"id": key}, function(err, items) {
+        callback();
+    });
 };

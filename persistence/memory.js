@@ -14,8 +14,7 @@
  *    limitations under the License.
  */
 
-exports.persistenceListener = function() {
-
+function Memory() {
     console.log();
     console.log("******************************");
     console.log("Memory persistence is configured.");
@@ -23,60 +22,68 @@ exports.persistenceListener = function() {
     console.log("not be used for production!");
     console.log("******************************");
     console.log();
+}
 
-    var db = {};
+Memory.prototype = Object.create({}, {
+    constructor: {
+        value: Memory,
+        enumerable: false
+    }
+});
 
-    var getCollection = function( collectionID ) {
-        var collection = db[collectionID];
-        if ( collection ) {
-            return collection;
-        } else {
-            collection = {};
-            db[collectionID] = collection;
-            return collection;
-        }
-    };
+module.exports = Memory;
 
-    this.save = function( collectionID, key, data, callback) {
-        var collection = getCollection(collectionID);
-        collection[key] = data;
+var db = {};
+var getCollection = function( collectionID ) {
+    var collection = db[collectionID];
+    if ( collection ) {
+        return collection;
+    } else {
+        collection = {};
+        db[collectionID] = collection;
+        return collection;
+    }
+};
 
-        callback( data );
-    };
+Memory.prototype.save = function( collectionID, key, data, callback) {
+    var collection = getCollection(collectionID);
+    collection[key] = data;
 
-    this.remove = function( collectionID, key, callback ) {
-        var collection = getCollection(collectionID );
-        delete collection[key];
+    callback( data );
+};
 
-        callback();
-    };
+Memory.prototype.remove = function( collectionID, key, callback ) {
+    var collection = getCollection(collectionID );
+    delete collection[key];
 
-    this.find = function( collectionID, keyValues, callback ) {
-        var collectionItems = [];
-        var collection = getCollection(collectionID );
-        var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
+    callback();
+};
 
-        for (var colKey in collection) {
-            if (collection.hasOwnProperty(colKey)) {
+Memory.prototype.find = function( collectionID, keyValues, callback ) {
+    var collectionItems = [];
+    var collection = getCollection(collectionID );
+    var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
 
-                var entryToInspect = collection[colKey];
-                var match = true;
-                if ( findKeys ) {
-                    for ( var i in findKeys ) {
-                        var findKey = findKeys[i];
-                        if ( entryToInspect[ findKey ] !== keyValues[ findKey ] ) {
-                            match = false;
-                            break;
-                        }
+    for (var colKey in collection) {
+        if (collection.hasOwnProperty(colKey)) {
+
+            var entryToInspect = collection[colKey];
+            var match = true;
+            if ( findKeys ) {
+                for ( var i in findKeys ) {
+                    var findKey = findKeys[i];
+                    if ( entryToInspect[ findKey ] !== keyValues[ findKey ] ) {
+                        match = false;
+                        break;
                     }
                 }
+            }
 
-                if ( match ) {
-                    collectionItems.push( collection[colKey] );
-                }
+            if ( match ) {
+                collectionItems.push( collection[colKey] );
             }
         }
+    }
 
-        callback( collectionItems );
-    };
+    callback( collectionItems );
 };

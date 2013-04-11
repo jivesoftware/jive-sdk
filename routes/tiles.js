@@ -25,6 +25,7 @@ var url = require('url');
 var tileRegistry = require('../tile/registry');
 var events = require('events');
 var q = require('q');
+var jive = require("../api");
 
 function getProcessed(conf, all) {
     var host = conf.baseUrl + ':' + conf.port;
@@ -98,11 +99,8 @@ function getProcessed(conf, all) {
  * @param res
  */
 exports.tiles = function(req, res){
-    var app = req.app;
-    var jiveApi = app.settings['jiveApi'] || require('../api');
-
-    jiveApi.TileDefinition.findAll().execute( function( all ) {
-        var conf = res.app.settings['jiveClientConfiguration'];
+    jive.TileDefinition.findAll().execute( function( all ) {
+        var conf = jive.config.fetch();
 
         var processed = getProcessed(conf, all);
         var body = JSON.stringify(processed, null, 4);
@@ -114,32 +112,31 @@ exports.tiles = function(req, res){
 };
 
 exports.registration = function( req, res ) {
-    var conf = res.app.settings['jiveClientConfiguration'];
+    var conf = jive.config.fetch();
     var clientId = conf.clientId;
-    var jiveApi = res.app.settings['jiveApi'] || require("../api");
     var url = req.body['url'];
     var guid = req.body['guid'];
     var config = req.body['config'];
     var name = req.body['name'];
     var code = req.body['code'];
 
-    jiveApi.TileInstance.findByScope( guid ).execute( function(tileInstance) {
+    jive.TileInstance.findByScope( guid ).execute( function(tileInstance) {
         // the tile instance exists
         // update the config only
         if ( tileInstance ) {
             // update the config
             tileInstance['config'] = config;
 
-            jiveApi.TileInstance.save(tileInstance).execute(function() {
+            jive.TileInstance.save(tileInstance).execute(function() {
                 console.log( "persisted", tileInstance );
                 tileRegistry.emit("updateInstance." + name, tileInstance);
             });
 
         } else {
-            jiveApi.TileInstance.register(clientId, url, config, name, code).execute(
+            jive.TileInstance.register(clientId, url, config, name, code).execute(
                 function( tileInstance ) {
                     console.log("registered tile instance", tileInstance );
-                    jiveApi.TileInstance.save(tileInstance).execute(function() {
+                    jive.TileInstance.save(tileInstance).execute(function() {
                         console.log( "persisted", tileInstance );
                         tileRegistry.emit("newInstance." + name, tileInstance);
                     });
@@ -171,10 +168,7 @@ exports.registration = function( req, res ) {
  * @param res
  */
 exports.installTiles = function( req, res ) {
-    var app = req.app;
-    var conf = res.app.settings['jiveClientConfiguration'];
-
-    var jiveApi = res.app.settings['jiveApi'] || require("../api");
+    var conf = jive.config.fetch();
 
     var url_parts = url.parse(req.url, true);
     var query = url_parts.query;
@@ -183,7 +177,7 @@ exports.installTiles = function( req, res ) {
     var jivePort = query['jivePort'] || 80;
     var context = query['context'];
 
-    jiveApi.TileDefinition.findAll().execute( function( all ) {
+    jive.TileDefinition.findAll().execute( function( all ) {
         var processed = getProcessed(conf, all);
         var responses = {};
 

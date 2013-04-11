@@ -310,3 +310,15 @@ exports.TileDefinition = {
     }
 
 };
+
+////////////////////////////////////////////////////////////////////
+// todo - the new stuff goes here... eventually everything above will migrate!
+
+exports.persistence = {
+    'file' : require('./persistence/file'),
+    'memory' : require('./persistence/memory'),
+    'mongo' : require('./persistence/mongo')
+};
+
+exports.config = require('./lib/config');
+
