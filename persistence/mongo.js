@@ -51,8 +51,6 @@ Mongo.prototype.save = function( collectionID, key, data, callback) {
             callback( data );
         }
     } );
-
-    callback( data );
 };
 
 Mongo.prototype.find = function( collectionID, keyValues, callback ) {
