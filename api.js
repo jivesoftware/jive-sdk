@@ -280,10 +280,10 @@ exports.TileDefinition = {
 
                 // register event listeners
                 if ( listeners ) {
-                    var listenerKeys = Object.keys( listeners );
-                    for ( var i in listenerKeys ) {
-                        var event = listenerKeys[i];
-                        var listener = listeners[event];
+                    for ( var i in listeners ) {
+                        var listenerObj = listeners[i];
+                        var event = Object.keys(listenerObj)[0];
+                        var listener = listenerObj[event];
                         tileRegistry.addTileListener( event, definitionName, listener );
                     }
                 }
