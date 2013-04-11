@@ -135,7 +135,7 @@ exports.configureTiles = function(app) {
                     var key = tile + "." + item + ".task";
                     scheduler.schedule(key, interval,
                         typeof target.task === 'function' ? target.task : target.task.getRunnable(),
-                        {app: app}
+                        typeof target.task === 'function' ? {app:app} : target.task.getContext() || {app:app}
                     );
                 }
 

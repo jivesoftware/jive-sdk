@@ -18,6 +18,8 @@ var http                = require('http'),
     persistence         = require('./persistence/dispatcher'),
     jiveClient          = require('./client'),
     tilePusher          = require('./tile/pusher'),
+    tileRegistry        = require('./tile/registry'),
+    scheduler           = require('./tile/simpleScheduler'),
     jiveUtil            = require('./util')
 ;
 
@@ -257,6 +259,54 @@ exports.TileDefinition = {
                 persistence.remove("tileDefinition", tileDefinitionID, callback);
             }
         };
+    },
+
+    // xxx -- todo - this will get moved and merged maybe with tile/configurator.js
+    configure: function( definition, listeners, tasks, callback ) {
+        var definitionName = definition['name'];
+        if ( !definition['id'] ) {
+            definition['id'] = definitionName;
+        }
+
+        console.log("Registering", definitionName);
+
+        // save tile definition
+        // xxx todo maybe edit??
+        exports.TileDefinition.save( definition ).execute(
+            function(dbTile) {
+                console.log("Tile saved:", definitionName );
+
+                var tile = definition['name'];
+
+                // register event listeners
+                if ( listeners ) {
+                    var listenerKeys = Object.keys( listeners );
+                    for ( var i in listenerKeys ) {
+                        var event = listenerKeys[i];
+                        var listener = listeners[event];
+                        tileRegistry.addTileListener( event, definitionName, listener );
+                    }
+                }
+
+                // register tasks
+                if ( tasks ) {
+                    for ( var i in tasks ) {
+                        var task = tasks[i];
+                        var interval = (task.getInterval ? task.getInterval() : undefined ) || 15000;
+                        var taskName = (task.getTaskName ? task.getTaskName() : undefined ) || jiveUtil.guid();
+                        var key = tile + "." + taskName + ".task";
+                        scheduler.schedule(key, interval,
+                            typeof task === 'function' ? task : task.getRunnable(),
+                            {app: app}
+                        );
+                    }
+                }
+
+                if ( callback ) {
+                    callback( definition );
+                }
+            }
+        );
     }
 
 };

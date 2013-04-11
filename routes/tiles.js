@@ -52,14 +52,27 @@ function getProcessed(conf, all) {
         if ( !processedTile['updated'] ) {
             processedTile['updated'] = "2013-02-28T15:12:16.768-0800";
         }
-        if ( !processedTile['action'] ) {
-            processedTile['action'] = host + '/' + name + '/action';
+        if ( processedTile['action'] ) {
+            if ( processedTile['action'].indexOf('http') != 0 ) {
+                // assume its relative to host then
+                processedTile['action'] = host + ( processedTile['action'].indexOf('/') == 0 ? "" : "/" ) + processedTile['action'];
+            }
         }
         if ( !processedTile['config'] ) {
             processedTile['config'] = host + '/' + name + '/configure';
+        } else {
+            if ( processedTile['config'].indexOf('http') != 0 ) {
+                // assume its relative to host then
+                processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];
+            }
         }
         if ( !processedTile['register'] ) {
             processedTile['register'] = host + '/registration';
+        } else {
+            if ( processedTile['register'].indexOf('http') != 0 ) {
+                // assume its relative to host then
+                processedTile['register'] = host + ( processedTile['register'].indexOf('/') == 0 ? "" : "/" ) + processedTile['register'];
+            }
         }
         if ( !processedTile['client_id'] ) {
             processedTile['client_id'] = conf.clientId;
@@ -86,7 +99,7 @@ function getProcessed(conf, all) {
  */
 exports.tiles = function(req, res){
     var app = req.app;
-    var jiveApi = app.settings['jiveApi'];
+    var jiveApi = app.settings['jiveApi'] || require('../api');
 
     jiveApi.TileDefinition.findAll().execute( function( all ) {
         var conf = res.app.settings['jiveClientConfiguration'];
@@ -103,7 +116,7 @@ exports.tiles = function(req, res){
 exports.registration = function( req, res ) {
     var conf = res.app.settings['jiveClientConfiguration'];
     var clientId = conf.clientId;
-    var jiveApi = res.app.settings['jiveApi'];
+    var jiveApi = res.app.settings['jiveApi'] || require("../api");
     var url = req.body['url'];
     var guid = req.body['guid'];
     var config = req.body['config'];

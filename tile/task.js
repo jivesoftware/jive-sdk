@@ -20,11 +20,13 @@ module.exports = Task;
 
 var interval = 15000;
 var runnable = function() {};
+var context = null;
 
-function Task(_runnable, _interval ) {
+function Task(_runnable, _interval, _context ) {
     events.EventEmitter.call(this);
     runnable = _runnable;
     interval = _interval ? _interval : 15000;
+    context = _context;
 }
 
 Task.super_ = events.EventEmitter;
@@ -41,4 +43,8 @@ Task.prototype.getInterval = function() {
 
 Task.prototype.getRunnable = function() {
     return runnable;
+};
+
+Task.prototype.getContext = function() {
+    return context;
 };

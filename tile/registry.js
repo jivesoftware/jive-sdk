@@ -14,13 +14,13 @@
  *    limitations under the License.
  */
 
-/**
- * Created with IntelliJ IDEA.
- * User: matt
- * Date: 3/1/13
- * Time: 1:04 PM
- * To change this template use File | Settings | File Templates.
- */
 var events = require('events');
 
 exports = module.exports = new events.EventEmitter();
+
+exports.addTileListener = function( event, definitionName, listener ) {
+    console.log("registered event " + event + " for " + definitionName );
+    exports.addListener( event + "." + definitionName, listener );
+};
+
+

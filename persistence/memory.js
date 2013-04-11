@@ -53,19 +53,21 @@ exports.persistenceListener = function() {
 
     this.find = function( collectionID, keyValues, callback ) {
         var collectionItems = [];
-        var findKeys = Object.keys( keyValues );
         var collection = getCollection(collectionID );
+        var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
 
         for (var colKey in collection) {
             if (collection.hasOwnProperty(colKey)) {
 
                 var entryToInspect = collection[colKey];
                 var match = true;
-                for ( var i in findKeys ) {
-                    var findKey = findKeys[i];
-                    if ( entryToInspect[ findKey ] !== keyValues[ findKey ] ) {
-                        match = false;
-                        break;
+                if ( findKeys ) {
+                    for ( var i in findKeys ) {
+                        var findKey = findKeys[i];
+                        if ( entryToInspect[ findKey ] !== keyValues[ findKey ] ) {
+                            match = false;
+                            break;
+                        }
                     }
                 }
 
@@ -74,6 +76,7 @@ exports.persistenceListener = function() {
                 }
             }
         }
+
         callback( collectionItems );
     };
 };
