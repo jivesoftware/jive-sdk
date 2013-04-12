@@ -18,10 +18,7 @@ var fs              = require('fs'),
     q               = require('q'),
     jive    = require('../api');
 
-exports.configureTiles = function(app) {
-
-    var rootDir = app.settings['rootDir'];
-    var tilesDir = rootDir + '/tiles';
+exports.configureTiles = function(app, tilesDir) {
 
     var isValidFile = function(file ) {
         return !(file.indexOf('.') == 0)
@@ -101,7 +98,7 @@ exports.configureTiles = function(app) {
             {
                 'event': 'pushedUpdateInstance',
                 'handler' : function(theInstance, type, pushedData, response){
-                    console.log(type + ' push to', tileInstance.url, response.statusCode, tileInstance.name);
+                    console.log(type + ' push to', theInstance.url, response.statusCode, theInstance.name);
                 }
             }
         ];

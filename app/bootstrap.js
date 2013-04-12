@@ -9,11 +9,11 @@ var express = require('express')
     , consolidate = require('consolidate')
 ;
 
-exports.start = function( app, __dirname ) {
+exports.start = function( app, rootDir ) {
 
     var begin = function () {
         // read configuration
-        fs.readFile(__dirname + '/jiveclientconfiguration.json', 'utf8', function (err, data) {
+        fs.readFile(rootDir + '/jiveclientconfiguration.json', 'utf8', function (err, data) {
             if (err) throw err;
             console.log(data);
 
@@ -28,17 +28,14 @@ exports.start = function( app, __dirname ) {
         app.configure(function () {
             app.engine('html', consolidate.mustache);
             app.set('view engine', 'html');
-            app.set('views', __dirname + '/public/tiles');
+            app.set('views', rootDir + '/public/tiles');
             app.use(express.favicon());
-            app.use(express.static(path.join(__dirname, 'public')));
+            app.use(express.static(path.join(rootDir, 'public')));
 
             app.set('jiveClientConfiguration', data);
             app.set('port', data.port || 8070);
-            app.set('jiveClientPath', __dirname + '/jiveClient');
-            app.set('publicDir', __dirname + '/public');
-            app.set('rootDir', __dirname);
-            app.set('jiveClient', jiveClient);
-            app.set('jiveApi', jive);
+            app.set('publicDir', rootDir + '/public');
+            app.set('rootDir', rootDir);
         });
 
         app.emit('event:initialConfigurationComplete', app);
@@ -48,7 +45,9 @@ exports.start = function( app, __dirname ) {
 // Setup the event handlers
 
 app.on('event:configurationReady', configureApp);
-app.on('event:initialConfigurationComplete', tileConfigurator.configureTiles);
+app.on('event:initialConfigurationComplete', function() {
+    tileConfigurator.configureTiles(app, rootDir + "/tiles" );
+});
 app.on('event:tileConfigurationComplete', appConfigurator.configureApplication);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

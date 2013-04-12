@@ -15,6 +15,7 @@
  */
 
 var jive = require('../api');
+var jiveClient = require('../lib/client');
 
 /**
  * Loads the application specified by jiveclientconfiguration.json into memory,
@@ -23,8 +24,6 @@ var jive = require('../api');
  * @param app
  */
 exports.configureApplication = function( app ) {
-    var jiveApi = app.settings['jiveApi'];
-    var jiveClient = app.settings['jiveClient'];
     var config = jive.config.fetch();
     var appName = config.appName;
 

@@ -137,7 +137,7 @@ exports.registration = function( req, res ) {
     var code = req.body['code'];
 
     var registerer = function( instanceLibrary ) {
-        instanceLibrary.findByScope.execute( function(tileInstance) {
+        instanceLibrary.findByScope().execute( function(tileInstance) {
             // the instance exists
             // update the config only
             if ( tileInstance ) {
@@ -299,7 +299,7 @@ exports.installTiles = function( req, res ) {
 
         installer( tiles, function(responses) {
             if ( responses ) {
-                allResponses = responses;
+                allResponses = typeof responses === 'array' ? responses : [responses];
             }
 
             jive.extstreams.definitions.findAll().execute( function(extstreams) {
@@ -307,14 +307,14 @@ exports.installTiles = function( req, res ) {
                 installer( extstreams, function(responses) {
 
                     if ( responses ) {
-                        allResponses = allResponses.concat( responses );
+                        allResponses = allResponses.concat( typeof responses === 'array' ? responses : [responses] );
                     }
 
                     Object.keys(allResponses).forEach(function(jiveResp){
                         res.write("\n//");
                         res.write(jiveResp);
                         res.write(" response\n");
-                        res.write(responses[jiveResp]);
+                        res.write( JSON.stringify(allResponses[jiveResp]));
                     });
                     res.end();
 
