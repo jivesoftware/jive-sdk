@@ -4,7 +4,9 @@
 var jive = require('../api'),
     express = require('express'),
     routes = require('./testroutes'),
-    http = require('http');
+    http = require('http'),
+    jive = require('../../jive-sdk');
+
 
 var configuration = {
     'port' : 8091,
@@ -13,28 +15,25 @@ var configuration = {
     'persistence' : new jive.persistence.mongo()
 };
 
-var server;
+jive.config.save( configuration );
 
-exports.start = function() {
-    jive.config.save( configuration );
-
-    var app = express();
-    app.use(express.bodyParser());
-    app.use(express.logger('dev'));
-    app.use(express.methodOverride());
-    app.use(app.router);
-    app.configure('development', function () {
-        app.use(express.errorHandler());
-    });
+var app = express();
+app.use(express.bodyParser());
+app.use(express.logger('dev'));
+app.use(express.methodOverride());
+app.use(app.router);
+app.configure('development', function () {
+    app.use(express.errorHandler());
+});
 
 
-    // ROUTES
-    app.get('/', routes.index);
+// ROUTES
+app.get('/', routes.index);
 
-    server = http.createServer(app).listen(configuration.port, function () {
-        console.log("Test server listening on port " + configuration.port);
-    } );
-};
+var server = http.createServer(app).listen(configuration.port, function () {
+    console.log("Test server listening on port " + configuration.port);
+} );
+
 
 exports.server = function() {
     return server;

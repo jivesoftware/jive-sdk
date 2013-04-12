@@ -1,5 +1,4 @@
-var util = require('../../lib/util'),
-    jive = require('../../api'),
+var jive = require('../../../jive-sdk'),
     assert = require('assert');
 
 var host = jive.config.fetch()['baseUrl'];
@@ -17,10 +16,12 @@ var errorCallback = function(err) {
     assert.ifError(err);
 };
 
-describe('util', function(){
-    it("should succeed with GET to '" + base + "'", function(done) {
-        console.log("Starting request");
-        util.buildRequest(base, "GET")
-            .execute(function(res) {successCallback(res); done();}, function(err) {errorCallback(err); done();});
+describe('jive.util', function(){
+    describe('#buildRequest()', function() {
+        it("should succeed with GET to '" + base + "'", function(done) {
+            console.log("Starting request");
+            jive.util.buildRequest(base, "GET")
+                .execute(function(res) {successCallback(res); done();}, function(err) {errorCallback(err); done();});
+        });
     });
 });

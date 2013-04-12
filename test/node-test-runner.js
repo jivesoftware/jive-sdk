@@ -1,10 +1,16 @@
 var Mocha = require('mocha'),
     path = require('path'),
     fs = require('fs'),
-    server = require('./test-server');
+    jive = require('../../jive-sdk')
 
-//Start the test server
-server.start();
+var configuration = {
+    'port' : 8091,
+    'baseUrl' : 'http://charles-z800.jiveland.com',
+    'clientId' : '766t8osmgixp87ypdbbvmu637k98fzvc',
+    'persistence' : new jive.persistence.mongo()
+};
+
+jive.config.save( configuration );
 
 //Run all tests in subfolder 'testcases'
 var mocha = new Mocha({
