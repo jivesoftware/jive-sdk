@@ -16,7 +16,6 @@
 
 var fs              = require('fs'),
     q               = require('q'),
-    scheduler       = require('./simpleScheduler'),
     tileRegistry    = require('./registry');
     jive    = require('../api');
 
@@ -134,8 +133,8 @@ exports.configureTiles = function(app) {
                 if ( target.task ) {
                     var interval = (target.task.getInterval ? target.task.getInterval() : undefined ) || target.interval || 15000;
                     var key = tile + "." + item + ".task";
-                    scheduler.schedule(key, interval,
-                        typeof target.task === 'function' ? target.task : target.task.getRunnable(),
+                    jive.tasks.schedule(typeof target.task === 'function' ? target.task : target.task.getRunnable(),
+                        key, interval,
                         typeof target.task === 'function' ? {app:app} : target.task.getContext() || {app:app}
                     );
                 }

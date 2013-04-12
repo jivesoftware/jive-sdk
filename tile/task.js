@@ -14,8 +14,6 @@
  *    limitations under the License.
  */
 
-var events = require('events');
-
 module.exports = Task;
 
 var interval = 15000;
@@ -23,14 +21,12 @@ var runnable = function() {};
 var context = null;
 
 function Task(_runnable, _interval, _context ) {
-    events.EventEmitter.call(this);
     runnable = _runnable;
     interval = _interval ? _interval : 15000;
     context = _context;
 }
 
-Task.super_ = events.EventEmitter;
-Task.prototype = Object.create(events.EventEmitter.prototype, {
+Task.prototype = Object.create({}, {
     constructor: {
         value: Task,
         enumerable: false

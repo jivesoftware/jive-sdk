@@ -14,32 +14,36 @@
  *    limitations under the License.
  */
 
-/// xxx remove this
-exports.setPersistenceListener = function( listener ) {
-    // xxx remove me!!
-};
-
-//////
+/////////////////////////////////////////////////////////////////////////////
+// persistence
 exports.persistence = {
     'file' : require('./persistence/file'),
     'memory' : require('./persistence/memory'),
     'mongo' : require('./persistence/mongo')
 };
 
-//////
+/////////////////////////////////////////////////////////////////////////////
+// configuration
 exports.config = require('./lib/config');
 
-//////
+/////////////////////////////////////////////////////////////////////////////
+// applications
 exports.applications = new (require('./lib/applications'));
 
-//////
+/////////////////////////////////////////////////////////////////////////////
+// external streams
 var extstreamsDefinitions = require('./lib/extstreamsDefinitions');
 var extstreams = new (require('./lib/extstreams'));
 extstreams['definitions'] = new extstreamsDefinitions();
 exports.extstreams = extstreams;
 
-//////
+/////////////////////////////////////////////////////////////////////////////
+// tiles
 var tileDefinitions = require('./lib/tilesDefinitions');
 var tiles = new (require('./lib/tiles'));
 tiles['definitions'] = new tileDefinitions();
 exports.tiles = tiles;
+
+/////////////////////////////////////////////////////////////////////////////
+// tasks
+exports.tasks = require('./lib/tasks');

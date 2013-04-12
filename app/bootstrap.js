@@ -6,13 +6,12 @@ var express = require('express')
     , jiveClient = require('../client')
     , tileConfigurator = require('../tile/configurator')
     , appConfigurator = require('../app/configurator')
-    , persistence = require('../persistence/file')
     , consolidate = require('consolidate')
 ;
 
 exports.start = function( app, __dirname ) {
 
-    var start = function () {
+    var begin = function () {
         // read configuration
         fs.readFile(__dirname + '/jiveclientconfiguration.json', 'utf8', function (err, data) {
             if (err) throw err;
@@ -25,8 +24,6 @@ exports.start = function( app, __dirname ) {
     };
 
     var configureApp = function (data) {
-        // Setup for file based persistence
-        jive.setPersistenceListener( new persistence(app) );
 
         app.configure(function () {
             app.engine('html', consolidate.mustache);
@@ -50,14 +47,14 @@ exports.start = function( app, __dirname ) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Setup the event handlers
 
-    app.on('event:configurationReady', configureApp);
-    app.on('event:initialConfigurationComplete', tileConfigurator.configureTiles);
-    app.on('event:tileConfigurationComplete', appConfigurator.configureApplication);
+app.on('event:configurationReady', configureApp);
+app.on('event:initialConfigurationComplete', tileConfigurator.configureTiles);
+app.on('event:tileConfigurationComplete', appConfigurator.configureApplication);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-start();
+begin();
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 };

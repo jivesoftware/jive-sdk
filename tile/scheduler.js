@@ -14,6 +14,20 @@
  *    limitations under the License.
  */
 
+var jiveUtil = require('../util');
+
+function Scheduler() {
+}
+
+Scheduler.prototype = Object.create({}, {
+    constructor: {
+        value: Scheduler,
+        enumerable: false
+    }
+});
+
+module.exports = Scheduler;
+
 var tasks = {};
 
 /**
@@ -22,26 +36,48 @@ var tasks = {};
  * @param interval The interval to invoke the callback
  * @param cb The callback
  */
-exports.schedule = function schedule(key, interval, cb, context){
-    if  (!cb) {
+Scheduler.prototype.schedule = function schedule(task, key, interval, context){
+    if  (!task) {
         return;
     }
+
+    var cb = typeof task === 'function' ? task : undefined;
+    if ( task.getRunnable ) {
+        cb = task.getRunnable();
+    }
+
+    if ( !cb ) {
+        return;
+    }
+
+    if ( task.getInterval ) {
+        interval = task.getInterval();
+    }
+
+    if ( !key ) {
+        key = jiveUtil.guid();
+    }
+
+    if ( !interval ) {
+        interval = 15000;
+    }
+
     this.unschedule(key);
     tasks[key] = setInterval( function() { cb(context) }, interval);
     console.log("scheduled task: " + key, interval);
 };
 
-exports.unschedule = function unschedule(key){
+Scheduler.prototype.unschedule = function unschedule(key){
     if(tasks[key]){
         clearInterval(tasks[key]);
     }
 };
 
-exports.getTasks = function getTasks(){
+Scheduler.prototype.getTasks = function getTasks(){
     return Object.keys(tasks);
 };
 
-exports.shutdown = function(){
+Scheduler.prototype.shutdown = function(){
     var scheduler = this;
     this.getTasks().forEach(function(taskKey){
         scheduler.unschedule(taskKey);
