@@ -3,7 +3,6 @@ var express = require('express')
     , http = require('http')
     , path = require('path')
     , jive = require('../api')
-    , jiveClient = require('../lib/client')
     , tileConfigurator = require('../tile/configurator')
     , appConfigurator = require('../app/configurator')
     , consolidate = require('consolidate')
@@ -32,7 +31,6 @@ exports.start = function( app, rootDir ) {
             app.use(express.favicon());
             app.use(express.static(path.join(rootDir, 'public')));
 
-            app.set('jiveClientConfiguration', data);
             app.set('port', data.port || 8070);
             app.set('publicDir', rootDir + '/public');
             app.set('rootDir', rootDir);
