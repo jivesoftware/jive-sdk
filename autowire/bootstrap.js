@@ -3,8 +3,8 @@ var express = require('express')
     , http = require('http')
     , path = require('path')
     , jive = require('../api')
-    , tileConfigurator = require('../tile/configurator')
-    , appConfigurator = require('../app/configurator')
+    , tileConfigurator = require('./tileConfigurator')
+    , appConfigurator = require('./appConfigurator')
     , consolidate = require('consolidate')
 ;
 
