@@ -78,11 +78,18 @@ exports.configureTiles = function(app) {
         definition.id = definition.id === '{{{tile_id}}}' ? null : definition.id;
         var tileName = definition.name;
 
-        jive.tiles.definitions.findByTileName(tileName).execute(
+        var libraryFunction;
+        if ( definition['style'] === 'ACTIVITY' ) {
+            libraryFunction = jive.extstreams.definitions;
+        } else {
+            libraryFunction = jive.tiles.definitions;
+        }
+
+        libraryFunction.findByTileName(tileName).execute(
             function(dbTile) {
                 if ( dbTile == null ) {
                     // persist tile since its not yet persisted
-                    jive.tiles.definitions.save( definition).execute(
+                    libraryFunction.save( definition).execute(
                         function() {
                             console.log("Tile saved:", tileName );
                         }
