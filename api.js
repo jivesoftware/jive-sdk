@@ -31,17 +31,20 @@ exports.config = require('./lib/config');
 exports.applications = new (require('./lib/applications'));
 
 /////////////////////////////////////////////////////////////////////////////
-// external streams
+// external streams and tiles
+
+var eventRegistry = require( './tile/registry');
+
 var extstreamsDefinitions = require('./lib/extstreamsDefinitions');
 var extstreams = new (require('./lib/extstreams'));
 extstreams['definitions'] = new extstreamsDefinitions();
+extstreams['events'] = eventRegistry;
 exports.extstreams = extstreams;
 
-/////////////////////////////////////////////////////////////////////////////
-// tiles
 var tileDefinitions = require('./lib/tilesDefinitions');
 var tiles = new (require('./lib/tiles'));
 tiles['definitions'] = new tileDefinitions();
+tiles['events'] = eventRegistry;
 exports.tiles = tiles;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -49,5 +52,5 @@ exports.tiles = tiles;
 exports.tasks = require('./lib/tasks');
 
 /////////////////////////////////////////////////////////////////////////////
-// tasks
+// util
 exports.util = require('./lib/util');

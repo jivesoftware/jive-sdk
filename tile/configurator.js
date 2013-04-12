@@ -16,7 +16,6 @@
 
 var fs              = require('fs'),
     q               = require('q'),
-    tileRegistry    = require('./registry');
     jive    = require('../api');
 
 exports.configureTiles = function(app) {
@@ -47,15 +46,12 @@ exports.configureTiles = function(app) {
             //Look in the routes directory for the current tile.
             //for each file that is in there that matches an http verb, add it to the app as a route
             proms.push(q.nfcall(fs.readdir, currentTileDir).then(function(verbDirs){
-                //todo: check to make sure the file you are adding is a legit http verb
                 verbDirs.forEach(function(httpVerbFile){
                     if ( !isValidFile(httpVerbFile) ) {
                         return;
                     }
 
                     var httpVerb = httpVerbFile.substring(0, httpVerbFile.length - 3);
-
-                    //todo: determine how to fix this. it's quite brittle b/c it depends on the location of this file
                     var routeHandlerPath = (currentTileDir + '/' + httpVerb);
                     var routeContextPath = ('/' + data.currentTile + '/' + currentRoute);
 
@@ -75,76 +71,71 @@ exports.configureTiles = function(app) {
         var definitionPath = tileDir + '/definition.json';
         var definition = JSON.parse( fs.readFileSync( definitionPath, 'utf8' ) );
         definition.id = definition.id === '{{{tile_id}}}' ? null : definition.id;
-        var tileName = definition.name;
-
-        var libraryFunction;
-        if ( definition['style'] === 'ACTIVITY' ) {
-            libraryFunction = jive.extstreams.definitions;
-        } else {
-            libraryFunction = jive.tiles.definitions;
-        }
-
-        libraryFunction.findByTileName(tileName).execute(
-            function(dbTile) {
-                if ( dbTile == null ) {
-                    // persist tile since its not yet persisted
-                    libraryFunction.save( definition).execute(
-                        function() {
-                            console.log("Tile saved:", tileName );
-                        }
-                    );
-
-                } else {
-                    console.log( 'Tile loaded:', tile );
-                }
-            }
-        );
-
-        //////////////////////////////////
-        /// attach global event listeners
-
-        tileRegistry.addListener("newInstance." + definition.name, function(theInstance){
-            console.log("a new " + definition.name + " instance was created", theInstance);
-        });
-        tileRegistry.addListener("destroyingInstance." + definition.name, function(theInstance){
-            console.log("Instance of " + definition.name + " is being destroyed", theInstance);
-        });
-        tileRegistry.addListener("destroyedInstance." + definition.name, function(theInstance){
-            console.log("Instance of " + definition.name + " has been destroyed", theInstance);
-        });
-        tileRegistry.addListener("pushedUpdateInstance." + definition.name, function(tileInstance, type, pushedData, response ){
-            console.log(type + ' push to', tileInstance.url, response.statusCode, tileInstance.name);
-        });
 
         /////////////////////////////////////////////////////
-        // apply tile specific tasks, life cycle events, etc.
+        // apply tasks, life cycle events, etc.
 
-        q.nfcall(fs.readdir, tileDir + '/services' ).then(function(tilesDirContents){
+        var tasks = [];
+        var events = [
+            {
+                'event': 'newInstance',
+                'handler' : function(theInstance){
+                    console.log("a new " + definition.name + " instance was created", theInstance);
+                }
+            },
+
+            {
+                'event': 'destroyingInstance',
+                'handler' : function(theInstance){
+                    console.log("Instance of " + definition.name + " is being destroyed", theInstance);
+                }
+            },
+
+            {
+                'event': 'destroyedInstance',
+                'handler' : function(theInstance){
+                    console.log("Instance of " + definition.name + " has been destroyed", theInstance);
+                }
+            },
+
+            {
+                'event': 'pushedUpdateInstance',
+                'handler' : function(theInstance, type, pushedData, response){
+                    console.log(type + ' push to', tileInstance.url, response.statusCode, tileInstance.name);
+                }
+            }
+        ];
+
+        q.nfcall(fs.readdir, tileDir + '/services' ).then( q.nfcall(function(tilesDirContents){
             tilesDirContents.forEach(function(item) {
                 if ( !isValidFile(item) ) {
                     return;
                 }
 
                 var theFile = tileDir + '/services/' + item;
-
                 var target = require(theFile);
 
                 // schedule task
                 if ( target.task ) {
-                    var interval = (target.task.getInterval ? target.task.getInterval() : undefined ) || target.interval || 15000;
-                    var key = tile + "." + item + ".task";
-                    jive.tasks.schedule(typeof target.task === 'function' ? target.task : target.task.getRunnable(),
-                        key, interval,
-                        typeof target.task === 'function' ? {app:app} : target.task.getContext() || {app:app}
-                    );
+                    tasks.push( target.task );
                 }
 
                 // register life cycle stuff
-                if ( target.registerEvents ) {
-                    target.registerEvents(tileRegistry, definition);
+                if ( target.registerEvents ) {     // xxx - todo - what if not array??
+                    events = events.concat( events.registerEvents() );
                 }
-            });
+            })
+        })).then( function() {
+            var libraryFunction;
+            if ( definition['style'] === 'ACTIVITY' ) {
+                libraryFunction = jive.extstreams.definitions;
+            } else {
+                libraryFunction = jive.tiles.definitions;
+            }
 
+            libraryFunction.configure(definition, events, tasks, function() {
+                console.log("done configuring", definition['name']);
+            });
         });
     }
 

@@ -18,7 +18,7 @@ var events = require('events');
 
 exports = module.exports = new events.EventEmitter();
 
-exports.addTileListener = function( event, definitionName, listener ) {
+exports.addEventListener = function( event, definitionName, listener ) {
     console.log("registered event " + event + " for " + definitionName );
     exports.addListener( event + "." + definitionName, listener );
 };
