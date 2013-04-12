@@ -31,7 +31,7 @@ exports.configureApplication = function( app ) {
     if ( config.clientId && config.clientSecret ) {
         // client id and secret are specified in configuration file
 
-        jiveApi.Application.findByID(config.clientId).execute( function(foundApp ) {
+        jive.Application.findByID(config.clientId).execute( function(foundApp ) {
             if ( foundApp ) {
                 // exists
                 console.log("Finished client config");
@@ -41,7 +41,7 @@ exports.configureApplication = function( app ) {
                 jiveClient.Application.retrieve( config.clientId,
                     function(application) {
                         // persist
-                        jiveApi.Application.save( application ).execute(function(){
+                        jive.Application.save( application ).execute(function(){
                             config.clientId = application.clientId;
                             config.clientSecret = application.clientSecret;
 
@@ -60,7 +60,7 @@ exports.configureApplication = function( app ) {
 
     } else {
 
-        jiveApi.Application.findByAppName(appName).execute( function(foundApp) {
+        jive.Application.findByAppName(appName).execute( function(foundApp) {
             if ( foundApp ) {
                 config.clientId = foundApp.clientId;
                 console.log("Finished client config");
@@ -79,7 +79,7 @@ exports.configureApplication = function( app ) {
                         // set clientId
                         config.clientId = application.clientId;
                         application.name = config.appName;
-                        jiveApi.Application.save( application ).execute(function(){
+                        jive.Application.save( application ).execute(function(){
                             console.log("Finished client config");
                             app.emit('event:clientAppConfigurationComplete', app);
                         });

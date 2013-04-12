@@ -18,10 +18,10 @@ var fs              = require('fs'),
     q               = require('q'),
     scheduler       = require('./simpleScheduler'),
     tileRegistry    = require('./registry');
+    jive    = require('../api');
 
 exports.configureTiles = function(app) {
 
-    var jiveApi = app.settings['jiveApi'];
     var rootDir = app.settings['rootDir'];
     var tilesDir = rootDir + '/tiles';
 
@@ -78,11 +78,11 @@ exports.configureTiles = function(app) {
         definition.id = definition.id === '{{{tile_id}}}' ? null : definition.id;
         var tileName = definition.name;
 
-        jiveApi.TileDefinition.findByTileName(tileName).execute(
+        jive.tiles.definitions.findByTileName(tileName).execute(
             function(dbTile) {
                 if ( dbTile == null ) {
                     // persist tile since its not yet persisted
-                    jiveApi.TileDefinition.save( definition).execute(
+                    jive.tiles.definitions.save( definition).execute(
                         function() {
                             console.log("Tile saved:", tileName );
                         }
@@ -97,7 +97,7 @@ exports.configureTiles = function(app) {
         //////////////////////////////////
         /// attach global event listeners
 
-        var conf = jiveApi.config.fetch();
+        var conf = jive.config.fetch();
 
         tileRegistry.addListener("newInstance." + definition.name, function(theInstance){
             console.log("a new " + definition.name + " instance was created", theInstance);
@@ -112,10 +112,10 @@ exports.configureTiles = function(app) {
             console.log(type + ' push to', tileInstance.url, response.statusCode, tileInstance.name);
         });
         tileRegistry.addListener("pushDataInstance." + definition.name, function(tileInstance, data, callback){
-            jiveApi.TileInstance.pushData( conf.clientId, tileInstance, data, callback );
+            jive.TileInstance.pushData( conf.clientId, tileInstance, data, callback );
         });
         tileRegistry.addListener("pushActivityInstance." + definition.name, function(tileInstance, data, callback){
-            jiveApi.TileInstance.pushActivity( conf.clientId, tileInstance, data, callback );
+            jive.TileInstance.pushActivity( conf.clientId, tileInstance, data, callback );
         });
 
         /////////////////////////////////////////////////////

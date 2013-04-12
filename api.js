@@ -18,8 +18,6 @@ var http                = require('http'),
     persistence         = require('./persistence/dispatcher'),
     jiveClient          = require('./client'),
     tilePusher          = require('./tile/pusher'),
-    tileRegistry        = require('./tile/registry'),
-    scheduler           = require('./tile/simpleScheduler'),
     jiveUtil            = require('./util')
 ;
 
@@ -211,114 +209,27 @@ exports.TileInstance = {
 
 };
 
-exports.TileDefinition = {
-
-    save: function (tileDefinition) {
-        if (!tileDefinition.id) {
-            tileDefinition.id = jiveUtil.guid();
-        }
-
-        return {
-            execute: function (callback) {
-                persistence.save("tileDefinition", tileDefinition.id, tileDefinition, function (saved) {
-                    callback(saved);
-                });
-            }
-        };
-    },
-
-    find: function ( keyValues, expectOne ) {
-        return {
-            execute: function (callback) {
-                persistence.find("tileDefinition", keyValues, function( found ) {
-                    if ( expectOne ) {
-                        returnOne( found, callback )
-                    } else {
-                        callback ( found );
-                    }
-                } );
-            }
-        };
-    },
-
-    findByID: function (tileDefinitionID) {
-        return exports.TileDefinition.find( { "id": tileDefinitionID }, true );
-    },
-
-    findByTileName: function (tilename) {
-        return exports.TileDefinition.find( { "name": tilename }, true );
-    },
-
-    findAll: function () {
-        return exports.TileDefinition.find( null );
-    },
-
-    remove: function (tileDefinitionID) {
-        return {
-            execute: function (callback) {
-                persistence.remove("tileDefinition", tileDefinitionID, callback);
-            }
-        };
-    },
-
-    // xxx -- todo - this will get moved and merged maybe with tile/configurator.js
-    configure: function( definition, listeners, tasks, callback ) {
-        var definitionName = definition['name'];
-        if ( !definition['id'] ) {
-            definition['id'] = definitionName;
-        }
-
-        console.log("Registering", definitionName);
-
-        // save tile definition
-        // xxx todo maybe edit??
-        exports.TileDefinition.save( definition ).execute(
-            function(dbTile) {
-                console.log("Tile saved:", definitionName );
-
-                var tile = definition['name'];
-
-                // register event listeners
-                if ( listeners ) {
-                    for ( var i in listeners ) {
-                        var listenerObj = listeners[i];
-                        var event = Object.keys(listenerObj)[0];
-                        var listener = listenerObj[event];
-                        tileRegistry.addTileListener( event, definitionName, listener );
-                    }
-                }
-
-                // register tasks
-                if ( tasks ) {
-                    for ( var i in tasks ) {
-                        var task = tasks[i];
-                        var interval = (task.getInterval ? task.getInterval() : undefined ) || 15000;
-                        var taskName = (task.getTaskName ? task.getTaskName() : undefined ) || jiveUtil.guid();
-                        var key = tile + "." + taskName + ".task";
-                        scheduler.schedule(key, interval,
-                            typeof task === 'function' ? task : task.getRunnable(),
-                            {app: app}
-                        );
-                    }
-                }
-
-                if ( callback ) {
-                    callback( definition );
-                }
-            }
-        );
-    }
-
-};
-
 ////////////////////////////////////////////////////////////////////
 // todo - the new stuff goes here... eventually everything above will migrate!
 
+//////
 exports.persistence = {
     'file' : require('./persistence/file'),
     'memory' : require('./persistence/memory'),
     'mongo' : require('./persistence/mongo')
 };
 
+//////
 exports.config = require('./lib/config');
 
+//////
+var extstreamsDefinitions = require('./lib/extstreamsDefinitions');
+var extstreams = new (require('./lib/extstreams'));
+extstreams['definitions'] = new extstreamsDefinitions();
+exports.extstreams = extstreams;
+
+//////
+var tileDefinitions = require('./lib/tilesDefinitions');
+var tiles = new (require('./lib/tiles'));
+tiles['definitions'] = new tileDefinitions();
+exports.tiles = tiles;

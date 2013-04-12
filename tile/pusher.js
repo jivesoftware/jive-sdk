@@ -21,11 +21,11 @@ var tileRegistry = require('./registry');
 var refreshTokenFlow = function (clientId, instance, successCallback, failureCallback) {
     console.log("Trying refresh flow for ", instance);
 
-    jiveApi.TileInstance.refreshAccessToken(clientId, instance).execute(
+    jive.TileInstance.refreshAccessToken(clientId, instance).execute(
         function (updated) {
             // success
             console.log('Successfully refreshed token.');
-            jiveApi.TileInstance.save(updated).execute(successCallback);
+            jive.TileInstance.save(updated).execute(successCallback);
         },
 
         function (result) {
@@ -74,7 +74,7 @@ var push = function (clientId, pushFunction, type, instance, dataToPush, pushURL
             tileRegistry.emit("destroyingInstance." + instance['name'], instance);
 
             // destroy the instance
-            jiveApi.TileInstance.remove(instance['id']).execute( function() {
+            jive.TileInstance.remove(instance['id']).execute( function() {
                 tileRegistry.emit("destroyedInstance." + instance['name'], instance);
             });
 

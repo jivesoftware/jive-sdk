@@ -99,7 +99,7 @@ function getProcessed(conf, all) {
  * @param res
  */
 exports.tiles = function(req, res){
-    jive.TileDefinition.findAll().execute( function( all ) {
+    jive.tiles.definitions.findAll().execute( function( all ) {
         var conf = jive.config.fetch();
 
         var processed = getProcessed(conf, all);
@@ -177,7 +177,7 @@ exports.installTiles = function( req, res ) {
     var jivePort = query['jivePort'] || 80;
     var context = query['context'];
 
-    jive.TileDefinition.findAll().execute( function( all ) {
+    jive.tiles.definitions.findAll().execute( function( all ) {
         var processed = getProcessed(conf, all);
         var responses = {};
 
