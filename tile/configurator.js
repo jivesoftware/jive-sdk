@@ -68,6 +68,7 @@ exports.configureTiles = function(app) {
 
     function handleTileRegistration( tile ) {
         var tileDir = tilesDir + '/' + tile;
+        var svcDir =  tileDir + '/services';
         var definitionPath = tileDir + '/definition.json';
         var definition = JSON.parse( fs.readFileSync( definitionPath, 'utf8' ) );
         definition.id = definition.id === '{{{tile_id}}}' ? null : definition.id;
@@ -75,8 +76,7 @@ exports.configureTiles = function(app) {
         /////////////////////////////////////////////////////
         // apply tile specific tasks, life cycle events, etc.
 
-        var tasks = [];
-        var events = [
+        var baseEvents = [
             {
                 'event': 'newInstance',
                 'handler' : function(theInstance){
@@ -106,36 +106,52 @@ exports.configureTiles = function(app) {
             }
         ];
 
-        q.nfcall(fs.readdir, tileDir + '/services' ).then( q.nfcall(function(tilesDirContents){
-            tilesDirContents.forEach(function(item) {
-                if ( !isValidFile(item) ) {
-                    return;
-                }
-
-                var theFile = tileDir + '/services/' + item;
-                var target = require(theFile);
-
-                // schedule task
-                if ( target.task ) {
-                    tasks.push( target.task );
-                }
-
-                // register life cycle stuff
-                if ( target.registerEvents ) {     // xxx - todo - what if not array??
-                    events = events.concat( events.registerEvents() );
-                }
-            })
-        })).then( function() {
-            var libraryFunction;
-            if ( definition['style'] === 'ACTIVITY' ) {
-                libraryFunction = jive.extstreams.definitions;
+        var doIt = function(dd, events, tasks) {
+            var style = dd['style'];
+            var ff;
+            if ( style === 'ACTIVITY' ) {
+                ff = jive.extstreams.definitions;
             } else {
-                libraryFunction = jive.tiles.definitions;
+                ff = jive.tiles.definitions;
             }
 
-            libraryFunction.configure(definition, events, tasks, function() {
+            ff.configure(dd, events, tasks, function() {
+                console.log("done configuring", dd['name']);
+            });
+        };
+
+
+        if ( !fs.existsSync(svcDir ) ) {
+            return q.nfcall( doIt, definition, baseEvents, []).then(function() {
                 console.log("done configuring", definition['name']);
             });
+        }
+
+       return q.nfcall(fs.readdir, svcDir ).then( function(tilesDirContents) {
+
+           var tasks = [];
+           var events = [];
+           events = events.concat(baseEvents);
+
+           tilesDirContents.forEach(function(item) {
+                if ( isValidFile(item) ) {
+                    var theFile = svcDir + '/' + item;
+                    var target = require(theFile);
+
+                    // task
+                    if ( target.task ) {
+                        target.task.setKey( tile + '.' + item + "." + target.task.getInterval() );
+                        tasks.push( target.task );
+                    }
+
+                    // event handler
+                    if ( target.registerEvents ) {     // xxx - todo - what if not array??
+                        events = events.concat( target.registerEvents );
+                    }
+                }
+            });
+
+           doIt( definition, events, tasks );
         });
     }
 
@@ -144,8 +160,14 @@ exports.configureTiles = function(app) {
             addTileRoutesToApp({"routes":routesToAdd, "currentTile":tile});
         });
 
-        handleTileRegistration(tile);
-        return routes;
+        var detail = handleTileRegistration(tile);
+
+        var r = [ routes ];
+        if ( detail ) {
+            r.push(detail);
+        }
+
+        return q.all( r );
     }
 
     //Find the tiles by walking the tileDir tree
