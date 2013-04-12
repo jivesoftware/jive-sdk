@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-var jiveClient = require('./../client');
+var jiveClient = require('../lib/client');
 var jive = require('./../api');
 var tileRegistry = require('./registry');
 

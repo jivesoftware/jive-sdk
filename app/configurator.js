@@ -38,7 +38,7 @@ exports.configureApplication = function( app ) {
                 app.emit('event:clientAppConfigurationComplete', app);
             }  else {
                 // check if still valid
-                jiveClient.applications.retrieve( config.clientId,
+                jiveClient.Applications.retrieve( config.clientId,
                     function(application) {
                         // persist
                         jive.applications.save( application ).execute(function(){
@@ -67,7 +67,7 @@ exports.configureApplication = function( app ) {
                 app.emit('event:clientAppConfigurationComplete', app );
             } else {
                 // register app, and proceed
-                jiveClient.applications.register(
+                jiveClient.Applications.register(
                     {
                         'appName' : config.appName,
                         'appDescription': config.appDescription,
