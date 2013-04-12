@@ -99,14 +99,30 @@ function getProcessed(conf, all) {
  * @param res
  */
 exports.tiles = function(req, res){
-    jive.tiles.definitions.findAll().execute( function( all ) {
+    var toShow = [];
+
+    var finalize = function() {
         var conf = jive.config.fetch();
 
-        var processed = getProcessed(conf, all);
+        var processed = getProcessed(conf, toShow);
         var body = JSON.stringify(processed, null, 4);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(body);
+    };
+
+    jive.tiles.definitions.findAll().execute( function( tiles ) {
+        if ( tiles ) {
+            toShow = tiles;
+        }
+
+        jive.extstreams.definitions.findAll().execute( function( streams ) {
+            if ( streams ) {
+                toShow = toShow.concat( streams );
+            }
+
+            finalize();
+        } );
 
     } );
 };
@@ -120,28 +136,42 @@ exports.registration = function( req, res ) {
     var name = req.body['name'];
     var code = req.body['code'];
 
-    jive.TileInstance.findByScope( guid ).execute( function(tileInstance) {
-        // the tile instance exists
-        // update the config only
-        if ( tileInstance ) {
-            // update the config
-            tileInstance['config'] = config;
+    var registerer = function( instanceLibrary ) {
+        instanceLibrary.findByScope.execute( function(tileInstance) {
+            // the instance exists
+            // update the config only
+            if ( tileInstance ) {
+                // update the config
+                tileInstance['config'] = config;
 
-            jive.TileInstance.save(tileInstance).execute(function() {
-                console.log( "persisted", tileInstance );
-                tileRegistry.emit("updateInstance." + name, tileInstance);
-            });
+                instanceLibrary.save(tileInstance).execute(function() {
+                    tileRegistry.emit("updateInstance." + name, tileInstance);
+                });
+            } else {
+                instanceLibrary.register(clientId, url, config, name, code).execute(
+                    function( tileInstance ) {
+                        console.log("registered instance", tileInstance );
+                        instanceLibrary.save(tileInstance).execute(function() {
+                            tileRegistry.emit("newInstance." + name, tileInstance);
+                        });
+                    }
+                );
+            }
+        });
 
-        } else {
-            jive.TileInstance.register(clientId, url, config, name, code).execute(
-                function( tileInstance ) {
-                    console.log("registered tile instance", tileInstance );
-                    jive.TileInstance.save(tileInstance).execute(function() {
-                        console.log( "persisted", tileInstance );
-                        tileRegistry.emit("newInstance." + name, tileInstance);
-                    });
-                }
-            );
+    };
+
+    // try tiles
+    jive.tiles.definitions.findByTileName( name).execute( function( found ) {
+        if ( found ) {
+            registerer(jive.tiles);
+        }
+    });
+
+    // try extstreams
+    jive.extstreams.definitions.findByTileName( name).execute( function( found ) {
+        if ( found ) {
+            registerer(jive.extstreams);
         }
     });
 
@@ -177,8 +207,8 @@ exports.installTiles = function( req, res ) {
     var jivePort = query['jivePort'] || 80;
     var context = query['context'];
 
-    jive.tiles.definitions.findAll().execute( function( all ) {
-        var processed = getProcessed(conf, all);
+    var installer = function( definitions, callback ) {
+        var processed = getProcessed(conf, definitions);
         var responses = {};
 
         var doDefinition = function( requestParams, tile, postBody ) {
@@ -190,46 +220,46 @@ exports.installTiles = function( req, res ) {
                 jiveResponse.on('data', function (chunk) {
                     strBuf.push(chunk);
                 }).on('end', function () {
-                    var str = strBuf.join("");
-                    responses[tile.name] = str;
-                    console.log("Jive POST response for " + tile.name + ".  Status: " + jiveResponse.statusCode);
-                    console.log("Headers: ", jiveResponse.headers);
-                    console.log("Body: \n", str);
+                        var str = strBuf.join("");
+                        responses[tile.name] = str;
+                        console.log("Jive POST response for " + tile.name + ".  Status: " + jiveResponse.statusCode);
+                        console.log("Headers: ", jiveResponse.headers);
+                        console.log("Body: \n", str);
 
-                    // special handling if its 409 - this means we should try to PUT instead
-                    if ( jiveResponse.statusCode === 409 ) {
-                        var existingLocation = jiveResponse.headers['location'];
-                        if ( existingLocation ) {
-                            var path = url.parse(existingLocation, true)['path'];
+                        // special handling if its 409 - this means we should try to PUT instead
+                        if ( jiveResponse.statusCode === 409 ) {
+                            var existingLocation = jiveResponse.headers['location'];
+                            if ( existingLocation ) {
+                                var path = url.parse(existingLocation, true)['path'];
 
-                            requestParams['method'] = 'PUT';
-                            requestParams['path'] = path;
+                                requestParams['method'] = 'PUT';
+                                requestParams['path'] = path;
 
-                            var putRequest =  http.request( requestParams, function(jiveResponse) {
-                                var strBuf = [];
-                                jiveResponse.on('data', function (chunk) {
-                                    strBuf.push(chunk);
-                                }).on('end', function () {
-                                        var str = strBuf.join("");
-                                        responses[tile.name] = str;
-                                        console.log("Jive PUT response for " + tile.name + ".  Status: " + jiveResponse.statusCode);
-                                        console.log("Headers: ", jiveResponse.headers);
-                                        console.log("Body: \n", str);
-                                        deferred.resolve();
+                                var putRequest =  http.request( requestParams, function(jiveResponse) {
+                                    var strBuf = [];
+                                    jiveResponse.on('data', function (chunk) {
+                                        strBuf.push(chunk);
+                                    }).on('end', function () {
+                                            var str = strBuf.join("");
+                                            responses[tile.name] = str;
+                                            console.log("Jive PUT response for " + tile.name + ".  Status: " + jiveResponse.statusCode);
+                                            console.log("Headers: ", jiveResponse.headers);
+                                            console.log("Body: \n", str);
+                                            deferred.resolve();
+                                        });
                                 });
-                            });
 
-                            putRequest.on('error', function(e) {
-                                console.log("error on request to jive instance: ", e);
-                            });
+                                putRequest.on('error', function(e) {
+                                    console.log("error on request to jive instance: ", e);
+                                });
 
-                            putRequest.write(postBody, 'utf8');
-                            putRequest.end();
+                                putRequest.write(postBody, 'utf8');
+                                putRequest.end();
+                            }
+                        } else {
+                            deferred.resolve();
                         }
-                    } else {
-                        deferred.resolve();
-                    }
-                });
+                    });
             });
 
             postRequest.on('error', function(e) {
@@ -245,13 +275,8 @@ exports.installTiles = function( req, res ) {
         (function processOne() {
             var tile = processed.shift();
             if ( !tile ) {
-                Object.keys(responses).forEach(function(jiveResp){
-                    res.write("\n//");
-                    res.write(jiveResp);
-                    res.write(" response\n");
-                    res.write(responses[jiveResp]);
-                });
-                res.end();
+                callback(responses);
+
                 return;
             }
 
@@ -267,5 +292,37 @@ exports.installTiles = function( req, res ) {
             doDefinition(requestParams, tile, postBody).then( processOne );
         })();
 
+    };
+
+    var allResponses = [];
+    jive.tiles.definitions.findAll().execute( function( tiles ) {
+
+        installer( tiles, function(responses) {
+            if ( responses ) {
+                allResponses = responses;
+            }
+
+            jive.extstreams.definitions.findAll().execute( function(extstreams) {
+
+                installer( extstreams, function(responses) {
+
+                    if ( responses ) {
+                        allResponses = allResponses.concat( responses );
+                    }
+
+                    Object.keys(allResponses).forEach(function(jiveResp){
+                        res.write("\n//");
+                        res.write(jiveResp);
+                        res.write(" response\n");
+                        res.write(responses[jiveResp]);
+                    });
+                    res.end();
+
+                });
+
+            } );
+        })
+
     });
 };
+

@@ -15,17 +15,17 @@
  */
 
 var jiveClient = require('./../client');
-var jiveApi = require('./../api');
+var jive = require('./../api');
 var tileRegistry = require('./registry');
 
-var refreshTokenFlow = function (clientId, instance, successCallback, failureCallback) {
+var refreshTokenFlow = function (instanceLibrary, clientId, instance, successCallback, failureCallback) {
     console.log("Trying refresh flow for ", instance);
 
-    jive.TileInstance.refreshAccessToken(clientId, instance).execute(
+    instanceLibrary.refreshAccessToken(clientId, instance).execute(
         function (updated) {
             // success
             console.log('Successfully refreshed token.');
-            jive.TileInstance.save(updated).execute(successCallback);
+            instanceLibrary.save(updated).execute(successCallback);
         },
 
         function (result) {
@@ -36,54 +36,69 @@ var refreshTokenFlow = function (clientId, instance, successCallback, failureCal
 };
 
 var push = function (clientId, pushFunction, type, instance, dataToPush, pushURL, callback, retryIfFail) {
-    pushFunction(instance, dataToPush, pushURL).execute(function (response) {
+    var doPush = function(instanceLibrary) {
 
-        if ( !response.statusCode ) {
-            // err?
-            return;
-        }
+        pushFunction(instance, dataToPush, pushURL ).execute(function (response) {
 
-        if (response.statusCode >= 400 && response.statusCode < 410) {
-            console.log("Got access invalid access: " + response.statusCode + ". Trying refresh flow.");
-
-            if ( !retryIfFail ) {
-                console.log('Not executing refresh token flow.');
-                if ( callback ) {
-                    callback( response );
-                }
+            if ( !response.statusCode ) {
+                // err?
                 return;
             }
 
-            refreshTokenFlow(clientId, instance,
-                // success
-                function () {
-                    console.log("Retrying push.");
-                    // do not retry on next fail
-                    push(clientId, pushFunction, type, instance, dataToPush, pushURL, callback, false);
-                },
-                // failure
-                function (result) {
-                    console.log("refreshTokenFlow failed.", result);
-                    if (callback) {
-                        callback(response);
+            if (response.statusCode >= 400 && response.statusCode < 410) {
+                console.log("Got access invalid access: " + response.statusCode + ". Trying refresh flow.");
+
+                if ( !retryIfFail ) {
+                    console.log('Not executing refresh token flow.');
+                    if ( callback ) {
+                        callback( response );
                     }
+                    return;
                 }
-            );
-        } else if ( response.statusCode == 410 ) {
-            // push was rejected with a 'gone'
-            tileRegistry.emit("destroyingInstance." + instance['name'], instance);
 
-            // destroy the instance
-            jive.TileInstance.remove(instance['id']).execute( function() {
-                tileRegistry.emit("destroyedInstance." + instance['name'], instance);
-            });
+                refreshTokenFlow(instanceLibrary, clientId, instance,
+                    // success
+                    function () {
+                        console.log("Retrying push.");
+                        // do not retry on next fail
+                        push(clientId, pushFunction, type, instance, dataToPush, pushURL, callback, false);
+                    },
+                    // failure
+                    function (result) {
+                        console.log("refreshTokenFlow failed.", result);
+                        if (callback) {
+                            callback(response);
+                        }
+                    }
+                );
+            } else if ( response.statusCode == 410 ) {
+                // push was rejected with a 'gone'
+                tileRegistry.emit("destroyingInstance." + instance['name'], instance);
 
-        } else {
-            // successful push
-            if (callback) {
-                callback(response);
+                // destroy the instance
+                instanceLibrary.remove(instance['id']).execute( function() {
+                    tileRegistry.emit("destroyedInstance." + instance['name'], instance);
+                });
+
+            } else {
+                // successful push
+                if (callback) {
+                    callback(response);
+                }
+                tileRegistry.emit("pushedUpdateInstance." + instance['name'], instance, type, dataToPush, response);
             }
-            tileRegistry.emit("pushedUpdateInstance." + instance['name'], instance, type, dataToPush, response);
+        });
+    };
+
+    // lookup the definition
+    var definitionName = instance['name'];
+
+    jive.tiles.definitions.findByTileName( definitionName ).execute( function(tile) {
+        if ( tile ) {
+            doPush( jive.tiles );
+        } else {
+            // must be an extstream
+            doPush( jive.extstreams );
         }
     });
 };

@@ -16,9 +16,7 @@
 
 var http                = require('http'),
     persistence         = require('./persistence/dispatcher'),
-    jiveClient          = require('./client'),
-    tilePusher          = require('./tile/pusher'),
-    jiveUtil            = require('./util')
+    jiveClient          = require('./client')
 ;
 
 exports.setPersistenceListener = function( listener ) {
@@ -79,132 +77,6 @@ exports.Application = {
                 persistence.remove("application", clientId, callback);
             }
         };
-    }
-
-};
-
-exports.TileInstance = {
-
-    save: function (tileInstance) {
-        if (!tileInstance.id) {
-            tileInstance.id = jiveUtil.guid();
-        }
-
-        return {
-            execute: function (callback) {
-                persistence.save("tileInstance", tileInstance.id, tileInstance, function( saved ) {
-                    callback(saved);
-                });
-            }
-        };
-    },
-
-    find: function ( keyValues, expectOne ) {
-        return {
-            execute: function (callback) {
-                persistence.find("tileInstance", keyValues, function( found ) {
-                    if ( expectOne ) {
-                        returnOne( found, callback )
-                    } else {
-                        callback ( found );
-                    }
-                } );
-            }
-        };
-    },
-
-    findByID: function (tileInstanceID) {
-        return exports.TileInstance.find( { "id" : tileInstanceID }, true );
-    },
-
-    findByDefinitionName: function (definitionName) {
-        return exports.TileInstance.find( { "name": definitionName } );
-    },
-
-    findByScope: function (scope) {
-        return exports.TileInstance.find( { "scope" : scope }, true );
-    },
-
-    findAll: function () {
-        return exports.TileInstance.find( null );
-    },
-
-    remove: function (tileInstanceID) {
-        return {
-            execute: function (callback) {
-                persistence.remove("tileInstance", tileInstanceID, callback);
-            }
-        };
-    },
-
-    register: function (client_id, url, config, name, code ) {
-
-        // todo -- validation?
-
-        return {
-            execute: function (callback) {
-                var options = {
-                    client_id: client_id,
-                    code: code
-                };
-
-                jiveClient.TileInstance.register(options, function (accessTokenResponse) {
-                    console.log("Reached Access Token Exchange callback", accessTokenResponse);
-
-                    var tileInstance = {
-                        url: url,
-                        config: config,
-                        name: name
-                    };
-
-                    tileInstance['accessToken'] = accessTokenResponse['access_token'];
-                    tileInstance['expiresIn'] = accessTokenResponse['expires_in'];
-                    tileInstance['refreshToken'] = accessTokenResponse['refresh_token'];
-                    tileInstance['scope'] = accessTokenResponse['scope'];
-
-                    callback(tileInstance);
-                });
-
-            }
-        };
-    },
-
-    refreshAccessToken: function (client_id, tileInstance) {
-        var options = {
-            client_id: client_id,
-            refresh_token: tileInstance['refreshToken']
-        };
-
-        return {
-            execute: function (success, failure) {
-                jiveClient.TileInstance.refreshAccessToken(options,
-                    function (accessTokenResponse) {
-                        // success
-                        tileInstance['accessToken'] = accessTokenResponse['access_token'];
-                        tileInstance['expiresIn'] = accessTokenResponse['expires_in'];
-                        tileInstance['refreshToken'] = accessTokenResponse['refresh_token'];
-                        success(tileInstance);
-                    }, function (result) {
-                        // failure
-                        console.log('error refreshing access token for ', tileInstance, result);
-                        failure(result);
-                    }
-                );
-            }
-        }
-
-    },
-
-    pushData: function (client_id, tileInstance, data, callback) {
-        tilePusher.pushData(client_id, tileInstance, data, callback);
-    },
-
-    pushActivity: function (client_id, tileInstance, activity, callback) {
-        tilePusher.pushActivity(client_id, tileInstance, activity, callback);
-    },
-
-    pushComment: function (client_id, tileInstance, comment, commentURL, callback) {
-        tilePusher.pushComment(client_id, tileInstance, commentURL, comment, callback);
     }
 
 };

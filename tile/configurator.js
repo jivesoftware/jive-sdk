@@ -104,8 +104,6 @@ exports.configureTiles = function(app) {
         //////////////////////////////////
         /// attach global event listeners
 
-        var conf = jive.config.fetch();
-
         tileRegistry.addListener("newInstance." + definition.name, function(theInstance){
             console.log("a new " + definition.name + " instance was created", theInstance);
         });
@@ -117,12 +115,6 @@ exports.configureTiles = function(app) {
         });
         tileRegistry.addListener("pushedUpdateInstance." + definition.name, function(tileInstance, type, pushedData, response ){
             console.log(type + ' push to', tileInstance.url, response.statusCode, tileInstance.name);
-        });
-        tileRegistry.addListener("pushDataInstance." + definition.name, function(tileInstance, data, callback){
-            jive.TileInstance.pushData( conf.clientId, tileInstance, data, callback );
-        });
-        tileRegistry.addListener("pushActivityInstance." + definition.name, function(tileInstance, data, callback){
-            jive.TileInstance.pushActivity( conf.clientId, tileInstance, data, callback );
         });
 
         /////////////////////////////////////////////////////
