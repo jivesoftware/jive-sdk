@@ -85,7 +85,7 @@ var push = function (clientId, pushFunction, type, instance, dataToPush, pushURL
                 if (callback) {
                     callback(response);
                 }
-                tileRegistry.emit("pushedUpdateInstance." + instance['name'], instance, type, dataToPush, response);
+                tileRegistry.emit(type + "Pushed." + instance['name'], instance, dataToPush, response);
             }
         });
     };

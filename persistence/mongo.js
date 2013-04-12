@@ -63,8 +63,8 @@ Mongo.prototype.find = function( collectionID, keyValues, callback ) {
     collection.find(keyValues, function(err, items) {
         if( err || !items || items.length < 1) {
             callback([]);
+            return;
         }
-
         callback( items );
     });
 };

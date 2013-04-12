@@ -96,9 +96,23 @@ exports.configureTiles = function(app, tilesDir) {
             },
 
             {
-                'event': 'pushedUpdateInstance',
-                'handler' : function(theInstance, type, pushedData, response){
-                    console.log(type + ' push to', theInstance.url, response.statusCode, theInstance.name);
+                'event': 'dataPushed',
+                'handler' : function(theInstance, pushedData, response){
+                    console.log('data push to', theInstance.url, response.statusCode, theInstance.name);
+                }
+            },
+
+            {
+                'event': 'activityPushed',
+                'handler' : function(theInstance, pushedData, response){
+                    console.log('activity push to', theInstance.url, response.statusCode, theInstance.name);
+                }
+            },
+
+            {
+                'event': 'commentPushed',
+                'handler' : function(theInstance, pushedData, response){
+                    console.log('comment push to', theInstance.url, response.statusCode, theInstance.name);
                 }
             }
         ];
