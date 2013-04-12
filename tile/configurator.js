@@ -73,7 +73,7 @@ exports.configureTiles = function(app) {
         definition.id = definition.id === '{{{tile_id}}}' ? null : definition.id;
 
         /////////////////////////////////////////////////////
-        // apply tasks, life cycle events, etc.
+        // apply tile specific tasks, life cycle events, etc.
 
         var tasks = [];
         var events = [
