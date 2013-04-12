@@ -31,17 +31,17 @@ exports.configureApplication = function( app ) {
     if ( config.clientId && config.clientSecret ) {
         // client id and secret are specified in configuration file
 
-        jive.Application.findByID(config.clientId).execute( function(foundApp ) {
+        jive.applications.findByID(config.clientId).execute( function(foundApp ) {
             if ( foundApp ) {
                 // exists
                 console.log("Finished client config");
                 app.emit('event:clientAppConfigurationComplete', app);
             }  else {
                 // check if still valid
-                jiveClient.Application.retrieve( config.clientId,
+                jiveClient.applications.retrieve( config.clientId,
                     function(application) {
                         // persist
-                        jive.Application.save( application ).execute(function(){
+                        jive.applications.save( application ).execute(function(){
                             config.clientId = application.clientId;
                             config.clientSecret = application.clientSecret;
 
@@ -60,14 +60,14 @@ exports.configureApplication = function( app ) {
 
     } else {
 
-        jive.Application.findByAppName(appName).execute( function(foundApp) {
+        jive.applications.findByAppName(appName).execute( function(foundApp) {
             if ( foundApp ) {
                 config.clientId = foundApp.clientId;
                 console.log("Finished client config");
                 app.emit('event:clientAppConfigurationComplete', app );
             } else {
                 // register app, and proceed
-                jiveClient.Application.register(
+                jiveClient.applications.register(
                     {
                         'appName' : config.appName,
                         'appDescription': config.appDescription,
@@ -79,7 +79,7 @@ exports.configureApplication = function( app ) {
                         // set clientId
                         config.clientId = application.clientId;
                         application.name = config.appName;
-                        jive.Application.save( application ).execute(function(){
+                        jive.applications.save( application ).execute(function(){
                             console.log("Finished client config");
                             app.emit('event:clientAppConfigurationComplete', app);
                         });

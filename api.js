@@ -14,75 +14,10 @@
  *    limitations under the License.
  */
 
-var http                = require('http'),
-    persistence         = require('./persistence/dispatcher'),
-    jiveClient          = require('./client')
-;
-
+/// xxx remove this
 exports.setPersistenceListener = function( listener ) {
-    persistence.setListener(listener);
+    // xxx remove me!!
 };
-
-var returnOne = function(found, callback ) {
-    if ( found == null || found.length < 1 ) {
-        callback( null );
-    } else {
-        // return first one
-        callback( found[0] );
-    }
-};
-
-exports.Application = {
-
-    save: function (application) {
-
-        return {
-            execute: function (callback) {
-                persistence.save("application", application.clientId, application, function (saved) {
-                    callback(saved);
-                });
-            }
-        };
-    },
-
-    find: function ( keyValues, expectOne ) {
-        return {
-            execute: function (callback) {
-                persistence.find("application", keyValues, function( found ) {
-                    if ( expectOne ) {
-                        returnOne( found, callback )
-                    } else {
-                        callback ( found );
-                    }
-                } );
-            }
-        };
-    },
-
-    findByAppName: function (appname) {
-        return exports.Application.find( { "name": appname }, true );
-    },
-
-    findAll: function () {
-        return exports.Application.find( null );
-    },
-
-    findByID: function (clientId) {
-        return exports.Application.find( { "clientId": clientId }, true );
-    },
-
-    remove: function (clientId) {
-        return {
-            execute: function (callback) {
-                persistence.remove("application", clientId, callback);
-            }
-        };
-    }
-
-};
-
-////////////////////////////////////////////////////////////////////
-// todo - the new stuff goes here... eventually everything above will migrate!
 
 //////
 exports.persistence = {
@@ -93,6 +28,9 @@ exports.persistence = {
 
 //////
 exports.config = require('./lib/config');
+
+//////
+exports.applications = new (require('./lib/applications'));
 
 //////
 var extstreamsDefinitions = require('./lib/extstreamsDefinitions');
