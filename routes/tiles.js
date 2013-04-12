@@ -310,11 +310,15 @@ exports.installTiles = function( req, res ) {
                         allResponses = allResponses.concat( typeof responses === 'array' ? responses : [responses] );
                     }
 
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
                     Object.keys(allResponses).forEach(function(jiveResp){
-                        res.write("\n//");
-                        res.write(jiveResp);
-                        res.write(" response\n");
-                        res.write( JSON.stringify(allResponses[jiveResp]));
+                        var def = Object.keys(allResponses[jiveResp])[0];
+                        if ( def  ) {
+                            res.write("\n//");
+                            res.write(def );
+                            res.write(" response\n");
+                            res.write( JSON.stringify(allResponses[jiveResp], null, 4) );
+                        }
                     });
                     res.end();
 
