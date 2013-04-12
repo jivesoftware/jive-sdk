@@ -14,25 +14,19 @@
  *    limitations under the License.
  */
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Private
+
+/**
+ * Reference to the mongo db schema.
+ */
 var db;
 
-function Mongo(app) {
-    var databaseUrl = "mydb";
-    if ( app && app.settings && app.settings['databaseUrl'] ) {
-        databaseUrl = app.settings['databaseUrl'];
-    }
-    db = require("mongojs").connect(databaseUrl);
-}
-
-Mongo.prototype = Object.create({}, {
-    constructor: {
-        value: Mongo,
-        enumerable: false
-    }
-});
-
-module.exports = Mongo;
-
+/**
+ * Fetches a named collection from the mongo db schema if collection exists; otherwise lazily create the collection.
+ * @param collectionID
+ * @return {*}
+ */
 var getCollection = function( collectionID ) {
     var collection = db[collectionID];
     if ( collection ) {
@@ -42,6 +36,34 @@ var getCollection = function( collectionID ) {
     }
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Constructor
+
+/**
+ * @param app
+ * @constructor
+ */
+function Mongo(app) {
+    var databaseUrl = "mydb";
+    if ( app && app.settings && app.settings['databaseUrl'] ) {
+        databaseUrl = app.settings['databaseUrl'];
+    }
+    db = require("mongojs").connect(databaseUrl);
+}
+
+module.exports = Mongo;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Public
+
+/**
+ * Save the provided data in a named collection, and invoke the callback
+ * when done.
+ * @param collectionID
+ * @param key
+ * @param data
+ * @param callback
+ */
 Mongo.prototype.save = function( collectionID, key, data, callback) {
     var collection = getCollection(collectionID);
 
@@ -53,14 +75,21 @@ Mongo.prototype.save = function( collectionID, key, data, callback) {
     } );
 };
 
-Mongo.prototype.find = function( collectionID, keyValues, callback ) {
+/**
+ * Retrieve a piece of data from a named collection, based on the criteria, and invoke the callback
+ * with an array of the results when done.
+ * @param collectionID
+ * @param criteria
+ * @param callback
+ */
+Mongo.prototype.find = function( collectionID, criteria, callback ) {
     var collection = getCollection(collectionID);
     if (!collection ) {
         callback(null);
         return;
     }
 
-    collection.find(keyValues, function(err, items) {
+    collection.find(criteria, function(err, items) {
         if( err || !items || items.length < 1) {
             callback([]);
             return;
@@ -69,6 +98,13 @@ Mongo.prototype.find = function( collectionID, keyValues, callback ) {
     });
 };
 
+/**
+ * Remove a piece of data from a name collection, based to the provided key, and invoke the callback
+ * when done.
+ * @param collectionID
+ * @param key
+ * @param callback
+ */
 Mongo.prototype.remove = function( collectionID, key, callback ) {
     var collection = getCollection(collectionID);
     if (!collection ) {

@@ -16,24 +16,8 @@
 
 var fs = require('fs');
 
-function File() {
-    console.log();
-    console.log("******************************");
-    console.log("File persistence is configured.");
-    console.log("Please note that this should");
-    console.log("not be used for production!");
-    console.log("******************************");
-    console.log();
-}
-
-File.prototype = Object.create({}, {
-    constructor: {
-        value: File,
-        enumerable: false
-    }
-});
-
-module.exports = File;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Private
 
 var loading = {};
 var cache = {};
@@ -183,6 +167,24 @@ CacheEntry.prototype.discard = function() {
         cacheSize--;
     }
 };
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Constructor
+
+function File() {
+    console.log();
+    console.log("******************************");
+    console.log("File persistence is configured.");
+    console.log("Please note that this should");
+    console.log("not be used for production!");
+    console.log("******************************");
+    console.log();
+}
+
+module.exports = File;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Public
 
 File.prototype.save = function( collectionID, key, data, callback) {
     getCacheEntry(collectionID, function(collection, entry) {

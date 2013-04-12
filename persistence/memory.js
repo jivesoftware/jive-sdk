@@ -14,6 +14,37 @@
  *    limitations under the License.
  */
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Private
+
+/**
+ * In-memory data structure to use as a database
+ * @type {{}}
+ */
+var db = {};
+
+/**
+ * Fetches a named collection from the db if collection exists; otherwise lazily create the collection.
+ * @param collectionID
+ * @return {*}
+ */
+var getCollection = function( collectionID ) {
+    var collection = db[collectionID];
+    if ( collection ) {
+        return collection;
+    } else {
+        collection = {};
+        db[collectionID] = collection;
+        return collection;
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Constructor
+
+/**
+ * @constructor
+ */
 function Memory() {
     console.log();
     console.log("******************************");
@@ -33,18 +64,16 @@ Memory.prototype = Object.create({}, {
 
 module.exports = Memory;
 
-var db = {};
-var getCollection = function( collectionID ) {
-    var collection = db[collectionID];
-    if ( collection ) {
-        return collection;
-    } else {
-        collection = {};
-        db[collectionID] = collection;
-        return collection;
-    }
-};
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Public
 
+/**
+ * Save the provided data in a named collection, and invoke the callback
+ * @param collectionID
+ * @param key
+ * @param data
+ * @param callback
+ */
 Memory.prototype.save = function( collectionID, key, data, callback) {
     var collection = getCollection(collectionID);
     collection[key] = data;
@@ -52,6 +81,13 @@ Memory.prototype.save = function( collectionID, key, data, callback) {
     callback( data );
 };
 
+/**
+ * Remove a piece of data from a name collection, based to the provided key, and invoke the callback
+ * when done.
+ * @param collectionID
+ * @param key
+ * @param callback
+ */
 Memory.prototype.remove = function( collectionID, key, callback ) {
     var collection = getCollection(collectionID );
     delete collection[key];
@@ -59,6 +95,13 @@ Memory.prototype.remove = function( collectionID, key, callback ) {
     callback();
 };
 
+/**
+ * Retrieve a piece of data from a named collection, based on the criteria, and invoke the callback
+ * with an array of the results when done.
+ * @param collectionID
+ * @param keyValues
+ * @param callback
+ */
 Memory.prototype.find = function( collectionID, keyValues, callback ) {
     var collectionItems = [];
     var collection = getCollection(collectionID );
