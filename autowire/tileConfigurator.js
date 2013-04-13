@@ -155,7 +155,7 @@ function addTileRoutesToApp(app, tileInfo){
 }
 
 /**
- * Returns a promise for detecting when the tile directory has beeen autowired.
+ * Returns a promise for detecting when the tile directory has been autowired.
  * @param app
  * @param tileDir
  */
@@ -200,6 +200,12 @@ function configureOneTileDir( app, tileDir ) {
 
 exports.configureOneTileDir = configureOneTileDir;
 
+/**
+ * Autowires each tile discovered in the provided tiles directory.
+ * @param app
+ * @param tilesDir
+ * @return {*}
+ */
 exports.configureTilesDir = function( app, tilesDir ) {
     //Find the tiles by walking the tileDir tree
     return q.nfcall(fs.readdir, tilesDir).then(function(tilesDirContents){

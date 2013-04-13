@@ -1,4 +1,4 @@
-var assert = require("assert")
+var assert = require("assert");
 
 describe("TestHelloWorld", function() {
     it("should be true that 1 == \"1\"", function() {

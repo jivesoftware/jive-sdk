@@ -2,13 +2,13 @@ var Mocha = require('mocha'),
     path = require('path'),
     fs = require('fs'),
     jive = require('../../jive-sdk'),
-    http = require('http')
+    http = require('http');
 
 var configuration = {
     'port' : 8093,
     'baseUrl' : 'http://localhost',
     'clientId' : '766t8osmgixp87ypdbbvmu637k98fzvc',
-    'persistence' : new jive.persistence.mongo()
+    'persistence' : new jive.persistence.memory()
 };
 
 jive.config.save( configuration );
