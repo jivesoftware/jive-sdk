@@ -185,7 +185,7 @@ function configureOneTileDir( app, tile, tileDir ) {
 
     var masterPromise = q.all( allPromises  );
 
-    return masterPromise.then( function() {
+    return masterPromise.then( function(gg) {
         // save the definition when we're done
         jive.extstreams.definitions.save( definition).execute( function() {
             console.log("saved", definition.name );
