@@ -103,8 +103,8 @@ function processServices( definition, svcDir ) {
                 }
 
                 // event handler
-                if ( target.registerEvents ) {
-                    events = events.concat( target.registerEvents );
+                if ( target.eventHandlers ) {
+                    events = events.concat( target.eventHandlers );
                 }
             }
         });
