@@ -8,7 +8,7 @@ var base = host + ":" + port;
 
 var successCallback = function(res) {
     console.log("Request succeeded:");
-    console.log(res.substring(0, 100));
+    console.log(JSON.stringify(res).substring(0, 100));
 };
 
 var errorCallback = function(err) {
@@ -21,7 +21,17 @@ describe('jive.util', function(){
         it("should succeed with GET to '" + base + "'", function(done) {
             console.log("Starting request");
             jive.util.buildRequest(base, "GET")
-                .execute(function(res) {successCallback(res); done();}, function(err) {errorCallback(err); done();});
+                .execute(wrap(successCallback, done), wrap(errorCallback, done));
         });
     });
 });
+
+//Helpers
+
+//For Mocha framework, need to call "done" after a callback to indicate the test completed for asynchronous tests
+function wrap(f, done) {
+    return function(arg) {
+        f(arg);
+        done();
+    }
+}
