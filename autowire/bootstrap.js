@@ -49,9 +49,9 @@ exports.start = function( app, rootDir ) {
             if (err) throw err;
             console.log(data);
 
-            var jiveClientConfiguration = JSON.parse(data);
-            jive.config.save( jiveClientConfiguration );
-            app.emit('event:configurationReady', jiveClientConfiguration);
+            var jiveConfig = JSON.parse(data);
+            jive.config.save( jiveConfig );
+            app.emit('event:jiveConfigurationReady', jiveConfig);
         });
     };
 
@@ -66,19 +66,39 @@ exports.start = function( app, rootDir ) {
 
             app.set('publicDir', rootDir + '/public');
             app.set('rootDir', rootDir);
+
+            console.log();
+            console.log('Configured global framework routes:');
+            app.post('/registration', jive.routes.registration);
+
+            console.log("/registration");
+            console.log();
+
         });
 
-        app.emit('event:initialConfigurationComplete', app);
+        app.configure( 'development', function () {
+            console.log();
+            console.log('Configured global dev framework routes:');
+            app.get('/tiles', jive.routes.tiles);
+            app.get('/tilesInstall', jive.routes.installTiles);
+
+            console.log("/tiles");
+            console.log("/tilesInstall");
+            console.log();
+
+        });
+
+        app.emit('event:jiveAppConfigurationComplete', app);
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Setup the event handlers
 
-    app.on('event:configurationReady', configureApp);
-    app.on('event:initialConfigurationComplete', function() {
+    app.on('event:jiveConfigurationReady', configureApp);
+    app.on('event:jiveAppConfigurationComplete', function() {
         tileConfigurator.configureTilesDir(app, rootDir + "/tiles" );
     });
-    app.on('event:tileConfigurationComplete', appConfigurator.configureApplication);
+    app.on('event:jiveTileConfigurationComplete', appConfigurator.configureApplication);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 

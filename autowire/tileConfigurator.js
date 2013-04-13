@@ -176,7 +176,7 @@ exports.configureOneTileDir = configureOneTileDir;
  * @param tilesDir
  * @return {*}
  */
-exports.configureTilesDir = function( app, tilesDir ) {
+exports.configureTilesDir = function( app, tilesDir, callback ) {
     //Find the tiles by walking the tileDir tree
     return q.nfcall(fs.readdir, tilesDir).then(function(tilesDirContents){
         var proms = [];
@@ -190,8 +190,11 @@ exports.configureTilesDir = function( app, tilesDir ) {
 
         return q.all(proms).then(function(){
             //We've added all the routes for the tiles and actions throw the event that indicates we are done
-            console.log("Finished tile config");
-            app.emit('event:tileConfigurationComplete', app);
+            console.log("Finished tiles directory config");
+            app.emit('event:jiveTileConfigurationComplete', app);
+            if ( callback ) {
+                callback();
+            }
         });
     }).done();
 };
