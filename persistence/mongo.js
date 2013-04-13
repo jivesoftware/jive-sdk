@@ -14,30 +14,8 @@
  *    limitations under the License.
  */
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Private
 
-/**
- * Reference to the mongo db schema.
- */
-var db;
-
-/**
- * Fetches a named collection from the mongo db schema if collection exists; otherwise lazily create the collection.
- * @param collectionID
- * @return {*}
- */
-var getCollection = function( collectionID ) {
-    var collection = db[collectionID];
-    if ( collection ) {
-        return collection;
-    } else {
-        return db.collection(collectionID);
-    }
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Constructor
+var jive = require('../api');
 
 /**
  * @param app
@@ -51,68 +29,110 @@ function Mongo(app) {
     db = require("mongojs").connect(databaseUrl);
 }
 
-module.exports = Mongo;
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Public
-
-/**
- * Save the provided data in a named collection, and invoke the callback
- * when done.
- * @param collectionID
- * @param key
- * @param data
- * @param callback
- */
-Mongo.prototype.save = function( collectionID, key, data, callback) {
-    var collection = getCollection(collectionID);
-
-    collection.save( data, function(err, saved ) {
-        if( err || !saved ) throw err;
-        else {
-            callback( data );
-        }
-    } );
-};
-
-/**
- * Retrieve a piece of data from a named collection, based on the criteria, and invoke the callback
- * with an array of the results when done.
- * @param collectionID
- * @param criteria
- * @param callback
- */
-Mongo.prototype.find = function( collectionID, criteria, callback ) {
-    var collection = getCollection(collectionID);
-    if (!collection ) {
-        callback(null);
-        return;
+module.exports = function(databaseUrl) {
+    // setup database url
+    if ( !databaseUrl ) {
+        databaseUrl = jive.config.fetch()['databaeUrl'];
     }
 
-    collection.find(criteria, function(err, items) {
-        if( err || !items || items.length < 1) {
-            callback([]);
-            return;
-        }
-        callback( items );
-    });
-};
-
-/**
- * Remove a piece of data from a name collection, based to the provided key, and invoke the callback
- * when done.
- * @param collectionID
- * @param key
- * @param callback
- */
-Mongo.prototype.remove = function( collectionID, key, callback ) {
-    var collection = getCollection(collectionID);
-    if (!collection ) {
-        callback();
-        return;
+    if ( !databaseUrl ) {
+        // failover to default mongodb
+        databaseUrl = 'mydb';
     }
 
-    collection.remove({"id": key}, function(err, items) {
-        callback();
-    });
+    console.log();
+    console.log("******************");
+    console.log("MongoDB configured");
+    console.log("******************");
+    console.log();
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Private
+
+    /**
+     * Reference to the mongo db schema.
+     */
+    var db = require('mongojs').connect(databaseUrl);
+
+    /**
+     * Fetches a named collection from the mongo db schema if collection exists; otherwise lazily create the collection.
+     * @param collectionID
+     * @return {*}
+     */
+    var getCollection = function( collectionID ) {
+        var collection = db[collectionID];
+        if ( collection ) {
+            return collection;
+        } else {
+            return db.collection(collectionID);
+        }
+    };
+
+    return {
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Public
+
+        /**
+         * Save the provided data in a named collection, and invoke the callback
+         * when done.
+         * @param collectionID
+         * @param key
+         * @param data
+         * @param callback
+         */
+        save : function( collectionID, key, data, callback) {
+        var collection = getCollection(collectionID);
+            collection.save( data, function(err, saved ) {
+                if( err || !saved ) throw err;
+                else {
+                    callback( data );
+                }
+            } );
+        },
+
+        /**
+         * Retrieve a piece of data from a named collection, based on the criteria, and invoke the callback
+         * with an array of the results when done.
+         * @param collectionID
+         * @param criteria
+         * @param callback
+         */
+        find : function( collectionID, criteria, callback ) {
+            var collection = getCollection(collectionID);
+            if (!collection ) {
+                callback(null);
+                return;
+            }
+
+            collection.find(criteria, function(err, items) {
+                if( err || !items || items.length < 1) {
+                    callback([]);
+                    return;
+                }
+                callback( items );
+            });
+        },
+
+        /**
+         * Remove a piece of data from a name collection, based to the provided key, and invoke the callback
+         * when done.
+         * @param collectionID
+         * @param key
+         * @param callback
+         */
+        remove : function( collectionID, key, callback ) {
+            var collection = getCollection(collectionID);
+            if (!collection ) {
+                callback();
+                return;
+            }
+
+            collection.remove({"id": key}, function(err, items) {
+                callback();
+            });
+        }
+
+    };
+
 };
