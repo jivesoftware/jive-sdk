@@ -27,6 +27,7 @@ var events = require('events');
 var q = require('q');
 var jive = require("../api");
 
+// xxx todo this needs to be cleaned up -- and it might now belong here
 function getProcessed(conf, all) {
     var host = conf.baseUrl + ':' + conf.port;
     var processed = [];
@@ -99,32 +100,30 @@ function getProcessed(conf, all) {
  * @param res
  */
 exports.tiles = function(req, res){
-    var toShow = [];
+
+    var allDefinitions = [];
+
+    function makePromise(execute) {
+        var deferred = q.defer();
+        execute( function( results ) {
+            allDefinitions = allDefinitions.concat( results );
+            deferred.resolve();
+        });
+
+        return deferred.promise;
+    }
 
     var finalize = function() {
         var conf = jive.config.fetch();
-
-        var processed = getProcessed(conf, toShow);
+        var processed = getProcessed(conf, allDefinitions);
         var body = JSON.stringify(processed, null, 4);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(body);
     };
 
-    jive.tiles.definitions.findAll().execute( function( tiles ) {
-        if ( tiles ) {
-            toShow = tiles;
-        }
-
-        jive.extstreams.definitions.findAll().execute( function( streams ) {
-            if ( streams ) {
-                toShow = toShow.concat( streams );
-            }
-
-            finalize();
-        } );
-
-    } );
+    makePromise(jive.tiles.definitions.findAll().execute).then(
+    makePromise(jive.extstreams.definitions.findAll().execute )).then( finalize );
 };
 
 exports.registration = function( req, res ) {
