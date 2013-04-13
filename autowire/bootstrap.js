@@ -25,8 +25,27 @@ var express = require('express'),
 exports.start = function( app, rootDir ) {
 
     var begin = function () {
-        // read configuration
-        fs.readFile(rootDir + '/jiveclientconfiguration.json', 'utf8', function (err, data) {
+        // read configuration from cmd line arguments or from environment
+
+        var configFileFromEnv = process.env['CONFIG_FILE'];
+        var configFilePathFromArgs;
+
+        console.log("Command line arguments:");
+        process.argv.forEach(function (val, index, array) {
+            if ( val.indexOf('=') > -1 ) {
+                var arg = val.split(/=/);
+                console.log(arg[0],'=',arg[1]);
+
+                if ( arg[0] == 'configFile' ) {
+                    configFilePathFromArgs = arg[1];
+                }
+            }
+        });
+
+        var configFileToUse =
+            configFilePathFromArgs || configFileFromEnv || rootDir + '/jiveclientconfiguration.json';
+
+        fs.readFile(configFileToUse, 'utf8', function (err, data) {
             if (err) throw err;
             console.log(data);
 
@@ -45,7 +64,6 @@ exports.start = function( app, rootDir ) {
             app.use(express.favicon());
             app.use(express.static(path.join(rootDir, 'public')));
 
-            app.set('port', data.port || 8070);
             app.set('publicDir', rootDir + '/public');
             app.set('rootDir', rootDir);
         });
@@ -53,19 +71,19 @@ exports.start = function( app, rootDir ) {
         app.emit('event:initialConfigurationComplete', app);
     };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// Setup the event handlers
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // Setup the event handlers
 
-app.on('event:configurationReady', configureApp);
-app.on('event:initialConfigurationComplete', function() {
-    tileConfigurator.configureTilesDir(app, rootDir + "/tiles" );
-});
-app.on('event:tileConfigurationComplete', appConfigurator.configureApplication);
+    app.on('event:configurationReady', configureApp);
+    app.on('event:initialConfigurationComplete', function() {
+        tileConfigurator.configureTilesDir(app, rootDir + "/tiles" );
+    });
+    app.on('event:tileConfigurationComplete', appConfigurator.configureApplication);
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-begin();
-///////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    begin();
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 };

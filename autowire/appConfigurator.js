@@ -40,7 +40,7 @@ exports.configureApplication = function( app ) {
             if ( foundApp ) {
                 // exists
                 console.log("Finished client config");
-                app.emit('event:clientAppConfigurationComplete', app);
+                app.emit('event:jiveConfigurationComplete', app);
             }  else {
                 // check if still valid
                 jiveClient.Applications.retrieve( config.clientId,
@@ -51,13 +51,13 @@ exports.configureApplication = function( app ) {
                             config.clientSecret = application.clientSecret;
 
                             console.log("Finished client config");
-                            app.emit('event:clientAppConfigurationComplete', app);
+                            app.emit('event:jiveConfigurationComplete', app);
                         });
                     },
                     function() {
                         // invalid client ID
                         console.log("Failed client config");
-                        app.emit('event:clientAppConfigurationFailed', "Invalid client ID");
+                        app.emit('event:jiveConfigurationFailed', "Invalid client ID");
                     }
                 );
             }
@@ -69,7 +69,7 @@ exports.configureApplication = function( app ) {
             if ( foundApp ) {
                 config.clientId = foundApp.clientId;
                 console.log("Finished client config");
-                app.emit('event:clientAppConfigurationComplete', app );
+                app.emit('event:jiveConfigurationComplete', app );
             } else {
                 // register app, and proceed
                 jiveClient.Applications.register(
@@ -86,12 +86,12 @@ exports.configureApplication = function( app ) {
                         application.name = config.appName;
                         jive.applications.save( application ).execute(function(){
                             console.log("Finished client config");
-                            app.emit('event:clientAppConfigurationComplete', app);
+                            app.emit('event:jiveConfigurationComplete', app);
                         });
                     },
                     function(){
                         console.log("Failed client config");
-                        app.emit('event:clientAppConfigurationFailed', "Unable to register application");
+                        app.emit('event:jiveConfigurationFailed', "Unable to register application");
                     }
                 );
             }
