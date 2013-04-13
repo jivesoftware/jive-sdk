@@ -97,9 +97,17 @@ function processServices( definition, svcDir ) {
                 var target = require(theFile);
 
                 // task
-                if ( target.task ) {
-                    target.task.setKey( definition.name  + '.' + item + "." + target.task.getInterval() );
-                    tasks.push( target.task );
+                var task = target.task;
+                if ( task ) {
+                    var taskToAdd = task;
+                    if (typeof task === 'function' ) {
+                        // its a function, create a wrapping task object
+                        taskToAdd = jive.tasks.build( task );
+                    }
+
+                    // enforce a standard key
+                    taskToAdd.setKey( definition.name  + '.' + item + "." + taskToAdd.getInterval() );
+                    tasks.push( taskToAdd );
                 }
 
                 // event handler
