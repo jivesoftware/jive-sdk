@@ -36,50 +36,6 @@ function processServices( definition, svcDir ) {
     /////////////////////////////////////////////////////
     // apply tile specific tasks, life cycle events, etc.
 
-    var baseEvents = [
-        {
-            'event': 'newInstance',
-            'handler' : function(theInstance){
-                console.log("a new " + definition.name + " instance was created", theInstance);
-            }
-        },
-
-        {
-            'event': 'destroyingInstance',
-            'handler' : function(theInstance){
-                console.log("Instance of " + definition.name + " is being destroyed", theInstance);
-            }
-        },
-
-        {
-            'event': 'destroyedInstance',
-            'handler' : function(theInstance){
-                console.log("Instance of " + definition.name + " has been destroyed", theInstance);
-            }
-        },
-
-        {
-            'event': 'dataPushed',
-            'handler' : function(theInstance, pushedData, response){
-                console.log('data push to', theInstance.url, response.statusCode, theInstance.name);
-            }
-        },
-
-        {
-            'event': 'activityPushed',
-            'handler' : function(theInstance, pushedData, response){
-                console.log('activity push to', theInstance.url, response.statusCode, theInstance.name);
-            }
-        },
-
-        {
-            'event': 'commentPushed',
-            'handler' : function(theInstance, pushedData, response){
-                console.log('comment push to', theInstance.url, response.statusCode, theInstance.name);
-            }
-        }
-    ];
-
     if ( !fs.existsSync( svcDir ) ) {
         return;
     }
@@ -88,7 +44,9 @@ function processServices( definition, svcDir ) {
 
         var tasks = [];
         var events = [];
-        events = events.concat(baseEvents);
+
+        // add in the base event handlers
+        events = events.concat(jive.events.baseEvents);
 
         // analyze the directory contents, picking up tasks and events
         tilesDirContents.forEach(function(item) {

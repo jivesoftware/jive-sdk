@@ -23,4 +23,51 @@ exports.addEventListener = function( event, definitionName, listener ) {
     exports.addListener( event + "." + definitionName, listener );
 };
 
+/**
+ * This is an array of events which will be applied to every autowired tile
+ * @type {Array}
+ */
+exports.baseEvents = [
+    {
+        'event': 'newInstance',
+        'handler' : function(theInstance){
+            console.log("A new instance was created", theInstance);
+        }
+    },
+
+    {
+        'event': 'destroyingInstance',
+        'handler' : function(theInstance){
+            console.log("Instance is being destroyed", theInstance);
+        }
+    },
+
+    {
+        'event': 'destroyedInstance',
+        'handler' : function(theInstance){
+            console.log("Instance has been destroyed", theInstance);
+        }
+    },
+
+    {
+        'event': 'dataPushed',
+        'handler' : function(theInstance, pushedData, response){
+            console.log('Data push to', theInstance.url, response.statusCode, theInstance.name);
+        }
+    },
+
+    {
+        'event': 'activityPushed',
+        'handler' : function(theInstance, pushedData, response){
+            console.log('Activity push to', theInstance.url, response.statusCode, theInstance.name);
+        }
+    },
+
+    {
+        'event': 'commentPushed',
+        'handler' : function(theInstance, pushedData, response){
+            console.log('Comment push to', theInstance.url, response.statusCode, theInstance.name);
+        }
+    }
+];
 
