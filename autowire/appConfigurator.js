@@ -27,6 +27,12 @@ exports.configureApplication = function( app ) {
     var config = jive.config.fetch();
     var appName = config.appName;
 
+    // configure global routes
+    console.log('Configuring global framework routes.');
+    app.get('/tiles', require('../routes/tiles').tiles);
+    app.get('/tilesInstall', require('../routes/tiles').installTiles);
+    app.post('/registration', require('../routes/tiles').registration);
+
     if ( config.clientId && config.clientSecret ) {
         // client id and secret are specified in configuration file
 

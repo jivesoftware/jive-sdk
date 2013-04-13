@@ -44,7 +44,7 @@ exports.start = function( app, rootDir ) {
 
 app.on('event:configurationReady', configureApp);
 app.on('event:initialConfigurationComplete', function() {
-    tileConfigurator.configureTiles(app, rootDir + "/tiles" );
+    tileConfigurator.configureTilesDir(app, rootDir + "/tiles" );
 });
 app.on('event:tileConfigurationComplete', appConfigurator.configureApplication);
 

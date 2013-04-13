@@ -14,192 +14,207 @@
  *    limitations under the License.
  */
 
-var fs              = require('fs'),
-    q               = require('q'),
-    jive    = require('../api');
+var fs = require('fs'),
+    q  = require('q'),
+    jive = require('../api');
 
-exports.configureTiles = function(app, tilesDir) {
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Private
 
-    var isValidFile = function(file ) {
-        return !(file.indexOf('.') == 0)
-    };
+var isValidFile = function(file ) {
+    return !(file.indexOf('.') == 0)
+};
 
-    // configure global routes
-    console.log('Configuring global framework routes.');
-    app.get('/tiles', require('../routes/tiles').tiles);
-    app.get('/tilesInstall', require('../routes/tiles').installTiles);
-    app.post('/registration', require('../routes/tiles').registration);
+/**
+ * Returns a promise when defintion tasks, life cycle events,
+ * and other things in the service directory have been processed.
+ * @param definition
+ * @param svcDir
+ * @return {*}
+ */
+function processServices( definition, svcDir ) {
+    /////////////////////////////////////////////////////
+    // apply tile specific tasks, life cycle events, etc.
 
-    function addTileRoutesToApp(data){
-        var proms = [];
-
-        data.routes.forEach( function( currentRoute ) {
-            var currentTileDir = tilesDir + '/' + data.currentTile + '/routes/' + currentRoute;
-
-            if ( !isValidFile(currentRoute) ) {
-                return;
+    var baseEvents = [
+        {
+            'event': 'newInstance',
+            'handler' : function(theInstance){
+                console.log("a new " + definition.name + " instance was created", theInstance);
             }
+        },
 
-            //Look in the routes directory for the current tile.
-            //for each file that is in there that matches an http verb, add it to the app as a route
-            proms.push(q.nfcall(fs.readdir, currentTileDir).then(function(verbDirs){
-                verbDirs.forEach(function(httpVerbFile){
-                    if ( !isValidFile(httpVerbFile) ) {
-                        return;
-                    }
+        {
+            'event': 'destroyingInstance',
+            'handler' : function(theInstance){
+                console.log("Instance of " + definition.name + " is being destroyed", theInstance);
+            }
+        },
 
-                    var httpVerb = httpVerbFile.substring(0, httpVerbFile.length - 3);
-                    var routeHandlerPath = (currentTileDir + '/' + httpVerb);
-                    var routeContextPath = ('/' + data.currentTile + '/' + currentRoute);
+        {
+            'event': 'destroyedInstance',
+            'handler' : function(theInstance){
+                console.log("Instance of " + definition.name + " has been destroyed", theInstance);
+            }
+        },
 
-                    console.log('Tile route added for ', data.currentTile, ': ', routeContextPath, ' -> ', routeHandlerPath );
-                    var routeHandler = require(routeHandlerPath);
-                    if (typeof app[httpVerb] == 'function') {
-                        app[httpVerb](routeContextPath, routeHandler.route);
-                    }
-                });
-            }));
-        });
-        return q.all(proms);
+        {
+            'event': 'dataPushed',
+            'handler' : function(theInstance, pushedData, response){
+                console.log('data push to', theInstance.url, response.statusCode, theInstance.name);
+            }
+        },
+
+        {
+            'event': 'activityPushed',
+            'handler' : function(theInstance, pushedData, response){
+                console.log('activity push to', theInstance.url, response.statusCode, theInstance.name);
+            }
+        },
+
+        {
+            'event': 'commentPushed',
+            'handler' : function(theInstance, pushedData, response){
+                console.log('comment push to', theInstance.url, response.statusCode, theInstance.name);
+            }
+        }
+    ];
+
+    if ( !fs.existsSync( svcDir ) ) {
+        return;
     }
 
-    function handleTileRegistration( tile ) {
-        var tileDir = tilesDir + '/' + tile;
-        var svcDir =  tileDir + '/services';
-        var definitionPath = tileDir + '/definition.json';
-        var definition = JSON.parse( fs.readFileSync( definitionPath, 'utf8' ) );
+    return q.nfcall(fs.readdir, svcDir ).then( function(tilesDirContents) {
+
+        var tasks = [];
+        var events = [];
+        events = events.concat(baseEvents);
+
+        // analyze the directory contents, picking up tasks and events
+        tilesDirContents.forEach(function(item) {
+            if ( isValidFile(item) ) {
+                var theFile = svcDir + '/' + item;
+                var target = require(theFile);
+
+                // task
+                if ( target.task ) {
+                    target.task.setKey( definition.name  + '.' + item + "." + target.task.getInterval() );
+                    tasks.push( target.task );
+                }
+
+                // event handler
+                if ( target.registerEvents ) {
+                    events = events.concat( target.registerEvents );
+                }
+            }
+        });
+
+        // add the event listeners and tasks that were found
+        jive.extstreams.definitions.addListeners( definition.name, events );
+        jive.extstreams.definitions.addTasks( tasks );
+    });
+}
+
+/**
+ * Returns a promise when all the tile routes have been calculated for a particular tile directory.
+ * @param tileInfo
+ * @return {*}
+ */
+function addTileRoutesToApp(app, tileInfo){
+    var promises = [];
+
+    tileInfo.routes.forEach( function( currentRoute ) {
+        if ( !isValidFile(currentRoute) ) {
+            return;
+        }
+
+        //Look in the routes directory for the current tile.
+        //for each file that is in there that matches an http verb, add it to the app as a route
+        var currentTileDir = tileInfo.routePath + '/' + currentRoute;
+        promises.push(q.nfcall(fs.readdir, currentTileDir).then( function(verbDirs){
+            verbDirs.forEach(function(httpVerbFile){
+                if ( !isValidFile(httpVerbFile) ) {
+                    return;
+                }
+
+                var httpVerb = httpVerbFile.substring(0, httpVerbFile.length - 3);
+                var routeHandlerPath = (currentTileDir + '/' + httpVerb);
+                var routeContextPath = ('/' + tileInfo.currentTile + '/' + currentRoute);
+
+                console.log('Tile route added for ', tileInfo.currentTile, ': ', routeContextPath, ' -> ', routeHandlerPath );
+                var routeHandler = require(routeHandlerPath);
+                if (typeof app[httpVerb] == 'function') {
+                    app[httpVerb](routeContextPath, routeHandler.route);
+                }
+            });
+        }));
+    });
+
+    // convert the collected promises into a single promise that returns when they're all successfull
+    return q.all(promises);
+}
+
+/**
+ * Returns a promise
+ * @param app
+ * @param tileDir
+ */
+function configureOneTileDir( app, tile, tileDir ) {
+    var definitionPath = tileDir + '/definition.json';
+    var servicesPath = tileDir + '/services';
+    var routesPath = tileDir + '/routes';
+    var definition = JSON.parse( fs.readFileSync( definitionPath, 'utf8' ) );
         definition.id = definition.id === '{{{tile_id}}}' ? null : definition.id;
 
-        /////////////////////////////////////////////////////
-        // apply tile specific tasks, life cycle events, etc.
+    var routesPromise = q.nfcall(fs.readdir, routesPath)
+    // process the routes
+    .then( function(routesToAdd) {
+        return addTileRoutesToApp( app, { "routePath" : routesPath, "routes":routesToAdd, "currentTile":tile} )
+    });
 
-        var baseEvents = [
-            {
-                'event': 'newInstance',
-                'handler' : function(theInstance){
-                    console.log("a new " + definition.name + " instance was created", theInstance);
-                }
-            },
+    var servicesPromise = processServices( definition, servicesPath );
 
-            {
-                'event': 'destroyingInstance',
-                'handler' : function(theInstance){
-                    console.log("Instance of " + definition.name + " is being destroyed", theInstance);
-                }
-            },
-
-            {
-                'event': 'destroyedInstance',
-                'handler' : function(theInstance){
-                    console.log("Instance of " + definition.name + " has been destroyed", theInstance);
-                }
-            },
-
-            {
-                'event': 'dataPushed',
-                'handler' : function(theInstance, pushedData, response){
-                    console.log('data push to', theInstance.url, response.statusCode, theInstance.name);
-                }
-            },
-
-            {
-                'event': 'activityPushed',
-                'handler' : function(theInstance, pushedData, response){
-                    console.log('activity push to', theInstance.url, response.statusCode, theInstance.name);
-                }
-            },
-
-            {
-                'event': 'commentPushed',
-                'handler' : function(theInstance, pushedData, response){
-                    console.log('comment push to', theInstance.url, response.statusCode, theInstance.name);
-                }
-            }
-        ];
-
-        var doIt = function(dd, events, tasks) {
-            var style = dd['style'];
-            var ff;
-            if ( style === 'ACTIVITY' ) {
-                ff = jive.extstreams.definitions;
-            } else {
-                ff = jive.tiles.definitions;
-            }
-
-            ff.configure(dd, events, tasks, function() {
-                console.log("done configuring", dd['name']);
-            });
-        };
-
-
-        if ( !fs.existsSync(svcDir ) ) {
-            return q.nfcall( doIt, definition, baseEvents, []).then(function() {
-                console.log("done configuring", definition['name']);
-            });
-        }
-
-       return q.nfcall(fs.readdir, svcDir ).then( function(tilesDirContents) {
-
-           var tasks = [];
-           var events = [];
-           events = events.concat(baseEvents);
-
-           tilesDirContents.forEach(function(item) {
-                if ( isValidFile(item) ) {
-                    var theFile = svcDir + '/' + item;
-                    var target = require(theFile);
-
-                    // task
-                    if ( target.task ) {
-                        target.task.setKey( tile + '.' + item + "." + target.task.getInterval() );
-                        tasks.push( target.task );
-                    }
-
-                    // event handler
-                    if ( target.registerEvents ) {     // xxx - todo - what if not array??
-                        events = events.concat( target.registerEvents );
-                    }
-                }
-            });
-
-           doIt( definition, events, tasks );
-        });
+    var allPromises = [];
+    if ( routesPromise ) {
+        allPromises.push(routesPromise);
     }
 
-    function addTileConfiguration(tile, routePath){
-        var routes = q.nfcall(fs.readdir, routePath).then(function(routesToAdd){
-            addTileRoutesToApp({"routes":routesToAdd, "currentTile":tile});
-        });
-
-        var detail = handleTileRegistration(tile);
-
-        var r = [ routes ];
-        if ( detail ) {
-            r.push(detail);
-        }
-
-        return q.all( r );
+    if ( servicesPromise ) {
+        allPromises.push(servicesPromise);
     }
 
+    var masterPromise = q.all( allPromises  );
+
+    return masterPromise.then( function() {
+        // save the definition when we're done
+        jive.extstreams.definitions.save( definition).execute( function() {
+            console.log("saved", definition.name );
+        });
+    });
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// public
+
+exports.configureOneTileDir = configureOneTileDir;
+
+exports.configureTilesDir = function( app, tilesDir ) {
     //Find the tiles by walking the tileDir tree
-    var tiles = [];
-    var tileRoutesPaths = [];
     return q.nfcall(fs.readdir, tilesDir).then(function(tilesDirContents){
         var proms = [];
         tilesDirContents.forEach(function(item) {
             if ( !isValidFile(item) ) {
                 return;
             }
-            var tileDirPath = tilesDir + '/' + item + '/routes';
-            proms.push(addTileConfiguration(item, tileDirPath));
-            tileRoutesPaths.push( tileDirPath );
-            tiles.push( item );
+            var tileDirPath = tilesDir + '/' + item ;
+            proms.push(configureOneTileDir(app, item, tileDirPath));
         });
+
         return q.all(proms).then(function(){
             //We've added all the routes for the tiles and actions throw the event that indicates we are done
             console.log("Finished tile config");
             app.emit('event:tileConfigurationComplete', app);
         });
     }).done();
-
 };
+
