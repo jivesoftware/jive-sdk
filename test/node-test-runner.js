@@ -1,10 +1,11 @@
 var Mocha = require('mocha'),
     path = require('path'),
     fs = require('fs'),
-    jive = require('../../jive-sdk')
+    jive = require('../../jive-sdk'),
+    http = require('http')
 
 var configuration = {
-    'port' : 8091,
+    'port' : 8093,
     'baseUrl' : 'http://charles-z800.jiveland.com',
     'clientId' : '766t8osmgixp87ypdbbvmu637k98fzvc',
     'persistence' : new jive.persistence.mongo()
@@ -12,36 +13,79 @@ var configuration = {
 
 jive.config.save( configuration );
 
-//Run all tests in subfolder 'testcases'
-var mocha = new Mocha({
-    reporter: 'dot',
-    ui: 'bdd',
-    timeout: 999999
+var serverChild = require('child_process').fork('./test-server',  {execArgv: []});
+
+serverChild.on('message', function(m) {
+    console.log("Child server process started");
+    console.log(m);
+    runMocha();
 });
 
-var testDir = './testcases/';
+serverChild.send({pleaseStart: true});
 
-fs.readdir(testDir, function (err, files) {
-    if (err) {
-        console.log(err);
-        return;
-    }
-    files.forEach(function (file) {
-        if (path.extname(file) === '.js') {
-            console.log('adding test file: %s', file);
-            mocha.addFile(testDir + file);
+function runMocha() {
+    //Run all tests in subfolder 'testcases'
+    var mocha = new Mocha({
+        reporter: 'dot',
+        ui: 'bdd',
+        timeout: 999999
+    });
+
+    var testDir = './testcases/';
+
+    fs.readdir(testDir, function (err, files) {
+        if (err) {
+            console.log(err);
+            return;
         }
-    });
+        files.forEach(function (file) {
+            if (path.extname(file) === '.js') {
+                console.log('adding test file: %s', file);
+                mocha.addFile(testDir + file);
+            }
+        });
 
-    var runner = mocha.run(function () {
-        console.log('finished');
-    });
+        var runner = mocha.run(function () {
+            console.log('finished');
+        });
 
-    runner.on('pass', function (test) {
-        console.log('... %s passed', test.title);
-    });
+        runner.on('pass', function (test) {
+            console.log('... %s passed', test.title);
+        });
 
-    runner.on('fail', function (test) {
-        console.log('... %s failed', test.title);
+        runner.on('fail', function (test) {
+            console.log('... %s failed', test.title);
+        });
     });
-});
+}
+
+
+//Helpers
+
+function waitSynchronous(ms) {
+    var date = new Date();
+    do {
+        var currentDate = new Date();
+    } while (currentDate - date < ms);
+}
+
+function wait(serverName) {
+    var gotOK = false;
+
+
+    while (!gotOK) {
+        jive.util.buildRequest(serverName).execute(
+            function(res) {
+                if (res.responseCode === 200) {
+                    gotOK = true;
+                }
+            },
+            function(err) {
+                console.log("Failed to connect to test server '" + serverName + "'");
+                console.log(err);
+            });
+
+        waitSynchronous(2000);
+    }
+
+}

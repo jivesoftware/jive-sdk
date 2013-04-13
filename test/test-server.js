@@ -1,15 +1,16 @@
 /**
  * Modify this configuration to match your jive-sdk server's config
  */
-var jive = require('../api'),
-    express = require('express'),
+var express = require('express'),
     routes = require('./testroutes'),
     http = require('http'),
     jive = require('../../jive-sdk');
 
+var forkedProcess = true;
+
 
 var configuration = {
-    'port' : 8091,
+    'port' : 8093,
     'baseUrl' : 'http://charles-z800.jiveland.com',
     'clientId' : '766t8osmgixp87ypdbbvmu637k98fzvc',
     'persistence' : new jive.persistence.mongo()
@@ -26,14 +27,30 @@ app.configure('development', function () {
     app.use(express.errorHandler());
 });
 
-
 // ROUTES
 app.get('/', routes.index);
 
-var server = http.createServer(app).listen(configuration.port, function () {
-    console.log("Test server listening on port " + configuration.port);
-} );
+if (forkedProcess) {
+    process.on('message', function(m) {
+        console.log("Test server received message from test runner");
+        console.log(m);
+        if (m['pleaseStart'] == true) {
+            startServer();
+        }
+    });
+}
+else {
+    startServer();
+}
 
+function startServer() {
+    var server = http.createServer(app).listen(configuration.port, function () {
+        console.log("Test server listening on port " + configuration.port);
+        if (process.send) {
+            process.send( {serverStarted: true});
+        }
+    } );
+}
 
 exports.server = function() {
     return server;
