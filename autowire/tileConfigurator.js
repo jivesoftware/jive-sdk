@@ -109,8 +109,12 @@ function processServices( definition, svcDir ) {
             }
         });
 
-        // add the event listeners and tasks that were found
-        jive.extstreams.definitions.addListeners( definition.name, events );
+        // add the event handlers
+        events.forEach( function( handlerInfo ) {
+            jive.extstreams.definitions.addEventHandler( definition.name, handlerInfo['event'], handlerInfo['handler'] );
+        });
+
+        // add the tasks
         jive.extstreams.definitions.addTasks( tasks );
     });
 }
