@@ -190,7 +190,7 @@ function configureOneTileDir( app, tileDir ) {
         // save the definition when we're done
         var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams : jive.tiles;
         apiToUse.definitions.save( definition).execute( function() {
-            console.log("saved", definition.name );
+            console.log("Done configuring", definition.name );
         });
     });
 }
