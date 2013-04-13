@@ -155,11 +155,12 @@ function addTileRoutesToApp(app, tileInfo){
 }
 
 /**
- * Returns a promise
+ * Returns a promise for detecting when the tile directory has beeen autowired.
  * @param app
  * @param tileDir
  */
-function configureOneTileDir( app, tile, tileDir ) {
+function configureOneTileDir( app, tileDir ) {
+    var tile = tileDir.substring( tileDir.lastIndexOf('/') + 1, tileDir.length ); /// xxx todo this might not always work!
     var definitionPath = tileDir + '/definition.json';
     var servicesPath = tileDir + '/services';
     var routesPath = tileDir + '/routes';
@@ -187,7 +188,8 @@ function configureOneTileDir( app, tile, tileDir ) {
 
     return masterPromise.then( function(gg) {
         // save the definition when we're done
-        jive.extstreams.definitions.save( definition).execute( function() {
+        var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams : jive.tiles;
+        apiToUse.definitions.save( definition).execute( function() {
             console.log("saved", definition.name );
         });
     });
@@ -207,7 +209,7 @@ exports.configureTilesDir = function( app, tilesDir ) {
                 return;
             }
             var tileDirPath = tilesDir + '/' + item ;
-            proms.push(configureOneTileDir(app, item, tileDirPath));
+            proms.push(configureOneTileDir(app, tileDirPath));
         });
 
         return q.all(proms).then(function(){
