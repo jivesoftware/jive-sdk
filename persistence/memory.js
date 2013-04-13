@@ -14,38 +14,12 @@
  *    limitations under the License.
  */
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Private
-
 /**
- * In-memory data structure to use as a database
- * @type {{}}
+ * New instances of this module will separate state from every other instance.
  */
-var db = {};
 
-/**
- * Fetches a named collection from the db if collection exists; otherwise lazily create the collection.
- * @param collectionID
- * @return {*}
- */
-var getCollection = function( collectionID ) {
-    var collection = db[collectionID];
-    if ( collection ) {
-        return collection;
-    } else {
-        collection = {};
-        db[collectionID] = collection;
-        return collection;
-    }
-};
+module.exports = function() {
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Constructor
-
-/**
- * @constructor
- */
-function Memory() {
     console.log();
     console.log("******************************");
     console.log("Memory persistence is configured.");
@@ -53,80 +27,100 @@ function Memory() {
     console.log("not be used for production!");
     console.log("******************************");
     console.log();
-}
 
-Memory.prototype = Object.create({}, {
-    constructor: {
-        value: Memory,
-        enumerable: false
-    }
-});
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Private
 
-module.exports = Memory;
+    /**
+     * In-memory data structure to use as a database
+     * @type {{}}
+     */
+    var db = {};
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Public
+    /**
+     * Fetches a named collection from the db if collection exists; otherwise lazily create the collection.
+     * @param collectionID
+     * @return {*}
+     */
+    var getCollection = function( collectionID ) {
+        var collection = db[collectionID];
+        if ( collection ) {
+            return collection;
+        } else {
+            collection = {};
+            db[collectionID] = collection;
+            return collection;
+        }
+    };
 
-/**
- * Save the provided data in a named collection, and invoke the callback
- * @param collectionID
- * @param key
- * @param data
- * @param callback
- */
-Memory.prototype.save = function( collectionID, key, data, callback) {
-    var collection = getCollection(collectionID);
-    collection[key] = data;
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Public
 
-    callback( data );
-};
+    return {
+        /**
+         * Save the provided data in a named collection, and invoke the callback
+         * @param collectionID
+         * @param key
+         * @param data
+         * @param callback
+         */
+        save: function( collectionID, key, data, callback) {
+            var collection = getCollection(collectionID);
+            collection[key] = data;
 
-/**
- * Remove a piece of data from a name collection, based to the provided key, and invoke the callback
- * when done.
- * @param collectionID
- * @param key
- * @param callback
- */
-Memory.prototype.remove = function( collectionID, key, callback ) {
-    var collection = getCollection(collectionID );
-    delete collection[key];
+            callback( data );
+        },
 
-    callback();
-};
+        /**
+         * Remove a piece of data from a name collection, based to the provided key, and invoke the callback
+         * when done.
+         * @param collectionID
+         * @param key
+         * @param callback
+         */
+        remove: function( collectionID, key, callback ) {
+            var collection = getCollection(collectionID );
+            delete collection[key];
 
-/**
- * Retrieve a piece of data from a named collection, based on the criteria, and invoke the callback
- * with an array of the results when done.
- * @param collectionID
- * @param keyValues
- * @param callback
- */
-Memory.prototype.find = function( collectionID, keyValues, callback ) {
-    var collectionItems = [];
-    var collection = getCollection(collectionID );
-    var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
+            callback();
+        },
 
-    for (var colKey in collection) {
-        if (collection.hasOwnProperty(colKey)) {
+        /**
+         * Retrieve a piece of data from a named collection, based on the criteria, and invoke the callback
+         * with an array of the results when done.
+         * @param collectionID
+         * @param keyValues
+         * @param callback
+         */
+        find: function( collectionID, keyValues, callback ) {
+            var collectionItems = [];
+            var collection = getCollection(collectionID );
+            var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
 
-            var entryToInspect = collection[colKey];
-            var match = true;
-            if ( findKeys ) {
-                for ( var i in findKeys ) {
-                    var findKey = findKeys[i];
-                    if ( entryToInspect[ findKey ] !== keyValues[ findKey ] ) {
-                        match = false;
-                        break;
+            for (var colKey in collection) {
+                if (collection.hasOwnProperty(colKey)) {
+
+                    var entryToInspect = collection[colKey];
+                    var match = true;
+                    if ( findKeys ) {
+                        for ( var i in findKeys ) {
+                            var findKey = findKeys[i];
+                            if ( entryToInspect[ findKey ] !== keyValues[ findKey ] ) {
+                                match = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if ( match ) {
+                        collectionItems.push( collection[colKey] );
                     }
                 }
             }
 
-            if ( match ) {
-                collectionItems.push( collection[colKey] );
-            }
+            callback( collectionItems );
         }
-    }
+    };
 
-    callback( collectionItems );
 };
+

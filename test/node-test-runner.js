@@ -6,7 +6,7 @@ var Mocha = require('mocha'),
 
 var configuration = {
     'port' : 8093,
-    'baseUrl' : 'http://charles-z800.jiveland.com',
+    'baseUrl' : 'http://localhost',
     'clientId' : '766t8osmgixp87ypdbbvmu637k98fzvc',
     'persistence' : new jive.persistence.mongo()
 };
