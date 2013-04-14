@@ -53,8 +53,8 @@ exports.registration = function( req, res ) {
         }
     }
 
-    var registerer = function( instanceLibrary ) {
-        instanceLibrary.findByScope().execute( function(tileInstance) {
+    var registerer = function( scope, instanceLibrary ) {
+        instanceLibrary.findByScope(guid).execute( function(tileInstance) {
             // the instance exists
             // update the config only
             if ( tileInstance ) {
@@ -81,14 +81,14 @@ exports.registration = function( req, res ) {
     // try tiles
     jive.tiles.definitions.findByTileName( name).execute( function( found ) {
         if ( found ) {
-            registerer(jive.tiles);
+            registerer(guid, jive.tiles);
         }
     });
 
     // try extstreams
     jive.extstreams.definitions.findByTileName( name).execute( function( found ) {
         if ( found ) {
-            registerer(jive.extstreams);
+            registerer(guid, jive.extstreams);
         }
     });
 
