@@ -89,11 +89,14 @@ var configureApp = function (app, rootDir, config) {
     app.configure( 'development', function () {
         console.log();
         console.log('Configured global dev framework routes:');
+
         app.get('/tiles', jive.routes.tiles);
         app.get('/tilesInstall', jive.routes.installTiles);
+        app.get('/requestCredentials', jive.routes.requestCredentials);
 
         console.log("/tiles");
         console.log("/tilesInstall");
+        console.log("/requestCredentials");
         console.log();
 
     });
