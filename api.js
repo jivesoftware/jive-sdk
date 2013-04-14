@@ -31,7 +31,11 @@ exports.persistence = {
 exports.config = require('./lib/config');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// external streams and tiles
+// external streams and tiles (instances and definitions)
+// eg. jive.tiles
+//     jive.tiles.definitions
+//     jive.extstreams
+//     jive.extstreams.definitions
 
 var eventRegistry = require( './tile/registry');
 
