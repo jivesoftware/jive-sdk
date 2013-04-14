@@ -14,6 +14,8 @@
  *    limitations under the License.
  */
 
+var url = require('url');
+var http = require('http');
 var q = require('q');
 var jive = require("../api");
 var mustache = require('mustache');
