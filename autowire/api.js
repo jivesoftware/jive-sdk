@@ -20,6 +20,7 @@
  * of your tiles, or (2) providing a directory for one of the tiles to configure.
  */
 
+var q = require('q');
 var bootstrap = require('./bootstrap');
 var tileConfigurator = require('./tileConfigurator');
 
@@ -29,7 +30,18 @@ var tileConfigurator = require('./tileConfigurator');
  * @param rootDir
  */
 exports.all = function( app, rootDir ) {
-    bootstrap.start( app, rootDir );
+    var deferred = q.defer();
+
+    bootstrap.start( app, rootDir, function() {
+        // when bootstrapping is done
+        tileConfigurator.configureTilesDir( app, rootDir + '/tiles', function() {
+            // once tile configuration is done, emit the all done signal
+            deferred.resolve();
+            app.emit('event:jiveConfigurationComplete');
+        } );
+    } );
+
+    return deferred.promise;
 };
 
 /**
@@ -51,7 +63,16 @@ exports.all = function( app, rootDir ) {
  * @param tileDir
  * @param callback
  */
-exports.one = function( app, tileDir, callback ) {
-    var promise = tileConfigurator.configureOneTileDir( app, tileDir );
-    promise.then( callback );
+exports.one = function( app, rootDir, tileDir ) {
+    var deferred = q.defer();
+    bootstrap.start( app, rootDir, function() {
+        // when bootstrapping is done
+        var promise = tileConfigurator.configureOneTileDir( app, tileDir );
+        promise.then( function() {
+            // once tile configuration is done, emit the all done signal
+            deferred.resolve();
+        } );
+    } );
+
+    return deferred.promise;
 };

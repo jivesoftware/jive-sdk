@@ -18,92 +18,105 @@ var express = require('express'),
     fs = require('fs'),
     path = require('path'),
     jive = require('../api'),
-    tileConfigurator = require('./tileConfigurator'),
-    appConfigurator = require('./appConfigurator'),
     consolidate = require('consolidate');
 
-exports.start = function( app, rootDir ) {
+var alreadyBootstrapped = false;
 
-    var begin = function () {
-        // read configuration from cmd line arguments or from environment
+var loadConfiguration = function (app, rootDir) {
+    // read configuration from cmd line arguments or from environment
 
-        var configFileFromEnv = process.env['CONFIG_FILE'];
-        var configFilePathFromArgs;
+    var configFileFromEnv = process.env['CONFIG_FILE'];
+    var configFilePathFromArgs;
 
-        console.log("Command line arguments:");
-        process.argv.forEach(function (val, index, array) {
-            if ( val.indexOf('=') > -1 ) {
-                var arg = val.split(/=/);
-                console.log(arg[0],'=',arg[1]);
+    console.log("Command line arguments:");
+    process.argv.forEach(function (val, index, array) {
+        if ( val.indexOf('=') > -1 ) {
+            var arg = val.split(/=/);
+            console.log(arg[0],'=',arg[1]);
 
-                if ( arg[0] == 'configFile' ) {
-                    configFilePathFromArgs = arg[1];
-                }
+            if ( arg[0] == 'configFile' ) {
+                configFilePathFromArgs = arg[1];
             }
-        });
-
-        var configFileToUse =
-            configFilePathFromArgs || configFileFromEnv || rootDir + '/jiveclientconfiguration.json';
-
-        fs.readFile(configFileToUse, 'utf8', function (err, data) {
-            if (err) throw err;
-            console.log(data);
-
-            var jiveConfig = JSON.parse(data);
-            jive.config.save( jiveConfig );
-            app.emit('event:jiveConfigurationReady', jiveConfig);
-        });
-    };
-
-    var configureApp = function (data) {
-
-        app.configure(function () {
-            app.engine('html', consolidate.mustache);
-            app.set('view engine', 'html');
-            app.set('views', rootDir + '/public/tiles');
-            app.use(express.favicon());
-            app.use(express.static(path.join(rootDir, 'public')));
-
-            app.set('publicDir', rootDir + '/public');
-            app.set('rootDir', rootDir);
-
-            console.log();
-            console.log('Configured global framework routes:');
-            app.post('/registration', jive.routes.registration);
-
-            console.log("/registration");
-            console.log();
-
-        });
-
-        app.configure( 'development', function () {
-            console.log();
-            console.log('Configured global dev framework routes:');
-            app.get('/tiles', jive.routes.tiles);
-            app.get('/tilesInstall', jive.routes.installTiles);
-
-            console.log("/tiles");
-            console.log("/tilesInstall");
-            console.log();
-
-        });
-
-        app.emit('event:jiveAppConfigurationComplete', app);
-    };
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Setup the event handlers
-
-    app.on('event:jiveConfigurationReady', configureApp);
-    app.on('event:jiveAppConfigurationComplete', function() {
-        tileConfigurator.configureTilesDir(app, rootDir + "/tiles" );
+        }
     });
-    app.on('event:jiveTileConfigurationComplete', appConfigurator.configureApplication);
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    var configFileToUse =
+        configFilePathFromArgs || configFileFromEnv || rootDir + '/jiveclientconfiguration.json';
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    begin();
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    fs.readFile(configFileToUse, 'utf8', function (err, data) {
+        if (err) throw err;
 
+        console.log('Startup configuration from',configFileToUse);
+        console.log(data);
+
+        var jiveConfig = JSON.parse(data);
+
+        if ( jiveConfig.clientId && jiveConfig.clientSecret ) {
+            // client id and secret are specified in configuration file
+            console.log("Finished client config");
+        } else {
+            // clientID and secret must be available at this point!
+            throw 'ClientID and clientSecret must be configured. Please acquire these from Jive Software, and place it' +
+                ' in your configuration file (' + configFileToUse + ').';
+        }
+
+        jive.config.save( jiveConfig );
+        app.emit('event:jiveConfigurationReady', jiveConfig);
+    });
+};
+
+var configureApp = function (app, rootDir, config) {
+    app.configure(function () {
+        app.engine('html', consolidate.mustache);
+        app.set('view engine', 'html');
+        app.set('views', rootDir + '/public/tiles');
+        app.use(express.favicon());
+        app.use(express.static(path.join(rootDir, 'public')));
+
+        app.set('publicDir', rootDir + '/public');
+        app.set('rootDir', rootDir);
+        app.set('port', config['port']);
+
+        console.log();
+        console.log('Configured global framework routes:');
+        app.post('/registration', jive.routes.registration);
+
+        console.log("/registration");
+        console.log();
+
+    });
+
+    app.configure( 'development', function () {
+        console.log();
+        console.log('Configured global dev framework routes:');
+        app.get('/tiles', jive.routes.tiles);
+        app.get('/tilesInstall', jive.routes.installTiles);
+
+        console.log("/tiles");
+        console.log("/tilesInstall");
+        console.log();
+
+    });
+
+    app.emit('event:jiveBoostrapComplete', app);
+};
+
+exports.start = function( app, rootDir, bootstrapCompleteCallback ) {
+
+    if ( alreadyBootstrapped ) {
+        console.log('Already bootstrapped, or in progress, skipping.');
+        bootstrapCompleteCallback();
+        return;
+    }
+
+    // not yet bootstrapped, proceed
+    alreadyBootstrapped = true;
+
+    // setup event listeners
+    app.on('event:jiveConfigurationReady', function(config) {
+        configureApp(app, rootDir, config);
+    });
+    app.on('event:jiveBoostrapComplete', bootstrapCompleteCallback );
+
+    loadConfiguration(app, rootDir);
 };
