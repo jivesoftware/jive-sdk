@@ -38,6 +38,21 @@ exports.registration = function( req, res ) {
     var name = req.body['name'];
     var code = req.body['code'];
 
+    var auth = req.headers['authorization'];
+    if (auth && auth.indexOf('Basic ') == 0 ) {
+        var authParts = auth.split('Basic ');
+        var p = new Buffer(authParts[1], 'base64').toString();
+        var pParts = p.split(':');
+        var authClientId = pParts[0];
+        var authSecret = pParts[1];
+
+        if ( authClientId !== clientId || authSecret !== authSecret ) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end( JSON.stringify( { 'error': 'Invalid HMAC authorization header' } ) );
+            return;
+        }
+    }
+
     var registerer = function( instanceLibrary ) {
         instanceLibrary.findByScope().execute( function(tileInstance) {
             // the instance exists
