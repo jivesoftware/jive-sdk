@@ -36,10 +36,6 @@ function processServices( definition, svcDir ) {
     /////////////////////////////////////////////////////
     // apply tile specific tasks, life cycle events, etc.
 
-    if ( !fs.existsSync( svcDir ) ) {
-        return;
-    }
-
     return q.nfcall(fs.readdir, svcDir ).then( function(tilesDirContents) {
 
         var tasks = [];
@@ -124,6 +120,15 @@ function addTileRoutesToApp(app, tileInfo){
     return q.all(promises);
 }
 
+function fsexists(path) {
+    var deferred = q.defer();
+    fs.exists( path, function(exists ) {
+        deferred.resolve(exists);
+    });
+
+    return deferred.promise;
+}
+
 /**
  * Returns a promise for detecting when the tile directory has been autowired.
  * @param app
@@ -134,33 +139,41 @@ function configureOneTileDir( app, tileDir ) {
     var definitionPath = tileDir + '/definition.json';
     var servicesPath = tileDir + '/services';
     var routesPath = tileDir + '/routes';
-    var definition = JSON.parse( fs.readFileSync( definitionPath, 'utf8' ) );
+
+    return q.nfcall( fs.readFile, definitionPath).then( function(data ) {
+        var definition = JSON.parse(data);
         definition.id = definition.id === '{{{tile_id}}}' ? null : definition.id;
+        return definition;
+    }).then( function(definition) {
 
-    var allPromises = [];
+        var promises = [];
 
-    if ( fs.existsSync(routesPath ) ) {
-        var routesPromise = q.nfcall(fs.readdir, routesPath)
-            // process the routes
-            .then( function(routesToAdd) {
-                return addTileRoutesToApp( app, { "routePath" : routesPath, "routes":routesToAdd, "currentTile":tile} )
-            });
-
-        allPromises.push(routesPromise);
-    }
-
-    if ( fs.existsSync(servicesPath ) ) {
-        var servicesPromise = processServices( definition, servicesPath );
-        allPromises.push(servicesPromise);
-    }
-
-    return q.all( allPromises ).then( function() {
-        // save the definition when we're done
-        var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams : jive.tiles;
-        apiToUse.definitions.save( definition).execute( function() {
-            console.log("Done configuring", definition.name );
+        var r = fsexists(routesPath).then( function(exists) {
+            if ( exists ) {
+                return q.nfcall(fs.readdir, routesPath)
+                    // process the routes
+                    .then( function(routesToAdd) {
+                        return addTileRoutesToApp( app, { "routePath" : routesPath, "routes":routesToAdd, "currentTile":tile} )
+                });
+            }
         });
-    });
+
+        promises.push(r);
+
+        var s = fsexists(servicesPath).then( function(exists) {
+            if ( exists ) {
+                return processServices( definition, servicesPath );
+            }
+        });
+
+        promises.push(s);
+
+        var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams.definitions : jive.tiles.definitions;
+
+        return q.all(promises).then( jive.util.makePromise(apiToUse.save(definition).execute).then( function() {
+            console.log("Done configuring", definition.name );
+        }));
+    } )
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
