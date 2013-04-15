@@ -27,8 +27,6 @@ var dev = require('./dev');
 
 // xxx todo - add oauth2 support end points here
 
-// xxx todo - add authz checking here
-
 exports.registration = function( req, res ) {
     var conf = jive.config.fetch();
     var clientId = conf.clientId;
