@@ -52,21 +52,21 @@ exports.registration = function( req, res ) {
     }
 
     var registerer = function( scope, instanceLibrary ) {
-        instanceLibrary.findByScope(guid).execute( function(tileInstance) {
+        instanceLibrary.findByScope(guid).then( function(tileInstance) {
             // the instance exists
             // update the config only
             if ( tileInstance ) {
                 // update the config
                 tileInstance['config'] = config;
 
-                instanceLibrary.save(tileInstance).execute(function() {
+                instanceLibrary.save(tileInstance).then(function() {
                     tileRegistry.emit("updateInstance." + name, tileInstance);
                 });
             } else {
-                instanceLibrary.register(clientId, url, config, name, code).execute(
+                instanceLibrary.register(clientId, url, config, name, code).then(
                     function( tileInstance ) {
                         console.log("registered instance", tileInstance );
-                        instanceLibrary.save(tileInstance).execute(function() {
+                        instanceLibrary.save(tileInstance).then(function() {
                             tileRegistry.emit("newInstance." + name, tileInstance);
                         });
                     }
@@ -77,14 +77,14 @@ exports.registration = function( req, res ) {
     };
 
     // try tiles
-    jive.tiles.definitions.findByTileName( name).execute( function( found ) {
+    jive.tiles.definitions.findByTileName( name).then( function( found ) {
         if ( found ) {
             registerer(guid, jive.tiles);
         }
     });
 
     // try extstreams
-    jive.extstreams.definitions.findByTileName( name).execute( function( found ) {
+    jive.extstreams.definitions.findByTileName( name).then( function( found ) {
         if ( found ) {
             registerer(guid, jive.extstreams);
         }

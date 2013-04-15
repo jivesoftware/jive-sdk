@@ -14,6 +14,8 @@
  *    limitations under the License.
  */
 
+var q = require('q');
+
 /**
  * New instances of this module will separate state from every other instance.
  */
@@ -58,67 +60,70 @@ module.exports = function() {
 
     return {
         /**
-         * Save the provided data in a named collection, and invoke the callback
+         * Save the provided data in a named collection
          * @param collectionID
          * @param key
          * @param data
-         * @param callback
          */
-        save: function( collectionID, key, data, callback) {
-            var collection = getCollection(collectionID);
-            collection[key] = data;
-
-            callback( data );
+        save: function( collectionID, key, data) {
+            return q.fcall( function () {
+                var collection = getCollection(collectionID);
+                collection[key] = data;
+                return data;
+            });
         },
 
         /**
-         * Remove a piece of data from a name collection, based to the provided key, and invoke the callback
-         * when done.
+         * Remove a piece of data from a name collection, based to the provided key and return a promise
+         * that returns removed items when done.
          * @param collectionID
          * @param key
-         * @param callback
          */
-        remove: function( collectionID, key, callback ) {
-            var collection = getCollection(collectionID );
-            delete collection[key];
-
-            callback();
+        remove: function( collectionID, key ) {
+            return q.fcall( function () {
+                var collection = getCollection(collectionID );
+                var removed = collection[key];
+                delete collection[key];
+                return removed;
+            });
         },
 
         /**
-         * Retrieve a piece of data from a named collection, based on the criteria, and invoke the callback
-         * with an array of the results when done.
+         * Retrieve a piece of data from a named collection, based on the criteria, and returns a promise
+         * that contains found items when done.
          * @param collectionID
          * @param keyValues
-         * @param callback
          */
-        find: function( collectionID, keyValues, callback ) {
-            var collectionItems = [];
-            var collection = getCollection(collectionID );
-            var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
+        find: function( collectionID, keyValues ) {
+            return q.fcall( function() {
 
-            for (var colKey in collection) {
-                if (collection.hasOwnProperty(colKey)) {
+                var collectionItems = [];
+                var collection = getCollection(collectionID );
+                var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
 
-                    var entryToInspect = collection[colKey];
-                    var match = true;
-                    if ( findKeys ) {
-                        for ( var i in findKeys ) {
-                            var findKey = findKeys[i];
-                            if ( entryToInspect[ findKey ] !== keyValues[ findKey ] ) {
-                                match = false;
-                                break;
+                for (var colKey in collection) {
+                    if (collection.hasOwnProperty(colKey)) {
+
+                        var entryToInspect = collection[colKey];
+                        var match = true;
+                        if ( findKeys ) {
+                            for ( var i in findKeys ) {
+                                var findKey = findKeys[i];
+                                if ( entryToInspect[ findKey ] !== keyValues[ findKey ] ) {
+                                    match = false;
+                                    break;
+                                }
                             }
                         }
-                    }
 
-                    if ( match ) {
-                        collectionItems.push( collection[colKey] );
+                        if ( match ) {
+                            collectionItems.push( collection[colKey] );
+                        }
                     }
                 }
-            }
 
-            callback( collectionItems );
+                return collectionItems;
+            });
         }
     };
 

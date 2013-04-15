@@ -156,7 +156,7 @@ function configureOneDefinitionDir( app, definitionDir ) {
                 return definition;
             }).then( function( definition ) {
                 var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams.definitions : jive.tiles.definitions;
-                return jive.util.makePromise(apiToUse.save(definition).execute);
+                return apiToUse.save(definition);
             });
         }
     });

@@ -14,6 +14,7 @@
  *    limitations under the License.
  */
 
+var q = require('q');
 var jive = require('../api');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,42 +30,43 @@ function lazyInit() {
     if ( !persistenceListener ) {
         persistenceListener = jive.setup.options['persistence'] || new jive.persistence.file();
     }
+    return persistenceListener;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Public
 
 /**
- * Save data under a key within a named collection, and invoke callback when its done.
+ * Save data under a key within a named collection, and return a promise.
  * @param collectionID
  * @param key
  * @param data
- * @param callback
  */
-exports.save = function (collectionID, key, data, callback) {
-    lazyInit();
-    persistenceListener.save(collectionID, key, data, callback);
+exports.save = function (collectionID, key, data) {
+    return q.fcall(lazyInit).then( function( persistenceListener) {
+        return persistenceListener.save(collectionID, key, data ) }
+    );
 };
 
 /**
  * Look up a record from within a named collection using key-value pair criteria, and return
- * the resulting array when its done.
+ * the a promise that will return the resulting array when its done.
  * @param collectionID String
  * @param criteria A JSON key-value structure, eg. { "style": "LIST", "name" : "samplelist" }
- * @param callback Expects a parameter called results eg. function( results ) {..}
  */
-exports.find = function (collectionID, criteria, callback) {
-    lazyInit();
-    persistenceListener.find(collectionID, criteria, callback);
+exports.find = function (collectionID, criteria) {
+    return q.fcall(lazyInit).then( function( persistenceListener) {
+        return persistenceListener.find(collectionID, criteria ) }
+    );
 };
 
 /**
- * Remove a record by key from a named collection, and invoke the callback when done.
+ * Remove a record by key from a named collection, and return a promise containing removed items when done.
  * @param collectionID string
  * @param key String
- * @param callback expects no arguments
  */
-exports.remove = function (collectionID, key, callback) {
-    lazyInit();
-    persistenceListener.remove(collectionID, key, callback);
+exports.remove = function (collectionID, key) {
+    return q.fcall(lazyInit).then( function( persistenceListener) {
+        return persistenceListener.remove(collectionID, key) }
+    );
 };

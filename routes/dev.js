@@ -31,30 +31,22 @@ var mustache = require('mustache');
  * @param res
  */
 exports.tiles = function(req, res){
-
-    var allDefinitions = [];
-
-    function makePromise(execute) {
-        var deferred = q.defer();
-        execute( function( results ) {
-            allDefinitions = allDefinitions.concat( results );
-            deferred.resolve();
+    var finalizeRequest = function(allDefinitions) {
+        var toReturn = [];
+        allDefinitions.forEach( function(batch) {
+            toReturn = toReturn.concat( batch );
         });
 
-        return deferred.promise;
-    }
-
-    var finalize = function() {
         var conf = jive.setup.options;
-        var processed = getProcessed(conf, allDefinitions);
+        var processed = getProcessed(conf, toReturn);
         var body = JSON.stringify(processed, null, 4);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(body);
     };
 
-    makePromise(jive.tiles.definitions.findAll().execute).then(
-    makePromise(jive.extstreams.definitions.findAll().execute )).then( finalize );
+    q.all( [ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ] )
+        .then( finalizeRequest );
 };
 
 /**
@@ -256,14 +248,14 @@ exports.installTiles = function( req, res ) {
     };
 
     var allResponses = [];
-    jive.tiles.definitions.findAll().execute( function( tiles ) {
+    jive.tiles.definitions.findAll().then( function( tiles ) {
 
         installer( tiles, function(responses) {
             if ( responses ) {
                 allResponses = typeof responses === 'array' ? responses : [responses];
             }
 
-            jive.extstreams.definitions.findAll().execute( function(extstreams) {
+            jive.extstreams.definitions.findAll().then( function(extstreams) {
 
                 installer( extstreams, function(responses) {
 

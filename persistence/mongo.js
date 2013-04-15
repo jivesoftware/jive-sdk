@@ -15,6 +15,7 @@
  */
 
 
+var q = require('q');
 var jive = require('../api');
 
 /**
@@ -74,63 +75,71 @@ module.exports = function(databaseUrl) {
         // Public
 
         /**
-         * Save the provided data in a named collection, and invoke the callback
-         * when done.
+         * Save the provided data in a named collection, and return promise
          * @param collectionID
          * @param key
          * @param data
-         * @param callback
          */
-        save : function( collectionID, key, data, callback) {
-        var collection = getCollection(collectionID);
+        save : function( collectionID, key, data) {
+            var deferred = q.defer();
+
+            var collection = getCollection(collectionID);
             collection.save( data, function(err, saved ) {
                 if( err || !saved ) throw err;
                 else {
-                    callback( data );
+                    deferred.resolve(data);
                 }
             } );
+
+            return deferred.promise;
         },
 
         /**
-         * Retrieve a piece of data from a named collection, based on the criteria, and invoke the callback
+         * Retrieve a piece of data from a named collection, based on the criteria, return promise
          * with an array of the results when done.
          * @param collectionID
          * @param criteria
-         * @param callback
          */
-        find : function( collectionID, criteria, callback ) {
+        find : function( collectionID, criteria) {
+            var deferred = q.defer();
+
             var collection = getCollection(collectionID);
             if (!collection ) {
-                callback(null);
+                deferred.resolve(null);
                 return;
             }
 
             collection.find(criteria, function(err, items) {
                 if( err || !items || items.length < 1) {
-                    callback([]);
+                    deferred.resolve();
                     return;
                 }
-                callback( items );
+                deferred.resolve(items);
             });
+
+            return deferred.promise;
         },
 
         /**
-         * Remove a piece of data from a name collection, based to the provided key, and invoke the callback
-         * when done.
+         * Remove a piece of data from a name collection, based to the provided key, return promise
+         * containing removed items when done.f
          * @param collectionID
          * @param key
-         * @param callback
          */
-        remove : function( collectionID, key, callback ) {
+        remove : function( collectionID, key ) {
+            var deferred = q.defer();
+
             var collection = getCollection(collectionID);
             if (!collection ) {
-                callback();
+                deferred.resolve();
                 return;
             }
 
             collection.remove({"id": key}, function(err, items) {
-                callback();
+                deferred.resolve(items);
             });
+
+            return deferred.promise;
         }
 
     };

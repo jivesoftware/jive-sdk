@@ -15,6 +15,7 @@
  */
 
 var fs = require('fs');
+var q = require('q');
 
 module.exports = function() {
 
@@ -182,25 +183,36 @@ module.exports = function() {
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Public
 
-        save : function( collectionID, key, data, callback) {
+        save : function( collectionID, key, data) {
+            var deferred = q.defer();
+
             getCacheEntry(collectionID, function(collection, entry) {
                 collection[key] = data;
                 entry.setDirty(true);
                 entry.add(); // set as most recently used
-                callback( data );
+                deferred.resolve( data );
             });
+
+            return deferred.promise;
         },
 
-        remove : function( collectionID, key, callback ) {
+        remove : function( collectionID, key ) {
+            var deferred = q.defer();
+
             getCacheEntry(collectionID, function(collection, entry) {
+                var removed = collection[key];
                 delete collection[key];
                 entry.setDirty(true);
                 entry.add(); // set as most recently used
-                callback();
+                deferred.resolve(removed);
             });
+
+            return deferred.promise;
         },
 
-        find : function( collectionID, keyValues, callback ) {
+        find : function( collectionID, keyValues ) {
+
+            var deferred = q.defer();
 
             getCacheEntry(collectionID, function(collection) {
                 var collectionItems = [];
@@ -227,8 +239,10 @@ module.exports = function() {
                     }
                 }
 
-                callback( collectionItems );
+                deferred.resolve( collectionItems );
             });
+
+            return deferred.promise;
         }
 
     };
