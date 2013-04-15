@@ -60,7 +60,7 @@ var loadConfiguration = function (app, rootDir) {
                 ' in your configuration file (' + configFileToUse + ').';
         }
 
-        jive.config.save( jiveConfig );
+        jive.setup.init( jiveConfig );
         app.emit('event:jiveConfigurationReady', jiveConfig);
     });
 };

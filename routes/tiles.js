@@ -28,7 +28,7 @@ var dev = require('./dev');
 // xxx todo - add oauth2 support end points here
 
 exports.registration = function( req, res ) {
-    var conf = jive.config.fetch();
+    var conf = jive.setup.options;
     var clientId = conf.clientId;
     var url = req.body['url'];
     var guid = req.body['guid'];

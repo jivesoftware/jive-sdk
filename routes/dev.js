@@ -45,7 +45,7 @@ exports.tiles = function(req, res){
     }
 
     var finalize = function() {
-        var conf = jive.config.fetch();
+        var conf = jive.setup.options;
         var processed = getProcessed(conf, allDefinitions);
         var body = JSON.stringify(processed, null, 4);
 
@@ -82,7 +82,7 @@ exports.requestCredentials = function( req, res ) {
 
 // xxx todo this needs to be cleaned up -- and it might now belong here
 function getProcessed(conf, all) {
-    var host = conf.baseUrl + ':' + conf.port;
+    var host = conf.clientUrl + ':' + conf.port;
     var processed = [];
 
     all.forEach( function( tile ) {
@@ -159,7 +159,7 @@ function getProcessed(conf, all) {
  * @param res
  */
 exports.installTiles = function( req, res ) {
-    var conf = jive.config.fetch();
+    var conf = jive.setup.options;
 
     var url_parts = url.parse(req.url, true);
     var query = url_parts.query;

@@ -6,12 +6,12 @@ var Mocha = require('mocha'),
 
 var configuration = {
     'port' : 8093,
-    'baseUrl' : 'http://localhost',
+    'clientUrl' : 'http://localhost',
     'clientId' : '766t8osmgixp87ypdbbvmu637k98fzvc',
     'persistence' : new jive.persistence.memory()
 };
 
-jive.config.save( configuration );
+jive.setup.init( configuration );
 
 var serverChild = require('child_process').fork('./test-server',  {execArgv: []});
 
