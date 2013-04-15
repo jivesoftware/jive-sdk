@@ -137,26 +137,24 @@ function configureOneTileDir( app, tileDir ) {
     var definition = JSON.parse( fs.readFileSync( definitionPath, 'utf8' ) );
         definition.id = definition.id === '{{{tile_id}}}' ? null : definition.id;
 
-    var routesPromise = q.nfcall(fs.readdir, routesPath)
-    // process the routes
-    .then( function(routesToAdd) {
-        return addTileRoutesToApp( app, { "routePath" : routesPath, "routes":routesToAdd, "currentTile":tile} )
-    });
-
-    var servicesPromise = processServices( definition, servicesPath );
-
     var allPromises = [];
-    if ( routesPromise ) {
+
+    if ( fs.existsSync(routesPath ) ) {
+        var routesPromise = q.nfcall(fs.readdir, routesPath)
+            // process the routes
+            .then( function(routesToAdd) {
+                return addTileRoutesToApp( app, { "routePath" : routesPath, "routes":routesToAdd, "currentTile":tile} )
+            });
+
         allPromises.push(routesPromise);
     }
 
-    if ( servicesPromise ) {
+    if ( fs.existsSync(servicesPath ) ) {
+        var servicesPromise = processServices( definition, servicesPath );
         allPromises.push(servicesPromise);
     }
 
-    var masterPromise = q.all( allPromises  );
-
-    return masterPromise.then( function(gg) {
+    return q.all( allPromises ).then( function() {
         // save the definition when we're done
         var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams : jive.tiles;
         apiToUse.definitions.save( definition).execute( function() {
