@@ -28,15 +28,15 @@ var isValidFile = function(file ) {
 /**
  * Returns a promise when defintion tasks, life cycle events,
  * and other things in the service directory have been processed.
- * @param definition
+ * @param definitionName
  * @param svcDir
  * @return {*}
  */
-function processServices( definition, svcDir ) {
+function processServices( definitionName, svcDir ) {
     /////////////////////////////////////////////////////
-    // apply tile specific tasks, life cycle events, etc.
+    // apply definition specific tasks, life cycle events, etc.
 
-    return q.nfcall(fs.readdir, svcDir ).then( function(tilesDirContents) {
+    return q.nfcall(fs.readdir, svcDir ).then( function(dirContents) {
 
         var tasks = [];
         var events = [];
@@ -45,7 +45,7 @@ function processServices( definition, svcDir ) {
         events = events.concat(jive.events.baseEvents);
 
         // analyze the directory contents, picking up tasks and events
-        tilesDirContents.forEach(function(item) {
+        dirContents.forEach(function(item) {
             if ( isValidFile(item) ) {
                 var theFile = svcDir + '/' + item;
                 var target = require(theFile);
@@ -60,7 +60,7 @@ function processServices( definition, svcDir ) {
                     }
 
                     // enforce a standard key
-                    taskToAdd.setKey( definition.name  + '.' + item + "." + taskToAdd.getInterval() );
+                    taskToAdd.setKey( definitionName  + '.' + item + "." + taskToAdd.getInterval() );
                     tasks.push( taskToAdd );
                 }
 
@@ -73,7 +73,7 @@ function processServices( definition, svcDir ) {
 
         // add the event handlers
         events.forEach( function( handlerInfo ) {
-            jive.extstreams.definitions.addEventHandler( definition.name, handlerInfo['event'], handlerInfo['handler'] );
+            jive.extstreams.definitions.addEventHandler( definitionName, handlerInfo['event'], handlerInfo['handler'] );
         });
 
         // add the tasks
@@ -82,32 +82,32 @@ function processServices( definition, svcDir ) {
 }
 
 /**
- * Returns a promise when all the tile routes have been calculated for a particular tile directory.
- * @param tileInfo
+ * Returns a promise when all the routes have been calculated for a particular definition directory.
+ * @param definitionInfo
  * @return {*}
  */
-function addTileRoutesToApp(app, tileInfo){
+function addDefinitionRoutesToApp(app, definitionInfo){
     var promises = [];
 
-    tileInfo.routes.forEach( function( currentRoute ) {
+    definitionInfo.routes.forEach( function( currentRoute ) {
         if ( !isValidFile(currentRoute) ) {
             return;
         }
 
-        //Look in the routes directory for the current tile.
+        //Look in the routes directory for the current definition.
         //for each file that is in there that matches an http verb, add it to the app as a route
-        var currentTileDir = tileInfo.routePath + '/' + currentRoute;
-        promises.push(q.nfcall(fs.readdir, currentTileDir).then( function(verbDirs){
+        var currentDefinitionDir = definitionInfo.routePath + '/' + currentRoute;
+        promises.push(q.nfcall(fs.readdir, currentDefinitionDir).then( function(verbDirs){
             verbDirs.forEach(function(httpVerbFile){
                 if ( !isValidFile(httpVerbFile) ) {
                     return;
                 }
 
                 var httpVerb = httpVerbFile.substring(0, httpVerbFile.length - 3);
-                var routeHandlerPath = (currentTileDir + '/' + httpVerb);
-                var routeContextPath = ('/' + tileInfo.currentTile + '/' + currentRoute);
+                var routeHandlerPath = (currentDefinitionDir + '/' + httpVerb);
+                var routeContextPath = ('/' + definitionInfo.name + '/' + currentRoute);
 
-                console.log('Tile route added for ', tileInfo.currentTile, ': ', routeContextPath, ' -> ', routeHandlerPath );
+                console.log('Definition route added for ', definitionInfo.name, ': ', routeContextPath, ' -> ', routeHandlerPath );
                 var routeHandler = require(routeHandlerPath);
                 if (typeof app[httpVerb] == 'function') {
                     app[httpVerb](routeContextPath, routeHandler.route);
@@ -131,79 +131,93 @@ function fsexists(path) {
 }
 
 /**
- * Returns a promise for detecting when the tile directory has been autowired.
+ * Returns a promise for detecting when the definition directory has been autowired.
+ * Assumes that the definintion directory is exactly the same as the definition name, eg.:
+ *
+ * /tiles/my-twitter-definition
+ *
+ * In this case the definition name is my-twitter-definition.
  * @param app
- * @param tileDir
+ * @param definitionDir
  */
-function configureOneTileDir( app, tileDir ) {
-    var tile = tileDir.substring( tileDir.lastIndexOf('/') + 1, tileDir.length ); /// xxx todo this might not always work!
-    var definitionPath = tileDir + '/definition.json';
-    var servicesPath = tileDir + '/services';
-    var routesPath = tileDir + '/routes';
+function configureOneDefinitionDir( app, definitionDir ) {
 
-    return q.nfcall( fs.readFile, definitionPath).then( function(data ) {
-        var definition = JSON.parse(data);
-        definition.id = definition.id === '{{{tile_id}}}' ? null : definition.id;
-        return definition;
-    }).then( function(definition) {
+    var definitionName = definitionDir.substring( definitionDir.lastIndexOf('/') + 1, definitionDir.length ); /// xxx todo this might not always work!
+    var definitionPath = definitionDir + '/definition.json';
+    var servicesPath = definitionDir + '/services';
+    var routesPath = definitionDir + '/routes';
 
+    // if a definition exists, read it from disk and save it
+    var definitionPromise = fsexists(definitionPath).then( function(exists) {
+        if ( exists ) {
+            return q.nfcall( fs.readFile, definitionPath).then( function(data ) {
+                var definition = JSON.parse(data);
+                definition.id = definition.id === '{{{tile_id}}}' ? null : definition.id;
+                return definition;
+            }).then( function( definition ) {
+                var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams.definitions : jive.tiles.definitions;
+                return jive.util.makePromise(apiToUse.save(definition).execute);
+            });
+        }
+    });
+
+    // wire up service and routes
+    return definitionPromise.then( function() {
         var promises = [];
 
-        var r = fsexists(routesPath).then( function(exists) {
+        promises.push( fsexists(routesPath).then( function(exists) {
             if ( exists ) {
                 return q.nfcall(fs.readdir, routesPath)
                     // process the routes
                     .then( function(routesToAdd) {
-                        return addTileRoutesToApp( app, { "routePath" : routesPath, "routes":routesToAdd, "currentTile":tile} )
+                        return addDefinitionRoutesToApp( app, { "routePath" : routesPath, "routes":routesToAdd, "name":definitionName} )
                 });
             }
-        });
-
-        promises.push(r);
-
-        var s = fsexists(servicesPath).then( function(exists) {
-            if ( exists ) {
-                return processServices( definition, servicesPath );
-            }
-        });
-
-        promises.push(s);
-
-        var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams.definitions : jive.tiles.definitions;
-
-        return q.all(promises).then( jive.util.makePromise(apiToUse.save(definition).execute).then( function() {
-            console.log("Done configuring", definition.name );
         }));
-    } )
+
+        promises.push( fsexists(servicesPath).then( function(exists) {
+            if ( exists ) {
+                return processServices( definitionName, servicesPath );
+            }
+        }));
+
+        return q.all(promises);
+    }).fail(function(f) {
+        console.log(f);
+    });
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
-exports.configureOneTileDir = configureOneTileDir;
+/**
+ * Autowires a given definition by directory:
+ * - if a definitions.json file is discovered, saves the definition
+ * - if a services directory is discovered, all files are are inspected for exported tasks and event handlers
+ * - if a routes directory is discovered, routes are automatically added to the app for each one
+ * @type {Function}
+ */
+exports.configureOneDefinitionDir = configureOneDefinitionDir;
 
 /**
- * Autowires each tile discovered in the provided tiles directory.
+ * Autowires each definition discovered in the provided definitions directory.
  * @param app
- * @param tilesDir
+ * @param definitionsDir
  * @return {*}
  */
-exports.configureTilesDir = function( app, tilesDir, callback ) {
-    //Find the tiles by walking the tileDir tree
-    return q.nfcall(fs.readdir, tilesDir).then(function(tilesDirContents){
+exports.configureDefinitionsDir = function( app, definitionsDir, callback ) {
+    return q.nfcall(fs.readdir, definitionsDir).then(function(dirContents){
         var proms = [];
-        tilesDirContents.forEach(function(item) {
+        dirContents.forEach(function(item) {
             if ( !isValidFile(item) ) {
                 return;
             }
-            var tileDirPath = tilesDir + '/' + item ;
-            proms.push(configureOneTileDir(app, tileDirPath));
+            var dirPath = definitionsDir + '/' + item ;
+            proms.push(configureOneDefinitionDir(app, dirPath));
         });
 
         return q.all(proms).then(function(){
-            //We've added all the routes for the tiles and actions throw the event that indicates we are done
-            console.log("Finished tiles directory config");
-            app.emit('event:jiveTileConfigurationComplete', app);
+            console.log("Finished definitions directory config");
             if ( callback ) {
                 callback();
             }

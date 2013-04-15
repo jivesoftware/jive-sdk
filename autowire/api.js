@@ -16,8 +16,8 @@
 
 /**
  * This is the entry point into the autowire api, which uses the underlying SDK api
- * to automagically configure your tiles by either (1) providing a base directory
- * of your tiles, or (2) providing a directory for one of the tiles to configure.
+ * to automagically configure your definitions by either (1) providing a base directory
+ * of your tiles, or (2) configure just one definition by its directory.
  */
 
 var q = require('q');
@@ -34,7 +34,7 @@ exports.all = function( app, rootDir ) {
 
     bootstrap.start( app, rootDir, function() {
         // when bootstrapping is done
-        tileConfigurator.configureTilesDir( app, rootDir + '/tiles', function() {
+        tileConfigurator.configureDefinitionsDir( app, rootDir + '/tiles', function() {
             // once tile configuration is done, emit the all done signal
             deferred.resolve();
             app.emit('event:jiveConfigurationComplete');
@@ -45,7 +45,7 @@ exports.all = function( app, rootDir ) {
 };
 
 /**
- * Autowire a single tile root diretory. The expected structure under that directory looks like
+ * Autowire a single definition via its directory. The expected structure under that directory looks like
  * this:
  * tileDir/
  *   /serivces
@@ -60,14 +60,14 @@ exports.all = function( app, rootDir ) {
  *
  *   todo - much more detail here
  * @param app
+ * @param rootDir Root directory of your app
  * @param tileDir
- * @param callback
  */
 exports.one = function( app, rootDir, tileDir ) {
     var deferred = q.defer();
     bootstrap.start( app, rootDir, function() {
         // when bootstrapping is done
-        var promise = tileConfigurator.configureOneTileDir( app, tileDir );
+        var promise = tileConfigurator.configureOneDefinitionDir( app, tileDir );
         promise.then( function() {
             // once tile configuration is done, emit the all done signal
             deferred.resolve();
