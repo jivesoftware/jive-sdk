@@ -122,7 +122,8 @@ function addTileRoutesToApp(app, tileInfo){
 
 function fsexists(path) {
     var deferred = q.defer();
-    fs.exists( path, function(exists ) {
+    var method = fs.exists ? fs.exists : require('path').exists;
+    method( path, function(exists ) {
         deferred.resolve(exists);
     });
 
