@@ -21,9 +21,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // persistence
 exports.persistence = {
-    'file' : require('./persistence/file'),
-    'memory' : require('./persistence/memory'),
-    'mongo' : require('./persistence/mongo')
+    'file' : require('./lib/persistence/file'),
+    'memory' : require('./lib/persistence/memory'),
+    'mongo' : require('./lib/persistence/mongo')
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
