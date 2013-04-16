@@ -104,30 +104,35 @@ exports.init = function(_app, options, definitionsToAutowire ) {
     promises.push( initialPromise );
 
     if ( definitionsToAutowire  ) {
-        definitionsToAutowire.forEach( function( definition ) {
-            promises.push( exports.autowireDefinition(definition ) );
-        });
+        promises.push( exports.autowire(definitionsToAutowire ) );
     }
 
     return q.all(promises);
 };
 
-
 /**
+ *
  */
-exports.autowire = function(tileRootDirectory) {
-    return definitionConfigurator.setupAllDefinitions(app, _dir( tileRootDirectory, '/tiles') );
-};
+exports.autowire = function(definitionsToAutowire) {
+    if( definitionsToAutowire ) {
 
-/**
- * Autowire a single definition via its directory
- * @param definitionName
- * @param directory
- */
-exports.autowireDefinition = function( definitionName, directory ) {
-    return definitionConfigurator.setupOneDefinition(
-        app, _dir(directory, '/tiles/' + definitionName), definitionName
-    );
+        if (definitionsToAutowire['forEach'] ) {
+            var promises = [];
+            definitionsToAutowire.forEach( function( definition ) {
+                promises.push( definitionConfigurator.setupOneDefinition(
+                    app, _dir( '/tiles/' + definition), definition
+                ) );
+            });
+            return q.all(promises);
+        } else {
+            return definitionConfigurator.setupOneDefinition(
+                app, _dir( '/tiles/' + definitionsToAutowire), definitionsToAutowire
+            );
+        }
+    } else {
+        // assume autowiring everything
+        return definitionConfigurator.setupAllDefinitions(app, _dir( '/tiles', '/tiles') );
+    }
 };
 
 /**

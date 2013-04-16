@@ -16,10 +16,13 @@
 
 var fs = require('fs'),
     q  = require('q'),
+    path  = require('path'),
     jive = require('../api');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Private
+
+var legalRouteVerbs = ['get', 'put', 'delete', 'post' ];
 
 function isValidFile(file ) {
     return !(file.indexOf('.') == 0)
@@ -94,48 +97,74 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
     });
 };
 
+var processCandidateRoutes = function(app, httpVerb, definitionName, routeHandlerPath, _routeContextPath) {
+    var legalVerbFile = legalRouteVerbs.indexOf(httpVerb) > -1;
+    var routeHandler = require(routeHandlerPath);
+
+    for ( var key in routeHandler ) {
+        if ( !routeHandler.hasOwnProperty(key) ) {
+            continue;
+        }
+        var routeContextPath = _routeContextPath;
+
+        var added = false;
+        var candidate = routeHandler[key];
+        if ( typeof candidate === 'function' && key === 'route' && legalVerbFile ) {
+            // if there is a function called 'route' and this is a legal verb file, register it
+            app[httpVerb](routeContextPath, routeHandler.route);
+            added = true;
+        } else {
+            // if its a valid route descriptor object, analyze it
+            if ( typeof candidate == 'object' && candidate['verb'] && candidate['route'] ) {
+                // its a valid handler
+                var path =  candidate['path'] || key;
+                routeContextPath += "/" + path;
+                httpVerb = candidate['verb'];
+                app[httpVerb](routeContextPath, candidate['route']);
+                added = true;
+            }
+        }
+
+        if ( added ) {
+            console.log('Route added for', definitionName, ':',
+                httpVerb.toUpperCase(), routeContextPath, ' -> ',
+                routeHandlerPath + ".js" );
+        }
+    }
+};
+
 /**
  * Returns a promise when all the routes have been calculated for a particular definition directory.
- * @param definitionInfo
- * @return {*}
  */
-exports.setupDefinitionRoutes = function(app, definitionName, routesDirPath){
+exports.setupDefinitionRoutes = function(app, definitionName, routesPath, root){
+    if ( !root ) {
+        root = routesPath;
+    }
 
-    return q.nfcall(fs.readdir, routesDirPath)
-        // process the routes
-    .then( function( routesToAdd ) {
+    return q.nfcall( fs.stat, routesPath ).then( function(stat) {
+        if ( stat.isDirectory() ) {
+            return q.nfcall(fs.readdir, routesPath)
+                // process the routes
+                .then( function( subItems ) {
+                    var promises = [];
+                    subItems.forEach( function( subItem ) {
+                        promises.push( exports.setupDefinitionRoutes(app, definitionName, routesPath + "/" + subItem, root ) );
+                    });
 
-        var promises = [];
-
-        routesToAdd.forEach( function( currentRoute ) {
-            if ( !isValidFile(currentRoute) ) {
-                return;
-            }
-
-            //Look in the routes directory for the current definition.
-            //for each file that is in there that matches an http verb, add it to the app as a route
-            var currentDefinitionDir = routesDirPath + '/' + currentRoute;
-            promises.push(q.nfcall(fs.readdir, currentDefinitionDir).then( function(verbDirs){
-                verbDirs.forEach(function(httpVerbFile){
-                    if ( !isValidFile(httpVerbFile) ) {
-                        return;
-                    }
-
-                    var httpVerb = httpVerbFile.substring(0, httpVerbFile.length - 3);
-                    var routeHandlerPath = (currentDefinitionDir + '/' + httpVerb);
-                    var routeContextPath = ('/' + definitionName + '/' + currentRoute);
-
-                    console.log('Definition route added for ', definitionName, ': ', routeContextPath, ' -> ', routeHandlerPath );
-                    var routeHandler = require(routeHandlerPath);
-                    if (typeof app[httpVerb] == 'function') {
-                        app[httpVerb](routeContextPath, routeHandler.route);
-                    }
+                    return q.all( promises );
                 });
-            }));
-        });
+        } else if ( stat.isFile() ) {
+            var routeFile = path.basename( routesPath );
+            var currentDefinitionDir = path.dirname( routesPath );
+            if ( isValidFile(routeFile) ) {
 
-        // convert the collected promises into a single promise that returns when they're all successfull
-        return q.all(promises);
+                var httpVerb = routeFile.substring(0, routeFile.length - 3).toLowerCase();
+                var routeHandlerPath = (currentDefinitionDir + '/' + httpVerb);
+                var routeContextPath = ('/' + definitionName + currentDefinitionDir.replace(root,''));
+
+                processCandidateRoutes(app, httpVerb, definitionName, routeHandlerPath, routeContextPath);
+            }
+        }
     });
 };
 
