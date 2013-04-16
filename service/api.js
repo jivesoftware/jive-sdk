@@ -19,7 +19,7 @@
 
 var q = require('q');
 var bootstrap = require('./bootstrap');
-var definitionConfigurator = require('./definitionConfigurator');
+var definitionConfigurator = require('./definitionSetup');
 
 var app;
 var rootDir;
