@@ -39,24 +39,15 @@ function startServer() {
         'port' : 8093,
         'clientUrl' : 'http://localhost',
         'clientId'      : '4mkgdszjkbzfjwgwsjnj0r5q1db9n0fh',
-        'clientSecret'  : 'rm93mbrpr8an2eajq439625vzg3xqp.MyvfefMHZlEv4E49WH6AC90cw2U.1.s',
-        'persistence' : new jive.persistence.memory()
+        'clientSecret'  : 'rm93mbrpr8an2eajq439625vzg3xqp.MyvfefMHZlEv4E49WH6AC90cw2U.1.s'
     };
 
-    jive.service.init( app, configuration).then( jive.service.start )
-        .then( function() {
-
-            var server = http.createServer(app).listen(configuration.port, function () {
-                console.log("Test server listening on port " + configuration.port);
-                if (process.send) {
-                    process.send( {serverStarted: true});
-                }
-            } );
-
-        }).fail( function(e) {
-            console.log(e);
-            process.exit(-1);
-        });
+    var server = http.createServer(app).listen(configuration.port, function () {
+        console.log("Test server listening on port " + configuration.port);
+        if (process.send) {
+            process.send( {serverStarted: true});
+        }
+    } );
 }
 
 exports.server = function() {

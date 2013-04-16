@@ -8,11 +8,10 @@ var configuration = {
     'port' : 8093,
     'clientUrl' : 'http://localhost',
     'clientId'      : '4mkgdszjkbzfjwgwsjnj0r5q1db9n0fh',
-    'clientSecret'  : 'rm93mbrpr8an2eajq439625vzg3xqp.MyvfefMHZlEv4E49WH6AC90cw2U.1.s',
-    'persistence' : new jive.persistence.memory()
+    'clientSecret'  : 'rm93mbrpr8an2eajq439625vzg3xqp.MyvfefMHZlEv4E49WH6AC90cw2U.1.s'
 };
 
-jive.service.init( null, configuration );
+jive.service.options = configuration;
 
 var serverChild = require('child_process').fork('./test-server',  {execArgv: []});
 

@@ -28,7 +28,7 @@ var persistenceListener = null;
  */
 function lazyInit() {
     if ( !persistenceListener ) {
-        persistenceListener = jive.service.options['persistence'] || new jive.persistence.file();
+        persistenceListener = jive.service.persistence || new jive.persistence.file();
     }
     return persistenceListener;
 }

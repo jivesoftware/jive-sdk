@@ -22,7 +22,7 @@ var bootstrap = require('./bootstrap');
 var definitionConfigurator = require('./definitionSetup');
 
 var app;
-var rootDir;
+var rootDir = process.cwd();
 
 var _dir = function(theDir, defaultDir ) {
     theDir = theDir || defaultDir;
@@ -43,14 +43,20 @@ var _dir = function(theDir, defaultDir ) {
 exports.options = {};
 
 /**
+ * @type {undefined}
+ */
+exports.persistence = undefined;
+
+/**
  * @param _app
  * @param options JSON or path
- * @param rootDir optional
+ * @param definitionsToAutowire optional arraylist of tile names under [app root]/tiles to autowire
  */
-exports.init = function(_app, options, _rootDir ) {
-    return q.fcall(function(){
-        app = _app;
-        rootDir = _rootDir || process.cwd();
+exports.init = function(_app, options, definitionsToAutowire ) {
+    app = _app;
+    rootDir =  rootDir || process.cwd();
+
+    var initialPromise = q.fcall(function(){
 
         // if no options are provided, then try getting them from
         // cmd line arguments, or from environemnt
@@ -80,6 +86,17 @@ exports.init = function(_app, options, _rootDir ) {
 
         exports.options = options;
     });
+
+    var promises = [];
+    promises.push( initialPromise );
+
+    if ( definitionsToAutowire  ) {
+        definitionsToAutowire.forEach( function( definition ) {
+            promises.push( exports.autowireDefinition(definition ) );
+        });
+    }
+
+    return q.all(promises);
 };
 
 

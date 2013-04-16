@@ -82,8 +82,6 @@ var loadConfiguration = function (optionsObjectOrFilePath) {
             // clientID and secret must be available at this point!
             throw 'Errors were found in ' +
                 ' in your configuration file (' + configFileToUse + '):\n' + errors;
-        } else {
-            console.log("Finished client config");
         }
 
         deferred.resolve(jiveConfig);
@@ -93,6 +91,12 @@ var loadConfiguration = function (optionsObjectOrFilePath) {
 };
 
 var configureApp = function (app, rootDir, config) {
+    if ( !app ) {
+        return q.fcall(function() {
+            console.log("Warning - app not specified.");
+        } );
+    }
+
     var p1 = q.defer();
     var p2 = q.defer();
 
@@ -107,19 +111,16 @@ var configureApp = function (app, rootDir, config) {
         app.set('rootDir', rootDir);
         app.set('port', config['port']);
 
-        console.log();
-        console.log('Configured global framework routes:');
+        console.log('Global framework routes:');
         app.post('/registration', jive.routes.registration);
 
         console.log("/registration");
-        console.log();
 
         p1.resolve();
     });
 
     app.configure( 'development', function () {
-        console.log();
-        console.log('Configured global dev framework routes:');
+        console.log('Global dev framework routes:');
 
         app.get('/tiles', jive.routes.tiles);
         app.get('/tilesInstall', jive.routes.installTiles);
@@ -128,7 +129,6 @@ var configureApp = function (app, rootDir, config) {
         console.log("/tiles");
         console.log("/tilesInstall");
         console.log("/requestCredentials");
-        console.log();
 
         p2.resolve();
     });
