@@ -1,8 +1,8 @@
 var jive = require('../../../jive-sdk'),
     assert = require('assert');
 
-var host = jive.setup.options['clientUrl'];
-var port = jive.setup.options['port'];
+var host = jive.service.options['clientUrl'];
+var port = jive.service.options['port'];
 var base = host + ":" + port;
 
 

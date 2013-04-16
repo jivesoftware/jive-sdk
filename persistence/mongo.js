@@ -33,7 +33,7 @@ function Mongo(app) {
 module.exports = function(databaseUrl) {
     // setup database url
     if ( !databaseUrl ) {
-        databaseUrl = jive.setup.options['databaeUrl'];
+        databaseUrl = jive.service.options['databaeUrl'];
     }
 
     if ( !databaseUrl ) {

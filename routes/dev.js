@@ -37,7 +37,7 @@ exports.tiles = function(req, res){
             toReturn = toReturn.concat( batch );
         });
 
-        var conf = jive.setup.options;
+        var conf = jive.service.options;
         var processed = getProcessed(conf, toReturn);
         var body = JSON.stringify(processed, null, 4);
 
@@ -125,7 +125,7 @@ function getProcessed(conf, all) {
             processedTile['client_id'] = conf.clientId;
         }
         if ( !processedTile['id'] ) {
-            processedTile['id'] = '{{{tile_id}}}';
+            processedTile['id'] = '{{{definition_id}}}';
         }
 
         processedTile.description += ' for ' + conf.clientId;
@@ -151,7 +151,7 @@ function getProcessed(conf, all) {
  * @param res
  */
 exports.installTiles = function( req, res ) {
-    var conf = jive.setup.options;
+    var conf = jive.service.options;
 
     var url_parts = url.parse(req.url, true);
     var query = url_parts.query;
