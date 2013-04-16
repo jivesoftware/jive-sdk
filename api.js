@@ -27,33 +27,25 @@ exports.persistence = {
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// setup
-exports.setup = require('./lib/setup');
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // external streams and tiles (instances and definitions)
 // eg. jive.tiles
 //     jive.tiles.definitions
 //     jive.extstreams
 //     jive.extstreams.definitions
 
-var eventRegistry = require( './tile/registry');
-
 var extstreamsDefinitions = require('./lib/extstreamsDefinitions');
 var extstreams = new (require('./lib/extstreams'));
 extstreams['definitions'] = new extstreamsDefinitions();
-extstreams['events'] = eventRegistry;
 exports.extstreams = extstreams;
 
 var tileDefinitions = require('./lib/tilesDefinitions');
 var tiles = new (require('./lib/tiles'));
 tiles['definitions'] = new tileDefinitions();
-tiles['events'] = eventRegistry;
 exports.tiles = tiles;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // events
-exports.events = eventRegistry;
+exports.events = require( './lib/events');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // tasks

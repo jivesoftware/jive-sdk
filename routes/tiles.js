@@ -20,7 +20,6 @@
  */
 
 var url = require('url');
-var tileRegistry = require('../tile/registry');
 var q = require('q');
 var jive = require("../api");
 var dev = require('./dev');
@@ -60,14 +59,14 @@ exports.registration = function( req, res ) {
                 tileInstance['config'] = config;
 
                 instanceLibrary.save(tileInstance).then(function() {
-                    tileRegistry.emit("updateInstance." + name, tileInstance);
+                    jive.events.emit("updateInstance." + name, tileInstance);
                 });
             } else {
                 instanceLibrary.register(clientId, url, config, name, code).then(
                     function( tileInstance ) {
                         console.log("registered instance", tileInstance );
                         instanceLibrary.save(tileInstance).then(function() {
-                            tileRegistry.emit("newInstance." + name, tileInstance);
+                            jive.events.emit("newInstance." + name, tileInstance);
                         });
                     }
                 );
