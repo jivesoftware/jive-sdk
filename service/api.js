@@ -17,6 +17,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Private
 
+var fs = require('fs');
 var q = require('q');
 var bootstrap = require('./bootstrap');
 var definitionConfigurator = require('./definitionSetup');
@@ -49,20 +50,25 @@ exports.persistence = undefined;
 
 /**
  * @param _app
- * @param options JSON or path
+ * @param options JSON or path to options file
  * @param definitionsToAutowire optional arraylist of tile names under [app root]/tiles to autowire
  */
 exports.init = function(_app, options, definitionsToAutowire ) {
     app = _app;
     rootDir =  rootDir || process.cwd();
 
-    var initialPromise = q.fcall(function(){
-
+    var initialPromise;
+    if ( typeof options === 'object' ) {
+        exports.options = options;
+        initialPromise = q.fcall( function() {
+            return options;
+        });
+    } else {
         // if no options are provided, then try getting them from
         // cmd line arguments, or from environemnt
         if ( !options ) {
             var configFileFromEnv = process.env['CONFIG_FILE'];
-            var configFilePathFromArgs;
+            var configFilePathFromArgs = undefined;
 
             process.argv.forEach(function (val, index, array) {
                 if ( val.indexOf('=') > -1 ) {
@@ -84,8 +90,15 @@ exports.init = function(_app, options, definitionsToAutowire ) {
             }
         }
 
-        exports.options = options;
-    });
+        initialPromise = q.nfcall( fs.readFile, options, 'utf8').then( function (data) {
+            console.log('Startup configuration from', options);
+            console.log(data);
+
+            var jiveConfig = JSON.parse(data);
+            exports.options = jiveConfig;
+            return jiveConfig;
+        });
+    }
 
     var promises = [];
     promises.push( initialPromise );

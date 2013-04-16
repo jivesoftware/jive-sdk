@@ -24,73 +24,33 @@ var express = require('express'),
 var alreadyBootstrapped = false;
 
 /**
- * Pass in one of the following:
- * - json object representing setup parameters
- *   or
- * - path to the file which contains the setup parameters
- * @param optionsObjectOrFilePath
- * @return {Function|promise|promise|Q.promise}
+ * @param options
  */
-var loadConfiguration = function (optionsObjectOrFilePath) {
-    var deferred = q.defer();
-
-    var checkConfig = function(config) {
-        var errors = [];
-        if ( !config['clientId'] ) {
-            errors.push('Setup parameter clientID is required. Please acquire this from Jive Software.');
-        }
-        if ( !config['clientSecret'] ) {
-            errors.push('Setup parameter clientSecret is required. Please acquire this from Jive Software.');
-        }
-        if ( !config['clientUrl'] ) {
-            errors.push('Setup parameter clientUrl is required');
-        }
-        return errors;
-    };
-
-    if ( typeof optionsObjectOrFilePath === 'object' ) {
-        return q.fcall( function() {
-            console.log('Startup configuration object');
-            console.log(optionsObjectOrFilePath);
-
-            var errors = checkConfig(optionsObjectOrFilePath);
-            if ( errors.length > 0 ) {
-                throw 'Errors were found in ' +
-                    ' in your configuration:\n' + errors + '.';
-            }
-            return optionsObjectOrFilePath;
-        });
-    }
-
-    // options must be path
-    if ( !optionsObjectOrFilePath ) {
+var validateServiceOptions = function (options) {
+    // options must be present
+    if ( !options ) {
         throw 'Undefined options';
     }
 
-    var configFileToUse = optionsObjectOrFilePath
+    var errors = [];
+    if ( !options['clientId'] ) {
+        errors.push('Setup parameter clientID is required. Please acquire this from Jive Software.');
+    }
+    if ( !options['clientSecret'] ) {
+        errors.push('Setup parameter clientSecret is required. Please acquire this from Jive Software.');
+    }
+    if ( !options['clientUrl'] ) {
+        errors.push('Setup parameter clientUrl is required');
+    }
 
-    fs.readFile(configFileToUse, 'utf8', function (err, data) {
-        if (err) throw err;
-
-        console.log('Startup configuration from',configFileToUse);
-        console.log(data);
-
-        var jiveConfig = JSON.parse(data);
-
-        var errors = checkConfig(jiveConfig);
-        if ( errors.length > 0 ) {
-            // clientID and secret must be available at this point!
-            throw 'Errors were found in ' +
-                ' in your configuration file (' + configFileToUse + '):\n' + errors;
-        }
-
-        deferred.resolve(jiveConfig);
-    });
-
-    return deferred.promise;
+    if ( errors.length > 0 ) {
+        // clientID and secret must be available at this point!
+        throw 'Errors were found in ' +
+            ' in the configuration:\n' + errors;
+    }
 };
 
-var configureApp = function (app, rootDir, config) {
+var setupExpressApp = function (app, rootDir, config) {
     if ( !app ) {
         return q.fcall(function() {
             console.log("Warning - app not specified.");
@@ -141,11 +101,10 @@ var configureApp = function (app, rootDir, config) {
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
  */
-exports.start = function( app, optionsObjectOrFilePath, rootDir) {
+exports.start = function( app, options, rootDir) {
     if ( alreadyBootstrapped ) {
         return q.fcall( function() {
             console.log('Already bootstrapped, skipping.');
-            deferred.resolve();
         });
     }
 
@@ -154,7 +113,6 @@ exports.start = function( app, optionsObjectOrFilePath, rootDir) {
     // mark already bootstrapped so we don't do it again
     alreadyBootstrapped = true;
 
-    return loadConfiguration(optionsObjectOrFilePath).then( function(config) {
-         return configureApp(app, rootDir, config );
-     });
+    validateServiceOptions(options);
+    return setupExpressApp(app, rootDir, options );
 };
