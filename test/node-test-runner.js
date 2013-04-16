@@ -7,11 +7,12 @@ var Mocha = require('mocha'),
 var configuration = {
     'port' : 8093,
     'clientUrl' : 'http://localhost',
-    'clientId' : '766t8osmgixp87ypdbbvmu637k98fzvc',
+    'clientId'      : '4mkgdszjkbzfjwgwsjnj0r5q1db9n0fh',
+    'clientSecret'  : 'rm93mbrpr8an2eajq439625vzg3xqp.MyvfefMHZlEv4E49WH6AC90cw2U.1.s',
     'persistence' : new jive.persistence.memory()
 };
 
-jive.setup.init( configuration );
+jive.service.init( null, configuration );
 
 var serverChild = require('child_process').fork('./test-server',  {execArgv: []});
 
