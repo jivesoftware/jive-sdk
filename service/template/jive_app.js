@@ -173,7 +173,10 @@ As with the autowire by verb file example above, you should reference these rout
 
 Regarding the services directory:
 --------------------------------
-The system will search for .js files in this directory, and look for event handler and task exports.
+Though the system will search for .js files anywhere under the tile directory, it is good practice to put your
+services related items in a specific services directory.
+
+The system will try to discover any event handlers and tasks exported in .js files.
 
 (1) Event Handlers
 If you have a file that exports an .eventHandlers array property, the system will call jive.definitions.addEventHandler()
@@ -223,7 +226,7 @@ endpoint is in the format expected by the jivelinks API.
 (2) If "registration" attribute is not specified, the value will be interpreted as
      http[your service url]/registration (this is the shared, framework provided registration endpoint).
 (3) Any paths containing {{{host}}} will have that value substituted with the value of clientUrl from your
-    configuration file
+    configuration file.
 
 =====================
 Step 3. START SERVICE
