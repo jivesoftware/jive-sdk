@@ -101,7 +101,7 @@ var setupExpressApp = function (app, rootDir, config) {
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
  */
-exports.start = function( app, options, rootDir) {
+exports.start = function( app, options, rootDir, tilesDir ) {
     if ( alreadyBootstrapped ) {
         return q.fcall( function() {
             console.log('Already bootstrapped, skipping.');
@@ -114,5 +114,5 @@ exports.start = function( app, options, rootDir) {
     alreadyBootstrapped = true;
 
     validateServiceOptions(options);
-    return setupExpressApp(app, rootDir, options );
+    return setupExpressApp(app, rootDir, options);
 };

@@ -27,6 +27,7 @@ var jive = require('../api');
 
 var app;
 var rootDir = process.cwd();
+var tilesDir = rootDir + '/tiles';
 
 var _dir = function(theDir, defaultDir ) {
     theDir = theDir || defaultDir;
@@ -56,9 +57,10 @@ exports.persistence = undefined;
  * @param options JSON or path to options file
  * @param definitionsToAutowire optional arraylist of tile names under [app root]/tiles to autowire
  */
-exports.init = function(_app, options, definitionsToAutowire ) {
+exports.init = function(_app, options ) {
     app = _app;
     rootDir =  rootDir || process.cwd();
+    tilesDir = rootDir + '/tiles';
 
     // for some reason this needs to be configured earlier than later
     app.use(express.bodyParser());
@@ -112,11 +114,6 @@ exports.init = function(_app, options, definitionsToAutowire ) {
 
     var promises = [];
     promises.push( initialPromise );
-//    promises.push( setupExpressApp(app) );
-
-    if ( definitionsToAutowire  ) {
-        promises.push( exports.autowire(definitionsToAutowire ) );
-    }
 
     return q.all(promises);
 };
@@ -180,7 +177,7 @@ exports.autowireDefinitionMetadata = function( definitionMetadataFile ) {
  * Return promise - fail or succeed
  */
 exports.start = function() {
-    return bootstrap.start( app, exports.options, rootDir );
+    return bootstrap.start( app, exports.options, rootDir, tilesDir );
 };
 
 

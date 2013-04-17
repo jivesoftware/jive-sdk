@@ -53,45 +53,56 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
 
-    return recursiveDirectoryProcessor( null, definitionName, svcDir, svcDir,
-        function(app, definitionName, theFile, theDirectory) {
+    q.fcall( function() {
+        // add base events
+        jive.events.baseEvents.forEach( function( handlerInfo ) {
+            jive.extstreams.definitions.addEventHandler( definitionName, handlerInfo['event'], handlerInfo['handler'], handlerInfo['description'] );
+        });
+    }).then( function() {
+            return recursiveDirectoryProcessor( null, definitionName, svcDir, svcDir,
+                function(app, definitionName, theFile, theDirectory) {
 
-            var target = require(theDirectory + '/' + theFile);
+                    var target = require(theDirectory + '/' + theFile);
 
-            // task
-            var task = target.task;
-            if ( task ) {
-                var taskToAdd = task;
-                if (typeof task === 'function' ) {
-                    // its a function, create a wrapping task object
-                    taskToAdd = jive.tasks.build( task );
+                    // task
+                    var task = target.task;
+                    if ( task ) {
+                        var taskToAdd = task;
+                        if (typeof task === 'function' ) {
+                            // its a function, create a wrapping task object
+                            taskToAdd = jive.tasks.build( task );
+                        }
+
+                        // enforce a standard key
+                        taskToAdd.setKey( definitionName  + '.' + theFile + "." + taskToAdd.getInterval() );
+                        jive.extstreams.definitions.addTasks( taskToAdd );
+                    }
+
+                    // event handler
+                    if ( target.eventHandlers ) {
+                        target.eventHandlers.forEach( function( handlerInfo ) {
+                            jive.extstreams.definitions.addEventHandler(
+                                definitionName,
+                                handlerInfo['event'],
+                                handlerInfo['handler'],
+                                handlerInfo['description'] || 'Unique to definition' );
+                        });
+                    }
+
+                    // definitionjson
+                    if ( target.definitionJSON ) {
+                        var definition = target.definitionJSON;
+                        definition.id = definition.id === '{{{definition_id}}}' ? null : definition.id;
+                        var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams.definitions : jive.tiles.definitions;
+                        return apiToUse.save(definition);
+                    }
+                },
+
+                function(currentFsItem) {
+                    return legalServiceFileExtensions.indexOf(path.extname( currentFsItem ) ) > -1;
                 }
-
-                // enforce a standard key
-                taskToAdd.setKey( definitionName  + '.' + theFile + "." + taskToAdd.getInterval() );
-                jive.extstreams.definitions.addTasks( taskToAdd );
-            }
-
-            // event handler
-            if ( target.eventHandlers ) {
-                target.eventHandlers.forEach( function( handlerInfo ) {
-                    jive.extstreams.definitions.addEventHandler( definitionName, handlerInfo['event'], handlerInfo['handler'] );
-                 });
-            }
-
-            // definitionjson
-            if ( target.definitionJSON ) {
-                var definition = target.definitionJSON;
-                definition.id = definition.id === '{{{definition_id}}}' ? null : definition.id;
-                var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams.definitions : jive.tiles.definitions;
-                return apiToUse.save(definition);
-            }
-        },
-
-        function(currentFsItem) {
-            return legalServiceFileExtensions.indexOf(path.extname( currentFsItem ) ) > -1;
-        }
-    );
+            );
+    } )
 };
 
 var recursiveDirectoryProcessor = function(app, definitionName, currentFsItem, root, processorFunction, filterFunction ) {
@@ -198,7 +209,8 @@ exports.setupDefinitionMetadata = function(definitionPath) {
  * @param definitionDir
  */
 exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
-    definitionName = definitionName || (definitionDir.substring( definitionDir.lastIndexOf('/') + 1, definitionDir.length ) ); /// xxx todo this might not always work!
+    definitionName = definitionName ||
+        (definitionDir.substring( definitionDir.lastIndexOf('/') + 1, definitionDir.length ) ); /// xxx todo this might not always work! use path
     var definitionPath = definitionDir + '/definition.json';
     var routesPath = definitionDir + '/routes';
 
