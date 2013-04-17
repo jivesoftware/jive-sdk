@@ -18,9 +18,12 @@
 // Private
 
 var fs = require('fs');
+var path = require('path');
+var express = require('express');
 var q = require('q');
 var bootstrap = require('./bootstrap');
 var definitionConfigurator = require('./definitionSetup');
+var jive = require('../api');
 
 var app;
 var rootDir = process.cwd();
@@ -56,6 +59,13 @@ exports.persistence = undefined;
 exports.init = function(_app, options, definitionsToAutowire ) {
     app = _app;
     rootDir =  rootDir || process.cwd();
+
+    // for some reason this needs to be configured earlier than later
+    app.use(express.bodyParser());
+    app.use(express.logger('dev'));
+    app.use(express.methodOverride());
+    app.use(app.router);
+    app.use(express.errorHandler());
 
     var initialPromise;
     if ( typeof options === 'object' ) {
@@ -102,6 +112,7 @@ exports.init = function(_app, options, definitionsToAutowire ) {
 
     var promises = [];
     promises.push( initialPromise );
+//    promises.push( setupExpressApp(app) );
 
     if ( definitionsToAutowire  ) {
         promises.push( exports.autowire(definitionsToAutowire ) );
