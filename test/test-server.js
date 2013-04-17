@@ -24,8 +24,13 @@ if (forkedProcess) {
     process.on('message', function(m) {
         console.log("Test server received message from test runner");
         console.log(m);
+
         if (m['pleaseStart'] == true) {
             startServer();
+        }
+
+        if (m['pleaseStop'] == true) {
+            stopServer();
         }
     });
 }
@@ -34,7 +39,6 @@ else {
 }
 
 function startServer() {
-
     var configuration = {
         'port' : 8093,
         'clientUrl' : 'http://localhost',
@@ -48,6 +52,10 @@ function startServer() {
             process.send( {serverStarted: true});
         }
     } );
+}
+
+function stopServer() {
+    process.exit();
 }
 
 exports.server = function() {

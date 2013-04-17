@@ -46,6 +46,8 @@ function runMocha() {
         });
 
         var runner = mocha.run(function () {
+            serverChild.send({pleaseStop: true});
+
             console.log('finished');
         });
 
