@@ -130,74 +130,66 @@ function getProcessed(conf, all) {
 exports.installTiles = function( req, res ) {
     var conf = jive.service.options;
 
-    var url_parts = url.parse(req.url, true);
+    var reqUrl = req.url;
+    var url_parts = url.parse(reqUrl, true);
     var query = url_parts.query;
 
     var jiveHost = query['jiveHost'];
     var jivePort = query['jivePort'] || 80;
     var context = query['context'];
+    var protocol = query['protocol'] || 'http';
+
+    var definitionPostURL = protocol + '://' + jiveHost + ( context ? '/' + context : '' ) + '/api/jivelinks/v1/tiles/definitions';
 
     var installer = function( definitions, callback ) {
         var processed = getProcessed(conf, definitions);
         var responses = {};
 
-        var doDefinition = function( requestParams, tile, postBody ) {
+        var doDefinition = function( requestOptions, tile, postBody ) {
             var deferred = q.defer();
             console.log("Making request to jive instance for " + tile.name + ":\n", postBody);
 
-            var postRequest =  http.request( requestParams, function(jiveResponse) {
-                var strBuf = [];
-                jiveResponse.on('data', function (chunk) {
-                    strBuf.push(chunk);
-                }).on('end', function () {
-                        var str = strBuf.join("");
-                        responses[tile.name] = str;
-                        console.log("Jive POST response for " + tile.name + ".  Status: " + jiveResponse.statusCode);
-                        console.log("Headers: ", jiveResponse.headers);
-                        console.log("Body: \n", str);
+            jive.util.buildRequest(definitionPostURL, 'POST', postBody, requestOptions['headers']).execute(
+                // success
+                function(jiveResponse) {
 
-                        // special handling if its 409 - this means we should try to PUT instead
-                        if ( jiveResponse.statusCode === 409 ) {
-                            var existingLocation = jiveResponse.headers['location'];
-                            if ( existingLocation ) {
-                                var path = url.parse(existingLocation, true)['path'];
+                    var str = JSON.stringify(jiveResponse);
+                    responses[tile.name] = str;
+                    console.log("Jive POST response for " + tile.name + ".  Status: " + jiveResponse.statusCode);
+                    console.log("Headers: ", jiveResponse.headers);
+                    console.log("Body: \n", str);
 
-                                requestParams['method'] = 'PUT';
-                                requestParams['path'] = path;
+                    // special handling if its 409 - this means we should try to PUT instead
+                    if ( jiveResponse.statusCode === 409 ) {
+                        var existingLocation = jiveResponse.headers['location'];
+                        if ( existingLocation ) {
+                            jive.util.buildRequest(existingLocation, 'PUT', postBody, requestOptions['headers']).execute(
+                                // success
+                                function(jiveResponse) {
+                                    var str = JSON.stringify(jiveResponse);
+                                    responses[tile.name] = str;
+                                    console.log("Jive PUT response for " + tile.name + ".  Status: " + jiveResponse.statusCode);
+                                    console.log("Headers: ", jiveResponse.headers);
+                                    console.log("Body: \n", str);
+                                    deferred.resolve();
+                                },
 
-                                var putRequest =  http.request( requestParams, function(jiveResponse) {
-                                    var strBuf = [];
-                                    jiveResponse.on('data', function (chunk) {
-                                        strBuf.push(chunk);
-                                    }).on('end', function () {
-                                            var str = strBuf.join("");
-                                            responses[tile.name] = str;
-                                            console.log("Jive PUT response for " + tile.name + ".  Status: " + jiveResponse.statusCode);
-                                            console.log("Headers: ", jiveResponse.headers);
-                                            console.log("Body: \n", str);
-                                            deferred.resolve();
-                                        });
-                                });
-
-                                putRequest.on('error', function(e) {
+                                // error
+                                function(e) {
                                     console.log("error on request to jive instance: ", e);
-                                });
-
-                                putRequest.write(postBody, 'utf8');
-                                putRequest.end();
-                            }
-                        } else {
-                            deferred.resolve();
+                                }
+                            );
                         }
-                    });
-            });
+                    } else {
+                        deferred.resolve();
+                    }
+                },
 
-            postRequest.on('error', function(e) {
-                console.log("error on request to jive instance: ", e);
-            });
-
-            postRequest.write(postBody, 'utf8');
-            postRequest.end();
+                // fail
+                function(e) {
+                    console.log("error on request to jive instance: ", e);
+                }
+            );
 
             return deferred.promise;
         };
@@ -215,9 +207,8 @@ exports.installTiles = function( req, res ) {
             var requestParams = {
                 host    : jiveHost, port: jivePort, method: 'POST',
                 path    : ( context ? '/' + context : '' ) + '/api/jivelinks/v1/tiles/definitions',
-                headers : { 'Authorization' : 'Basic YWRtaW46YWRtaW4='}
+                headers : { 'Authorization' : 'Basic YWRtaW46YWRtaW4=', 'Content-Type' : 'application/json' }
             };
-            requestParams['headers']['Content-Length'] = Buffer.byteLength(postBody, 'utf8');
 
             doDefinition(requestParams, tile, postBody).then( processOne );
         })();
