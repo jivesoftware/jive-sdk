@@ -19,6 +19,9 @@ var fs = require('fs'),
     path  = require('path'),
     jive = require('../api');
 
+var express = require('express');
+var consolidate = require('consolidate');
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Private
 
@@ -212,7 +215,18 @@ exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
     definitionName = definitionName ||
         (definitionDir.substring( definitionDir.lastIndexOf('/') + 1, definitionDir.length ) ); /// xxx todo this might not always work! use path
     var definitionPath = definitionDir + '/definition.json';
-    var routesPath = definitionDir + '/routes';
+    var routesPath = definitionDir + '/backend/routes';
+
+    // setup tile public directory
+    app.use( '/tiles/' + definitionName, express.static( definitionDir + '/public'  ) );
+
+    var definitionApp = express();
+
+    definitionApp.engine('html', consolidate.mustache);
+    definitionApp.set('view engine', 'html');
+    definitionApp.set('views', definitionDir + '/public');
+
+    app.use( definitionApp );
 
     // if a definition exists, read it from disk and save it
     var definitionPromise = exports.setupDefinitionMetadata(definitionPath);
@@ -223,7 +237,7 @@ exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
 
         promises.push( fsexists(routesPath).then( function(exists) {
             if ( exists ) {
-                return exports.setupDefinitionRoutes( app,definitionName, routesPath );
+                return exports.setupDefinitionRoutes( definitionApp, definitionName, routesPath );
             }
         }));
 

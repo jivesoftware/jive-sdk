@@ -67,8 +67,6 @@ var setupExpressApp = function (app, rootDir, config) {
         app.use(express.favicon());
         app.use(express.static(path.join(rootDir, 'public')));
 
-        app.set('publicDir', rootDir + '/public');
-        app.set('rootDir', rootDir);
         app.set('port', config['port']);
 
         console.log('Global framework routes:');
