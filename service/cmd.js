@@ -42,7 +42,7 @@ exports.init = function() {
         var p = jive.util.fsexists(targetDir).then( function(exists) {
             if ( !exists || force ) {
                 console.log('Creating', targetDir);
-                return jive.util.mkdir(targetDir);
+                return jive.util.fsmkdir(targetDir);
             } else {
                 console.log(targetDir,'already exists, skipping');
             }

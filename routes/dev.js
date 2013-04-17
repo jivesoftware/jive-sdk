@@ -49,29 +49,6 @@ exports.tiles = function(req, res){
         .then( finalizeRequest );
 };
 
-/**
- * This will only work inside Jive's network.
- * @param req
- * @param res
- */
-exports.requestCredentials = function( req, res ) {
-    var options = {};
-    options['userEmail'] = 'aron@jaf.jiveland.com';
-    options['userPassword'] = 'admin';
-    options['callbackURL'] = 'http://www.jivesoftware.com';
-    options['appName'] = jive.util.guid();
-    options['appDescription'] = jive.util.guid();
-
-    var callback = function( detail ) {
-        var body = JSON.stringify(detail, null, 4);
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(body);
-    };
-
-    require('../lib/client').Application.register( options, callback, callback );
-};
-
 // xxx todo this needs to be cleaned up -- and it might now belong here
 function getProcessed(conf, all) {
     var host = conf.clientUrl + ':' + conf.port;
