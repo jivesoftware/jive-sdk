@@ -23,6 +23,7 @@ var fs = require('fs'),
 // Private
 
 var legalRouteVerbs = ['get', 'put', 'delete', 'post' ];
+var legalServiceFileExtensions = [ '.json', '.js' ];
 
 function isValidFile(file ) {
     return !(file.indexOf('.') == 0)
@@ -52,120 +53,123 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
 
-    return q.nfcall(fs.readdir, svcDir ).then( function(dirContents) {
+    return recursiveDirectoryProcessor( null, definitionName, svcDir, svcDir,
+        function(app, definitionName, theFile, theDirectory) {
 
-        var tasks = [];
-        var events = [];
+            var target = require(theDirectory + '/' + theFile);
 
-        // add in the base event handlers
-        events = events.concat(jive.events.baseEvents);
-
-        // analyze the directory contents, picking up tasks and events
-        dirContents.forEach(function(item) {
-            if ( isValidFile(item) ) {
-                var theFile = svcDir + '/' + item;
-                var target = require(theFile);
-
-                // task
-                var task = target.task;
-                if ( task ) {
-                    var taskToAdd = task;
-                    if (typeof task === 'function' ) {
-                        // its a function, create a wrapping task object
-                        taskToAdd = jive.tasks.build( task );
-                    }
-
-                    // enforce a standard key
-                    taskToAdd.setKey( definitionName  + '.' + item + "." + taskToAdd.getInterval() );
-                    tasks.push( taskToAdd );
+            // task
+            var task = target.task;
+            if ( task ) {
+                var taskToAdd = task;
+                if (typeof task === 'function' ) {
+                    // its a function, create a wrapping task object
+                    taskToAdd = jive.tasks.build( task );
                 }
 
-                // event handler
-                if ( target.eventHandlers ) {
-                    events = events.concat( target.eventHandlers );
-                }
+                // enforce a standard key
+                taskToAdd.setKey( definitionName  + '.' + theFile + "." + taskToAdd.getInterval() );
+                jive.extstreams.definitions.addTasks( taskToAdd );
             }
-        });
 
-        // add the event handlers
-        events.forEach( function( handlerInfo ) {
-            jive.extstreams.definitions.addEventHandler( definitionName, handlerInfo['event'], handlerInfo['handler'] );
-        });
+            // event handler
+            if ( target.eventHandlers ) {
+                target.eventHandlers.forEach( function( handlerInfo ) {
+                    jive.extstreams.definitions.addEventHandler( definitionName, handlerInfo['event'], handlerInfo['handler'] );
+                 });
+            }
 
-        // add the tasks
-        jive.extstreams.definitions.addTasks( tasks );
-    });
+            // definitionjson
+            if ( target.definitionJSON ) {
+                var definition = target.definitionJSON;
+                definition.id = definition.id === '{{{definition_id}}}' ? null : definition.id;
+                var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams.definitions : jive.tiles.definitions;
+                return apiToUse.save(definition);
+            }
+        },
+
+        function(currentFsItem) {
+            return legalServiceFileExtensions.indexOf(path.extname( currentFsItem ) ) > -1;
+        }
+    );
 };
 
-var processCandidateRoutes = function(app, httpVerb, definitionName, routeHandlerPath, _routeContextPath) {
-    var legalVerbFile = legalRouteVerbs.indexOf(httpVerb) > -1;
-    var routeHandler = require(routeHandlerPath);
-
-    for ( var key in routeHandler ) {
-        if ( !routeHandler.hasOwnProperty(key) ) {
-            continue;
-        }
-        var routeContextPath = _routeContextPath;
-
-        var added = false;
-        var candidate = routeHandler[key];
-        if ( typeof candidate === 'function' && key === 'route' && legalVerbFile ) {
-            // if there is a function called 'route' and this is a legal verb file, register it
-            app[httpVerb](routeContextPath, routeHandler.route);
-            added = true;
-        } else {
-            // if its a valid route descriptor object, analyze it
-            if ( typeof candidate == 'object' && candidate['verb'] && candidate['route'] ) {
-                // its a valid handler
-                var path =  candidate['path'] || key;
-                routeContextPath += "/" + path;
-                httpVerb = candidate['verb'];
-                app[httpVerb](routeContextPath, candidate['route']);
-                added = true;
-            }
-        }
-
-        if ( added ) {
-            console.log('Route added for', definitionName, ':',
-                httpVerb.toUpperCase(), routeContextPath, ' -> ',
-                routeHandlerPath + ".js" );
-        }
-    }
-};
-
-/**
- * Returns a promise when all the routes have been calculated for a particular definition directory.
- */
-exports.setupDefinitionRoutes = function(app, definitionName, routesPath, root){
-    if ( !root ) {
-        root = routesPath;
-    }
-
-    return q.nfcall( fs.stat, routesPath ).then( function(stat) {
+var recursiveDirectoryProcessor = function(app, definitionName, currentFsItem, root, processorFunction, filterFunction ) {
+    return q.nfcall( fs.stat, currentFsItem ).then( function(stat) {
         if ( stat.isDirectory() ) {
-            return q.nfcall(fs.readdir, routesPath)
+            return q.nfcall(fs.readdir, currentFsItem)
                 // process the routes
                 .then( function( subItems ) {
                     var promises = [];
                     subItems.forEach( function( subItem ) {
-                        promises.push( exports.setupDefinitionRoutes(app, definitionName, routesPath + "/" + subItem, root ) );
+                        promises.push( recursiveDirectoryProcessor( app, definitionName,
+                            currentFsItem + '/' + subItem, root, processorFunction, filterFunction ) );
                     });
 
                     return q.all( promises );
                 });
         } else if ( stat.isFile() ) {
-            var routeFile = path.basename( routesPath );
-            var currentDefinitionDir = path.dirname( routesPath );
-            if ( isValidFile(routeFile) ) {
-
-                var httpVerb = routeFile.substring(0, routeFile.length - 3).toLowerCase();
-                var routeHandlerPath = (currentDefinitionDir + '/' + httpVerb);
-                var routeContextPath = ('/' + definitionName + currentDefinitionDir.replace(root,''));
-
-                processCandidateRoutes(app, httpVerb, definitionName, routeHandlerPath, routeContextPath);
+            if ( !filterFunction || filterFunction( currentFsItem ) ) {
+                var theDirectory = path.dirname( currentFsItem );
+                var theFile = path.basename( currentFsItem );
+                if ( isValidFile(theFile) ) {
+                    var p = processorFunction( app, definitionName, theFile, theDirectory, root );
+                    if ( p ) {
+                        return p;
+                    }
+                }
             }
         }
     });
+};
+
+/**
+ * Returns a promise when all the routes have been calculated for a particular definition directory.
+ */
+exports.setupDefinitionRoutes = function(app, definitionName, routesPath){
+
+    var processCandidateRoutes = function(app, definitionName, theFile, theDirectory, root ) {
+        var httpVerb = theFile.substring(0, theFile.length - 3).toLowerCase();
+        var routeHandlerPath = (theDirectory + '/' + httpVerb);
+        var _routeContextPath = ('/' + definitionName + theDirectory.replace(root,''));
+
+        var legalVerbFile = legalRouteVerbs.indexOf(httpVerb) > -1;
+        var routeHandler = require(routeHandlerPath);
+
+        for ( var key in routeHandler ) {
+            if ( !routeHandler.hasOwnProperty(key) ) {
+                continue;
+            }
+
+            var routeContextPath = _routeContextPath;
+
+            var added = false;
+            var candidate = routeHandler[key];
+            if ( typeof candidate === 'function' && key === 'route' && legalVerbFile ) {
+                // if there is a function called 'route' and this is a legal verb file, register it
+                app[httpVerb](routeContextPath, routeHandler.route);
+                added = true;
+            } else {
+                // if its a valid route descriptor object, analyze it
+                if ( typeof candidate == 'object' && candidate['verb'] && candidate['route'] ) {
+                    // its a valid handler
+                    var path =  candidate['path'] || key;
+                    routeContextPath += "/" + path;
+                    httpVerb = candidate['verb'];
+                    app[httpVerb](routeContextPath, candidate['route']);
+                    added = true;
+                }
+            }
+
+            if ( added ) {
+                console.log('Route added for', definitionName, ':',
+                    httpVerb.toUpperCase(), routeContextPath, ' -> ',
+                    routeHandlerPath + ".js" );
+            }
+        }
+    };
+
+    return recursiveDirectoryProcessor( app, definitionName, routesPath, routesPath, processCandidateRoutes );
 };
 
 exports.setupDefinitionMetadata = function(definitionPath) {
@@ -196,7 +200,6 @@ exports.setupDefinitionMetadata = function(definitionPath) {
 exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
     definitionName = definitionName || (definitionDir.substring( definitionDir.lastIndexOf('/') + 1, definitionDir.length ) ); /// xxx todo this might not always work!
     var definitionPath = definitionDir + '/definition.json';
-    var servicesPath = definitionDir + '/services';
     var routesPath = definitionDir + '/routes';
 
     // if a definition exists, read it from disk and save it
@@ -212,9 +215,9 @@ exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
             }
         }));
 
-        promises.push( fsexists(servicesPath).then( function(exists) {
+        promises.push( fsexists(definitionDir).then( function(exists) {
             if ( exists ) {
-                return exports.setupDefinitionServices( definitionName, servicesPath );
+                return exports.setupDefinitionServices( definitionName, definitionDir );
             }
         }));
 
