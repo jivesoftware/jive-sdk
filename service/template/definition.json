@@ -1,6 +1,6 @@
 {
     "sampleData" : {
-        "title" : "Sample List",
+        "title" : "Sample List {{{TILE_NAME}}}",
         "contents" : [ {
             "text" : "Item 1"
         }, {
@@ -12,7 +12,7 @@
             "listStyle" : "contentList"
         }
     },
-    "displayName" : "Sample List",
+    "displayName" : "Tile {{{TILE_NAME}}}",
     "name" : "{{{TILE_NAME}}}",
     "description" : "{{{TILE_NAME}}}",
     "style" : "LIST",
