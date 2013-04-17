@@ -84,11 +84,9 @@ var setupExpressApp = function (app, rootDir, config) {
 
         app.get('/tiles', jive.routes.tiles);
         app.get('/tilesInstall', jive.routes.installTiles);
-        app.get('/requestCredentials', jive.routes.requestCredentials);
 
         console.log("/tiles");
         console.log("/tilesInstall");
-        console.log("/requestCredentials");
 
         p2.resolve();
     });

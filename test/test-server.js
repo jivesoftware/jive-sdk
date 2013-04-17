@@ -32,6 +32,10 @@ if (forkedProcess) {
         if (m['pleaseStop'] == true) {
             stopServer();
         }
+
+        if ( m['operation'] ) {
+            doOperation( m['operation'] );
+        }
     });
 }
 else {
@@ -56,6 +60,12 @@ function startServer() {
 
 function stopServer() {
     process.exit();
+}
+
+function doOperation( operation ) {
+    var type = operation['type'];
+
+
 }
 
 exports.server = function() {

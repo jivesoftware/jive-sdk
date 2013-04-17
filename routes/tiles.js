@@ -100,4 +100,3 @@ exports.registration = function( req, res ) {
 
 exports.tiles = dev.tiles;
 exports.installTiles = dev.installTiles;
-exports.requestCredentials = dev.requestCredentials;
