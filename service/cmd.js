@@ -96,37 +96,38 @@ exports.init = function() {
 
     };
 
-
-    // shared infrastructure
+    // top level
     conditionalCopy('jive_app.js','jive_app.js', forceAll );
     writeOutTemplateConditional( 'package.json', 'package.json', forceAll );
     conditionalCopy('jiveclientconfiguration.json', 'jiveclientconfiguration.json', forceAll );
     conditionalMkdir('tiles', 'tiles', forceAll );
     conditionalMkdir('public', 'public' , forceAll );
-    conditionalMkdir('public/tiles', 'public/tiles', forceAll );
 
     // specific to tile
     conditionalMkdir('tiles/' + tileName , forceAll || forceTile );
-    conditionalMkdir('tiles/' + tileName + '/routes' , forceAll || forceTile);
-    conditionalMkdir('tiles/' + tileName + '/routes/configure' , forceAll || forceTile);
-    writeOutTemplateConditional( 'route_configure.js', 'tiles/' + tileName + '/routes/configure/get.js' , forceAll || forceTile);
-    writeOutTemplateConditional( 'definition.json', 'tiles/' + tileName + '/definition.json' , forceAll || forceTile);
-    writeOutTemplateConditional( 'services.js', 'tiles/' + tileName + '/services.js' , forceAll || forceTile);
 
-    conditionalMkdir('public/tiles/' + tileName , forceAll || forceTile);
-    conditionalMkdir('public/tiles/' + tileName + '/javascripts' , forceAll || forceTile);
-    conditionalCopy('main.js', 'public/tiles/' + tileName + '/javascripts/main.js' , forceAll || forceTile);
-    conditionalMkdir('public/tiles/' + tileName + '/stylesheets' , forceAll || forceTile);
-    conditionalCopy('main.js', 'public/tiles/' + tileName + '/stylesheets/main.js' , forceAll || forceTile);
-    writeOutTemplateConditional('configuration.html', 'public/tiles/' + tileName + '/configuration.html', forceAll || forceTile );
+    // backend
+    conditionalMkdir('tiles/' + tileName + '/backend' , forceAll || forceTile);
+    conditionalMkdir('tiles/' + tileName + '/backend/routes' , forceAll || forceTile);
+    conditionalMkdir('tiles/' + tileName + '/backend/routes/configure' , forceAll || forceTile);
+    writeOutTemplateConditional( 'route_configure.js', 'tiles/' + tileName + '/backend/routes/configure/get.js' , forceAll || forceTile);
+    writeOutTemplateConditional( 'definition.json', 'tiles/' + tileName + '/definition.json' , forceAll || forceTile);
+    writeOutTemplateConditional( 'services.js', 'tiles/' + tileName + '/backend/services.js' , forceAll || forceTile);
+
+    // public
+    conditionalMkdir('/tiles/' + tileName + '/public/javascripts' , forceAll || forceTile);
+    conditionalMkdir('/tiles/' + tileName + '/public/stylesheets' , forceAll || forceTile);
+    conditionalCopy('main.js',            'tiles/' + tileName + '/public/javascripts/main.js' , forceAll || forceTile);
+    writeOutTemplateConditional('main.css',           'tiles/' + tileName + '/public/stylesheets/main.css' , forceAll || forceTile);
+    conditionalCopy('configuration.html', 'tiles/' + tileName + '/public/configuration.html', forceAll || forceTile );
 
     q.all( promises).then(function() {
         console.log('... Done!');
         console.log();
 
-        console.log('Contents of tiles directory (', t('public/tiles'), '):' );
+        console.log('Contents of tiles directory (', t('/tiles'), '):' );
 
-        q.nfcall(fs.readdir, t('public/tiles') ).then(function(dirContents){
+        q.nfcall(fs.readdir, t('tiles') ).then(function(dirContents){
             var proms = [];
             dirContents.forEach(function(item) {
                 console.log(item);
