@@ -62,7 +62,7 @@ function getProcessed(conf, all) {
         var stringified = JSON.stringify(tile);
         stringified =  mustache.render(stringified, {
             host: host,
-            tile_public: host + '/tiles/' + name,
+            tile_public: host + '/' + name,
             tile_route: host + '/' + name,
             clientId: conf.clientId
         });

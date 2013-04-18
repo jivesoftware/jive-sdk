@@ -217,9 +217,9 @@ exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
     var definitionPath = definitionDir + '/definition.json';
     var routesPath = definitionDir + '/backend/routes';
 
-    // setup tile public directory
-    app.use( '/tiles/' + definitionName, express.static( definitionDir + '/public'  ) );
+    app.use( '/' + definitionName, express.static( definitionDir + '/public'  ) );
 
+    // setup tile public directory
     var definitionApp = express();
 
     definitionApp.engine('html', consolidate.mustache);
