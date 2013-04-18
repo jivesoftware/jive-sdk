@@ -74,6 +74,27 @@ var setupExpressApp = function (app, rootDir, config) {
 
         console.log("/registration");
 
+        // wire in an sdk app with its own views
+        var jiveSdkApp = express();
+
+        jiveSdkApp.engine('html', consolidate.mustache);
+        jiveSdkApp.set('view engine', 'html');
+        jiveSdkApp.set('views', __dirname + '/../views' );    // assume that views will be in the root jive-sdk folder
+
+        app.use( jiveSdkApp );
+
+        // oauth2 endpoints are wired only if there are oauth2 properties
+        if ( jive.service.options['oauth2'] ) {
+            var oauth = require('../routes/oauth');
+
+            // wire internal sdk endpoints
+            jiveSdkApp.get('/authorizeUrl', oauth.authorizeUrl );
+            console.log("/authorizeUrl");
+
+            jiveSdkApp.get('/oauth2Callback', oauth.oauth2Callback );
+            console.log("/oauth2Callback");
+
+        }
         p1.resolve();
     });
 
