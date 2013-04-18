@@ -77,8 +77,9 @@ var setupExpressApp = function (app, rootDir, config) {
         // wire in an sdk app with its own views
         var jiveSdkApp = express();
 
-        jiveSdkApp.engine('html', consolidate.mustache);
-        jiveSdkApp.set('view engine', 'html');
+        jiveSdkApp.engine('html js', consolidate.mustache);
+        jiveSdkApp.engine('js', consolidate.mustache);
+        jiveSdkApp.set('view engine', 'html js');
         jiveSdkApp.set('views', __dirname + '/../views' );    // assume that views will be in the root jive-sdk folder
 
         app.use( jiveSdkApp );
@@ -93,6 +94,10 @@ var setupExpressApp = function (app, rootDir, config) {
 
             jiveSdkApp.get('/oauth2Callback', oauth.oauth2Callback );
             console.log("/oauth2Callback");
+
+            jiveSdkApp.get('/javascripts/oauth2client.js', function(req, res) {
+                res.render('oauth2client.js');
+            });
 
         }
         p1.resolve();
