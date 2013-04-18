@@ -7,6 +7,7 @@ function OAuth2ServerFlow( options ) {
     var jiveAuthorizeUrlErrorCallback = options['jiveAuthorizeUrlErrorCallback'];
     var oauth2SuccessCallback = options['oauth2SuccessCallback'];
     var preOauth2DanceCallback = options['preOauth2DanceCallback'];
+    var onLoadCallback = options['onLoadCallback'];
 
     // has defaults
     var ticketURL =  options['ticketURL'];
@@ -37,21 +38,21 @@ function OAuth2ServerFlow( options ) {
             'href' : url,
             'authz': authz
         }).execute(function(response){
-                if ( response.status >= 400 && response.status <= 599 ) {
-                    jiveAuthorizeUrlErrorCallback(response);
-                    return;
-                }
+            if ( response.status >= 400 && response.status <= 599 ) {
+                jiveAuthorizeUrlErrorCallback(response);
+                return;
+            }
 
-                // pop open oauth url
-                var data = response.content;
-                $(grantDOMElementID).click(
-                    jive.tile.openOAuthPopup(
-                        JSON.parse(data).url,
-                        'width=310,height=600,scrollbars=yes',
-                        openCallback, closeCallback
-                    ).createOpenerOnClick()
-                );
-            });
+            // pop open oauth url
+            var data = response.content;
+            $(grantDOMElementID).click(
+                jive.tile.openOAuthPopup(
+                    JSON.parse(data).url,
+                    'width=310,height=600,scrollbars=yes',
+                    openCallback, closeCallback
+                ).createOpenerOnClick()
+            );
+        });
     };
 
     return {
@@ -69,6 +70,10 @@ function OAuth2ServerFlow( options ) {
                 var id = identifiers['viewer'];   // user ID
                 var ticket = config["ticketID"]; // may or may not be there
                 var oauth2CallbackUrl = jive.tile.getOAuth2CallbackUrl();
+
+                if ( onLoadCallback ) {
+                    onLoadCallback( config, identifiers );
+                }
 
                 if ( ticketURL ) {
                     //
