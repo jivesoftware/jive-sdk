@@ -5,23 +5,32 @@ var Mocha = require('mocha'),
     http = require('http');
 
 var configuration = {
-    'port' : 8093,
+    'port' : 8094,
     'clientUrl' : 'http://localhost',
-    'clientId'      : '4mkgdszjkbzfjwgwsjnj0r5q1db9n0fh',
-    'clientSecret'  : 'rm93mbrpr8an2eajq439625vzg3xqp.MyvfefMHZlEv4E49WH6AC90cw2U.1.s'
+    'clientId'      : '6bgwdhc0rwifutkywsua19c49yt2qs2r',
+    'clientSecret'  : '6iyjdimjzg5jbmvozv03dj0ogdzi3y.XKSkGTDsYznPZLd0zM0ZU06ExHA.1.s'
 };
 
 jive.service.options = configuration;
 
-var serverChild = require('child_process').fork('./test-server',  {execArgv: []});
+var serverProcess = require('child_process').fork('./test-server',  {execArgv: []});
+var serverStartedCallback = function(m) {
 
-serverChild.on('message', function(m) {
-    console.log("Child server process started");
     console.log(m);
-    runMocha();
-});
+    var success = m.serverStarted;
+    if (success) {
+        console.log("Test server started, running tests");
+        runMocha();
+    }
+    else {
+        console.log("Failure starting test server!");
+    }
+    serverProcess.removeAllListeners('message');
+};
 
-serverChild.send({pleaseStart: true});
+serverProcess.on('message', serverStartedCallback);
+
+serverProcess.send({pleaseStart: true, config: configuration});
 
 function runMocha() {
     //Run all tests in subfolder 'testcases'
@@ -46,48 +55,24 @@ function runMocha() {
         });
 
         var runner = mocha.run(function () {
-            serverChild.send({pleaseStop: true});
+            serverProcess.send({pleaseStop: true});
 
             console.log('finished');
         });
 
         runner.on('pass', function (test) {
-            console.log('... %s passed', test.title);
+            console.log('...Test "%s" passed', test.title);
         });
 
         runner.on('fail', function (test) {
-            console.log('... %s failed', test.title);
+            console.log('...Test "%s" failed', test.title);
+            if (test.err && (test.err.expected || test.err.actual) ) {
+                console.log('Expected: \'%s\', Actual: \'%s\'', test.err.expected, test.err.actual);
+            }
         });
     });
 }
 
-
-//Helpers
-
-function waitSynchronous(ms) {
-    var date = new Date();
-    do {
-        var currentDate = new Date();
-    } while (currentDate - date < ms);
-}
-
-function wait(serverName) {
-    var gotOK = false;
-
-
-    while (!gotOK) {
-        jive.util.buildRequest(serverName).execute(
-            function(res) {
-                if (res.responseCode === 200) {
-                    gotOK = true;
-                }
-            },
-            function(err) {
-                console.log("Failed to connect to test server '" + serverName + "'");
-                console.log(err);
-            });
-
-        waitSynchronous(2000);
-    }
-
+exports.serverProcess = function() {
+    return serverProcess;
 }

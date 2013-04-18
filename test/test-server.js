@@ -1,5 +1,5 @@
 /**
- * Modify this configuration to match your jive-sdk server's config
+ * Test server that accepts inter-process communication to modify its endpoints.
  */
 var express = require('express'),
     routes = require('./testroutes'),
@@ -22,11 +22,11 @@ app.get('/', routes.index);
 
 if (forkedProcess) {
     process.on('message', function(m) {
-        console.log("Test server received message from test runner");
-        console.log(m);
+      //  console.log("Test server received message from test runner");
+      //  console.log(m);
 
         if (m['pleaseStart'] == true) {
-            startServer();
+            startServer(m.config);
         }
 
         if (m['pleaseStop'] == true) {
@@ -35,6 +35,10 @@ if (forkedProcess) {
 
         if ( m['operation'] ) {
             doOperation( m['operation'] );
+            process.send({
+                operationSuccess: true,
+                id: m.id
+            });
         }
     });
 }
@@ -42,13 +46,8 @@ else {
     startServer();
 }
 
-function startServer() {
-    var configuration = {
-        'port' : 8093,
-        'clientUrl' : 'http://localhost',
-        'clientId'      : '4mkgdszjkbzfjwgwsjnj0r5q1db9n0fh',
-        'clientSecret'  : 'rm93mbrpr8an2eajq439625vzg3xqp.MyvfefMHZlEv4E49WH6AC90cw2U.1.s'
-    };
+function startServer(configuration) {
+
 
     var server = http.createServer(app).listen(configuration.port, function () {
         console.log("Test server listening on port " + configuration.port);
@@ -62,10 +61,63 @@ function stopServer() {
     process.exit();
 }
 
+/**
+ * Sample operation JSON:
+ * {
+ *     "type" : "setEndpoint",
+ *     "method" : "GET",
+ *     "path" : "/test",
+ *     "statusCode" : 200,
+ *     "body" : "<html><body>Test endpoint body</body></html>"
+ *     "headers" : { "Content-Type": "application/json" }
+ *
+ * }
+ * @param operation
+ */
 function doOperation( operation ) {
     var type = operation['type'];
+    if (type == "setEndpoint") {
+        var method = operation['method'];
+        var path = operation['path'];
+        var statusCode = operation['statusCode'];
+        var body = operation['body'];
+        var headers = operation['headers'];
+
+        setEndpoint(method, path, statusCode, body, headers);
 
 
+    }
+}
+
+function setEndpoint(method, path, statusCode, body, headers) {
+    //Default header with json content type
+    if (!headers || headers.length <= 0) {
+        headers = {"Content-Type": "application/json"};
+    }
+    if (method.toUpperCase() == "GET") {
+        app.get( path, function( req, res ) {
+            res.writeHead(statusCode, headers);
+            res.end(body );
+        } );
+    }
+    if (method.toUpperCase() == "POST") {
+        app.post( path, function( req, res ) {
+            res.writeHead(statusCode, headers);
+            res.end(body );
+        } );
+    }
+    if (method.toUpperCase() == "PUT") {
+        app.put( path, function( req, res ) {
+            res.writeHead(statusCode, headers);
+            res.end(body );
+        } );
+    }
+    if (method.toUpperCase() == "DELETE") {
+        app.delete( path, function( req, res ) {
+            res.writeHead(statusCode, headers);
+            res.end(body );
+        } );
+    }
 }
 
 exports.server = function() {
