@@ -6,24 +6,39 @@ var host = jive.service.options['clientUrl'];
 var port = jive.service.options['port'];
 var base = host + ":" + port;
 
-var configJSON = {
+var getEndpoint = {
     "type": "setEndpoint",
     "method": "GET",
     "path": "/test",
     "statusCode": 200,
     "body": "{\"key\": \"value\"}",
     "headers": { "Content-Type": "application/json" }
-
 };
 
-var successCallback = function (res) {
-    var entity = res.entity;
-    if (res.statusCode != 200) {
-        assert.fail(res.statusCode, 200, "Status code from server incorrect");
-    }
-    else if (entity.key != "value") {
-        assert.fail(res.key, "value", "Response from server was incorrect")
-    }
+var postEndpoint = {
+    "type": "setEndpoint",
+    "method": "POST",
+    "path": "/test",
+    "statusCode": 204,
+    "body": "{\"key\": \"value\"}",
+    "headers": { "Content-Type": "application/json" }
+};
+
+var successCallback = function (endpoint, done) {
+
+    var expectedEntity = JSON.parse(endpoint.body);
+    return function (res) {
+        var entity = res.entity;
+        if (res.statusCode != endpoint.statusCode) {
+            assert.fail(res.statusCode, endpoint.statusCode, "Status code from server incorrect");
+        }
+        for (var key in entity) {
+            if (entity[key] != expectedEntity[key]) {
+                assert.fail(entity[key], expectedEntity[key], "Response from server was incorrect")
+            }
+        }
+        done();
+    };
 };
 
 var errorCallback = function (err) {
@@ -39,14 +54,21 @@ describe('jive.util', function () {
 
     //Configure server first. Call done() on completion for mocha to be happy
     before(function (done) {
-        test_util.configServer(configJSON).then(function() { done()});
+        test_util.configServer(getEndpoint)
+            .thenResolve(test_util.configServer(postEndpoint))
+            .then(done);
     });
 
 
     describe('#buildRequest()', function () {
         it("GET to /test", function (done) {
-            jive.util.buildRequest(url, "GET")
-                .execute(wrap(successCallback, done), wrap(errorCallback, done));
+            jive.util.buildRequest(base + getEndpoint.path, "GET")
+                .execute(successCallback(getEndpoint,done), wrap(errorCallback, done));
+        });
+
+        it("POST to /test", function (done) {
+            jive.util.buildRequest(base + postEndpoint.path, "POST", {test: "value"})
+                .execute(successCallback(postEndpoint,done), wrap(errorCallback, done));
         });
     });
 });

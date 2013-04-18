@@ -20,7 +20,7 @@ exports.configServer = function(operationJson) {
            serverProc.removeListener('message', arguments.callee);
            var success = m.operationSuccess;
            if (success) {
-                deferred.resolve(m);
+                deferred.resolve();
            }
             else if (success === false) {
                deferred.reject('Server failed to re-configure: ' + JSON.stringify(m));
