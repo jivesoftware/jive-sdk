@@ -74,7 +74,11 @@ exports.registration = function( req, res ) {
                             jive.events.emit("newInstance." + name, tileInstance);
                         });
                     }
-                );
+                ).fail( function(err) {
+                    console.log('Fail!',err);
+                    res.writeHead(502, { 'Content-Type': 'application/json' });
+                    res.end( JSON.stringify( { status: 500, 'error': 'Failed to get acquire access token', 'detail' : err } ) );
+                } );
             }
         });
 
