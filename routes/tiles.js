@@ -29,6 +29,7 @@ var dev = require('./dev');
 exports.registration = function( req, res ) {
     var conf = jive.service.options;
     var clientId = conf.clientId;
+    var secret = conf.clientSecret;
     var url = req.body['url'];
     var guid = req.body['guid'];
     var config = req.body['config'];
@@ -43,7 +44,7 @@ exports.registration = function( req, res ) {
         var authClientId = pParts[0];
         var authSecret = pParts[1];
 
-        if ( authClientId !== clientId || authSecret !== authSecret ) {
+        if ( authClientId !== clientId || authSecret !== secret ) {
             res.writeHead(403, { 'Content-Type': 'application/json' });
             res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid HMAC authorization header' } ) );
             return;
@@ -84,12 +85,14 @@ exports.registration = function( req, res ) {
 
     };
 
+    var completedResponse = false;
     // try tiles
     jive.tiles.definitions.findByTileName( name).then( function( found ) {
         if ( found ) {
             registerer(guid, jive.tiles);
         }
         else {
+            completedResponse = true;
             errorResponse(res);
         }
     });
@@ -100,14 +103,17 @@ exports.registration = function( req, res ) {
             registerer(guid, jive.extstreams);
         }
         else {
+            completedResponse = true;
             errorResponse(res);
         }
     });
 
     var errorResponse = function(res) {
-        res.status(400);
-        res.set({'Content-Type': 'application/json'});
-        res.end({status: 400, message: "No tile or external stream definition was found for the given name '" + name + "'"});
+        if (!completedResponse) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(
+                JSON.stringify({status: 400, message: "No tile or external stream definition was found for the given name '" + name + "'"}));
+        }
     }
 };
 

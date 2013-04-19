@@ -56,7 +56,7 @@ else {
 function startServer(configuration) {
     config = configuration;
     if (configuration.integrationServer===true) {
-        setupIntegration();
+        setupIntegration(configuration);
     }
     if (configuration.mockJiveId===true) {
 
@@ -145,7 +145,9 @@ exports.server = function() {
     return server;
 };
 
-function setupIntegration() {
+function setupIntegration(configuration) {
+
+    jive.service.options = configuration;
 
 // Setup the tile configuration UI route at [clientUrl]:[port]/configure (eg. http://yoursite:8090/configure):
     app.get( '/configure', function( req, res ) {

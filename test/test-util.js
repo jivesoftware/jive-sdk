@@ -40,10 +40,14 @@ exports.configServer = function(operationJson, serverProc) {
 /**
  * Creates a new server in a forked process and returns a promise to act on after the server is up
  */
-exports.createServer = function(config) {
+exports.createServer = function(config, procOptions) {
     var deferred = q.defer();
 
-    var serverProcess = require('child_process').fork('./test-server',  {execArgv: [], silent: true});
+    if (!procOptions) {
+        procOptions = {};
+    }
+    procOptions.execArgv = [];
+    var serverProcess = require('child_process').fork('./test-server',  procOptions);
 
     var serverStartedCallback = function(m) {
 
