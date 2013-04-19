@@ -6,7 +6,9 @@ var express = require('express'),
     http = require('http'),
     jive = require('../../jive-sdk');
 
-var forkedProcess = true;
+var forkedProcess = typeof process.send !== 'undefined';
+var config = null;
+var server = null;
 
 var app = express();
 app.use(express.bodyParser());
@@ -22,15 +24,16 @@ app.get('/', routes.index);
 
 if (forkedProcess) {
     process.on('message', function(m) {
-      //  console.log("Test server received message from test runner");
-      //  console.log(m);
+    //   console.log("Test server received message from test runner");
+    //   console.log(m);
 
-        if (m['pleaseStart'] == true) {
+        if (m['pleaseStart'] === true) {
             startServer(m.config);
         }
 
-        if (m['pleaseStop'] == true) {
-            stopServer();
+        if (m['pleaseStop'] === true) {
+            stopServer(m.id);
+
         }
 
         if ( m['operation'] ) {
@@ -43,23 +46,42 @@ if (forkedProcess) {
     });
 }
 else {
-    startServer();
+    config = {
+        'port' : 8096,
+        'clientUrl' : 'http://localhost'
+    };
+    startServer(config);
 }
 
 function startServer(configuration) {
+    config = configuration;
+    if (configuration.integrationServer===true) {
+        setupIntegration();
+    }
+    if (configuration.mockJiveId===true) {
 
-    setupIntegration();
+    }
 
-    var server = http.createServer(app).listen(configuration.port, function () {
+    server = http.createServer(app);
+    server.listen(configuration.port, function () {
         console.log("Test server listening on port " + configuration.port);
-        if (process.send) {
+        if (forkedProcess) {
             process.send( {serverStarted: true});
         }
     } );
 }
 
-function stopServer() {
-    process.exit();
+function stopServer(id) {
+    server.on('close', function() {
+        console.log("Server at port " + config.port + " stopped");
+        process.send({
+            serverStopped: true,
+            id: id
+        });
+        process.exit();
+    })
+    server.close();
+
 }
 
 /**

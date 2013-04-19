@@ -2,37 +2,25 @@ var Mocha = require('mocha'),
     path = require('path'),
     fs = require('fs'),
     jive = require('../../jive-sdk'),
-    http = require('http');
+    http = require('http'),
+    test_util = require('./test-util');
 
 var configuration = {
-    'port' : 8095,
+    'port' : 8097,
     'clientUrl' : 'http://localhost',
     'clientId'      : '6bgwdhc0rwifutkywsua19c49yt2qs2r',
-    'clientSecret'  : '6iyjdimjzg5jbmvozv03dj0ogdzi3y.XKSkGTDsYznPZLd0zM0ZU06ExHA.1.s'
+    'clientSecret'  : '6iyjdimjzg5jbmvozv03dj0ogdzi3y.XKSkGTDsYznPZLd0zM0ZU06ExHA.1.s',
+    'integrationServer' : true
 };
 
 jive.service.options = configuration;
 
-var serverProcess = require('child_process').fork('./test-server',  {execArgv: []});
-var serverStartedCallback = function(m) {
+test_util.createServer(configuration).then(runMocha);
 
-    console.log(m);
-    var success = m.serverStarted;
-    if (success) {
-        console.log("Test server started, running tests");
-        runMocha();
-    }
-    else {
-        console.log("Failure starting test server!");
-    }
-    serverProcess.removeAllListeners('message');
-};
+var integrationServerProc;
 
-serverProcess.on('message', serverStartedCallback);
-
-serverProcess.send({pleaseStart: true, config: configuration});
-
-function runMocha() {
+function runMocha(serverProc) {
+    integrationServerProc = serverProc;
     //Run all tests in subfolder 'testcases'
     var mocha = new Mocha({
         reporter: 'dot',
@@ -55,7 +43,7 @@ function runMocha() {
         });
 
         var runner = mocha.run(function () {
-            serverProcess.send({pleaseStop: true});
+            integrationServerProc.send({pleaseStop: true});
 
             console.log('finished');
         });
@@ -74,5 +62,5 @@ function runMocha() {
 }
 
 exports.serverProcess = function() {
-    return serverProcess;
+    return integrationServerProc;
 }
