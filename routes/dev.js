@@ -51,7 +51,8 @@ exports.tiles = function(req, res){
 
 // xxx todo this needs to be cleaned up -- and it might now belong here
 function getProcessed(conf, all) {
-    var host = conf.clientUrl + ':' + conf.port;
+    var host = conf.clientUrl +
+        ( (conf.port == 80 || conf.port == 443) ? '' : ( ':' + conf.port ) );
     var processed = [];
 
     all.forEach( function( tile ) {
