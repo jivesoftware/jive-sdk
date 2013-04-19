@@ -161,14 +161,16 @@ exports.setupDefinitionRoutes = function(app, definitionName, routesPath){
             var candidate = routeHandler[key];
             if ( typeof candidate === 'function' && key === 'route' && legalVerbFile ) {
                 // if there is a function called 'route' and this is a legal verb file, register it
-                app[httpVerb](routeContextPath, routeHandler.route);
+                app[httpVerb](routeContextPath, routeHandler.route.bind(app));
                 added = true;
             } else {
                 // if its a valid route descriptor object, analyze it
                 if ( typeof candidate == 'object' && candidate['verb'] && candidate['route'] ) {
                     // its a valid handler
                     var path =  candidate['path'] || key;
-                    routeContextPath += "/" + path;
+                    if ( path !== '/' ) {
+                        routeContextPath += "/" + path;
+                    }
                     httpVerb = candidate['verb'];
                     app[httpVerb](routeContextPath, candidate['route']);
                     added = true;

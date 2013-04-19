@@ -16,7 +16,7 @@ exports.fetchOAuth2Conf = function() {
  * @param res
  */
 exports.authorizeUrl = function(req, res ) {
-    var oauth2Conf = exports.fetchOAuth2Conf();
+    var oauth2Conf = this.fetchOAuth2Conf();
 
     var url_parts = url.parse(req.url, true);
     var query = url_parts.query;
@@ -34,10 +34,16 @@ exports.authorizeUrl = function(req, res ) {
 
 };
 
-// override?
-exports.oauth2SuccessCallback = function( oauth2CallbackRequest, originServerAccessTokenResponse, callback ) {
+/**
+ * Override this in a subclass!
+ * @param oauth2CallbackRequest
+ * @param originServerAccessTokenResponse
+ * @param callback
+ */
+exports.oauth2SuccessCallback = function( state, originServerAccessTokenResponse, callback ) {
+    console.log(state);
     console.log(originServerAccessTokenResponse);
-    callback({'ticketID': 1000 });
+    callback();
 };
 
 /**
@@ -48,13 +54,13 @@ exports.oauth2SuccessCallback = function( oauth2CallbackRequest, originServerAcc
  * @param res
  */
 exports.oauth2Callback = function(req, res ) {
-    var oauth2Conf = exports.fetchOAuth2Conf();
+    var oauth2Conf = this.fetchOAuth2Conf();
 
     var url_parts = url.parse(req.url, true);
     var query = url_parts.query;
 
     var code = query['code'];
-    var state = JSON.parse( jive.util.base64Decode(query['state']));
+    var state = JSON.parse( JSON.parse( jive.util.base64Decode(query['state'])) );
     var jiveRedirectUrl = state['jiveRedirectUrl'];
 
     var postObject = oauthUtil.buildOauth2CallbackObject( oauth2Conf, code );
@@ -78,14 +84,14 @@ exports.oauth2Callback = function(req, res ) {
         res.render('oauth2Redirect.html', { 'redirect' : redirect } );
     };
 
-    var oauth2SuccessCallback = exports.oauth2SuccessCallback;
+    var oauth2SuccessCallback = this.oauth2SuccessCallback;
 
     jive.util.buildRequest( oauth2Conf['originServerTokenRequestUrl'], 'POST', postObject, headers).execute(
         function(response) {
             // success
             if ( response.statusCode >= 200 && response.statusCode < 299 ) {
                 if (  oauth2SuccessCallback ) {
-                    oauth2SuccessCallback( req, response, proceed );
+                    oauth2SuccessCallback( state, response, proceed );
                 } else {
                     proceed();
                 }

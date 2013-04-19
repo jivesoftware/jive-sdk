@@ -88,12 +88,20 @@ var setupExpressApp = function (app, rootDir, config) {
         if ( jive.service.options['oauth2'] ) {
             var oauth = require('../routes/oauth');
 
+
+//            var oauth2 = require('/Users/aron.racho/dev/projects/jive-sdk-examples/basicexample/tiles/samplesfdc/backend/oauth.js');
+
             // wire internal sdk endpoints
-            jiveSdkApp.get('/authorizeUrl', oauth.authorizeUrl );
+            jiveSdkApp.get('/authorizeUrl', oauth.authorizeUrl.bind(oauth) );
             console.log("/authorizeUrl");
 
-            jiveSdkApp.get('/oauth2Callback', oauth.oauth2Callback );
+            jiveSdkApp.get('/oauth2Callback', oauth.oauth2Callback.bind(oauth) );
             console.log("/oauth2Callback");
+
+//            jiveSdkApp.get('/authorizeUrl2', oauth2.authorizeUrl.bind(oauth2) );
+//
+//            jiveSdkApp.get('/oauth2Callback2', oauth2.oauth2Callback.bind(oauth2) );
+
 
             jiveSdkApp.get('/javascripts/oauth2client.js', function(req, res) {
                 res.render('oauth2client.js');

@@ -10,6 +10,7 @@ function OAuth2ServerFlow( options ) {
     var onLoadCallback = options['onLoadCallback'];
 
     // has defaults
+    var authorizeUrl =  options['authorizeUrl'] || serviceHost + '/authorizeUrl';
     var ticketURL =  options['ticketURL'];
     var authz = options['authz'] || 'signed';
 
@@ -20,7 +21,7 @@ function OAuth2ServerFlow( options ) {
         }
 
         //Fetch the jive callback url - eg. http://server//gadgets/jiveOAuth2Callback
-        var url = serviceHost + "/authorizeUrl?callback=" + oauth2CallbackUrl
+        var url = authorizeUrl + "?callback=" + oauth2CallbackUrl
             + "&ts=" + new Date().getTime() + "&viewerID=" + viewerID;
 
         //Pre open condition check
@@ -67,7 +68,7 @@ function OAuth2ServerFlow( options ) {
 
                 // state
                 var identifiers = jive.tile.getIdentifiers();
-                var id = identifiers['viewer'];   // user ID
+                var viewerID = identifiers['viewer'];   // user ID
                 var ticket = config["ticketID"]; // may or may not be there
                 var oauth2CallbackUrl = jive.tile.getOAuth2CallbackUrl();
 
@@ -82,7 +83,7 @@ function OAuth2ServerFlow( options ) {
                     //
                     osapi.http.get({
                         'href' :  serviceHost + ticketURL + '?' + (
-                            ticket ? ('ticketID=' + ticket) : ('viewerID=' + id + "&ts=" + new Date().getTime())
+                            ticket ? ('ticketID=' + ticket) : ('viewerID=' + viewerID + "&ts=" + new Date().getTime())
                         ),
                         'format' : 'json',
                         'authz': authz
@@ -98,14 +99,14 @@ function OAuth2ServerFlow( options ) {
                             // skip authentication
                             ticket = data.ticketID;
                             if ( !ticket ) {
-                                doOAuthDance(id, oauth2CallbackUrl);
+                                doOAuthDance(viewerID, oauth2CallbackUrl);
                             } else {
                                 oauth2SuccessCallback();
                             }
                         } else {
                             // ticket is not ok
                             // proceed with authentication
-                            doOAuthDance(id, oauth2CallbackUrl);
+                            doOAuthDance(viewerID, oauth2CallbackUrl);
                         }
                     });
 
@@ -113,7 +114,7 @@ function OAuth2ServerFlow( options ) {
                     // proceed with authentication since
                     // there is no ticket endpoint to check for
                     // origin server access token validity.
-                    doOAuthDance(id, oauth2CallbackUrl);
+                    doOAuthDance(viewerID, oauth2CallbackUrl);
                 }
 
             });
