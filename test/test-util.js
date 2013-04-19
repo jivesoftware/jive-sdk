@@ -43,7 +43,7 @@ exports.configServer = function(operationJson, serverProc) {
 exports.createServer = function(config) {
     var deferred = q.defer();
 
-    var serverProcess = require('child_process').fork('./test-server',  {execArgv: []});
+    var serverProcess = require('child_process').fork('./test-server',  {execArgv: [], silent: true});
 
     var serverStartedCallback = function(m) {
 
@@ -104,16 +104,16 @@ exports.get = function(url, expectedStatus, expectedEntity) {
     return testClientRequest(url, expectedStatus, expectedEntity, "GET", null, null);
 }
 
-exports.post = function(url, expectedStatus, expectedEntity, body) {
-    return testClientRequest(url, expectedStatus, expectedEntity, "POST", body, null);
+exports.post = function(url, expectedStatus, expectedEntity, body, headers) {
+    return testClientRequest(url, expectedStatus, expectedEntity, "POST", body, headers);
 }
 
-exports.put = function(url, expectedStatus, expectedEntity, body) {
-    return testClientRequest(url, expectedStatus, expectedEntity, "PUT", body, null);
+exports.put = function(url, expectedStatus, expectedEntity, body, headers) {
+    return testClientRequest(url, expectedStatus, expectedEntity, "PUT", body, headers);
 }
 
-exports.delete = function(url, expectedStatus, expectedEntity, body) {
-    return testClientRequest(url, expectedStatus, expectedEntity, "DELETE", body, null);
+exports.delete = function(url, expectedStatus, expectedEntity, headers) {
+    return testClientRequest(url, expectedStatus, expectedEntity, "DELETE", body, headers);
 }
 
 function testClientRequest(url, expectedStatus, expectedEntity, method, body, headers) {
@@ -150,4 +150,10 @@ function errorCallback (deferred) {
         deferred.resolve(err);
     }
 };
+
+exports.makeBasicAuth = function(user, password) {
+    var tok = user + ":" + password;
+    var hash = new Buffer(tok).toString('base64');
+    return "Basic " + hash;
+}
 

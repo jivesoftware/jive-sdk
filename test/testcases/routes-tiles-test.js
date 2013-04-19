@@ -28,6 +28,8 @@ var jiveIdServerConfig = {
     mockJiveId: true
 }
 
+var basicAuth = testUtil.makeBasicAuth(integrationConfig.clientId, integrationConfig.clientSecret);
+
 
 //************************MOCHA TESTS************************
 describe('jive.util', function () {
@@ -49,8 +51,20 @@ describe('jive.util', function () {
 
 
     describe('#buildRequest()', function () {
-        it("GET to /registration", function (done) {
-            testUtil.get(base + "/registration", 200).then(function (res) {
+        it("GET to /registration should return 404", function (done) {
+            testUtil.get(base + "/registration", 404).then(function (res) {
+                done();
+            });
+        });
+
+        it("POST to /registration without basic auth should return 401", function (done) {
+            testUtil.post(base + "/registration", 401).then(function (res) {
+                done();
+            });
+        });
+
+        it("POST to /registration with basic auth and no entity should return 400", function (done) {
+            testUtil.post(base + "/registration", 400, null, null, {"Authorization" : basicAuth}).then(function (res) {
                 done();
             });
         });
