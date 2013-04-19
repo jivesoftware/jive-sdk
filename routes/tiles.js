@@ -56,6 +56,8 @@ exports.registration = function( req, res ) {
         return;
     }
 
+    var completedResponse = false;
+
     var registerer = function( scope, instanceLibrary ) {
         instanceLibrary.findByScope(guid).then( function(tileInstance) {
             // the instance exists
@@ -66,44 +68,53 @@ exports.registration = function( req, res ) {
 
                 instanceLibrary.save(tileInstance).then(function() {
                     jive.events.emit("updateInstance." + name, tileInstance);
+                    res.writeHead(204, {'Content-Type': 'applicataion/json'});
+                    res.end(JSON.stringify(tileInstance));
+                    completedResponse = true;
                 });
+
             } else {
-                instanceLibrary.register(clientId, url, config, name, code).then(
+                return instanceLibrary.register(clientId, url, config, name, code).then(
                     function( tileInstance ) {
                         console.log("registered instance", tileInstance );
                         instanceLibrary.save(tileInstance).then(function() {
                             jive.events.emit("newInstance." + name, tileInstance);
+                            res.writeHead(201, {'Content-Type': 'applicataion/json'});
+                            res.end(JSON.stringify(tileInstance));
+                            completedResponse = true;
                         });
+
                     }
                 ).fail( function(err) {
                     console.log('Fail!',err);
                     res.writeHead(502, { 'Content-Type': 'application/json' });
                     res.end( JSON.stringify( { status: 500, 'error': 'Failed to get acquire access token', 'detail' : err } ) );
+                    completedResponse = true;
                 } );
             }
         });
 
     };
 
-    var completedResponse = false;
+
     // try tiles
     jive.tiles.definitions.findByTileName( name).then( function( found ) {
+
         if ( found ) {
             registerer(guid, jive.tiles);
         }
         else {
-            completedResponse = true;
             errorResponse(res);
         }
     });
 
     // try extstreams
     jive.extstreams.definitions.findByTileName( name).then( function( found ) {
+        completedResponse = true;
         if ( found ) {
             registerer(guid, jive.extstreams);
         }
         else {
-            completedResponse = true;
             errorResponse(res);
         }
     });
@@ -113,6 +124,7 @@ exports.registration = function( req, res ) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(
                 JSON.stringify({status: 400, message: "No tile or external stream definition was found for the given name '" + name + "'"}));
+            completedResponse = true;
         }
     }
 };

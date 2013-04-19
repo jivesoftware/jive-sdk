@@ -69,6 +69,12 @@ describe('jive.util', function () {
             });
         });
 
+        it("POST to /registration with incorrect basic auth should return 403", function (done) {
+            testUtil.post(base + "/registration", 403, null, null, {"Authorization" : "Basic blahblah"}).then(function (res) {
+                done();
+            });
+        });
+
         it("POST to /test", function (done) {
             testUtil.post(jiveIdBase + postEndpoint.path, 204, null, null).then(function (res) {
                 done();
