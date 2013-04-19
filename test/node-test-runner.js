@@ -5,7 +5,7 @@ var Mocha = require('mocha'),
     http = require('http');
 
 var configuration = {
-    'port' : 8094,
+    'port' : 8095,
     'clientUrl' : 'http://localhost',
     'clientId'      : '6bgwdhc0rwifutkywsua19c49yt2qs2r',
     'clientSecret'  : '6iyjdimjzg5jbmvozv03dj0ogdzi3y.XKSkGTDsYznPZLd0zM0ZU06ExHA.1.s'

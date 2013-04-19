@@ -44,10 +44,15 @@ exports.registration = function( req, res ) {
         var authSecret = pParts[1];
 
         if ( authClientId !== clientId || authSecret !== authSecret ) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end( JSON.stringify( { 'error': 'Invalid HMAC authorization header' } ) );
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid HMAC authorization header' } ) );
             return;
         }
+    }
+    else {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end( JSON.stringify( { status: 401, 'error': 'Basic Auth header is required. Must provide clientID:clientSecret' } ) );
+        return;
     }
 
     var registerer = function( scope, instanceLibrary ) {
@@ -80,6 +85,9 @@ exports.registration = function( req, res ) {
         if ( found ) {
             registerer(guid, jive.tiles);
         }
+        else {
+            errorResponse(res);
+        }
     });
 
     // try extstreams
@@ -87,12 +95,16 @@ exports.registration = function( req, res ) {
         if ( found ) {
             registerer(guid, jive.extstreams);
         }
+        else {
+            errorResponse(res);
+        }
     });
 
-    // todo -- what if it isn't? err???
-    res.status(204);
-    res.set({'Content-Type': 'application/json'});
-    res.send();
+    var errorResponse = function(res) {
+        res.status(400);
+        res.set({'Content-Type': 'application/json'});
+        res.end({status: 400, message: "No tile or external stream definition was found for the given name '" + name + "'"});
+    }
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

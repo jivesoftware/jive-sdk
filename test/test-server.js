@@ -48,6 +48,7 @@ else {
 
 function startServer(configuration) {
 
+    setupIntegration();
 
     var server = http.createServer(app).listen(configuration.port, function () {
         console.log("Test server listening on port " + configuration.port);
@@ -84,8 +85,6 @@ function doOperation( operation ) {
         var headers = operation['headers'];
 
         setEndpoint(method, path, statusCode, body, headers);
-
-
     }
 }
 
@@ -123,3 +122,49 @@ function setEndpoint(method, path, statusCode, body, headers) {
 exports.server = function() {
     return server;
 };
+
+function setupIntegration() {
+
+// Setup the tile configuration UI route at [clientUrl]:[port]/configure (eg. http://yoursite:8090/configure):
+    app.get( '/configure', function( req, res ) {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end( "<script>jive.tile.onOpen(function() { jive.tile.close({'config':'value'});});</script>" );
+    } );
+
+// Setup the tile registration route at [clientUrl]:[port]/registration (eg. http://yoursite:8090/registration):
+    app.post( '/registration', jive.routes.registration );
+
+// For development, you may also setup useful dev endpoints to show what tiles are available on your service;
+// for installing tiles on a jive instance
+    app.get( '/tiles', jive.routes.tiles );
+    app.get( '/tilesInstall', jive.routes.installTiles );
+
+//
+// Your tile must also declare metadata about itself, permitting the Jive instance to discover
+// what type of type style it is, icons, and also the aforementioned required endpoints (configuration
+// and registration).
+//
+    var definition = {
+        "sampleData": {"title": "Account Details",
+            "contents": [
+                {
+                    "name": "Value",
+                    "value": "Initial data"
+                }
+            ]},
+        "config": "/configure",
+        "register": "/registration",
+        "displayName": "Table Example",
+        "name": "sampletable",
+        "description": "Table example.",
+        "style": "TABLE",
+        "icons": {
+            "16": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+            "48": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+            "128": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif"
+        }
+    };
+
+// Make this definition known to your service by calling the .save function as demonstrated below:
+    jive.tiles.definitions.save(definition);
+}
