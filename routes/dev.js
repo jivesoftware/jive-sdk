@@ -138,6 +138,7 @@ exports.installTiles = function( req, res ) {
     var jivePort = query['jivePort'] || 80;
     var context = query['context'];
     var protocol = query['protocol'] || 'http';
+    var credentials = query['credentials'] || 'YWRtaW46YWRtaW4=';
 
     var definitionPostURL = protocol + '://' + jiveHost + ( context ? '/' + context : '' ) + '/api/jivelinks/v1/tiles/definitions';
 
@@ -207,7 +208,7 @@ exports.installTiles = function( req, res ) {
             var requestParams = {
                 host    : jiveHost, port: jivePort, method: 'POST',
                 path    : ( context ? '/' + context : '' ) + '/api/jivelinks/v1/tiles/definitions',
-                headers : { 'Authorization' : 'Basic YWRtaW46YWRtaW4=', 'Content-Type' : 'application/json' }
+                headers : { 'Authorization' : 'Basic ' + credentials, 'Content-Type' : 'application/json' }
             };
 
             doDefinition(requestParams, tile, postBody).then( processOne );
