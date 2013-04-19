@@ -68,7 +68,7 @@ exports.registration = function( req, res ) {
 
                 instanceLibrary.save(tileInstance).then(function() {
                     jive.events.emit("updateInstance." + name, tileInstance);
-                    res.writeHead(204, {'Content-Type': 'applicataion/json'});
+                    res.writeHead(204, {'Content-Type': 'application/json'});
                     res.end(JSON.stringify(tileInstance));
                     completedResponse = true;
                 });
@@ -79,7 +79,7 @@ exports.registration = function( req, res ) {
                         console.log("registered instance", tileInstance );
                         instanceLibrary.save(tileInstance).then(function() {
                             jive.events.emit("newInstance." + name, tileInstance);
-                            res.writeHead(201, {'Content-Type': 'applicataion/json'});
+                            res.writeHead(201, {'Content-Type': 'application/json'});
                             res.end(JSON.stringify(tileInstance));
                             completedResponse = true;
                         });
