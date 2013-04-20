@@ -25,7 +25,7 @@ var jive = require('jive-sdk');
 
 var argv = require('optimist').argv;
 
-var validTypes = ['activity', 'tile' ];
+var validTypes = ['all', 'activity', 'tile' ];
 var validCommands = ['create'];
 var validTileStyles = ['list', 'gauge', 'table' ];
 
@@ -109,7 +109,9 @@ function copyFileProcessor( type, currentFsItem, targetPath, substitutions ) {
 }
 
 function processDefinition(type, name, style, force) {
-    console.log('Creating', type, '"' + name + '"',
+
+    console.log('Creating', type == 'all' ? '' : type,
+        '"' + name + '"',
         (type !== 'activity' ? 'of style ' + style : ''));
 
     var root = '../service/generator';
@@ -163,16 +165,36 @@ function processDefinition(type, name, style, force) {
         )
     );
 
-    return promises;
+    return q.all(promises);
 }
 function execute(options) {
     var type = options['type'];
-    var style =  type ? options['style'] : 'activity';
-    var name = options['name'] || 'sample' + type;
     var force = options['force'];
 
-    style = type == 'activity' ? 'activity' : style;
-    return processDefinition(type, name, style, force);
+    var promises = [];
+
+    if ( type == 'all' ) {
+
+        var styles = [];
+        styles = styles.concat(validTileStyles);
+        styles.push('activity');
+
+        styles.forEach( function(style) {
+            var name = 'sample' + style;
+            promise = processDefinition(type, name, style, force);
+            promises.push(promise);
+        });
+
+    } else {
+        var style =  type == 'activity' ? 'activity' : options['style'];
+        var name = options['name'] || 'sample' + type;
+        var promise = processDefinition(type, name, style, force);
+        promises.push(promise);
+    }
+
+    q.all(promises).then(function() {
+       console.log('Done!');
+    });
 }
 
 exports.init = function() {
