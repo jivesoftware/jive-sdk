@@ -15,6 +15,7 @@
     "request" : "*",
     "mustache" : "*",
     "mocha": "*",
+    "optimist": "*",
     "mongojs": "*",
     "mongodb": "*",
     "node-uuid": "*",
