@@ -1,16 +1,22 @@
-var testRunner = require('./node-test-runner'),
-    q = require('q'),
+var q = require('q'),
     uuid = require('node-uuid'),
     jive = require('../../jive-sdk'),
     assert = require('assert');
 
 //*************************EXPORTED*****************************
 
+/**
+ * Send a configuration operation to the given server process, e.g. for modifying the endpoints. See test-server.js.
+ *
+ * @param operationJson
+ * @param serverProc
+ * @return {Function|promise|promise|Q.promise}
+ */
 exports.configServer = function(operationJson, serverProc) {
 
     //If no server process is provided, use the default server process provided by the test runner
     if (!serverProc) {
-        serverProc = testRunner.serverProcess();
+        serverProc = require('./node-test-runner').serverProcess();
     }
 
     var deferred = q.defer();
@@ -54,7 +60,6 @@ exports.createServer = function(config, procOptions) {
         serverProcess.removeListener('message', arguments.callee);
         var success = m.serverStarted;
         if (success) {
-            console.log("Test server started");
             deferred.resolve(serverProcess);
         }
         else {
@@ -77,7 +82,7 @@ exports.stopServer = function(serverProc) {
 
     //If no server process is provided, use the default server process provided by the test runner
     if (!serverProc) {
-        serverProc = testRunner.serverProcess();
+        serverProc = require('./node-test-runner').serverProcess();
     }
 
     var deferred = q.defer();
@@ -104,33 +109,38 @@ exports.stopServer = function(serverProc) {
     return deferred.promise;
 }
 
-exports.get = function(url, expectedStatus, expectedEntity) {
-    return testClientRequest(url, expectedStatus, expectedEntity, "GET", null, null);
+/********************************REQUEST UTILS********************************/
+
+exports.get = function(url, expectedStatus, expectedEntity, doPrintResponse) {
+    return testClientRequest(url, expectedStatus, expectedEntity, "GET", null, null, doPrintResponse);
 }
 
-exports.post = function(url, expectedStatus, expectedEntity, body, headers) {
-    return testClientRequest(url, expectedStatus, expectedEntity, "POST", body, headers);
+exports.post = function(url, expectedStatus, expectedEntity, body, headers, doPrintResponse) {
+    return testClientRequest(url, expectedStatus, expectedEntity, "POST", body, headers, doPrintResponse);
 }
 
-exports.put = function(url, expectedStatus, expectedEntity, body, headers) {
-    return testClientRequest(url, expectedStatus, expectedEntity, "PUT", body, headers);
+exports.put = function(url, expectedStatus, expectedEntity, body, headers, doPrintResponse) {
+    return testClientRequest(url, expectedStatus, expectedEntity, "PUT", body, headers, doPrintResponse);
 }
 
-exports.delete = function(url, expectedStatus, expectedEntity, headers) {
-    return testClientRequest(url, expectedStatus, expectedEntity, "DELETE", body, headers);
+exports.delete = function(url, expectedStatus, expectedEntity, body, headers, doPrintResponse) {
+    return testClientRequest(url, expectedStatus, expectedEntity, "DELETE", body, headers, doPrintResponse);
 }
 
-function testClientRequest(url, expectedStatus, expectedEntity, method, body, headers) {
+function testClientRequest(url, expectedStatus, expectedEntity, method, body, headers, doPrintResponse) {
     var deferred = q.defer();
     jive.util.buildRequest(url, method, body, headers, null)
-        .execute(successCallback(expectedStatus, expectedEntity, deferred), errorCallback(deferred));
+        .execute(successCallback(expectedStatus, expectedEntity, deferred, doPrintResponse), errorCallback(deferred));
 
     return deferred.promise;
 }
 
-function successCallback (expectedStatus, expectedEntity, deferred) {
+function successCallback (expectedStatus, expectedEntity, deferred, doPrintResponse) {
 
     return function (res) {
+        if (doPrintResponse) {
+            console.log(res.entity);
+        }
         var entity = res.entity;
         if (res.statusCode != expectedStatus) {
             assert.fail(res.statusCode, expectedStatus, "Status code from server incorrect");
@@ -159,5 +169,10 @@ exports.makeBasicAuth = function(user, password) {
     var tok = user + ":" + password;
     var hash = new Buffer(tok).toString('base64');
     return "Basic " + hash;
+}
+
+exports.makeGuid = function(communityUrl, isTile, tileOrExtstreamId) {
+    communityUrl = communityUrl.replace("http://","");
+    return "community:" + encodeURIComponent(communityUrl) + (isTile ? "/tile:" : "/extstream:") + tileOrExtstreamId;
 }
 

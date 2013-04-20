@@ -4,12 +4,15 @@
 var express = require('express'),
     routes = require('./testroutes'),
     http = require('http'),
-    jive = require('../../jive-sdk');
+    jive = require('../../jive-sdk'),
+    uuid = require('node-uuid');
 
+// "Private" variables
 var forkedProcess = typeof process.send !== 'undefined';
-var config = null;
-var server = null;
+var config = null; //Configuration passed in from the parent process
+var server = null; //The node server object
 
+//Setup app
 var app = express();
 app.use(express.bodyParser());
 app.use(express.logger('dev'));
@@ -18,9 +21,6 @@ app.use(app.router);
 app.configure('development', function () {
     app.use(express.errorHandler());
 });
-
-// ROUTES
-app.get('/', routes.index);
 
 if (forkedProcess) {
     process.on('message', function(m) {
@@ -59,12 +59,12 @@ function startServer(configuration) {
         setupIntegration(configuration);
     }
     if (configuration.mockJiveId===true) {
-
+        setupMockJiveId(configuration);
     }
 
     server = http.createServer(app);
     server.listen(configuration.port, function () {
-        console.log("Test server listening on port " + configuration.port);
+        console.log("Test server '" + configuration['serverName'] + "' listening on port " + configuration.port);
         if (forkedProcess) {
             process.send( {serverStarted: true});
         }
@@ -107,6 +107,12 @@ function doOperation( operation ) {
         var headers = operation['headers'];
 
         setEndpoint(method, path, statusCode, body, headers);
+    }
+    else if (type == "setEnv") {
+        var env = operation['env'];
+        for (var key in env){
+            process.env[key] = env[key];
+        }
     }
 }
 
@@ -191,4 +197,42 @@ function setupIntegration(configuration) {
 
 // Make this definition known to your service by calling the .save function as demonstrated below:
     jive.tiles.definitions.save(definition);
+}
+
+
+function setupMockJiveId(conf){
+
+    var allowedAuthzCode = null;
+
+    if (conf.allowedAuthzCode) {
+        allowedAuthzCode = conf.allowedAuthzCode;
+    }
+
+    app.post("/v1/oauth2/token", function(req, res) {
+
+        var body = req.body;
+
+        var requestCode = body['code'];
+
+        //If we aren't requiring a particular authz code or the request supplied the correct one
+        if (!allowedAuthzCode || allowedAuthzCode && requestCode == allowedAuthzCode) {
+
+            var response = {
+                "access_token": uuid.v4(),
+                "token_type":"bearer",
+                "refresh_token": uuid.v4(),
+                "expires_in": 3599,
+                "scope": require('./test-util').makeGuid(conf.clientUrl + (conf.port ? ":" + conf.port : ""), true, 1234),
+                "state":null};
+
+            res.writeHead(200, {"Content-Type": "application/json"});
+            res.end(JSON.stringify(response));
+        }
+        else {
+            res.writeHead(400, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({"error": "Invalid auth code " + requestCode}));
+        }
+
+    });
+
 }

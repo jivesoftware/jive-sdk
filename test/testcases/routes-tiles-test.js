@@ -1,6 +1,7 @@
 var jive = require('../../../jive-sdk'),
     assert = require('assert'),
-    testUtil = require('../test-util');
+    testUtil = require('../test-util'),
+    testRunner = require('../node-test-runner');
 
 var integrationConfig = jive.service.options;
 
@@ -8,27 +9,55 @@ var host = integrationConfig['clientUrl'];
 var port = integrationConfig['port'];
 var base = host + ":" + port;
 var jiveIdServerProc = null;
+var fakeJiveServerProc = null;
 
-
-var postEndpoint = {
-    "type": "setEndpoint",
-    "method": "POST",
-    "path": "/test",
-    "statusCode": 204,
-    "body": "{\"key\": \"value\"}",
-    "headers": { "Content-Type": "application/json" }
-};
-
+//Data for fake Jive ID server
 var jiveIdPort = port + 1;
 var jiveIdBase = host + ":" + jiveIdPort;
 
 var jiveIdServerConfig = {
     clientUrl: host,
     port: jiveIdPort,
-    mockJiveId: true
+    mockJiveId: true,
+    serverName: 'Fake Jive ID Server'
 }
 
+var setEnvironmentConfig = {
+    "type": "setEnv",
+    "env" : {
+        'jive.jiveid.servers.public' : jiveIdBase
+    }
+}
+
+//Data for fake Jive Server
+var fakeJivePort = port + 2;
+var fakeJiveUrl = host + ":" + fakeJivePort;
+
+var fakeJiveServerConfig = {
+    clientUrl: host,
+    port: fakeJivePort,
+    serverName: 'Fake Jive Instance Server'
+}
+
+var dataPushEndpoint = {
+    "type": "setEndpoint",
+    "method": "PUT",
+    "path": "/api/jivelinks/v1/tiles/1234/data",
+    "statusCode": 204,
+    "body": "",
+    "headers": { "Content-Type": "application/json" }
+};
+
 var basicAuth = testUtil.makeBasicAuth(integrationConfig.clientId, integrationConfig.clientSecret);
+
+var registrationRequest =
+{
+    "code": integrationConfig.clientSecret,
+    "name": "sampletable",
+    "config": {"config":"value"},
+    "url": fakeJiveUrl + dataPushEndpoint.path,
+    "guid": testUtil.makeGuid(fakeJiveUrl,true,1234)
+}
 
 
 //************************MOCHA TESTS************************
@@ -39,13 +68,19 @@ describe('jive.util', function () {
         testUtil.createServer(jiveIdServerConfig)
             .then(function (serverProc) {
                 jiveIdServerProc = serverProc;
-                return testUtil.configServer(postEndpoint, serverProc)
+                return testUtil.configServer(setEnvironmentConfig, testRunner.serverProcess())
+            })
+            .thenResolve(testUtil.createServer(fakeJiveServerConfig, {silent: true}))
+            .then(function(serverProc) {
+                fakeJiveServerProc = serverProc;
+                return testUtil.configServer(dataPushEndpoint, serverProc);
             })
             .then(done);
     });
 
     after(function (done) {
         testUtil.stopServer(jiveIdServerProc)
+            .thenResolve(testUtil.stopServer(fakeJiveServerProc))
             .then(done);
     });
 
@@ -58,28 +93,29 @@ describe('jive.util', function () {
         });
 
         it("POST to /registration without basic auth should return 401", function (done) {
-            testUtil.post(base + "/registration", 401).then(function (res) {
+            testUtil.post(base + "/registration", 401, null, {}).then(function (res) {
                 done();
             });
         });
 
         it("POST to /registration with basic auth and no entity should return 400", function (done) {
-            testUtil.post(base + "/registration", 400, null, null, {"Authorization" : basicAuth}).then(function (res) {
+            testUtil.post(base + "/registration", 400, null, {}, {"Authorization" : basicAuth}).then(function (res) {
                 done();
             });
         });
 
         it("POST to /registration with incorrect basic auth should return 403", function (done) {
-            testUtil.post(base + "/registration", 403, null, null, {"Authorization" : "Basic blahblah"}).then(function (res) {
+            testUtil.post(base + "/registration", 403, null, {}, {"Authorization" : "Basic blahblah"}, true).then(function (res) {
                 done();
             });
         });
 
-        it("POST to /test", function (done) {
-            testUtil.post(jiveIdBase + postEndpoint.path, 204, null, null).then(function (res) {
+        it("POST to /registration with basic auth and correct JSON should return 201 (created)", function (done) {
+            testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization" : basicAuth}, true).then(function (res) {
                 done();
             });
         });
+
     });
 });
 

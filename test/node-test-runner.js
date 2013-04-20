@@ -3,19 +3,20 @@ var Mocha = require('mocha'),
     fs = require('fs'),
     jive = require('../../jive-sdk'),
     http = require('http'),
-    test_util = require('./test-util');
+    testUtil = require('./test-util');
 
 var configuration = {
     'port' : 8097,
     'clientUrl' : 'http://localhost',
     'clientId'      : '6bgwdhc0rwifutkywsua19c49yt2qs2r',
     'clientSecret'  : '6iyjdimjzg5jbmvozv03dj0ogdzi3y.XKSkGTDsYznPZLd0zM0ZU06ExHA.1.s',
-    'integrationServer' : true
+    'integrationServer' : true,
+    'serverName' : "Test Integration Server"
 };
 
 jive.service.options = configuration;
 
-test_util.createServer(configuration).then(runMocha);
+testUtil.createServer(configuration).then(runMocha);
 
 var integrationServerProc;
 
