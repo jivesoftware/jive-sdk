@@ -26,7 +26,7 @@ var jive = require('jive-sdk');
 var argv = require('optimist').argv;
 
 var validTypes = ['all', 'activity', 'tile' ];
-var validCommands = ['create'];
+var validCommands = ['create','help'];
 var validTileStyles = ['list', 'gauge', 'table' ];
 
 function validate(options) {
@@ -201,7 +201,7 @@ function finish(target) {
     });
 }
 
-function execute(options) {
+function doCreate(options) {
     var type = options['type'];
     var force = options['force'];
 
@@ -233,8 +233,34 @@ function execute(options) {
     });
 }
 
+function doHelp() {
+    console.log('Usage: jive-sdk [cmd] [--options ...]\n');
+    console.log('where cmd include:');
+    console.log('   help');
+    console.log('   create\n');
+
+    console.log('where options include:');
+    console.log('   --type=<one of [tile, activity]>        Defaults to tile');
+    console.log('   --style=<one of [list, gauge, table]>   Only available when --type=tile');
+    console.log('   --force=<one of [true,false]>           Defaults to false, overrwrites existing if true');
+    console.log('   --name=<string>                         Defaults to sample<style>');
+}
+
+function execute(options) {
+    var cmd = options['cmd'];
+
+    if ( cmd === 'help' ) {
+        doHelp();
+    }
+
+    if ( cmd == 'create') {
+        doCreate(options);
+    }
+}
+
 exports.init = function() {
-    var cmd = argv._.length > 0 ? argv._[0] : 'create';
+    // default command to help
+    var cmd = argv._.length > 0 ? argv._[0] : 'help';
 
     var name = argv['name'];
     var type = argv['type'] || 'tile';
@@ -257,6 +283,10 @@ exports.init = function() {
         err.forEach( function(err) {
             console.log('   ', err);
         });
+
+        console.log();
+
+        doHelp();
 
         process.exit(-1);
     }
