@@ -70,15 +70,27 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
                     // task
                     var task = target.task;
                     if ( task ) {
-                        var taskToAdd = task;
+                        var tasksToAdd = [];
                         if (typeof task === 'function' ) {
                             // its a function, create a wrapping task object
-                            taskToAdd = jive.tasks.build( task );
+                            tasksToAdd.push( jive.tasks.build( task ) );
+                        } else if ( task['forEach'] ) {
+                            task.forEach( function( t ) {
+                                if ( typeof t === 'function' ) {
+                                    tasksToAdd.push( jive.tasks.build( t ) );
+                                } else if ( typeof t === 'object' ) {
+                                    tasksToAdd.push( t );
+                                }
+                            } );
+                        } else if ( typeof task === 'object' ) {
+                            tasksToAdd.push( task );
                         }
 
                         // enforce a standard key
-                        taskToAdd.setKey( definitionName  + '.' + theFile + "." + taskToAdd.getInterval() );
-                        jive.extstreams.definitions.addTasks( taskToAdd );
+                        tasksToAdd.forEach( function(taskToAdd) {
+                            taskToAdd.setKey( definitionName  + '.' + theFile + "." + taskToAdd.getInterval() );
+                        });
+                        jive.extstreams.definitions.addTasks( tasksToAdd );
                     }
 
                     // event handler
