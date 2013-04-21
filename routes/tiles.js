@@ -76,7 +76,7 @@ exports.registration = function( req, res ) {
             } else {
                 return instanceLibrary.register(clientId, url, config, name, code).then(
                     function( tileInstance ) {
-                        console.log("registered instance", tileInstance );
+                        jive.logger.info("registered instance", tileInstance );
                         instanceLibrary.save(tileInstance).then(function() {
                             jive.events.emit("newInstance." + name, tileInstance);
                             res.writeHead(201, {'Content-Type': 'application/json'});
@@ -86,7 +86,7 @@ exports.registration = function( req, res ) {
 
                     },
                      function(err) {
-                        console.log('Fail!',err);
+                        jive.logger.error('Fail!',err);
                         res.writeHead(502, { 'Content-Type': 'application/json' });
                         res.end( JSON.stringify( { status: 500, 'error': 'Failed to get acquire access token', 'detail' : err } ) );
                         completedResponse = true;

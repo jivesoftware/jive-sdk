@@ -85,10 +85,10 @@ exports.init = function(_app, options ) {
             process.argv.forEach(function (val, index, array) {
                 if ( val.indexOf('=') > -1 ) {
                     var arg = val.split(/=/);
-                    console.log(arg[0],'=',arg[1]);
+                    jive.logger.debug(arg[0],'=',arg[1]);
 
                     if ( arg[0] == 'configFile' ) {
-                        console.log("Command line argument:");
+                        jive.logger.debug("Command line argument:");
                         configFilePathFromArgs = arg[1];
                     }
                 }
@@ -103,8 +103,8 @@ exports.init = function(_app, options ) {
         }
 
         initialPromise = q.nfcall( fs.readFile, options, 'utf8').then( function (data) {
-            console.log('Startup configuration from', options);
-            console.log(data);
+            jive.logger.debug('Startup configuration from', options);
+            jive.logger.debug(data);
 
             var jiveConfig = JSON.parse(data);
             exports.options = jiveConfig;
@@ -177,7 +177,9 @@ exports.autowireDefinitionMetadata = function( definitionMetadataFile ) {
  * Return promise - fail or succeed
  */
 exports.start = function() {
-    return bootstrap.start( app, exports.options, rootDir, tilesDir );
+    return bootstrap.start( app, exports.options, rootDir, tilesDir).then( function() {
+        jive.logger.info("Service started.");
+    });
 };
 
 

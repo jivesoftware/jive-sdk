@@ -24,7 +24,7 @@ exports.task = function(context) {
     jive.tiles.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
         if ( instances ) {
             instances.forEach( function( instance ) {
-                console.log('running pusher for ', instance.name, 'instance', instance.id );
+                jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
 
                 count++;
 

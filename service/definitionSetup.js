@@ -190,7 +190,7 @@ exports.setupDefinitionRoutes = function(app, definitionName, routesPath){
             }
 
             if ( added ) {
-                console.log('Route added for', definitionName, ':',
+                jive.logger.debug('Route added for', definitionName, ':',
                     httpVerb.toUpperCase(), routeContextPath, ' -> ',
                     routeHandlerPath + ".js" );
             }
@@ -263,7 +263,7 @@ exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
 
         return q.all(promises);
     }).fail(function(f) {
-        console.log(f);
+        jive.logger.error(f);
     });
 };
 

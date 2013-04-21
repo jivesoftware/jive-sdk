@@ -62,3 +62,8 @@ exports.routes = require('./routes/tiles');
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // service
 exports.service = require('./service/api');
+
+var logger = require('log4js').getLogger();
+logger.setLevel('INFO');
+
+exports.logger = logger;

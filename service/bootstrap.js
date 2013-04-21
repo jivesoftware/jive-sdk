@@ -53,7 +53,7 @@ var validateServiceOptions = function (options) {
 var setupExpressApp = function (app, rootDir, config) {
     if ( !app ) {
         return q.fcall(function() {
-            console.log("Warning - app not specified.");
+            jive.logger.warn("Warning - app not specified.");
         } );
     }
 
@@ -69,10 +69,10 @@ var setupExpressApp = function (app, rootDir, config) {
 
         app.set('port', config['port']);
 
-        console.log('Global framework routes:');
+        jive.logger.debug('Global framework routes:');
         app.post('/registration', jive.routes.registration);
 
-        console.log("/registration");
+        jive.logger.debug("/registration");
 
         // wire in an sdk app with its own views
         var jiveSdkApp = express();
@@ -88,20 +88,12 @@ var setupExpressApp = function (app, rootDir, config) {
         if ( jive.service.options['oauth2'] ) {
             var oauth = require('../routes/oauth');
 
-
-//            var oauth2 = require('/Users/aron.racho/dev/projects/jive-sdk-examples/basicexample/tiles/samplesfdc/backend/oauth.js');
-
             // wire internal sdk endpoints
             jiveSdkApp.get('/authorizeUrl', oauth.authorizeUrl.bind(oauth) );
-            console.log("/authorizeUrl");
+            jive.logger.debug("/authorizeUrl");
 
             jiveSdkApp.get('/oauth2Callback', oauth.oauth2Callback.bind(oauth) );
-            console.log("/oauth2Callback");
-
-//            jiveSdkApp.get('/authorizeUrl2', oauth2.authorizeUrl.bind(oauth2) );
-//
-//            jiveSdkApp.get('/oauth2Callback2', oauth2.oauth2Callback.bind(oauth2) );
-
+            jive.logger.debug("/oauth2Callback");
 
             jiveSdkApp.get('/javascripts/oauth2client.js', function(req, res) {
                 res.render('oauth2client.js');
@@ -112,13 +104,13 @@ var setupExpressApp = function (app, rootDir, config) {
     });
 
     app.configure( 'development', function () {
-        console.log('Global dev framework routes:');
+        jive.logger.debug('Global dev framework routes:');
 
         app.get('/tiles', jive.routes.tiles);
         app.get('/tilesInstall', jive.routes.installTiles);
 
-        console.log("/tiles");
-        console.log("/tilesInstall");
+        jive.logger.debug("/tiles");
+        jive.logger.debug("/tilesInstall");
 
         p2.resolve();
     });
@@ -134,15 +126,17 @@ var setupExpressApp = function (app, rootDir, config) {
 exports.start = function( app, options, rootDir, tilesDir ) {
     if ( alreadyBootstrapped ) {
         return q.fcall( function() {
-            console.log('Already bootstrapped, skipping.');
+            jive.logger.warn('Already bootstrapped, skipping.');
         });
     }
 
-    console.log("Running bootstrap.");
+    jive.logger.info("Running bootstrap.");
 
     // mark already bootstrapped so we don't do it again
     alreadyBootstrapped = true;
 
     validateServiceOptions(options);
-    return setupExpressApp(app, rootDir, options);
+    return setupExpressApp(app, rootDir, options).then( function() {
+        jive.logger.info("Bootstrap complete.");
+    });
 };

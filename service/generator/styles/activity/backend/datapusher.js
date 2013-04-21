@@ -28,7 +28,7 @@ exports.task = function() {
                     return;
                 }
 
-                console.log('running pusher for ', instance.name, 'instance', instance.id );
+                jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
 
                 count++;
 
