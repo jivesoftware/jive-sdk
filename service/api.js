@@ -103,11 +103,12 @@ exports.init = function(_app, options ) {
         }
 
         initialPromise = q.nfcall( fs.readFile, options, 'utf8').then( function (data) {
-            jive.logger.debug('Startup configuration from', options);
-            jive.logger.debug(data);
-
             var jiveConfig = JSON.parse(data);
             exports.options = jiveConfig;
+
+            jive.logger.debug('Startup configuration from', options);
+            jive.logger.debug(jiveConfig);
+
             return jiveConfig;
         });
     }

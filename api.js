@@ -64,6 +64,6 @@ exports.routes = require('./routes/tiles');
 exports.service = require('./service/api');
 
 var logger = require('log4js').getLogger();
-logger.setLevel('INFO');
+logger.setLevel(process.env['jive.logging.level'] || 'INFO');
 
 exports.logger = logger;
