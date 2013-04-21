@@ -33,14 +33,12 @@ exports.persistence = {
 //     jive.extstreams
 //     jive.extstreams.definitions
 
-var extstreamsDefinitions = require('./lib/extstreamsDefinitions');
-var extstreams = new (require('./lib/extstreams'));
-extstreams['definitions'] = new extstreamsDefinitions();
+var extstreams = require('./lib/extstreams');
+extstreams['definitions'] = require('./lib/extstreamsDefinitions');
 exports.extstreams = extstreams;
 
-var tileDefinitions = require('./lib/tilesDefinitions');
-var tiles = new (require('./lib/tiles'));
-tiles['definitions'] = new tileDefinitions();
+var tiles = require('./lib/tiles');
+tiles['definitions'] = require('./lib/tilesDefinitions');
 exports.tiles = tiles;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
