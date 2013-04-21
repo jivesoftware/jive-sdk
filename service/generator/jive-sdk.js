@@ -50,16 +50,14 @@ function validate(options) {
 function recursiveDirectoryProcessor(currentFsItem, root, targetRoot, force, processor ) {
 
     var recurseDirectory =  function(directory) {
-        return q.nfcall(fs.readdir, directory)
-            // process the routes
-            .then( function( subItems ) {
-                var promises = [];
-                subItems.forEach( function( subItem ) {
-                    promises.push( recursiveDirectoryProcessor( directory + '/' + subItem, root, targetRoot, force, processor ) );
-                });
-
-                return q.all( promises );
+        return q.nfcall(fs.readdir, directory).then(function( subItems ) {
+            var promises = [];
+            subItems.forEach( function( subItem ) {
+                promises.push( recursiveDirectoryProcessor( directory + '/' + subItem, root, targetRoot, force, processor ) );
             });
+
+            return q.all( promises );
+        });
     };
 
     return q.nfcall( fs.stat, currentFsItem ).then( function(stat) {
@@ -67,23 +65,28 @@ function recursiveDirectoryProcessor(currentFsItem, root, targetRoot, force, pro
 
         if ( stat.isDirectory() ) {
             if ( root !== currentFsItem ) {
-                jive.util.fsexists(targetPath).then( function(exists) {
-                    if ( !exists ){
-                        return processor( 'dir', currentFsItem, targetPath ).then( recurseDirectory(currentFsItem ));
-                    }  else {
+                return jive.util.fsexists(targetPath).then( function(exists) {
+                    if ( root == currentFsItem || (exists && !force)) {
                         return recurseDirectory(currentFsItem);
+                    } else {
+                        return processor( 'dir', currentFsItem, targetPath ).then( function() {
+                            return recurseDirectory(currentFsItem )
+                        });
                     }
                 });
-            } else {
-                return recurseDirectory(currentFsItem);
             }
-        } else if ( stat.isFile() ) {
-            jive.util.fsexists(targetPath).then( function(exists) {
-                if ( !exists || force ) {
-                    return processor( 'file', currentFsItem, targetPath )
-                }
-            });
+
+            return recurseDirectory(currentFsItem);
         }
+
+        // must be a file
+        return jive.util.fsexists(targetPath).then( function(exists) {
+            if ( !exists || force ) {
+                return processor( 'file', currentFsItem, targetPath )
+            } else {
+                return q.fcall(function(){});
+            }
+        });
     });
 }
 
@@ -93,6 +96,7 @@ var conditionalMkdir = function(target, force) {
             return jive.util.fsmkdir(target);
         } else {
             console.log(target,'already exists, skipping');
+            return q.fcall(function(){});
         }
     });
 };
@@ -108,14 +112,14 @@ function copyFileProcessor( type, currentFsItem, targetPath, substitutions ) {
     });
 }
 
-function processDefinition(type, name, style, force) {
+function processDefinition(target, type, name, style, force) {
 
-    console.log('Creating', type == 'all' ? '' : type,
+    console.log('Preparing', type == 'all' ? '' : type,
         '"' + name + '"',
         (type !== 'activity' ? 'of style ' + style : ''));
 
     var root = '../service/generator';
-    var target = process.cwd();
+
 
     var substitutions = {
         'TILE_NAME': name,
@@ -140,7 +144,7 @@ function processDefinition(type, name, style, force) {
     );
 
     promises.push(
-        conditionalMkdir(target + '/tiles/' + name)
+        conditionalMkdir(target + '/tiles/' + name, force)
     );
 
     // copy definition
@@ -167,9 +171,41 @@ function processDefinition(type, name, style, force) {
 
     return q.all(promises);
 }
+
+function finish(target) {
+    var definitionsDir = target + '/tiles';
+    var configurationFile =  target + '/jiveclientconfiguration.json';
+
+    console.log('\n... Done!\n');
+
+    console.log('Contents of tiles directory (', definitionsDir, '):\n' );
+
+    q.nfcall(fs.readdir, definitionsDir ).then(function(dirContents){
+        dirContents.forEach(function(item) {
+            console.log(item);
+        });
+    }).then( function() {
+
+        console.log("\nThings you should do now, if you haven't done them already.");
+        console.log();
+        console.log('(1) Install dependent modules:');
+        console.log('   npm update ');
+        console.log('(2) Don\'t forget to edit', configurationFile, 'to specify your clientID, ' +
+            'clientSecret, clientUrl, and other important setup options!');
+        console.log();
+        console.log('When done, run your service:');
+        console.log();
+        console.log('   node jive_app.js');
+        console.log();
+
+    });
+}
+
 function execute(options) {
     var type = options['type'];
     var force = options['force'];
+
+    var target = process.cwd();
 
     var promises = [];
 
@@ -181,19 +217,19 @@ function execute(options) {
 
         styles.forEach( function(style) {
             var name = 'sample' + style;
-            promise = processDefinition(type, name, style, force);
+            promise = processDefinition(target, type, name, style, force);
             promises.push(promise);
         });
 
     } else {
         var style =  type == 'activity' ? 'activity' : options['style'];
         var name = options['name'] || 'sample' + type;
-        var promise = processDefinition(type, name, style, force);
+        var promise = processDefinition(target, type, name, style, force);
         promises.push(promise);
     }
 
-    q.all(promises).then(function() {
-       console.log('Done!');
+    q.all(promises).then( function() {
+        return finish(target);
     });
 }
 
@@ -228,3 +264,5 @@ exports.init = function() {
     execute(options);
 
 };
+
+//exports.init();
