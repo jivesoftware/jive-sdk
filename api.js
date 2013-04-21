@@ -18,8 +18,17 @@
  * This is the main entry point of the api.
  */
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// logging
+var logger = require('log4js').getLogger();
+logger.setLevel(process.env['jive.logging.level'] || 'INFO');
+exports.logger = logger;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // persistence
+// - the different supported flavors are file, memory, and mongo
+// - each strategy must expose find, save, remove methods
 exports.persistence = {
     'file' : require('./lib/persistence/file'),
     'memory' : require('./lib/persistence/memory'),
@@ -61,7 +70,3 @@ exports.routes = require('./routes/tiles');
 // service
 exports.service = require('./service/api');
 
-var logger = require('log4js').getLogger();
-logger.setLevel(process.env['jive.logging.level'] || 'INFO');
-
-exports.logger = logger;

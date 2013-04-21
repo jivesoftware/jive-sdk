@@ -47,10 +47,25 @@ var _dir = function(theDir, defaultDir ) {
  */
 exports.options = {};
 
+var persistence;
 /**
+ * Retrieves current persistence strategy, defaults to file.
  * @type {undefined}
  */
-exports.persistence = undefined;
+exports.persistence = function(_persistence) {
+
+    if ( _persistence ) {
+        if ( !_persistence['find']  || !_persistence['remove'] || !_persistence['save'] ) {
+            throw 'Unsupported persistence strategy - must implement find, remove, save methods.';
+        }
+        persistence = _persistence;
+    }
+
+    if ( !persistence) {
+        persistence = new jive.persistence.file();
+    }
+    return persistence;
+};
 
 /**
  * @param _app
@@ -72,6 +87,10 @@ exports.init = function(_app, options ) {
     var initialPromise;
     if ( typeof options === 'object' ) {
         exports.options = options;
+        if ( options['persistence'] ) {
+            // set persistence if the object is provided
+            exports.persistence( options['persistence'] );
+        }
         initialPromise = q.fcall( function() {
             return options;
         });
@@ -179,7 +198,7 @@ exports.autowireDefinitionMetadata = function( definitionMetadataFile ) {
  */
 exports.start = function() {
     return bootstrap.start( app, exports.options, rootDir, tilesDir).then( function() {
-        jive.logger.info("Service started.");
+        jive.logger.info("Service started in " + app['settings']['env'] + " mode");
     });
 };
 
