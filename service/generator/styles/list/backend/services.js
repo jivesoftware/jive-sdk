@@ -15,47 +15,50 @@
  */
 
 var count = 0;
-
 var jive = require("jive-sdk");
 
-exports.task = function() {
-    jive.extstreams.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
-        if ( instances ) {
-            instances.forEach( function( instance ) {
+function processTileInstance(instance) {
+    console.log('running pusher for ', instance.name, 'instance', instance.id);
 
-                var config = instance['config'];
-                if ( config && config['posting'] === 'off' ) {
-                    return;
+    count++;
+
+    var dataToPush = {
+        data: {
+            "title": "Simple Counter",
+            "contents": [
+                {
+                    "text": "Current count: " + count,
+                    "icon": "http://farm4.staticflickr.com/3136/5870956230_2d272d31fd_z.jpg",
+                    "linkDescription": "Current counter."
                 }
-
-                console.log('running pusher for ', instance.name, 'instance', instance.id );
-
-                count++;
-
-                var dataToPush = {
-                    "activity":
-                    {
-                        "action":{
-                            "name":"posted",
-                            "description":"Activity " + count
-                        },
-                        "actor":{
-                            "name":"Actor Name",
-                            "email":"actor@email.com"
-                        },
-                        "object":{
-                            "type":"website",
-                            "url":"http://www.google.com",
-                            "image":"http://placehold.it/102x102",
-                            "title":"Activity " + count,
-                            "description":"Activity " + count
-                        },
-                        "externalID": '' + new Date().getTime()
-                    }
-                };
-
-                jive.extstreams.pushActivity(instance, dataToPush);
-            });
+            ],
+            "config": {
+                "listStyle": "contentList"
+            },
+            "action": {
+                "text": "Add a Todo",
+                "context": {
+                    "mode": "add"
+                }
+            }
         }
-    });
-};
+    };
+
+    jive.tiles.pushData(instance, dataToPush);
+}
+
+exports.task = new jive.tasks.build(
+    // runnable
+    function() {
+        jive.tiles.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
+            if ( instances ) {
+                instances.forEach( function( instance ) {
+                    processTileInstance(instance);
+                });
+            }
+        });
+    },
+
+    // interval (optional)
+    5000
+);

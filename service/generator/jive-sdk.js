@@ -223,7 +223,7 @@ function doCreate(options) {
 
     } else {
         var style =  type == 'activity' ? 'activity' : options['style'];
-        var name = options['name'] || 'sample' + type;
+        var name = options['name'] || 'sample' + style;
         var promise = processDefinition(target, type, name, style, force);
         promises.push(promise);
     }
@@ -240,7 +240,7 @@ function doHelp() {
     console.log('   create\n');
 
     console.log('where options include:');
-    console.log('   --type=<one of [tile, activity]>        Defaults to tile');
+    console.log('   --type=<one of [tile, activity, all]>   Defaults to tile; if "all", all samples will be installed');
     console.log('   --style=<one of [list, gauge, table]>   Only available when --type=tile');
     console.log('   --force=<one of [true,false]>           Defaults to false, overrwrites existing if true');
     console.log('   --name=<string>                         Defaults to sample<style>');
