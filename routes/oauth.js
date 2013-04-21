@@ -86,7 +86,7 @@ exports.oauth2Callback = function(req, res ) {
 
     var oauth2SuccessCallback = this.oauth2SuccessCallback;
 
-    jive.util.buildRequest( oauth2Conf['originServerTokenRequestUrl'], 'POST', postObject, headers).execute(
+    jive.util.buildRequest( oauth2Conf['originServerTokenRequestUrl'], 'POST', postObject, headers).then(
         function(response) {
             // success
             if ( response.statusCode >= 200 && response.statusCode < 299 ) {

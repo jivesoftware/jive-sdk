@@ -128,14 +128,14 @@ exports.delete = function(url, expectedStatus, expectedEntity, body, headers, do
 }
 
 function testClientRequest(url, expectedStatus, expectedEntity, method, body, headers, doPrintResponse) {
-    var deferred = q.defer();
-    jive.util.buildRequest(url, method, body, headers, null)
-        .execute(successCallback(expectedStatus, expectedEntity, deferred, doPrintResponse), errorCallback(deferred));
-
-    return deferred.promise;
+    return jive.util.buildRequest(url, method, body, headers, null)
+        .then(
+            successCallback(expectedStatus, expectedEntity, doPrintResponse),
+            successCallback(expectedStatus, expectedEntity, doPrintResponse)
+        );
 }
 
-function successCallback (expectedStatus, expectedEntity, deferred, doPrintResponse) {
+function successCallback (expectedStatus, expectedEntity, doPrintResponse) {
 
     return function (res) {
         if (doPrintResponse) {
@@ -153,15 +153,13 @@ function successCallback (expectedStatus, expectedEntity, deferred, doPrintRespo
                 }
             }
         }
-        deferred.resolve(res);
     };
 };
 
-function errorCallback (deferred) {
+function errorCallback () {
     return function(err) {
         console.log(err);
         assert.ifError(err);
-        deferred.resolve(err);
     }
 };
 

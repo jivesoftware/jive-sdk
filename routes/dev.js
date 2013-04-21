@@ -151,7 +151,7 @@ exports.installTiles = function( req, res ) {
             var deferred = q.defer();
             console.log("Making request to jive instance for " + tile.name + ":\n", postBody);
 
-            jive.util.buildRequest(definitionPostURL, 'POST', postBody, requestOptions['headers']).execute(
+            jive.util.buildRequest(definitionPostURL, 'POST', postBody, requestOptions['headers']).then(
                 // success
                 function(jiveResponse) {
 
@@ -165,7 +165,7 @@ exports.installTiles = function( req, res ) {
                     if ( jiveResponse.statusCode === 409 ) {
                         var existingLocation = jiveResponse.headers['location'];
                         if ( existingLocation ) {
-                            jive.util.buildRequest(existingLocation, 'PUT', postBody, requestOptions['headers']).execute(
+                            jive.util.buildRequest(existingLocation, 'PUT', postBody, requestOptions['headers']).then(
                                 // success
                                 function(jiveResponse) {
                                     var str = JSON.stringify(jiveResponse);
