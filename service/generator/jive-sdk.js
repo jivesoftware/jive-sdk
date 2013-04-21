@@ -118,8 +118,7 @@ function processDefinition(target, type, name, style, force) {
         '"' + name + '"',
         (type !== 'activity' ? 'of style ' + style : ''));
 
-    var root = '../service/generator';
-
+    var root = __dirname;
 
     var substitutions = {
         'TILE_NAME': name,
