@@ -203,8 +203,7 @@ function finish(target) {
 function doCreate(options) {
     var type = options['type'];
     var force = options['force'];
-
-    var target = process.cwd();
+    var target = options['target'] || process.cwd();
 
     var promises = [];
 
@@ -257,7 +256,7 @@ function execute(options) {
     }
 }
 
-exports.init = function() {
+exports.init = function(target) {
     // default command to help
     var cmd = argv._.length > 0 ? argv._[0] : 'help';
 
@@ -266,6 +265,7 @@ exports.init = function() {
     var style = type == 'activity' ? '': (argv['style'] || 'list');
     var oauth = argv['oauthSupported'] || false;
     var force = argv['force'] || false;
+    var target = target;
 
     var options = {
         'name' : name,
@@ -273,7 +273,8 @@ exports.init = function() {
         'type'    : type,
         'oauth'    : oauth,
         'cmd'      : cmd,
-        'force'    : force
+        'force'    : force,
+        'target'    : target
     };
 
     var err = validate(options);
