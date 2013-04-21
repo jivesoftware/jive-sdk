@@ -25,7 +25,8 @@ var jiveIdServerConfig = {
 var setEnvironmentConfig = {
     "type": "setEnv",
     "env" : {
-        'jive.jiveid.servers.public' : jiveIdBase
+        'jive.jiveid.servers.public' : jiveIdBase,
+        'jive.logging.level': 'DEBUG'
     }
 }
 
