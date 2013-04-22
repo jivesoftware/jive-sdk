@@ -33,14 +33,14 @@ if (forkedProcess) {
 
         if (m['pleaseStop'] === true) {
             stopServer(m.id);
-
         }
 
         if ( m['operation'] ) {
-            doOperation( m['operation'] );
+            var context = doOperation( m['operation'] );
             process.send({
                 operationSuccess: true,
-                id: m.id
+                id: m.id,
+                context: context
             });
         }
     });
@@ -58,8 +58,13 @@ function startServer(configuration) {
     if (configuration.integrationServer===true) {
         setupIntegration(configuration);
     }
+
     if (configuration.mockJiveId===true) {
         setupMockJiveId(configuration);
+    }
+
+    if ( configuration.fakeJiveServer==true) {
+        setupJiveServer(configuration);
     }
 
     server = http.createServer(app);
@@ -106,6 +111,8 @@ function doOperation( operation ) {
         var body = operation['body'];
         var headers = operation['headers'];
 
+        console.log("SET ENDPOINT: ", operation);
+
         setEndpoint(method, path, statusCode, body, headers);
     }
     else if (type == "setEnv") {
@@ -113,6 +120,40 @@ function doOperation( operation ) {
         for (var key in env){
             process.env[key] = env[key];
         }
+    } else if ( type == "addTask" ) {
+        var task = function() {
+            jive.tiles.findByDefinitionName( "sampletable" ).then( function(instances) {
+                instances.forEach( function( instance ) {
+                    var dataToPush = {
+                        "data":
+                        {
+                            "title": "Account Details",
+                            "contents": [
+                                {
+                                    "name": "Value",
+                                    "value": "Updated " + new Date().getTime()
+                                }
+                            ]
+                        }
+                    };
+
+                    jive.tiles.pushData( instance, dataToPush).then(
+                    function(r) {
+                        process.send( {pushedData: r});
+                    }, function(r) {
+                        process.send( {pushedData: r});
+                    });
+                } );
+            });
+        };
+
+        var key = jive.tiles.definitions.addTasks( jive.tasks.build( task, 1000 ) );
+        return { "task": key };
+
+    } else if ( type == "removeTask" ) {
+        var task =  operation['task'];
+        jive.tasks.unschedule(task );
+        console.log("Removed task", task);
     }
 }
 
@@ -152,28 +193,17 @@ exports.server = function() {
 };
 
 function setupIntegration(configuration) {
-
     jive.service.options = configuration;
 
-// Setup the tile configuration UI route at [clientUrl]:[port]/configure (eg. http://yoursite:8090/configure):
     app.get( '/configure', function( req, res ) {
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end( "<script>jive.tile.onOpen(function() { jive.tile.close({'config':'value'});});</script>" );
     } );
 
-// Setup the tile registration route at [clientUrl]:[port]/registration (eg. http://yoursite:8090/registration):
     app.post( '/registration', jive.routes.registration );
-
-// For development, you may also setup useful dev endpoints to show what tiles are available on your service;
-// for installing tiles on a jive instance
     app.get( '/tiles', jive.routes.tiles );
     app.get( '/tilesInstall', jive.routes.installTiles );
 
-//
-// Your tile must also declare metadata about itself, permitting the Jive instance to discover
-// what type of type style it is, icons, and also the aforementioned required endpoints (configuration
-// and registration).
-//
     var definition = {
         "sampleData": {"title": "Account Details",
             "contents": [
@@ -195,10 +225,12 @@ function setupIntegration(configuration) {
         }
     };
 
-// Make this definition known to your service by calling the .save function as demonstrated below:
     jive.tiles.definitions.save(definition);
 }
 
+function setupJiveServer(conf) {
+    console.log("FFFFFF");
+}
 
 function setupMockJiveId(conf){
 
@@ -211,6 +243,8 @@ function setupMockJiveId(conf){
     app.post("/v1/oauth2/token", function(req, res) {
 
         var body = req.body;
+
+        process.send( {oauth2TokenRequest: body});
 
         var requestCode = body['code'];
 

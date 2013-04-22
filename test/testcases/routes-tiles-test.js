@@ -85,8 +85,7 @@ describe('jive.util', function () {
             .then(done);
     });
 
-
-    describe('#buildRequest()', function () {
+    describe('#registration()', function () {
         it("GET to /registration should return 404", function (done) {
             testUtil.get(base + "/registration", 404).then(function (res) {
                 done();
@@ -116,8 +115,8 @@ describe('jive.util', function () {
                 done();
             });
         });
-
     });
+
 });
 
 
