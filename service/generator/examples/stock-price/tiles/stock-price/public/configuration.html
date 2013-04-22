@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" value="text/html; charset=utf-8" />
+    <title>Configure stock price tile</title>
+</head>
+
+<body>
+
+    <form>
+        <h1>Select a stock symbol</h1>
+
+        <p>Select a stock to display its market price.</p>
+
+        <label for="symbol">
+            Enter a symbol:
+        </label>
+        <input type="text" name="symbol" placeholder="JIVE" /><br/>
+
+        <label for="exchange">
+            Enter an exchange (optional):
+        </label>
+        <input type="text" name="exchange" placeholder="NASDAQ" />
+
+        <p>Do you want to display change and percent change?</p>
+        <ul>
+            <li><input type="checkbox" name="Change" value="1" />
+            <label for="Change">change</label>
+
+            <li><input type="checkbox" name="ChangeinPercent" value="1" />
+            <label for="ChangeinPercent">percent change</label>
+        </ul>
+
+        <p>What other information do you want to display?  Pick up to 9 fields.</p>
+        <ul>
+            <li><input type="checkbox" name="fields/LastTradeTime" value="1" />
+            <label for="fields/LastTradeTime">last trade time</label>
+
+            <li><input type="checkbox" name="fields/LastTradeDate" value="1" />
+            <label for="fields/LastTradeDate">last trade date</label>
+
+            <li><input type="checkbox" name="fields/Volume" value="1" />
+            <label for="fields/Volume">volume</label>
+
+            <li><input type="checkbox" name="fields/AverageDailyVolume" value="1" />
+            <label for="fields/AverageDailyVolume">average daily volume</label>
+
+            <li><input type="checkbox" name="fields/YearRange" value="1" />
+            <label for="fields/YearRange">52 week range</label>
+
+            <li><input type="checkbox" name="fields/Open" value="1" />
+            <label for="fields/Open">open</label>
+
+            <li><input type="checkbox" name="fields/PreviousClose" value="1" />
+            <label for="fields/PreviousClose">previous close</label>
+
+            <li><input type="checkbox" name="fields/DaysLow" value="1" />
+            <label for="fields/DaysLow">day's low</label>
+
+            <li><input type="checkbox" name="fields/DaysHigh" value="1" />
+            <label for="fields/DaysHigh">day's high</label>
+
+            <li><input type="checkbox" name="fields/MarketCapitalization" value="1" />
+            <label for="fields/MarketCapitalization">market cap</label>
+        </ul>
+
+        <input type="submit" value="Apply"/>
+    </form>
+
+    <script src="{{{host}}}/stock-price/main.js"></script>
+</body>
+</html>
