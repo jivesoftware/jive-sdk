@@ -1,0 +1,23 @@
+{
+    "sampleData" : {
+        "title" : "Bitcoin Exchange Rates",
+        "contents" : [
+            { "name" : "24h", "value" : "--" },
+            { "name" : "7d",  "value" : "--" },
+            { "name" : "30d", "value" : "--" }
+        ],
+        "action" : {
+            "text" : "Action Link",
+            "url" : "http://slashdot.org/"
+        }
+    },
+    "displayName" : "Bitcoin Exchange Rates",
+    "name" : "bitcoin",
+    "description" : "Bitcoin information updated in real time.",
+    "style" : "TABLE",
+    "icons" : {
+        "16":  "{{{host}}}/bitcoin/logo_16.png",
+        "48":  "{{{host}}}/bitcoin/logo_48.png",
+        "128": "{{{host}}}/bitcoin/logo_128.png"
+    }
+}
