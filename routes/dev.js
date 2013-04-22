@@ -161,9 +161,22 @@ exports.installTiles = function( req, res ) {
                     console.log("Headers: ", jiveResponse.headers);
                     console.log("Body: \n", str);
 
+                    deferred.resolve();
+                },
+
+                // fail
+                function(jiveResponse) {
+                    console.log("Error on POST request to jive instance!");
+
+                    var str = JSON.stringify(jiveResponse);
+
+                    console.log("Headers: ", jiveResponse.headers);
+                    console.log("Body: \n", str);
+
                     // special handling if its 409 - this means we should try to PUT instead
                     if ( jiveResponse.statusCode === 409 ) {
                         var existingLocation = jiveResponse.headers['location'];
+                        console.log("Trying PUT to ", existingLocation, "...");
                         if ( existingLocation ) {
                             jive.util.buildRequest(existingLocation, 'PUT', postBody, requestOptions['headers']).then(
                                 // success
@@ -178,18 +191,14 @@ exports.installTiles = function( req, res ) {
 
                                 // error
                                 function(e) {
-                                    console.log("error on request to jive instance: ", e);
+                                    console.log("Error on PUT request to jive instance: ", e);
+                                    deferred.reject(jiveResponse);
                                 }
                             );
                         }
                     } else {
-                        deferred.resolve();
+                        deferred.reject(jiveResponse);
                     }
-                },
-
-                // fail
-                function(e) {
-                    console.log("error on request to jive instance: ", e);
                 }
             );
 
@@ -212,7 +221,10 @@ exports.installTiles = function( req, res ) {
                 headers : { 'Authorization' : 'Basic ' + credentials, 'Content-Type' : 'application/json' }
             };
 
-            doDefinition(requestParams, tile, postBody).then( processOne );
+            doDefinition(requestParams, tile, postBody).then(
+                processOne,
+                processOne
+            );
         })();
 
     };
