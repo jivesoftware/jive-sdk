@@ -1,0 +1,38 @@
+{
+    "sampleData" : {
+        "message": "Sample gauge",
+        "sections": [
+            {
+                "color": "#ff0000",
+                "label": "dummy"
+            },
+            {
+                "color": "#ff8000",
+                "label": "dummy"
+            },
+            {
+                "color": "#dcdc00",
+                "label": "dummy"
+            },
+            {
+                "color": "#80bb00",
+                "label": "dummy"
+            },
+            {
+                "color": "#00bb00",
+                "label": "dummy"
+            }
+        ],
+        "activeIndex": 4,
+        "status": "Excellent"
+    },
+    "displayName" : "{{{TILE_NAME}}}",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "{{{TILE_NAME}}}",
+    "style" : "GAUGE",
+    "icons" : {
+        "16" : "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "48" : "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "128" : "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif"
+    }
+}
