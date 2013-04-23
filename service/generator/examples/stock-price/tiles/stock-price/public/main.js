@@ -44,7 +44,7 @@ jive.tile.onOpen(function(config, options) {
 
     function resetData() {
         options.definitions.filter(function(d) {
-            return d.name === 'stock-price';
+            return d.name === '{{{TILE_NAME}}}';
         }).forEach(function(def) {
             (def.data.contents || []).forEach(function(c) {
                 c.value = '--';

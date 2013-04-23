@@ -33,7 +33,7 @@ What you should do is fill in the proper values for your server & port. The clie
 
 **Step 5. Run the puppy!**
 
-`node jive_app.js`
+`node app.js`
 
 That's it! You have just created your first tile! If you'd like to see the tile definition, then you can enter the following URL in your browser. Of course, the server and port should match what you put in the configuration file.
 

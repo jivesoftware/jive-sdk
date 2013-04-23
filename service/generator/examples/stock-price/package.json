@@ -1,5 +1,5 @@
 {
-  "name": "stock-price-tile",
+  "name": "jive-{{{TILE_NAME}}}",
   "description": "Displays live stock prices in a Jive place",
   "version": "0.0.1",
   "main": "app.js",

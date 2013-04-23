@@ -5,7 +5,7 @@ var jive = require('jive-sdk')
   , http = require('q-io/http');
 
 exports.task = new jive.tasks.build(function() {
-    var tiles = jive.tiles.findByDefinitionName('bitcoin').then(function(instances) {
+    var tiles = jive.tiles.findByDefinitionName('{{{TILE_NAME}}}').then(function(instances) {
         return instances || [];
     });
     var prices = tiles.then(function(ts) {
@@ -24,7 +24,7 @@ function fetchPrices() {
 }
 
 function pushUpdate(prices, tile) {
-    console.log('pushing update: '+ tile.name +', '+ tile.id);
+    console.log('Pushing update: '+ tile.name +', '+ tile.id);
     var symbol   = tile.config.symbol || 'USD';
     var myPrices = prices[symbol];
 
@@ -49,7 +49,9 @@ exports.eventHandlers = [
     {
         'event': 'newInstance',
         'handler' : function(theInstance){
+            jive.logger.info("Caught newInstance event, trying to push now.");
             fetchPrices().then(function(prices) {
+                jive.logger.info("Fetched prices", prices);
                 pushUpdate(prices, theInstance);
             });
         }

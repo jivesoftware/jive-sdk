@@ -1,6 +1,6 @@
 {
     "sampleData" : {
-        "title" : "Sample list",
+        "title" : "{{{TILE_NAME}}} {{{TILE_STYLE}}}",
         "contents" : [ {
             "text" : "Initial text to be replaced"
         } ],

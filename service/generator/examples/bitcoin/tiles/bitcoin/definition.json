@@ -11,13 +11,13 @@
             "url" : "http://slashdot.org/"
         }
     },
-    "displayName" : "Bitcoin Exchange Rates",
-    "name" : "bitcoin",
+    "displayName" : "Bitcoin Exchange Rates ({{{TILE_NAME}}})",
+    "name" : "{{{TILE_NAME}}}",
     "description" : "Bitcoin information updated in real time.",
     "style" : "TABLE",
     "icons" : {
-        "16":  "{{{host}}}/bitcoin/logo_16.png",
-        "48":  "{{{host}}}/bitcoin/logo_48.png",
-        "128": "{{{host}}}/bitcoin/logo_128.png"
+        "16":  "{{{host}}}/{{{TILE_NAME}}}/logo_16.png",
+        "48":  "{{{host}}}/{{{TILE_NAME}}}/logo_48.png",
+        "128": "{{{host}}}/{{{TILE_NAME}}}/logo_128.png"
     }
 }

@@ -1,8 +1,8 @@
 {
-  "name": "bitcoin-tile",
+  "name": "jive-{{{TILE_NAME}}}",
   "description": "Updates Jive places with bitcoin exchange rate",
   "version": "0.0.1",
-  "main": "main.js",
+  "main": "app.js",
   "author": {
     "name": "Jesse Hallett",
     "email": "jesse.hallett@jivesoftware.com"

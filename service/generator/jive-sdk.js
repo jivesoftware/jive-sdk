@@ -25,10 +25,10 @@ var jive = require('../../api');
 
 var argv = require('optimist').argv;
 
-var validTypes = ['all', 'activity', 'tile', 'example' ];
 var validCommands = ['create','help'];
-var validTileStyles = ['list', 'gauge', 'table' ];
-var validExamples = ['bitcoin'];
+
+var styles = [];
+var examples = [];
 
 function validate(options) {
     var err = [];
@@ -37,19 +37,16 @@ function validate(options) {
         err.push('Invalid comamnd ' + options['cmd'] + ', must be one of ' + validCommands );
     }
 
-    if ( validTypes.indexOf(options['type']) < 0  ) {
-        err.push('Invalid type ' + options['type'] + ', must be one of ' + validTypes );
+    if ( options['cmd'] === 'create' ) {
+        if ( styles.concat(examples).indexOf(options['subject']) < 0 &&  options['subject']  != 'all' ) {
+            if ( options['subject'] ) {
+                err.push('Invalid item ' + options['subject'] + ', must be one of ' + styles.concat(examples) + ", or 'all'.");
+            } else {
+                err.push('You must create one of ' + styles.concat(examples) + ", or 'all'.");
+            }
+        }
     }
 
-    if ( options['type'] == 'example' ) {
-        if ( validExamples.indexOf(options['style']) < 0 ) {
-            err.push('Invalid example ' + options['style'] + ', must be one of ' + validExamples );
-        }
-    } else {
-        if ( options['style'] && validTileStyles.indexOf(options['style']) < 0 && options['type'] !== 'activity' ) {
-            err.push('Invalid style ' + options['style'] + ', must be one of ' + validTileStyles );
-        }
-    }
     return err;
 }
 
@@ -118,21 +115,12 @@ function copyFileProcessor( type, currentFsItem, targetPath, substitutions ) {
     });
 }
 
-function processExample(target, example, force) {
-    console.log('Preparing example ', example );
+function processExample(target, example, name, force) {
+    console.log('Preparing example ', example, target );
 
     var root = __dirname;
 
-    var substitutions = {
-        'TILE_NAME': example,
-        'host': '{{{host}}}'
-    };
-
     var promises = [];
-
-    var substitutionProcessor = function (type, currentFsItem, targetPath) {
-        return copyFileProcessor(type, currentFsItem, targetPath, substitutions);
-    };
 
     // copy base
     promises.push(
@@ -141,7 +129,12 @@ function processExample(target, example, force) {
             root + '/base',
             target,
             force,
-            substitutionProcessor
+            function (type, currentFsItem, targetPath) {
+                return copyFileProcessor(type, currentFsItem, targetPath, {
+                    'TILE_NAME': example,
+                    'host': '{{{host}}}'
+                });
+            }
         )
     );
 
@@ -151,11 +144,31 @@ function processExample(target, example, force) {
             root + '/examples/' + example,
             target,
             force,
-            copyFileProcessor
+            function (type, currentFsItem, targetPath) {
+                return copyFileProcessor(type, currentFsItem, targetPath, {
+                    'TILE_NAME': name,
+                    'host': '{{{host}}}'
+                });
+            }
         )
     );
 
-    return q.all(promises);
+    return q.all(promises).then( function() {
+        var srcRoot = root + '/examples/' + example + '/tiles';
+        var targetRoot = target + '/tiles';
+        var renamePromises = [];
+        var p = q.nfcall(fs.readdir, srcRoot ).then( function(subdirs) {
+            subdirs.forEach( function(subdir) {
+                var src = targetRoot + '/' + subdir;
+                var tar = targetRoot + '/' + name;
+                if ( src !== tar ) {
+                    renamePromises.push( jive.util.fsrename(src, tar, force ) );
+                }
+            });
+        });
+
+        return q.all( renamePromises );
+    });
 }
 
 function processDefinition(target, type, name, style, force) {
@@ -168,6 +181,7 @@ function processDefinition(target, type, name, style, force) {
 
     var substitutions = {
         'TILE_NAME': name,
+        'TILE_STYLE': style,
         'host': '{{{host}}}'
     };
 
@@ -240,71 +254,76 @@ function finish(target) {
         console.log();
         console.log('When done, run your service:');
         console.log();
-        console.log('   node jive_app.js');
+        console.log('   node app.js');
         console.log();
 
     });
 }
 
-function doCreate(options) {
-    var type = options['type'];
+function doStyle( options ) {
+    var force = options['force'];
+    var target = options['target'] || process.cwd();
+
+    var style =  options['subject'];
+    var name = options['name'] || 'sample' + style;
+    var type = style == 'activity' ? 'activity' : style;
+    processDefinition(target, type, name, style, force).then( function() {
+        finish(target);
+    });
+}
+
+function doExample( options ) {
+    var force = options['force'];
+    var target = options['target'] || process.cwd();
+
+    var example =  options['subject'];
+    var name = options['name'] ? options['name'] : example;
+    processExample(target, example, name, force).then( function() {
+        finish(target);
+    });
+}
+
+function doAll( options ) {
     var force = options['force'];
     var target = options['target'] || process.cwd();
 
     var promises = [];
+    styles.forEach( function(style) {
+        var name = 'sample' + style + (options['name'] ? '-' + options['name'] : '' );
+        var type = style == 'activity' ? 'activity' : style;
+        promises.push( processDefinition(target, type, name, style, force));
+    });
 
-    if ( type == 'all' ) {
-
-        var styles = [];
-        styles = styles.concat(validTileStyles);
-        styles.push('activity');
-
-        styles.forEach( function(style) {
-            var name = 'sample' + style;
-            promise = processDefinition(target, type, name, style, force);
-            promises.push(promise);
-        });
-
-        validExamples.forEach( function( example ) {
-            promise = processExample(target, example, force);
-            promises.push(promise);
-        });
-
-    } else if (type == 'activity' || type == 'tile' ) {
-        var style =  type == 'activity' ? 'activity' : options['style'];
-        var name = options['name'] || 'sample' + style;
-        var promise = processDefinition(target, type, name, style, force);
-        promises.push(promise);
-    } else if ( type == 'example' ) {
-        var example =  options['style'];
-        var promise = processExample(target, example, force);
-        promises.push(promise);
-    }
+    examples.forEach( function( example ) {
+        var name = example + ( options['name'] ? ('-' + options['name'] ) : '');
+        promises.push(processExample(target, example, name, force));
+    });
 
     q.all(promises).then( function() {
-        if ( type == 'all' ) {
-            // if 'all', then use the base package.json
-            var root = __dirname;
-            return jive.util.fsTemplateCopy( root + '/base/package.json', target + '/package.json', { 'TILE_NAME': 'jive-examples-all' } )
-                .then( function() { return finish(target); });
-        } else {
-            return finish(target);
-        }
+        var root = __dirname;
+        return jive.util.fsTemplateCopy( root + '/base/package.json', target + '/package.json', { 'TILE_NAME': 'jive-examples-all' } )
+            .then( function() { return finish(target); });
     });
 }
 
+function doCreate(options) {
+}
+
 function doHelp() {
-    console.log('Usage: jive-sdk [cmd] [--options ...]\n');
+    console.log('Usage: jive-sdk [cmd] [item] [--options ...]\n');
     console.log('where cmd include:');
     console.log('   help');
     console.log('   create\n');
 
+    console.log('where item include:');
+    examples.concat(styles).forEach( function(item) {
+        console.log('   ' + item );
+    });
+
+    console.log();
     console.log('where options include:');
-    console.log('   --type=<one of [tile, activity, all]>   Defaults to tile; if "all", all samples will be installed');
-    console.log('   --style=<depends on --type]>            When --type=tile: [ table, gauge, list ]');
-    console.log('                                           When --type=example: [ bitcoin ]');
     console.log('   --force=<one of [true,false]>           Defaults to false, overrwrites existing if true');
-    console.log('   --name=<string>                         Defaults to sample<style>');
+    console.log('   --name=<string>                         Defaults to [item]');
 }
 
 function execute(options) {
@@ -315,46 +334,79 @@ function execute(options) {
     }
 
     if ( cmd == 'create') {
-        doCreate(options);
+        var subject = options['subject'];
+
+        if ( subject == 'all' ) {
+            doAll( options );
+            return;
+        }
+
+        if ( styles.indexOf( subject ) > -1 ) {
+            doStyle( options );
+            return;
+        }
+
+        if ( examples.indexOf( subject ) > -1 ) {
+            doExample( options );
+            return;
+        }
     }
 }
 
+function prepare() {
+    var root = __dirname;
+
+    return jive.util.fsreaddir( root + '/styles').then(function(items) {
+        styles = styles.concat( items );
+    }).then( function() {
+        return jive.util.fsreaddir( root + '/examples').then(function(items) {
+            examples = examples.concat( items );
+        } );
+    });
+}
+
 exports.init = function(target) {
-    // default command to help
-    var cmd = argv._.length > 0 ? argv._[0] : 'help';
+    // init lists
 
-    var name = argv['name'];
-    var type = argv['type'] || 'tile';
-    var style = type == 'activity' ? '': (argv['style'] || 'list');
-    var oauth = argv['oauthSupported'] || false;
-    var force = argv['force'] || false;
-    var target = target;
+    prepare().then( function() {
 
-    var options = {
-        'name' : name,
-        'style'    : style,
-        'type'    : type,
-        'oauth'    : oauth,
-        'cmd'      : cmd,
-        'force'    : force,
-        'target'    : target
-    };
+        // default command to help
+        var cmd = argv._.length > 0 ? argv._[0] : 'help';
+        var subject = argv._[1];
 
-    var err = validate(options);
-    if ( err.length > 0 ) {
-        console.log('Could not execute command, errors were found:');
-        err.forEach( function(err) {
-            console.log('   ', err);
-        });
+        var name = argv['name'];
+        var force = argv['force'] || false;
 
-        console.log();
+        if (name) {
+            name = name.replace(/[^\S]+/, '');
+            name = name.replace(/[^a-zA-Z0-9]/, '-');
+        }
 
-        doHelp();
+        var options = {
+            'name'      : name,
+            'cmd'       : cmd,
+            'subject'   : subject,
+            'force'     : force,
+            'target'    : target
+        };
 
-        process.exit(-1);
-    }
+        var err = validate(options);
+        if ( err.length > 0 ) {
+            console.log('Could not execute command, errors were found:');
+            err.forEach( function(err) {
+                console.log('   ', err);
+            });
 
-    execute(options);
+            console.log();
+
+            doHelp();
+
+            process.exit(-1);
+        }
+
+        execute(options);
+    });
+
 
 };
 

@@ -9,8 +9,8 @@
             "url" : "https://www.google.com/finance?q=JIVE"
         }
     },
-    "displayName" : "Stock Price",
-    "name" : "stock-price",
+    "displayName" : "Stock Price ({{{TILE_NAME}}})",
+    "name" : "{{{TILE_NAME}}}",
     "description" : "Displays live stock prices",
     "style" : "TABLE",
     "icons" : {

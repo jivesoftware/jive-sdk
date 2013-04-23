@@ -5,7 +5,7 @@ var jive = require('jive-sdk')
   , http = require('q-io/http');
 
 exports.task = new jive.tasks.build(function() {
-    jive.tiles.findByDefinitionName('stock-price').then(function(tiles) {
+    jive.tiles.findByDefinitionName('{{{TILE_NAME}}}').then(function(tiles) {
         tiles.forEach(pushUpdate);
     });
 }, 60000);
@@ -90,8 +90,12 @@ exports.eventHandlers = [
 
     {
         'event': 'newInstance',
-        'handler' : pushUpdate
+        'handler' : function(theInstance){
+            jive.logger.info("Caught newInstance event, trying to push now.");
+            pushUpdate(theInstance);
+        }
     },
+
 
     {
         'event': 'destroyingInstance',

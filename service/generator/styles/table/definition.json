@@ -1,5 +1,6 @@
 {
-    "sampleData": {"title": "Sample table",
+    "sampleData": {
+        "title": "{{{TILE_NAME}}} {{{TILE_STYLE}}}",
         "contents": [
             {
                 "name": "Value",

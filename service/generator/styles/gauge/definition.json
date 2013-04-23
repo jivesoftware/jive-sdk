@@ -1,6 +1,6 @@
 {
     "sampleData" : {
-        "message": "Sample gauge",
+        "message": "{{{TILE_NAME}}} {{{TILE_STYLE}}}",
         "sections": [
             {
                 "color": "#ff0000",

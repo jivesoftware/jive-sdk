@@ -16,7 +16,7 @@ jive.tile.onOpen(function(data, options) {
 
     function resetData() {
         options.definitions.filter(function(d) {
-            return d.name === 'bitcoin';
+            return d.name === '{{{TILE_NAME}}}';
         }).forEach(function(def) {
             (def.data.contents || []).forEach(function(c) {
                 c.value = '--';
