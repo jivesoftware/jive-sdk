@@ -10,7 +10,7 @@ var configuration = {
     'clientUrl' : 'http://localhost',
     'clientId'      : '6bgwdhc0rwifutkywsua19c49yt2qs2r',
     'clientSecret'  : '6iyjdimjzg5jbmvozv03dj0ogdzi3y.XKSkGTDsYznPZLd0zM0ZU06ExHA.1.s',
-    'integrationServer' : true,
+    'serverType' : 'integrationServer',
     'serverName' : "Test Integration Server"
 };
 
@@ -44,7 +44,9 @@ function runMocha(serverProc) {
         });
 
         var runner = mocha.run(function () {
-            integrationServerProc.send({pleaseStop: true});
+            testUtil.stopServer(integrationServerProc).then(function() {
+                console.log("Integration server stopped");
+            });
 
             console.log('finished');
         });

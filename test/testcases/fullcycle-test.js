@@ -18,7 +18,7 @@ var jiveIdBase = host + ":" + jiveIdPort;
 var jiveIdServerConfig = {
     clientUrl: host,
     port: jiveIdPort,
-    mockJiveId: true,
+    serverType: 'jiveIdServer',
     serverName: 'Fake Jive ID Server'
 }
 
@@ -41,7 +41,7 @@ var fakeJiveUrl = host + ":" + fakeJivePort;
 var fakeJiveServerConfig = {
     clientUrl: host,
     port: fakeJivePort,
-    fakeJiveServer: true,
+    serverType: 'fakeJiveServer',
     serverName: 'Fake Jive Instance Server'
 }
 
@@ -76,12 +76,14 @@ describe('jive.util', function () {
                 jiveIdServerProc = serverProc;
                 return testUtil.configServer(setEnvironmentConfig, testRunner.serverProcess());
             })
-            .thenResolve(testUtil.createServer(fakeJiveServerConfig, {silent: true}))
+            .thenResolve(testUtil.createServer(fakeJiveServerConfig))
             .then(function(serverProc) {
                 fakeJiveServerProc = serverProc;
                 return testUtil.configServer(dataPushEndpoint, serverProc);
             })
-            .then(done);
+            .then(function(x) {
+                done();
+            });
     });
 
     after(function (done) {

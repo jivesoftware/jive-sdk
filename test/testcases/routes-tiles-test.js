@@ -18,7 +18,7 @@ var jiveIdBase = host + ":" + jiveIdPort;
 var jiveIdServerConfig = {
     clientUrl: host,
     port: jiveIdPort,
-    mockJiveId: true,
+    serverType: 'jiveIdServer',
     serverName: 'Fake Jive ID Server'
 }
 
@@ -37,7 +37,8 @@ var fakeJiveUrl = host + ":" + fakeJivePort;
 var fakeJiveServerConfig = {
     clientUrl: host,
     port: fakeJivePort,
-    serverName: 'Fake Jive Instance Server'
+    serverType: 'fakeJiveServer',
+    serverName: 'Fake Jive Server'
 }
 
 var dataPushEndpoint = {
