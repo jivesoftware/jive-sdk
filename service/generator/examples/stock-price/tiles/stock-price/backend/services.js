@@ -11,7 +11,7 @@ exports.task = new jive.tasks.build(function() {
 }, 60000);
 
 function pushUpdate(tile) {
-    console.log('pushing update: '+ tile.name +', '+ tile.id);
+    console.log('pushing update: '+ tile.name +', '+ tile.id, tile);
     var symbol   = tile.config.symbol || 'JIVE';
     var exchange = tile.config.exchange;
     fetchData(symbol, exchange)
@@ -34,6 +34,7 @@ function fetchData(symbol, exchange) {
     }
     params.q = query;
     return http.read(formatUrl(base, params)).then(JSON.parse).then(function(data) {
+        console.log("Got yahoo data: ", data);
         return data.query.results.quote;
     });
 }
@@ -59,8 +60,7 @@ function prepareData(tile, data) {
     }).slice(0, 9);
 
     var qualifiedSymbol = (config.exchange ? config.exchange + ':' : '') + data.symbol;
-
-    return {
+    var preparedData = {
         title: data.symbol + (config.exchange ? ' on '+ config.exchange : ''),
         contents: [{ name: data.symbol, value: latestPrice }].concat(fields),
         action: {
@@ -68,6 +68,10 @@ function prepareData(tile, data) {
             url: 'https://www.google.com/finance?q='+ qualifiedSymbol
         }
     };
+
+    console.log("Prepared data", preparedData);
+
+    return preparedData;
 }
 
 function formatUrl(base, params) {
