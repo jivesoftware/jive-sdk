@@ -12,6 +12,7 @@
         "consolidate" : "*",
         "poplib" : "*",
         "q" : "*",
-        "multipart-parser" : "*"
+        "multipart-parser" : "*",
+        "q-io":     "1.6.x"
     }
 }

@@ -25,9 +25,10 @@ var jive = require('../../api');
 
 var argv = require('optimist').argv;
 
-var validTypes = ['all', 'activity', 'tile' ];
+var validTypes = ['all', 'activity', 'tile', 'example' ];
 var validCommands = ['create','help'];
 var validTileStyles = ['list', 'gauge', 'table' ];
+var validExamples = ['bitcoin'];
 
 function validate(options) {
     var err = [];
@@ -40,10 +41,15 @@ function validate(options) {
         err.push('Invalid type ' + options['type'] + ', must be one of ' + validTypes );
     }
 
-    if ( options['style'] && validTileStyles.indexOf(options['style']) < 0 && options['type'] !== 'activity' ) {
-        err.push('Invalid style ' + options['style'] + ', must be one of ' + validTileStyles );
+    if ( options['type'] == 'example' ) {
+        if ( validExamples.indexOf(options['style']) < 0 ) {
+            err.push('Invalid example ' + options['style'] + ', must be one of ' + validExamples );
+        }
+    } else {
+        if ( options['style'] && validTileStyles.indexOf(options['style']) < 0 && options['type'] !== 'activity' ) {
+            err.push('Invalid style ' + options['style'] + ', must be one of ' + validTileStyles );
+        }
     }
-
     return err;
 }
 
@@ -110,6 +116,46 @@ function copyFileProcessor( type, currentFsItem, targetPath, substitutions ) {
             return jive.util.fsTemplateCopy( currentFsItem, targetPath, substitutions );
         }
     });
+}
+
+function processExample(target, example, force) {
+    console.log('Preparing example ', example );
+
+    var root = __dirname;
+
+    var substitutions = {
+        'TILE_NAME': example,
+        'host': '{{{host}}}'
+    };
+
+    var promises = [];
+
+    var substitutionProcessor = function (type, currentFsItem, targetPath) {
+        return copyFileProcessor(type, currentFsItem, targetPath, substitutions);
+    };
+
+    // copy base
+    promises.push(
+        recursiveDirectoryProcessor(
+            root + '/base',
+            root + '/base',
+            target,
+            force,
+            substitutionProcessor
+        )
+    );
+
+    promises.push(
+        recursiveDirectoryProcessor(
+            root + '/examples/' + example,
+            root + '/examples/' + example,
+            target,
+            force,
+            copyFileProcessor
+        )
+    );
+
+    return q.all(promises);
 }
 
 function processDefinition(target, type, name, style, force) {
@@ -219,15 +265,31 @@ function doCreate(options) {
             promises.push(promise);
         });
 
-    } else {
+        validExamples.forEach( function( example ) {
+            promise = processExample(target, example, force);
+            promises.push(promise);
+        });
+
+    } else if (type == 'activity' || type == 'tile' ) {
         var style =  type == 'activity' ? 'activity' : options['style'];
         var name = options['name'] || 'sample' + style;
         var promise = processDefinition(target, type, name, style, force);
         promises.push(promise);
+    } else if ( type == 'example' ) {
+        var example =  options['style'];
+        var promise = processExample(target, example, force);
+        promises.push(promise);
     }
 
     q.all(promises).then( function() {
-        return finish(target);
+        if ( type == 'all' ) {
+            // if 'all', then use the base package.json
+            var root = __dirname;
+            return jive.util.fsTemplateCopy( root + '/base/package.json', target + '/package.json', { 'TILE_NAME': 'jive-examples-all' } )
+                .then( function() { return finish(target); });
+        } else {
+            return finish(target);
+        }
     });
 }
 
@@ -239,7 +301,8 @@ function doHelp() {
 
     console.log('where options include:');
     console.log('   --type=<one of [tile, activity, all]>   Defaults to tile; if "all", all samples will be installed');
-    console.log('   --style=<one of [list, gauge, table]>   Only available when --type=tile');
+    console.log('   --style=<depends on --type]>            When --type=tile: [ table, gauge, list ]');
+    console.log('                                           When --type=example: [ bitcoin ]');
     console.log('   --force=<one of [true,false]>           Defaults to false, overrwrites existing if true');
     console.log('   --name=<string>                         Defaults to sample<style>');
 }
