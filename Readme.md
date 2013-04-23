@@ -1,5 +1,5 @@
 # Jive Purposeful Places Framework
- Purposeful Places are a brand new integration framework for Jive that allows you to quickly and easily external activity streams and content from virtually any system. You can get [a high level overview of Purposeful Places in the Jive Community](https://community.jivesoftware.com/docs/DOC-81172). 
+ Purposeful Places are a brand new integration framework for Jive that allows you to quickly and easily external activity streams and content from virtually any system. You can get [a high level overview of Purposeful Places in the Jive Community](./docs/overview.md). 
 
  This repository contains the node.js library to help you get started building purposeful places!
 
