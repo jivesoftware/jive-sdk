@@ -25,7 +25,7 @@ var jiveIdServerConfig = {
 var setEnvironmentConfig = {
     "type": "setEnv",
     "env" : {
-        'jive.jiveid.servers.public' : jiveIdBase,
+        'jive_jiveid_servers_public' : jiveIdBase,
         'jive.logging.level': 'DEBUG'
     }
 }
@@ -77,7 +77,9 @@ describe('jive.util', function () {
                 fakeJiveServerProc = serverProc;
                 return testUtil.configServer(dataPushEndpoint, serverProc);
             })
-            .then(done);
+            .then(function(){
+                done();
+            });
     });
 
     after(function (done) {

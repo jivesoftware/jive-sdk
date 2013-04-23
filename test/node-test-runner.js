@@ -26,7 +26,7 @@ function runMocha(serverProc) {
     var mocha = new Mocha({
         reporter: 'dot',
         ui: 'bdd',
-        timeout: 999999
+        timeout: 10000
     });
 
     var testDir = './testcases/';

@@ -1,5 +1,6 @@
 var util = require('util'),
-    BaseServer = require('./base-server').BaseServer;
+    BaseServer = require('./base-server').BaseServer,
+    uuid=require('node-uuid');
 
 util.inherits(JiveIdServer, BaseServer);
 
@@ -7,17 +8,16 @@ exports.JiveIdServer= JiveIdServer;
 
 function JiveIdServer(app, config) {
     JiveIdServer.super_.call(this, app, config);
+
 }
 
 JiveIdServer.prototype.setup = function() {
-    var allowedAuthzCode = null;
 
-    var conf = this.config;
+    var config = this.config;
     var app = this.app;
+    var self = this;
 
-    if (conf.allowedAuthzCode) {
-        allowedAuthzCode = conf.allowedAuthzCode;
-    }
+    var tokenResponses = config['tokenResponses'];
 
     app.post("/v1/oauth2/token", function(req, res) {
 
@@ -26,31 +26,29 @@ JiveIdServer.prototype.setup = function() {
         process.send( {oauth2TokenRequest: body});
 
         var requestCode = body['code'];
+        var grantType = body['grant_type'];
+        var response = null;
+        var responseCode = 500;
 
-        //If we aren't requiring a particular authz code or the request supplied the correct one
-        if (!allowedAuthzCode || allowedAuthzCode && requestCode == allowedAuthzCode) {
-
-            var response = {
-                "access_token": uuid.v4(),
-                "token_type":"bearer",
-                "refresh_token": uuid.v4(),
-                "expires_in": 3599,
-                "scope": require('./test-util').makeGuid(conf.clientUrl + (conf.port ? ":" + conf.port : ""), true, 1234),
-                "state":null};
-
-            res.writeHead(200, {"Content-Type": "application/json"});
-            res.end(JSON.stringify(response));
+        if (tokenResponses && tokenResponses[grantType]) {
+            response = tokenResponses[grantType].response;
+            responseCode = tokenResponses[grantType].response;
+        } else if (grantType === 'authorization_code'){
+            response = self.getDefaultAuthzResponse();
+            responseCode = 200;
+        } else if (grantType === 'refresh_token') {
+            response = self.getDefaultRefreshResponse();
+            responseCode = 200;
         }
-        else {
-            res.writeHead(400, {"Content-Type": "application/json"});
-            res.end(JSON.stringify({"error": "Invalid auth code " + requestCode}));
-        }
+
+
+        res.writeHead(responseCode, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(response));
+
 
     });
 
 }
-
-
 
 JiveIdServer.prototype.doOperation = function(operation) {
     var tryBase = JiveIdServer.super_.prototype.doOperation.call(this, operation);
@@ -63,3 +61,32 @@ JiveIdServer.prototype.doOperation = function(operation) {
 
     return null;
 }
+
+
+JiveIdServer.prototype.getDefaultAuthzResponse = function() {
+    var config = this.config;
+    var response =
+    {
+        "access_token": uuid.v4(),
+        "token_type":"bearer",
+        "refresh_token": uuid.v4(),
+        "expires_in": 3599,
+        "scope": require('./test-util').makeGuid(config.clientUrl + (config.port ? ":" + config.port : ""), true, 1234),
+        "state":null
+    };
+    return response;
+};
+
+JiveIdServer.prototype.getDefaultRefreshResponse = function() {
+    var config = this.config;
+    var response =
+    {
+        "access_token": uuid.v4(),
+        "token_type":"bearer",
+        "refresh_token": uuid.v4(),
+        "expires_in": 3599,
+        "scope": require('./test-util').makeGuid(config.clientUrl + (config.port ? ":" + config.port : ""), true, 1234),
+        "state":null
+    };
+    return response;
+};

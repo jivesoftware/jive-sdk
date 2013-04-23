@@ -77,7 +77,7 @@ function startServer(configuration) {
     }
     else {
         console.log('ERROR invalid server type given "%s"', configuration.serverType);
-        process.send({serverStarted: false});
+        process.send({serverStarted: false, error: 'Invalid server type given "' + configuration.serverType + '"'});
         process.exit();
     }
 

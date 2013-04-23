@@ -19,13 +19,16 @@ var jiveIdServerConfig = {
     clientUrl: host,
     port: jiveIdPort,
     serverType: 'jiveIdServer',
-    serverName: 'Fake Jive ID Server'
+    serverName: 'Fake Jive ID Server',
+    tokenResponses: {
+
+    }
 }
 
 var setEnvironmentConfig = {
     "type": "setEnv",
-    "env" : {
-        'jive.jiveid.servers.public' : jiveIdBase,
+    "env": {
+        'jive_jiveid_servers_public': jiveIdBase,
         'jive.logging.level': 'DEBUG'
     }
 }
@@ -60,14 +63,14 @@ var registrationRequest =
 {
     "code": integrationConfig.clientSecret,
     "name": "sampletable",
-    "config": {"config":"value"},
+    "config": {"config": "value"},
     "url": fakeJiveUrl + dataPushEndpoint.path,
-    "guid": testUtil.makeGuid(fakeJiveUrl,true,1234)
+    "guid": testUtil.makeGuid(fakeJiveUrl, true, 1234)
 }
 
 
 //************************MOCHA TESTS************************
-describe('jive.util', function () {
+describe('Full Cycle Tests', function () {
 
     //Configure mock Jive ID server first. Call done() on completion for mocha to be happy
     before(function (done) {
@@ -77,11 +80,11 @@ describe('jive.util', function () {
                 return testUtil.configServer(setEnvironmentConfig, testRunner.serverProcess());
             })
             .thenResolve(testUtil.createServer(fakeJiveServerConfig))
-            .then(function(serverProc) {
+            .then(function (serverProc) {
                 fakeJiveServerProc = serverProc;
                 return testUtil.configServer(dataPushEndpoint, serverProc);
             })
-            .then(function(x) {
+            .then(function (x) {
                 done();
             });
     });
@@ -92,83 +95,73 @@ describe('jive.util', function () {
             .then(done);
     });
 
-    describe('#fullcycle()', function () {
-        it("Full cycle registration - basic", function (done) {
 
-            testUtil.configServer(addTaskConfig, testRunner.serverProcess()).then(function(m) {
+    it("Full cycle registration - register and push data", function (done) {
 
-                var task  = m['task'];
+        testUtil.configServer(addTaskConfig, testRunner.serverProcess()).then(function (m) {
 
-                testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization" : basicAuth}, true);
+            var task = m['task'];
+            var isDone = false;
+
+            testRunner.serverProcess().on("message", function (m) {
+                var pushedData = m['pushedData'];
+                if (pushedData && !isDone) {
+                    if (pushedData.statusCode != 204) {
+                        assert.fail(pushedData.statusCode, 204, "Expected datapush to be successful, return 204");
+                    } else {
+                        isDone = true;
+                        testUtil.configServer({"type": "removeTask", "task": task}, testRunner.serverProcess()).then(function () {
+                            done();
+                        });
+                    }
+                }
+            });
+
+            testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization": basicAuth}, true);
+
+        });
+
+    });
+
+
+    it("Full cycle registration - access token exchange", function (done) {
+
+
+        var dataPushEndpoint = {
+            "type": "setEndpoint",
+            "method": "PUT",
+            "path": "/api/jivelinks/v1/tiles/1234/data",
+            "statusCode": 401,
+            "body": "",
+            "headers": { "Content-Type": "application/json" }
+        };
+
+
+        testUtil.configServer(dataPushEndpoint, fakeJiveServerProc)
+            .thenResolve(testUtil.configServer(addTaskConfig, testRunner.serverProcess()))
+            .then(function (m) {
+
+                var task = m['task'];
 
                 var isDone = false;
-                testRunner.serverProcess().on("message", function(m) {
-                    var pushedData =  m['pushedData'];
-                    if ( pushedData && !isDone ) {
-                        if ( pushedData.statusCode != 204 ) {
-                            assert.fail( pushedData.statusCode, 204, "Expected datapush to be successful, return 204");
+
+                testRunner.serverProcess().on("message", function (m) {
+                    var pushedData = m['pushedData'];
+                    if (pushedData && !isDone) {
+                        if (pushedData.statusCode != 204) {
+                            assert.fail(pushedData.statusCode, 204, "Expected datapush to be successful, return 204");
                         } else {
                             isDone = true;
-                            testUtil.configServer({"type": "removeTask", "task":task}, testRunner.serverProcess()).then( function() {
+                            testUtil.configServer({"type": "removeTask", "task": task}, testRunner.serverProcess()).then(function () {
                                 done();
                             })
                         }
                     }
                 });
 
+                testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization": basicAuth}, true);
             });
-
-        });
     });
-
-    describe('#fullcycleAccessTokenExchange()', function () {
-        it("Full cycle registration - access token exchange", function (done) {
-
-
-            var dataPushEndpoint = {
-                "type": "setEndpoint",
-                "method": "PUT",
-                "path": "/api/jivelinks/v1/tiles/1234/data",
-                "statusCode": 401,
-                "body": "",
-                "headers": { "Content-Type": "application/json" }
-            };
-
-
-            testUtil.configServer(dataPushEndpoint, fakeJiveServerProc).then( function() {
-
-                testUtil.configServer(addTaskConfig, testRunner.serverProcess()).then(function(m) {
-
-                    var task  = m['task'];
-
-                    testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization" : basicAuth}, true);
-
-                    var isDone = false;
-                    testRunner.serverProcess().on("message", function(m) {
-                        var pushedData =  m['pushedData'];
-                        if ( pushedData && !isDone ) {
-                            if ( pushedData.statusCode != 204 ) {
-                                assert.fail( pushedData.statusCode, 204, "Expected datapush to be successful, return 204");
-                            } else {
-                                isDone = true;
-                                testUtil.configServer({"type": "removeTask", "task":task}, testRunner.serverProcess()).then( function() {
-                                    done();
-                                })
-                            }
-                        }
-                    });
-
-                });
-
-
-            });
-
-
-        });
-    });
-
-
-
 });
 
 

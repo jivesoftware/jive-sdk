@@ -13,7 +13,8 @@ var fakeServerUrl = host + ":" + fakeServerPort;
 var fakeServerConf = {
     'port': fakeServerPort,
     'clientUrl': host,
-    'serverName': 'Fake REST server for jiveutil tests'
+    'serverName': 'Fake REST server for jiveutil tests',
+    'serverType': 'genericServer'
 };
 
 var fakeServerProcess = null;
