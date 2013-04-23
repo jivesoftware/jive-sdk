@@ -96,6 +96,13 @@ exports.eventHandlers = [
         }
     },
 
+    {
+        'event': 'updateInstance',
+        'handler' : function(theInstance){
+            jive.logger.info("Caught updateInstance event, trying to push now.");
+            pushUpdate(theInstance);
+        }
+    },
 
     {
         'event': 'destroyingInstance',
