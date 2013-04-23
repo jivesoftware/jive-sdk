@@ -1,8 +1,8 @@
 /*jshint laxcomma:true */
 
 var jive = require('jive-sdk')
-  , q    = require('q')
-  , http = require('q-io/http');
+    , q    = require('q')
+    , http = require('q-io/http');
 
 exports.task = new jive.tasks.build(function() {
     jive.tiles.findByDefinitionName('{{{TILE_NAME}}}').then(function(tiles) {
@@ -15,10 +15,10 @@ function pushUpdate(tile) {
     var symbol   = tile.config.symbol || 'JIVE';
     var exchange = tile.config.exchange;
     fetchData(symbol, exchange)
-    .then(prepareData.bind(null, tile))
-    .then(function(data) {
-        jive.tiles.pushData(tile, { data: data });
-    });
+        .then(prepareData.bind(null, tile))
+        .then(function(data) {
+            jive.tiles.pushData(tile, { data: data });
+        });
 }
 
 function fetchData(symbol, exchange) {
@@ -34,30 +34,33 @@ function fetchData(symbol, exchange) {
     }
     params.q = query;
     return http.read(formatUrl(base, params)).then(JSON.parse).then(function(data) {
-        console.log("Got yahoo data: ", data);
+        console.log("Got yahoo data: ", JSON.stringify(data));
         return data.query.results.quote;
     });
 }
 
 function prepareData(tile, data) {
     var config = tile.config;
-    var latestPrice = data.LastTradePriceOnly;
-    if (config.Change) {
-        latestPrice += ' '+ data.Change;
-    }
-    if (config.Change && config.ChangeinPercent) {
-        latestPrice += ' ('+ data.ChangeinPercent +')';
-    }
-    else if (config.ChangeInPercent) {
-        latestPrice += ' '+ data.ChangeInPercent;
+    var latestPrice = '';
+    if ( data.LastTradePriceOnly ) {
+        latestPrice = data.LastTradePriceOnly;
+        if (config.Change && data.Change) {
+            latestPrice += ' '+ data.Change;
+        }
+        if (config.Change && config.ChangeinPercent) {
+            latestPrice += ' ('+ data.ChangeinPercent +')';
+        }
+        else if (config.ChangeInPercent && data.ChangeInPercent) {
+            latestPrice += ' '+ data.ChangeInPercent;
+        }
     }
 
-    var fields = Object.keys(config.fields).map(function(field) {
+    var fields = config.fields ?  Object.keys(config.fields).map(function(field) {
         return {
             name: formatField(field),
             value: data[field]
         };
-    }).slice(0, 9);
+    }).slice(0, 9) : [];
 
     var qualifiedSymbol = (config.exchange ? config.exchange + ':' : '') + data.symbol;
     var preparedData = {
@@ -83,11 +86,11 @@ function formatUrl(base, params) {
 
 function formatField(fieldName) {
     return fieldName
-    .replace(/[A-Z]/g, function(l) {
-        return ' '+ l.toLowerCase();
-    })
-    .replace(/days/, "day's")
-    .trim();
+        .replace(/[A-Z]/g, function(l) {
+            return ' '+ l.toLowerCase();
+        })
+        .replace(/days/, "day's")
+        .trim();
 }
 
 exports.eventHandlers = [
