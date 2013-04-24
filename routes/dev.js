@@ -141,7 +141,8 @@ exports.installTiles = function( req, res ) {
     var protocol = query['protocol'] || 'http';
     var credentials = query['credentials'] || 'YWRtaW46YWRtaW4=';
 
-    var definitionPostURL = protocol + '://' + jiveHost + ( context ? '/' + context : '' ) + '/api/jivelinks/v1/tiles/definitions';
+    var definitionPostURL = protocol + '://' + jiveHost + ':' + jivePort + ( context ? '/' + context : '' ) + '/api/jivelinks/v1/tiles/definitions';
+    console.log("Posting to ", definitionPostURL);
 
     var installer = function( definitions, callback ) {
         var processed = getProcessed(conf, definitions);
