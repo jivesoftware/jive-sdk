@@ -110,6 +110,34 @@ exports.stopServer = function(serverProc) {
     return deferred.promise;
 }
 
+exports.waitForMessage = function(serverProcess, key) {
+    var deferred = q.defer();
+    serverProcess.on('message', function(m){
+        if (m[key]) {
+            serverProcess.removeListener('message', arguments.callee);
+            deferred.resolve(m[key]);
+        }
+    });
+    return deferred.promise;
+}
+
+exports.waitForMessageValue = function(serverProcess, requiredKey, required) {
+    var deferred = q.defer();
+
+    serverProcess.on('message', function(m){
+        if (m[requiredKey]) {
+            var value = m[requiredKey];
+            for (var key in required) {
+                if (value[key] != required[key]) {
+                    return;
+                }
+            }
+            serverProcess.removeListener('message', arguments.callee);
+            deferred.resolve(value);
+        }
+    });
+    return deferred.promise;
+}
 /********************************REQUEST UTILS********************************/
 
 exports.get = function(url, expectedStatus, expectedEntity, doPrintResponse) {

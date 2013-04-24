@@ -41,7 +41,6 @@ JiveIdServer.prototype.setup = function() {
             responseCode = 200;
         }
 
-
         res.writeHead(responseCode, {"Content-Type": "application/json"});
         res.end(JSON.stringify(response));
 

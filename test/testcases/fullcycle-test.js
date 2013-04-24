@@ -1,7 +1,8 @@
 var jive = require('../../../jive-sdk'),
     assert = require('assert'),
     testUtil = require('../test-util'),
-    testRunner = require('../node-test-runner');
+    testRunner = require('../node-test-runner'),
+    q = require('q');
 
 var integrationConfig = jive.service.options;
 
@@ -84,7 +85,7 @@ describe('Full Cycle Tests', function () {
                 fakeJiveServerProc = serverProc;
                 return testUtil.configServer(dataPushEndpoint, serverProc);
             })
-            .then(function (x) {
+            .then(function () {
                 done();
             });
     });
@@ -95,72 +96,69 @@ describe('Full Cycle Tests', function () {
             .then(done);
     });
 
+    describe("All Full Cycle Tests", function () {
 
-    it("Full cycle registration - register and push data", function (done) {
+        it("Full cycle registration - register and push data", function (done) {
+            var taskKey = null;
 
-        testUtil.configServer(addTaskConfig, testRunner.serverProcess()).then(function (m) {
+            testUtil.configServer(addTaskConfig, testRunner.serverProcess()).then(function (m) {
+                taskKey = m['task'];
+                var promise = testUtil.waitForMessage(testRunner.serverProcess(), 'pushedData');
+                testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization": basicAuth}, true);
+                return promise;
 
-            var task = m['task'];
-            var isDone = false;
-
-            testRunner.serverProcess().on("message", function (m) {
-                var pushedData = m['pushedData'];
-                if (pushedData && !isDone) {
-                    if (pushedData.statusCode != 204) {
-                        assert.fail(pushedData.statusCode, 204, "Expected datapush to be successful, return 204");
-                    } else {
-                        isDone = true;
-                        testUtil.configServer({"type": "removeTask", "task": task}, testRunner.serverProcess()).then(function () {
-                            done();
-                        });
+            }).then(function (res) {
+                    if (res.statusCode != 204) {
+                        assert.fail(res.statusCode, 204, "Expected datapush to be successful, return 204");
                     }
-                }
-            });
 
-            testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization": basicAuth}, true);
-
+                    return testUtil.configServer({"type": "removeTask", "task": taskKey}, testRunner.serverProcess());
+                })
+                .then(function () {
+                    done();
+                });
         });
 
-    });
+        it("Full cycle registration - access token exchange", function (done) {
 
+            var dataPushFailEndpoint = {
+                "type": "setEndpoint",
+                "method": "PUT",
+                "path": "/api/jivelinks/v1/tiles/1234/data",
+                "statusCode": 401,
+                "body": "",
+                "headers": { "Content-Type": "application/json" }
+            };
 
-    it("Full cycle registration - access token exchange", function (done) {
+            var taskKey = null;
 
-
-        var dataPushEndpoint = {
-            "type": "setEndpoint",
-            "method": "PUT",
-            "path": "/api/jivelinks/v1/tiles/1234/data",
-            "statusCode": 401,
-            "body": "",
-            "headers": { "Content-Type": "application/json" }
-        };
-
-
-        testUtil.configServer(dataPushEndpoint, fakeJiveServerProc)
-            .thenResolve(testUtil.configServer(addTaskConfig, testRunner.serverProcess()))
-            .then(function (m) {
-
-                var task = m['task'];
-
-                var isDone = false;
-
-                testRunner.serverProcess().on("message", function (m) {
-                    var pushedData = m['pushedData'];
-                    if (pushedData && !isDone) {
-                        if (pushedData.statusCode != 204) {
-                            assert.fail(pushedData.statusCode, 204, "Expected datapush to be successful, return 204");
-                        } else {
-                            isDone = true;
-                            testUtil.configServer({"type": "removeTask", "task": task}, testRunner.serverProcess()).then(function () {
-                                done();
-                            })
-                        }
+            testUtil.configServer(dataPushFailEndpoint, fakeJiveServerProc)
+                .then(function () {
+                    return testUtil.configServer(addTaskConfig, testRunner.serverProcess());
+                })
+                .then(function (m) {
+                    taskKey = m['task'];
+                    var promise = testUtil.waitForMessageValue(jiveIdServerProc, 'oauth2TokenRequest', {'grant_type': 'refresh_token'});
+                    testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization": basicAuth}, true);
+                    return promise;
+                })
+                .then(function () {
+                    return testUtil.configServer(dataPushEndpoint, fakeJiveServerProc);   //Configure the endpoint back to return 204 on data push
+                })
+                .then(function () {
+                    return testUtil.waitForMessage(testRunner.serverProcess(), 'pushedData');
+                })
+                .then(function (res) {
+                    if (res.statusCode != 204) {
+                        assert.fail(res.statusCode, 204, "Expected datapush to be successful, return 204");
                     }
+                    return testUtil.configServer({"type": "removeTask", "task": taskKey}, testRunner.serverProcess())
+                })
+                .then(function () {
+                    done();
                 });
 
-                testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization": basicAuth}, true);
-            });
+        });
     });
 });
 

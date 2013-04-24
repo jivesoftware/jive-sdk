@@ -6,7 +6,7 @@ var Mocha = require('mocha'),
     testUtil = require('./test-util');
 
 var configuration = {
-    'port' : 8097,
+    'port' : 8106,
     'clientUrl' : 'http://localhost',
     'clientId'      : '6bgwdhc0rwifutkywsua19c49yt2qs2r',
     'clientSecret'  : '6iyjdimjzg5jbmvozv03dj0ogdzi3y.XKSkGTDsYznPZLd0zM0ZU06ExHA.1.s',
