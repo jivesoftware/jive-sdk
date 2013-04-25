@@ -43,7 +43,6 @@ function sendOperation(operationJson, serverProc) {
 
     return deferred.promise;
 }
-
 exports.sendOperation = sendOperation;
 
 /**
@@ -80,7 +79,6 @@ function createServer(config, procOptions) {
 
     return deferred.promise;
 };
-
 exports.createServer = createServer;
 
 function stopServer(serverProc) {
@@ -113,7 +111,6 @@ function stopServer(serverProc) {
 
     return deferred.promise;
 };
-
 exports.stopServer = stopServer;
 
 function waitForMessage(serverProcess, key) {
@@ -126,7 +123,6 @@ function waitForMessage(serverProcess, key) {
     });
     return deferred.promise;
 }
-
 exports.waitForMessage = waitForMessage;
 
 function waitForMessageValue(serverProcess, requiredKey, required) {
@@ -146,7 +142,6 @@ function waitForMessageValue(serverProcess, requiredKey, required) {
     });
     return deferred.promise;
 }
-
 exports.waitForMessageValue = waitForMessageValue;
 
 function clearInstances(integrationProcess) {
@@ -163,10 +158,10 @@ function clearInstances(integrationProcess) {
       return waitForMsg;
 
 }
-
 exports.clearInstances = clearInstances;
 
 function registerTile(integrationConfig, tileName, dataUrl, tileConfig) {
+
     if (!tileConfig) {
         tileConfig = {"config" : "value"};
     }
@@ -189,7 +184,6 @@ function registerTile(integrationConfig, tileName, dataUrl, tileConfig) {
             return entity['id'];
         });
 }
-
 exports.registerTile = registerTile;
 
 function findTile(integrationProcess, tileId) {
@@ -199,8 +193,32 @@ function findTile(integrationProcess, tileId) {
 
     return promise;
 }
-
 exports.findTile = findTile;
+
+function setGrantTypeResponse(jiveIdProcess, grantType, statusCode, body) {
+    var grantTypeJson = {};
+    grantTypeJson[grantType] = {
+        'statusCode' : statusCode,
+        'response': body
+    };
+    return sendOperation({"type" : "changeResponseToGrantTypes", "grantTypeResponses" : grantTypeJson}, jiveIdProcess);
+}
+exports.setGrantTypeResponse = setGrantTypeResponse;
+
+function clearGrantTypeResponses(jiveIdProcess) {
+    var grantTypeJson = {
+        "authorization" : null,
+        "refresh_token": null
+    };
+
+    return exports.sendOperation({"type" : "changeResponseToGrantTypes", "grantTypeResponses" : grantTypeJson}, jiveIdProcess);
+}
+exports.clearGrantTypeResponses = clearGrantTypeResponses;
+
+function clearAllTasks(integrationProcess) {
+    return sendOperation({'type': 'clearAllTasks'}, integrationProcess);
+}
+exports.clearAllTasks = clearAllTasks;
 
 /********************************REQUEST UTILS********************************/
 

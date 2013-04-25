@@ -99,6 +99,9 @@ IntegrationServer.prototype.doOperation = function(operation) {
         jive.tasks.unschedule(task );
         console.log("Removed task", task);
         return {};
+    } else if (type == "clearAllTasks") {
+        jive.tasks.clearAllTasks();
+        return {};
     } else if (type == "clearInstances") {
         var self = this;
         this.memory.clearInstances().then(function() {

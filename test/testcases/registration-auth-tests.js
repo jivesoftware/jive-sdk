@@ -24,8 +24,8 @@ var jiveIdServerConfig = {
 
 var setEnvironmentConfig = {
     "type": "setEnv",
-    "env" : {
-        'jive_jiveid_servers_public' : jiveIdBase,
+    "env": {
+        'jive_jiveid_servers_public': jiveIdBase,
         'jive.logging.level': 'DEBUG'
     }
 }
@@ -56,14 +56,14 @@ var registrationRequest =
 {
     "code": integrationConfig.clientSecret,
     "name": "sampletable",
-    "config": {"config":"value"},
+    "config": {"config": "value"},
     "url": fakeApiGatewayUrl + dataPushEndpoint.path,
-    "guid": testUtil.makeGuid(fakeApiGatewayUrl,true,1234)
+    "guid": testUtil.makeGuid(fakeApiGatewayUrl, true, 1234)
 }
 
 
 //************************MOCHA TESTS************************
-describe('jive.util', function () {
+describe('Registration Authentication Tests', function () {
 
     //Configure mock Jive ID server first. Call done() on completion for mocha to be happy
     before(function (done) {
@@ -73,11 +73,11 @@ describe('jive.util', function () {
                 return testUtil.sendOperation(setEnvironmentConfig, testRunner.serverProcess())
             })
             .thenResolve(testUtil.createServer(fakeApiGatewayConfig, {silent: true}))
-            .then(function(serverProc) {
+            .then(function (serverProc) {
                 fakeJiveServerProc = serverProc;
                 return testUtil.sendOperation(dataPushEndpoint, serverProc);
             })
-            .then(function(){
+            .then(function () {
                 done();
             });
     });
@@ -88,35 +88,45 @@ describe('jive.util', function () {
             .then(done);
     });
 
-    describe('#registration()', function () {
-        it("GET to /registration should return 404", function (done) {
-            testUtil.get(base + "/registration", 404).then(function (res) {
-                done();
-            });
+    it("GET to /registration should return 404", function (done) {
+        testUtil.get(base + "/registration", 404).then(function (res) {
+            done();
         });
+    });
 
-        it("POST to /registration without basic auth should return 401", function (done) {
-            testUtil.post(base + "/registration", 401, null, {}).then(function (res) {
-                done();
-            });
+    it("PUT to /registration should return 400", function (done) {
+        testUtil.put(base + "/registration", 400).then(function (res) {
+            done();
         });
+    });
 
-        it("POST to /registration with basic auth and no entity should return 400", function (done) {
-            testUtil.post(base + "/registration", 400, null, {}, {"Authorization" : basicAuth}).then(function (res) {
-                done();
-            });
+    it("DELETE to /registration should return 404", function (done) {
+        testUtil.delete(base + "/registration", 400).then(function (res) {
+            done();
         });
+    });
 
-        it("POST to /registration with incorrect basic auth should return 403", function (done) {
-            testUtil.post(base + "/registration", 403, null, {}, {"Authorization" : "Basic blahblah"}, true).then(function (res) {
-                done();
-            });
+    it("POST to /registration without basic auth should return 401", function (done) {
+        testUtil.post(base + "/registration", 401, null, {}).then(function (res) {
+            done();
         });
+    });
 
-        it("POST to /registration with basic auth and correct JSON should return 201 (created)", function (done) {
-            testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization" : basicAuth}, true).then(function (res) {
-                done();
-            });
+    it("POST to /registration with basic auth and no entity should return 400", function (done) {
+        testUtil.post(base + "/registration", 400, null, {}, {"Authorization": basicAuth}).then(function (res) {
+            done();
+        });
+    });
+
+    it("POST to /registration with incorrect basic auth should return 403", function (done) {
+        testUtil.post(base + "/registration", 403, null, {}, {"Authorization": "Basic blahblah"}, true).then(function (res) {
+            done();
+        });
+    });
+
+    it("POST to /registration with basic auth and correct JSON should return 201 (created)", function (done) {
+        testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization": basicAuth}, true).then(function (res) {
+            done();
         });
     });
 

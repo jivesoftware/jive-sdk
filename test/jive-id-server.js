@@ -12,16 +12,18 @@ function JiveIdServer(app, config) {
 }
 
 JiveIdServer.prototype.setup = function() {
+      this.configTokenEndpoint();
+}
 
-    var config = this.config;
+JiveIdServer.prototype.configTokenEndpoint = function() {
     var app = this.app;
     var self = this;
-
-    var tokenResponses = config['tokenResponses'];
 
     app.post("/v1/oauth2/token", function(req, res) {
 
         var body = req.body;
+        var config = self.config;
+        var grantTypeResponses = config['grantTypeResponses'];
 
         process.send( {oauth2TokenRequest: body});
 
@@ -30,9 +32,9 @@ JiveIdServer.prototype.setup = function() {
         var response = null;
         var responseCode = 500;
 
-        if (tokenResponses && tokenResponses[grantType]) {
-            response = tokenResponses[grantType].response;
-            responseCode = tokenResponses[grantType].response;
+        if (grantTypeResponses && grantTypeResponses[grantType]) {
+            response = grantTypeResponses[grantType].response;
+            responseCode = grantTypeResponses[grantType].statusCode;
         } else if (grantType === 'authorization_code'){
             response = self.getDefaultAuthzResponse();
             responseCode = 200;
@@ -41,12 +43,12 @@ JiveIdServer.prototype.setup = function() {
             responseCode = 200;
         }
 
+        //console.log('JIVE ID RETURNING RESPONSE CODE %d, BODY %s', responseCode, response);
         res.writeHead(responseCode, {"Content-Type": "application/json"});
         res.end(JSON.stringify(response));
 
 
     });
-
 }
 
 JiveIdServer.prototype.doOperation = function(operation) {
@@ -56,7 +58,17 @@ JiveIdServer.prototype.doOperation = function(operation) {
     }
 
     var type = operation['type'];
-
+    
+    if (type === 'changeResponseToGrantTypes') {
+        console.log('Received command to change response to grant types, %s', JSON.stringify(operation));
+        if (!this.config['grantTypeResponses']){
+            this.config['grantTypeResponses'] = {};
+        }
+        for (var key in operation['grantTypeResponses']) {
+            this.config['grantTypeResponses'][key] =  operation['grantTypeResponses'][key];
+        }
+        return {};
+    }
 
     return null;
 }
