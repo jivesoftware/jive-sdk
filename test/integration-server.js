@@ -15,6 +15,8 @@ IntegrationServer.prototype.setup = function() {
     var configuration = this.config,
         app = this.app;
     jive.service.options = configuration;
+    this.memory = new jive.persistence.memory();
+    jive.service.persistence(this.memory);
 
     app.get( '/configure', function( req, res ) {
         res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -46,7 +48,11 @@ IntegrationServer.prototype.setup = function() {
         }
     };
 
-    jive.tiles.definitions.save(definition);
+    var self = this;
+
+    jive.tiles.definitions.save(definition).then(function() {
+        console.log('Initial memory: %s', JSON.stringify(self.memory.getDb()));
+    });
 
 }
 
@@ -93,6 +99,13 @@ IntegrationServer.prototype.doOperation = function(operation) {
         jive.tasks.unschedule(task );
         console.log("Removed task", task);
         return {};
+    } else if (type == "clearInstances") {
+        var self = this;
+        this.memory.clearInstances().then(function() {
+            console.log('Cleared instances from memory. DB = %s', JSON.stringify(self.memory.getDb()));
+            process.send({'dbCleared': true});
+        });
+        return {'operationSuccess': true}
     }
 
     return null;

@@ -90,6 +90,12 @@ describe('Full Cycle Tests', function () {
             });
     });
 
+    beforeEach(function(done) {
+         testUtil.clearInstances(testRunner.serverProcess()).then(function() {
+            done();
+        });
+    });
+
     after(function (done) {
         testUtil.stopServer(jiveIdServerProc)
             .thenResolve(testUtil.stopServer(fakeJiveServerProc))
@@ -138,9 +144,10 @@ describe('Full Cycle Tests', function () {
                 })
                 .then(function (m) {
                     taskKey = m['task'];
-                    var promise = testUtil.waitForMessageValue(jiveIdServerProc, 'oauth2TokenRequest', {'grant_type': 'refresh_token'});
+                    var promise1 = testUtil.waitForMessageValue(jiveIdServerProc, 'oauth2TokenRequest', {'grant_type': 'authorization'});
+                    var promise2 = testUtil.waitForMessageValue(jiveIdServerProc, 'oauth2TokenRequest', {'grant_type': 'refresh_token'});
                     testUtil.post(base + "/registration", 201, null, registrationRequest, {"Authorization": basicAuth}, true);
-                    return promise;
+                    return q.all[promise1, promise2];
                 })
                 .then(function () {
                     return testUtil.configServer(dataPushEndpoint, fakeJiveServerProc);   //Configure the endpoint back to return 204 on data push

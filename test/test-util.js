@@ -77,7 +77,7 @@ exports.createServer = function(config, procOptions) {
     serverProcess.send({pleaseStart: true, config: config});
 
     return deferred.promise;
-}
+};
 
 exports.stopServer = function(serverProc) {
 
@@ -108,7 +108,8 @@ exports.stopServer = function(serverProc) {
     });
 
     return deferred.promise;
-}
+};
+
 
 exports.waitForMessage = function(serverProcess, key) {
     var deferred = q.defer();
@@ -137,6 +138,22 @@ exports.waitForMessageValue = function(serverProcess, requiredKey, required) {
         }
     });
     return deferred.promise;
+}
+
+
+exports.clearInstances = function(integrationProcess) {
+      var waitForMsg = exports.waitForMessage(integrationProcess, 'dbCleared').then(function(m){
+          if (m===true) {
+              console.log('Test util received message that DB was cleared!');
+          }
+          else {
+              console.log('Failure to clear DB');
+              throw 'Failure, DB not cleared: ' + JSON.stringify(m);
+          }
+      });
+      var waitForConfig = exports.configServer({'type': 'clearInstances'}, integrationProcess);
+      return waitForMsg;
+
 }
 /********************************REQUEST UTILS********************************/
 
