@@ -47,10 +47,10 @@ describe('jive.util', function () {
         testUtil.createServer(fakeServerConf, {silent: true})
             .then(function (serverProc) {
                 fakeServerProcess = serverProc;
-                return testUtil.configServer(getEndpoint, fakeServerProcess);
+                return testUtil.sendOperation(getEndpoint, fakeServerProcess);
             })
             .then(function() {
-                testUtil.configServer(postEndpoint, fakeServerProcess)
+                testUtil.sendOperation(postEndpoint, fakeServerProcess)
             })
             .then(done);
     });

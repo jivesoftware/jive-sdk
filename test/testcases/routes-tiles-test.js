@@ -70,12 +70,12 @@ describe('jive.util', function () {
         testUtil.createServer(jiveIdServerConfig)
             .then(function (serverProc) {
                 jiveIdServerProc = serverProc;
-                return testUtil.configServer(setEnvironmentConfig, testRunner.serverProcess())
+                return testUtil.sendOperation(setEnvironmentConfig, testRunner.serverProcess())
             })
             .thenResolve(testUtil.createServer(fakeJiveServerConfig, {silent: true}))
             .then(function(serverProc) {
                 fakeJiveServerProc = serverProc;
-                return testUtil.configServer(dataPushEndpoint, serverProc);
+                return testUtil.sendOperation(dataPushEndpoint, serverProc);
             })
             .then(function(){
                 done();

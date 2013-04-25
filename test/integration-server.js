@@ -105,7 +105,14 @@ IntegrationServer.prototype.doOperation = function(operation) {
             console.log('Cleared instances from memory. DB = %s', JSON.stringify(self.memory.getDb()));
             process.send({'dbCleared': true});
         });
-        return {'operationSuccess': true}
+        return {}
+    } else if (type == "findTile") {
+        var tileId = operation['tileId'];
+        jive.tiles.findByID(tileId).then(function(found) {
+            //console.log('Integration server found tile %s', JSON.stringify(found));
+            process.send({result: found});
+        });
+        return {};
     }
 
     return null;

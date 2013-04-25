@@ -12,7 +12,7 @@ var q = require('q'),
  * @param serverProc
  * @return {Function|promise|promise|Q.promise}
  */
-exports.configServer = function(operationJson, serverProc) {
+function sendOperation(operationJson, serverProc) {
 
     //If no server process is provided, use the default server process provided by the test runner
     if (!serverProc) {
@@ -44,10 +44,12 @@ exports.configServer = function(operationJson, serverProc) {
     return deferred.promise;
 }
 
+exports.sendOperation = sendOperation;
+
 /**
  * Creates a new server in a forked process and returns a promise to act on after the server is up
  */
-exports.createServer = function(config, procOptions) {
+function createServer(config, procOptions) {
     var deferred = q.defer();
 
     if (!procOptions) {
@@ -79,7 +81,9 @@ exports.createServer = function(config, procOptions) {
     return deferred.promise;
 };
 
-exports.stopServer = function(serverProc) {
+exports.createServer = createServer;
+
+function stopServer(serverProc) {
 
     //If no server process is provided, use the default server process provided by the test runner
     if (!serverProc) {
@@ -110,8 +114,9 @@ exports.stopServer = function(serverProc) {
     return deferred.promise;
 };
 
+exports.stopServer = stopServer;
 
-exports.waitForMessage = function(serverProcess, key) {
+function waitForMessage(serverProcess, key) {
     var deferred = q.defer();
     serverProcess.on('message', function(m){
         if (m[key]) {
@@ -122,7 +127,9 @@ exports.waitForMessage = function(serverProcess, key) {
     return deferred.promise;
 }
 
-exports.waitForMessageValue = function(serverProcess, requiredKey, required) {
+exports.waitForMessage = waitForMessage;
+
+function waitForMessageValue(serverProcess, requiredKey, required) {
     var deferred = q.defer();
 
     serverProcess.on('message', function(m){
@@ -140,38 +147,86 @@ exports.waitForMessageValue = function(serverProcess, requiredKey, required) {
     return deferred.promise;
 }
 
+exports.waitForMessageValue = waitForMessageValue;
 
-exports.clearInstances = function(integrationProcess) {
+function clearInstances(integrationProcess) {
       var waitForMsg = exports.waitForMessage(integrationProcess, 'dbCleared').then(function(m){
           if (m===true) {
-              console.log('Test util received message that DB was cleared!');
+              //console.log('Test util received message that DB was cleared!');
           }
           else {
               console.log('Failure to clear DB');
-              throw 'Failure, DB not cleared: ' + JSON.stringify(m);
+              throw Error('Failure, DB not cleared: ' + JSON.stringify(m));
           }
       });
-      var waitForConfig = exports.configServer({'type': 'clearInstances'}, integrationProcess);
+      var waitForConfig = exports.sendOperation({'type': 'clearInstances'}, integrationProcess);
       return waitForMsg;
 
 }
+
+exports.clearInstances = clearInstances;
+
+function registerTile(integrationConfig, tileName, dataUrl, tileConfig) {
+    if (!tileConfig) {
+        tileConfig = {"config" : "value"};
+    }
+    var registrationRequest =
+    {
+        "code": integrationConfig.clientSecret,
+        "name": tileName,
+        "config": tileConfig,
+        "url": dataUrl,
+        "guid": exports.makeGuid('http://localhost', true, 1234)
+    }
+
+    var host = integrationConfig['clientUrl'];
+    var port = integrationConfig['port'];
+    var integrationUrl = host + (port ? ":" + port : "");
+    var basicAuth = makeBasicAuth(integrationConfig.clientId, integrationConfig.clientSecret);
+    return post(integrationUrl + "/registration", 201, null, registrationRequest, {"Authorization": basicAuth}, true)
+        .then(function(res){
+            var entity = res['entity'];
+            return entity['id'];
+        });
+}
+
+exports.registerTile = registerTile;
+
+function findTile(integrationProcess, tileId) {
+    var promise = waitForMessage(integrationProcess, 'result');
+
+    sendOperation({'type': 'findTile', 'tileId': tileId}, integrationProcess);
+
+    return promise;
+}
+
+exports.findTile = findTile;
+
 /********************************REQUEST UTILS********************************/
 
-exports.get = function(url, expectedStatus, expectedEntity, doPrintResponse) {
+function get(url, expectedStatus, expectedEntity, doPrintResponse) {
     return testClientRequest(url, expectedStatus, expectedEntity, "GET", null, null, doPrintResponse);
 }
 
-exports.post = function(url, expectedStatus, expectedEntity, body, headers, doPrintResponse) {
+exports.get = get;
+
+function post(url, expectedStatus, expectedEntity, body, headers, doPrintResponse) {
     return testClientRequest(url, expectedStatus, expectedEntity, "POST", body, headers, doPrintResponse);
 }
 
-exports.put = function(url, expectedStatus, expectedEntity, body, headers, doPrintResponse) {
+exports.post = post;
+
+function put(url, expectedStatus, expectedEntity, body, headers, doPrintResponse) {
     return testClientRequest(url, expectedStatus, expectedEntity, "PUT", body, headers, doPrintResponse);
 }
 
-exports.delete = function(url, expectedStatus, expectedEntity, body, headers, doPrintResponse) {
+exports.put = put;
+
+function doDelete(url, expectedStatus, expectedEntity, body, headers, doPrintResponse) {
     return testClientRequest(url, expectedStatus, expectedEntity, "DELETE", body, headers, doPrintResponse);
 }
+
+exports.delete = doDelete;
 
 function testClientRequest(url, expectedStatus, expectedEntity, method, body, headers, doPrintResponse) {
     return jive.util.buildRequest(url, method, body, headers, null)
@@ -199,6 +254,8 @@ function successCallback (expectedStatus, expectedEntity, doPrintResponse) {
                 }
             }
         }
+
+        return res; //For additional promise chaining
     };
 };
 
@@ -209,14 +266,18 @@ function errorCallback () {
     }
 };
 
-exports.makeBasicAuth = function(user, password) {
+function makeBasicAuth(user, password) {
     var tok = user + ":" + password;
     var hash = new Buffer(tok).toString('base64');
     return "Basic " + hash;
 }
 
-exports.makeGuid = function(communityUrl, isTile, tileOrExtstreamId) {
+exports.makeBasicAuth = makeBasicAuth;
+
+function makeGuid(communityUrl, isTile, tileOrExtstreamId) {
     communityUrl = communityUrl.replace("http://","");
     return "community:" + encodeURIComponent(communityUrl) + (isTile ? "/tile:" : "/extstream:") + tileOrExtstreamId;
 }
+
+exports.makeGuid = makeGuid;
 
