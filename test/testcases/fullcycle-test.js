@@ -10,7 +10,7 @@ var host = integrationConfig['clientUrl'];
 var port = integrationConfig['port'];
 var base = host + ":" + port;
 var jiveIdServerProc = null;
-var fakeJiveServerProc = null;
+var fakeApiGatewayProc = null;
 
 //Data for fake Jive ID server
 var jiveIdPort = port + 1;
@@ -39,18 +39,18 @@ var addTaskConfig = {
 };
 
 //Data for fake Jive Server
-var fakeJivePort = port + 2;
-var fakeJiveUrl = host + ":" + fakeJivePort;
+var fakeApiGatewayPort = port + 2;
+var fakeApiGatewayUrl = host + ":" + fakeApiGatewayPort;
 
-var fakeJiveServerConfig = {
+var fakeApiGatewayConfig = {
     clientUrl: host,
-    port: fakeJivePort,
-    serverType: 'fakeJiveServer',
+    port: fakeApiGatewayPort,
+    serverType: 'fakeApiGateway',
     serverName: 'Fake Jive Instance Server'
 }
 
 var dataPath = "/api/jivelinks/v1/tiles/1234/data";
-var dataUrl = fakeJiveServerConfig['clientUrl'] + ":" + fakeJiveServerConfig['port'] + dataPath;
+var dataUrl = fakeApiGatewayConfig['clientUrl'] + ":" + fakeApiGatewayConfig['port'] + dataPath;
 
 var dataPushEndpoint = {
     "type": "setEndpoint",
@@ -68,8 +68,8 @@ var registrationRequest =
     "code": integrationConfig.clientSecret,
     "name": "sampletable",
     "config": {"config": "value"},
-    "url": fakeJiveUrl + dataPushEndpoint.path,
-    "guid": testUtil.makeGuid(fakeJiveUrl, true, 1234)
+    "url": fakeApiGatewayUrl + dataPushEndpoint.path,
+    "guid": testUtil.makeGuid(fakeApiGatewayUrl, true, 1234)
 }
 
 
@@ -83,9 +83,9 @@ describe('Full Cycle Tests', function () {
                 jiveIdServerProc = serverProc;
                 return testUtil.sendOperation(setEnvironmentConfig, testRunner.serverProcess());
             })
-            .thenResolve(testUtil.createServer(fakeJiveServerConfig))
+            .thenResolve(testUtil.createServer(fakeApiGatewayConfig))
             .then(function (serverProc) {
-                fakeJiveServerProc = serverProc;
+                fakeApiGatewayProc = serverProc;
                 return testUtil.sendOperation(dataPushEndpoint, serverProc);
             })
             .then(function () {
@@ -93,15 +93,15 @@ describe('Full Cycle Tests', function () {
             });
     });
 
-    beforeEach(function(done) {
-         testUtil.clearInstances(testRunner.serverProcess()).then(function() {
+    beforeEach(function (done) {
+        testUtil.clearInstances(testRunner.serverProcess()).then(function () {
             done();
         });
     });
 
     after(function (done) {
         testUtil.stopServer(jiveIdServerProc)
-            .thenResolve(testUtil.stopServer(fakeJiveServerProc))
+            .thenResolve(testUtil.stopServer(fakeApiGatewayProc))
             .then(done);
     });
 
@@ -141,7 +141,7 @@ describe('Full Cycle Tests', function () {
 
             var taskKey = null;
 
-            testUtil.sendOperation(dataPushFailEndpoint, fakeJiveServerProc)
+            testUtil.sendOperation(dataPushFailEndpoint, fakeApiGatewayProc)
                 .then(function () {
                     return testUtil.sendOperation(addTaskConfig, testRunner.serverProcess());
                 })
@@ -153,7 +153,7 @@ describe('Full Cycle Tests', function () {
                     return q.all[promise1, promise2];
                 })
                 .then(function () {
-                    return testUtil.sendOperation(dataPushEndpoint, fakeJiveServerProc);   //Configure the endpoint back to return 204 on data push
+                    return testUtil.sendOperation(dataPushEndpoint, fakeApiGatewayProc);   //Configure the endpoint back to return 204 on data push
                 })
                 .then(function () {
                     return testUtil.waitForMessage(testRunner.serverProcess(), 'pushedData');
@@ -175,11 +175,11 @@ describe('Full Cycle Tests', function () {
             var tileId;
 
             testUtil.registerTile(integrationConfig, 'sampletable', dataUrl)
-                .then(function(id) {
+                .then(function (id) {
                     tileId = id;
                     return testUtil.findTile(testRunner.serverProcess(), tileId);
                 })
-                .then(function(tile) {
+                .then(function (tile) {
                     if (tile) {
                         console.log('Found tile %s', JSON.stringify(tile));
                     }
@@ -193,11 +193,7 @@ describe('Full Cycle Tests', function () {
 
         });
 
-     /*   it("Full cycle - verify tile is deleted if gateway returns 410 gone response", function (done) {
-
-            var dataPath = "/api/jivelinks/v1/tiles/1234/data";
-            var dataUrl = fakeJiveServerConfig['clientUrl'] + ":" + fakeJiveServerConfig['port'] + dataPath;
-            var tileId;
+        it("Full cycle - verify tile is deleted if gateway returns 410 gone response", function (done) {
 
             var goneEndpoint = {
                 "type": "setEndpoint",
@@ -209,27 +205,47 @@ describe('Full Cycle Tests', function () {
             };
 
             var taskKey = null;
+            var tileId = null;
 
-            testUtil.sendOperation(goneEndpoint, fakeJiveServerProc)
-                *//*                .then(function () {
-                 return testUtil.sendOperation(addTaskConfig, testRunner.serverProcess());
-                 })*//*
-                .then(function (m) {
-                    taskKey = m['task'];
+            testUtil.sendOperation(goneEndpoint, fakeApiGatewayProc)
+                .then(function () {
                     return testUtil.registerTile(integrationConfig, 'sampletable', dataUrl);
                 })
-                .then(function(id) {
+                .then(function (id) {
                     tileId = id;
                     return testUtil.findTile(testRunner.serverProcess(), tileId);
                 })
-                .then(function(tile) {
-
+                .then(function (tile) {
+                    if (!tile) {
+                        assert.fail(tile, true, 'Expected tile to exist for ID ' + tileId);
+                    }
+                })
+                .then(function (m) {
+                    //Start waiting for pushedData message
+                    var waitForPush = testUtil.waitForMessage(testRunner.serverProcess(), 'pushedData');
+                    //Then kick off the task so that data will be pushed
+                    var waitForTask = testUtil.sendOperation(addTaskConfig, testRunner.serverProcess()).then(function(m){
+                        taskKey = m['task'];
+                    });
+                    return q.all([waitForPush, waitForTask]); //After both are complete, tile should have been deleted
+                })
+                .then(function() {
+                    return testUtil.findTile(testRunner.serverProcess(), tileId);
+                })
+                .then(function(tile){
+                    if (tile !== null) {
+                        assert.fail(tile, null, 'Expected tile to NOT exist after deleting for ID ' + tileId);
+                        console.log("Tile shouldn't exist %s", JSON.stringify(tile));
+                    }
+                })
+                .then(function() {
+                    return testUtil.sendOperation({"type": "removeTask", "task": taskKey}, testRunner.serverProcess());
                 })
                 .then(function () {
                     done();
                 });
 
-        });*/
+        });
     });
 });
 

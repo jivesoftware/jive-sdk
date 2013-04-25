@@ -31,13 +31,13 @@ var setEnvironmentConfig = {
 }
 
 //Data for fake Jive Server
-var fakeJivePort = port + 2;
-var fakeJiveUrl = host + ":" + fakeJivePort;
+var fakeApiGatewayPort = port + 2;
+var fakeApiGatewayUrl = host + ":" + fakeApiGatewayPort;
 
-var fakeJiveServerConfig = {
+var fakeApiGatewayConfig = {
     clientUrl: host,
-    port: fakeJivePort,
-    serverType: 'fakeJiveServer',
+    port: fakeApiGatewayPort,
+    serverType: 'fakeApiGateway',
     serverName: 'Fake Jive Server'
 }
 
@@ -57,8 +57,8 @@ var registrationRequest =
     "code": integrationConfig.clientSecret,
     "name": "sampletable",
     "config": {"config":"value"},
-    "url": fakeJiveUrl + dataPushEndpoint.path,
-    "guid": testUtil.makeGuid(fakeJiveUrl,true,1234)
+    "url": fakeApiGatewayUrl + dataPushEndpoint.path,
+    "guid": testUtil.makeGuid(fakeApiGatewayUrl,true,1234)
 }
 
 
@@ -72,7 +72,7 @@ describe('jive.util', function () {
                 jiveIdServerProc = serverProc;
                 return testUtil.sendOperation(setEnvironmentConfig, testRunner.serverProcess())
             })
-            .thenResolve(testUtil.createServer(fakeJiveServerConfig, {silent: true}))
+            .thenResolve(testUtil.createServer(fakeApiGatewayConfig, {silent: true}))
             .then(function(serverProc) {
                 fakeJiveServerProc = serverProc;
                 return testUtil.sendOperation(dataPushEndpoint, serverProc);

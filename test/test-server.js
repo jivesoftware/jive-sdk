@@ -6,7 +6,7 @@ var express = require('express'),
     http = require('http'),
     jive = require('../../jive-sdk'),
     uuid = require('node-uuid'),
-    FakeJiveServer = require('./fake-jive-server').FakeJiveServer,
+    FakeApiGateway = require('./fake-api-gateway').FakeApiGateway,
     IntegrationServer = require('./integration-server').IntegrationServer,
     JiveIdServer = require('./jive-id-server').JiveIdServer,
     BaseServer = require('./base-server').BaseServer;
@@ -69,8 +69,8 @@ function startServer(configuration) {
         ServerType = JiveIdServer;
     }
 
-    else if ( configuration.serverType==='fakeJiveServer') {
-        ServerType = FakeJiveServer;
+    else if ( configuration.serverType==='fakeApiGateway') {
+        ServerType = FakeApiGateway;
     }
     else if (configuration.serverType==='genericServer') {
         ServerType = BaseServer;

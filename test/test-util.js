@@ -119,7 +119,7 @@ exports.stopServer = stopServer;
 function waitForMessage(serverProcess, key) {
     var deferred = q.defer();
     serverProcess.on('message', function(m){
-        if (m[key]) {
+        if (m.hasOwnProperty(key)) {
             serverProcess.removeListener('message', arguments.callee);
             deferred.resolve(m[key]);
         }
@@ -133,7 +133,7 @@ function waitForMessageValue(serverProcess, requiredKey, required) {
     var deferred = q.defer();
 
     serverProcess.on('message', function(m){
-        if (m[requiredKey]) {
+        if (m.hasOwnProperty(requiredKey)) {
             var value = m[requiredKey];
             for (var key in required) {
                 if (value[key] != required[key]) {
