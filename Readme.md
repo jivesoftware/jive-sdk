@@ -44,7 +44,13 @@ That's it! You have just created your first tile! If you'd like to see the tile 
 Now that your killer integration application is up and running, let's see your tiles in action. 
 
 **Installing your tiles**
-> {"handWaving" : "In order to install a tile, you must have admin privileges in the Jive instance. We are in the process of building out a utility that will do this for you in the sandbox. Stay tuned for details!"}
+Currently, to install your tiles into a Jive instance, you will need to be an admin. However, we've created a utility that will make this easy for you! The first step is to get the tile definitions that you'd like to install. The framework provides an endpoint for you that makes this easy:
+`http://<yourServer:yourPort>/tiles`
+
+Copy your tile definitions to the clipboard. Then navigate to the tile-installer utility. In your browser, go to the following URL:
+`https://jivedev-tileinstaller.nodejitsu.com/`
+
+At this URL, you are presented with a form. Paste in your definitions and enter the tile-installer key you were provided when you signed up. After submitting, you should see a success dialog box. Now, your tiles are available in the sandbox!
 
 **Add your tiles to a Purposeful Place**
 Using your tile in Purposeful Place is easy! All you need to do is create a group that uses a template. When you configure the group, you'll be able to add your tile! 
