@@ -137,7 +137,8 @@ exports.init = function(_app, options ) {
 
 function initLogger(options) {
     var logfile = options['logFile'] || options['logfile'];
-    var logLevel = process.env['jive_logging_level'] || options['logLevel'].toUpperCase() || options['loglevel'].toUpperCase() || 'INFO';
+    var logLevel = process.env['jive_logging_level'] || options['logLevel'] || options['loglevel'] || 'INFO';
+    logLevel = logLevel.toUpperCase();
 
     if (!logfile) {
         logfile = 'logs/jive.log';
