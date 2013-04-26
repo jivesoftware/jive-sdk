@@ -24,6 +24,7 @@ var q = require('q');
 var bootstrap = require('./bootstrap');
 var definitionConfigurator = require('./definitionSetup');
 var jive = require('../api');
+var log4js = require('log4js');
 
 var app;
 var rootDir = process.cwd();
@@ -49,7 +50,7 @@ exports.options = {};
 
 var persistence;
 /**
- * Retrieves current persistence strategy, defaults to file.
+ * Retrieves or sets current persistence strategy, defaults to file.
  * @type {undefined}
  */
 exports.persistence = function(_persistence) {
@@ -87,10 +88,7 @@ exports.init = function(_app, options ) {
     var initialPromise;
     if ( typeof options === 'object' ) {
         exports.options = options;
-        if ( options['persistence'] ) {
-            // set persistence if the object is provided
-            exports.persistence( options['persistence'] );
-        }
+
         initialPromise = q.fcall( function() {
             return options;
         });
@@ -98,16 +96,16 @@ exports.init = function(_app, options ) {
         // if no options are provided, then try getting them from
         // cmd line arguments, or from environemnt
         if ( !options ) {
-            var configFileFromEnv = process.env['CONFIG_FILE'];
+            var configFileFromEnv = process.env['jive_sdk_config_file'];
             var configFilePathFromArgs = undefined;
 
             process.argv.forEach(function (val, index, array) {
                 if ( val.indexOf('=') > -1 ) {
                     var arg = val.split(/=/);
-                    jive.logger.debug(arg[0],'=',arg[1]);
+
 
                     if ( arg[0] == 'configFile' ) {
-                        jive.logger.debug("Command line argument:");
+                        jive.logger.debug("Command line argument:"  + arg[0] + "=" + arg[1]);
                         configFilePathFromArgs = arg[1];
                     }
                 }
@@ -132,11 +130,50 @@ exports.init = function(_app, options ) {
         });
     }
 
-    var promises = [];
-    promises.push( initialPromise );
-
-    return q.all(promises);
+    return initialPromise
+            .then(initLogger)
+            .then(initPersistence);
 };
+
+function initLogger(options) {
+    var logfile = options['logFile'] || options['logfile'];
+    var logLevel = process.env['jive_logging_level'] || options['logLevel'].toUpperCase() || options['loglevel'].toUpperCase() || 'INFO';
+
+    if (!logfile) {
+        logfile = 'logs/jive.log';
+    }
+    if (logfile.indexOf('logs/') === 0) {
+        if (!fs.existsSync('logs')) {
+            jive.logger.warn('logs subdirectory does not exist. Creating directory now.');
+            fs.mkdirSync('logs');
+        }
+    }
+    log4js.loadAppender('file');
+    log4js.addAppender(log4js.appenders.file(logfile), 'jive-sdk');
+
+    jive.logger.setLevel(logLevel);
+
+    return options;
+}
+
+function initPersistence(options) {
+    var persistence = options['persistence'];
+    if ( typeof persistence === 'object' ) {
+        // set persistence if the object is provided
+        exports.persistence( options['persistence'] );
+    }
+    else if ( typeof persistence === 'string' ) {
+        //If a string is provided, and it's a valid type exported in jive.persistence, then use that.
+        if (jive.persistence[persistence]) {
+            exports.persistence(new jive.persistence[persistence]());
+        }
+        else {
+            jive.logger.warn('Invalid persistence option given "' + persistence + '". Must be one of ' + Object.keys(jive.persistence));
+            jive.logger.warn('Defaulting to file persistence');
+        }
+    }
+    return options;
+}
 
 /**
  *

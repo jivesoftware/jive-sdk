@@ -21,7 +21,7 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // logging
-var logger = require('log4js').getLogger();
+var logger = require('log4js').getLogger('jive-sdk');
 logger.setLevel(process.env['jive_logging_level'] || 'INFO');
 exports.logger = logger;
 
