@@ -155,8 +155,9 @@ var recursiveDirectoryProcessor = function(app, definitionName, currentFsItem, r
 exports.setupDefinitionRoutes = function(app, definitionName, routesPath){
 
     var processCandidateRoutes = function(app, definitionName, theFile, theDirectory, root ) {
-        var httpVerb = theFile.substring(0, theFile.length - 3).toLowerCase();
-        var routeHandlerPath = (theDirectory + '/' + httpVerb);
+        var fileName = theFile.substring(0, theFile.length - 3);
+        var httpVerb = fileName.toLowerCase();
+        var routeHandlerPath = (theDirectory + '/' + fileName);
         var _routeContextPath = ('/' + definitionName + theDirectory.replace(root,''));
 
         var legalVerbFile = legalRouteVerbs.indexOf(httpVerb) > -1;

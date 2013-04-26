@@ -81,6 +81,7 @@ function createServer(config, procOptions) {
 };
 exports.createServer = createServer;
 
+/** Stop the test server running at the given */
 function stopServer(serverProc) {
 
     //If no server process is provided, use the default server process provided by the test runner

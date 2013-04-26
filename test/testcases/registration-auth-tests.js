@@ -94,20 +94,20 @@ describe('Registration Authentication Tests', function () {
         });
     });
 
-    it("PUT to /registration should return 400", function (done) {
-        testUtil.put(base + "/registration", 400).then(function (res) {
+    it("PUT to /registration should return 404", function (done) {
+        testUtil.put(base + "/registration", 404).then(function (res) {
             done();
         });
     });
 
-    it("DELETE to /registration should return 400", function (done) {
-        testUtil.delete(base + "/registration", 400).then(function (res) {
+    it("DELETE to /registration should return 404", function (done) {
+        testUtil.delete(base + "/registration", 404).then(function (res) {
             done();
         });
     });
 
     it("POST to /registration without basic auth should return 401", function (done) {
-        testUtil.post(base + "/registration", 401, null, {}).then(function (res) {
+        testUtil.post(base + "/registration", 401).then(function (res) {
             done();
         });
     });

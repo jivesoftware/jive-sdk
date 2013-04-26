@@ -13,8 +13,8 @@ var express = require('express'),
 
 // "Private" variables to this process
 var IS_FORKED = typeof process.send !== 'undefined';
-var SERVER = null;
-var NODE_SERVER = null;
+var SERVER = null; //The test server object, e.g. a FakeApiGateway server
+var NODE_SERVER = null; //The node server object returned by http.createServer
 
 //Setup app
 var app = express();
@@ -27,9 +27,8 @@ app.configure('development', function () {
 });
 
 if (IS_FORKED) {
+    //Set up listeners to interprocess communication
     process.on('message', function(m) {
-    //   console.log("Test server received message from test runner");
-    //   console.log(m);
 
         if (m['pleaseStart'] === true) {
             startServer(m.config);
@@ -52,7 +51,9 @@ if (IS_FORKED) {
 else {
     config = {
         'port' : 8096,
-        'clientUrl' : 'http://localhost'
+        'clientUrl' : 'http://localhost',
+        'serverType' : 'genericServer',
+        'serverName' : 'Generic Test Server started directly'
     };
     startServer(config);
 }
@@ -76,7 +77,7 @@ function startServer(configuration) {
         ServerType = BaseServer;
     }
     else {
-        console.log('ERROR invalid server type given "%s"', configuration.serverType);
+        console.log('ERROR in test-server.js. Invalid server type given "%s"', configuration.serverType);
         process.send({serverStarted: false, error: 'Invalid server type given "' + configuration.serverType + '"'});
         process.exit();
     }
@@ -94,13 +95,13 @@ function startServer(configuration) {
 
 function stopServer(id) {
     NODE_SERVER.on('close', function() {
-        console.log("Server at port " + SERVER.config.port + " stopped");
+        console.log("Server at port %d with name \"%s\" stopped", SERVER.config.port, SERVER.config.serverName);
         process.send({
             serverStopped: true,
             id: id
         });
         process.exit();
-    })
+    });
 
     NODE_SERVER.close();
 

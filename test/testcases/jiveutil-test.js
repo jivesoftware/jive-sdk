@@ -23,7 +23,7 @@ var getEndpoint = {
     "type": "setEndpoint",
     "method": "GET",
     "path": "/test",
-    "statusCode": 200,
+    "statusCode": 500,
     "body": "{\"key\": \"value\"}",
     "headers": { "Content-Type": "application/json" }
 };
@@ -85,44 +85,40 @@ describe('jive.util', function () {
     });
 
     describe('#buildRequest()', function () {
-        it("GET to /test", function (done) {
-            testUtil.get(fakeServerUrl + getEndpoint.path, 200, null).then(function (res) {
+        it("GET to /test returns " + getEndpoint.statusCode, function (done) {
+            testUtil.get(fakeServerUrl + getEndpoint.path, getEndpoint.statusCode, null).then(function (res) {
                 done();
             }, done);
         });
 
-        it("POST to /test with empty body returns 400", function (done) {
-            testUtil.post(fakeServerUrl + postEndpoint.path, 400, null, null).then(function (res) {
+        it("POST to /test with empty body returns 204", function (done) {
+            testUtil.post(fakeServerUrl + postEndpoint.path, postEndpoint.statusCode, null, null).then(function (res) {
                 done();
             }, done);
         });
 
-        it("POST to /test", function (done) {
-            testUtil.post(fakeServerUrl + postEndpoint.path, postEndpoint.statusCode, null, {}).then(function (res) {
+        it("POST to /test returns 204", function (done) {
+            testUtil.post(fakeServerUrl + postEndpoint.path, postEndpoint.statusCode, null, {"testKey": "value"}).then(function (res) {
                 done();
             }, done);
         });
 
-        it("PUT to /test", function (done) {
-            testUtil.put(fakeServerUrl + putEndpoint.path, putEndpoint.statusCode, null, {}).then(function (res) {
+        it("PUT to /test with empty body returns 201", function (done) {
+            testUtil.put(fakeServerUrl + putEndpoint.path, putEndpoint.statusCode, null, null).then(function (res) {
                 done();
             }, done);
         });
 
-        it("DELETE to /test", function (done) {
-            testUtil.delete(fakeServerUrl + deleteEndpoint.path, deleteEndpoint.statusCode, null, {}).then(function (res) {
+        it("PUT to /test returns 201", function (done) {
+            testUtil.put(fakeServerUrl + putEndpoint.path, putEndpoint.statusCode, null, {"testKey" : "value"}).then(function (res) {
+                done();
+            }, done);
+        });
+
+        it("DELETE to /test returns 200", function (done) {
+            testUtil.delete(fakeServerUrl + deleteEndpoint.path, deleteEndpoint.statusCode).then(function (res) {
                 done();
             }, done);
         });
     });
 });
-
-
-//*********************************************Helpers*********************************************
-//For Mocha framework, need to call "done" after a callback to indicate the test completed for asynchronous tests
-function wrap(f, done) {
-    return function (arg) {
-        f(arg);
-        done();
-    }
-}

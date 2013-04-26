@@ -174,7 +174,7 @@ describe('Data Push Tests', function () {
 
     });
 
-    it("Data Push Tests - verify 500 error from Jive ID is returned to error callback when refresh flow fails", function (done) {
+    it.only("Data Push Tests - verify 400 error from Jive ID is returned to error callback when refresh flow fails", function (done) {
 
         var dataPushFailEndpoint = {
             "type": "setEndpoint",
@@ -189,7 +189,7 @@ describe('Data Push Tests', function () {
 
         testUtil.sendOperation(dataPushFailEndpoint, fakeApiGatewayProc)
             .then(function () {
-                return testUtil.setGrantTypeResponse(jiveIdServerProc, 'refresh_token', 500, JSON.stringify({'error': 'Cannot grant tokens from refresh tokens at this time'}));
+                return testUtil.setGrantTypeResponse(jiveIdServerProc, 'refresh_token', 400, JSON.stringify({'error': 'Cannot grant tokens from refresh tokens at this time'}));
             })
             .then(function () {
                 return testUtil.sendOperation(addTaskConfig, testRunner.serverProcess());
@@ -199,7 +199,7 @@ describe('Data Push Tests', function () {
                 var promise1 = testUtil.waitForMessageValue(jiveIdServerProc, 'oauth2TokenRequest', {'grant_type': 'authorization_code'});
                 var promise2 = testUtil.waitForMessageValue(jiveIdServerProc, 'oauth2TokenRequest', {'grant_type': 'refresh_token'});
                 var promise3 = testUtil.waitForMessage(testRunner.serverProcess(), 'pushedData').then(function (res) {
-                    if (res.statusCode != 500) {
+                    if (res.statusCode != 400) {
                         assert.fail(res.statusCode, 500, 'Expected to get a 500 error back propagated from Jive ID error');
                     }
                 });
