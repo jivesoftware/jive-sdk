@@ -100,7 +100,7 @@ describe('Registration Authentication Tests', function () {
         });
     });
 
-    it("DELETE to /registration should return 404", function (done) {
+    it("DELETE to /registration should return 400", function (done) {
         testUtil.delete(base + "/registration", 400).then(function (res) {
             done();
         });

@@ -220,6 +220,30 @@ function clearAllTasks(integrationProcess) {
 }
 exports.clearAllTasks = clearAllTasks;
 
+function setEndpoint(serverProcess, method, statusCode, path, body) {
+    method = method.toUpperCase();
+    if (method != "GET" && method != "PUT" && method != "POST" && method != "DELETE") {
+        throw Error('Invalid method given in setEndpoint: ' + method);
+    }
+    if (path.indexOf('/') != 0) {
+        throw Error('Path must start with a "/" in testUtil.setEndpoint. Path given: ' + path);
+    }
+    if (typeof body === 'object') {
+        body = JSON.stringify(body);
+    }
+    var operation = {
+        "type": "setEndpoint",
+        "method": method,
+        "path": path,
+        "statusCode": statusCode,
+        "body": body,
+        "headers": { "Content-Type": "application/json" }
+    };
+    return sendOperation(operation, serverProcess);
+}
+
+exports.setEndpoint = setEndpoint;
+
 /********************************REQUEST UTILS********************************/
 
 function get(url, expectedStatus, expectedEntity, doPrintResponse) {
@@ -262,7 +286,7 @@ function successCallback (expectedStatus, expectedEntity, doPrintResponse) {
         }
         var entity = res.entity;
         if (res.statusCode != expectedStatus) {
-            assert.fail(res.statusCode, expectedStatus, "Status code from server incorrect");
+            assert.fail(res.statusCode, expectedStatus, "Status code from server incorrect: actual=" + res.statusCode + ",expected=" + expectedStatus);
         }
 
         if (expectedEntity) {

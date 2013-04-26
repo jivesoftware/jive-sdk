@@ -38,7 +38,7 @@ var addTaskConfig = {
     "type": "addTask"
 };
 
-//Data for fake Jive Server
+//Data for fake API Gateway Server
 var fakeApiGatewayPort = port + 2;
 var fakeApiGatewayUrl = host + ":" + fakeApiGatewayPort;
 
@@ -46,11 +46,11 @@ var fakeApiGatewayConfig = {
     clientUrl: host,
     port: fakeApiGatewayPort,
     serverType: 'fakeApiGateway',
-    serverName: 'Fake Jive Instance Server'
+    serverName: 'Fake API Gateway Server'
 }
 
 var dataPath = "/api/jivelinks/v1/tiles/1234/data";
-var dataUrl = fakeApiGatewayConfig['clientUrl'] + ":" + fakeApiGatewayConfig['port'] + dataPath;
+var dataUrl = fakeApiGatewayUrl + dataPath;
 
 var dataPushEndpoint = {
     "type": "setEndpoint",
@@ -74,7 +74,7 @@ var registrationRequest =
 
 
 //************************MOCHA TESTS************************
-describe('Full Cycle Tests', function () {
+describe('Data Push Tests', function () {
 
     //Configure mock Jive ID server first. Call done() on completion for mocha to be happy
     before(function (done) {
@@ -90,7 +90,7 @@ describe('Full Cycle Tests', function () {
             })
             .then(function () {
                 done();
-            });
+            }, done);
     });
 
     beforeEach(function (done) {
@@ -101,13 +101,13 @@ describe('Full Cycle Tests', function () {
             })
             .then(function () {
                 done();
-            });
+            }, done);
     });
 
     after(function (done) {
         testUtil.stopServer(jiveIdServerProc)
             .thenResolve(testUtil.stopServer(fakeApiGatewayProc))
-            .then(done);
+            .then(done, done);
     });
 
 
@@ -129,7 +129,7 @@ describe('Full Cycle Tests', function () {
             })
             .then(function () {
                 done();
-            });
+            }, done);
     });
 
     it("Data Push Tests - register tile and force access token exchange (refresh flow)", function (done) {
@@ -170,7 +170,7 @@ describe('Full Cycle Tests', function () {
             })
             .then(function () {
                 done();
-            });
+            }, done);
 
     });
 
@@ -208,10 +208,7 @@ describe('Full Cycle Tests', function () {
             })
             .then(function () {
                 done();
-            })
-            .catch(function (err) {
-                done(err);
-            });
+            }, done);
 
     });
 
@@ -265,7 +262,7 @@ describe('Full Cycle Tests', function () {
             })
             .then(function () {
                 done();
-            });
+            }, done);
 
     });
 
@@ -296,9 +293,7 @@ describe('Full Cycle Tests', function () {
             })
             .then(function () {
                 done();
-            }).catch(function (err) {
-            done(err);
-        });
+            }, done);
 
 
     });

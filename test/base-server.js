@@ -26,8 +26,6 @@ BaseServer.prototype.doOperation = function(operation) {
         var body = operation['body'];
         var headers = operation['headers'];
 
-        console.log("SET ENDPOINT: ", operation);
-
         this.setEndpoint(method, path, statusCode, body, headers);
         return {}; //operation handled
     }

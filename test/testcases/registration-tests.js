@@ -106,7 +106,7 @@ describe('Registration Tests', function () {
             .then(done);
     });
 
-    it("Registration Endpoint Tests - register tile and verify it is found with jive.tiles.findByID()", function (done) {
+    it("Registration Tests - register tile and verify it is found with jive.tiles.findByID()", function (done) {
 
         var tileId;
 
@@ -129,7 +129,7 @@ describe('Registration Tests', function () {
 
     });
 
-    it("Registration Endpoint Tests - verify 502 is returned when Jive ID cannot be reached", function (done) {
+    it("Registration Tests - verify 502 is returned when Jive ID cannot be reached", function (done) {
 
         var envInvalidJiveId = {
             "type": "setEnv",

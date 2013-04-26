@@ -37,6 +37,24 @@ var postEndpoint = {
     "headers": { "Content-Type": "application/json" }
 };
 
+var putEndpoint = {
+    "type": "setEndpoint",
+    "method": "PUT",
+    "path": "/test",
+    "statusCode": 201,
+    "body": "{\"key\": \"value\"}",
+    "headers": { "Content-Type": "application/json" }
+};
+
+var deleteEndpoint = {
+    "type": "setEndpoint",
+    "method": "DELETE",
+    "path": "/test",
+    "statusCode": 200,
+    "body": "{\"key\": \"value\"}",
+    "headers": { "Content-Type": "application/json" }
+};
+
 //************************MOCHA TESTS************************
 
 describe('jive.util', function () {
@@ -44,39 +62,57 @@ describe('jive.util', function () {
 
     //Configure server first. Call done() on completion for mocha to be happy
     before(function (done) {
-        testUtil.createServer(fakeServerConf, {silent: true})
+        testUtil.createServer(fakeServerConf)
             .then(function (serverProc) {
                 fakeServerProcess = serverProc;
                 return testUtil.sendOperation(getEndpoint, fakeServerProcess);
             })
             .then(function() {
-                testUtil.sendOperation(postEndpoint, fakeServerProcess)
+                return testUtil.sendOperation(postEndpoint, fakeServerProcess);
             })
-            .then(done);
+            .then(function() {
+                return testUtil.sendOperation(putEndpoint, fakeServerProcess);
+            })
+            .then(function() {
+                return testUtil.sendOperation(deleteEndpoint, fakeServerProcess);
+            })
+            .then(function() {done();}, done);
     });
 
     after(function (done) {
         testUtil.stopServer(fakeServerProcess)
-            .then(done);
+            .then(done, done);
     });
 
     describe('#buildRequest()', function () {
         it("GET to /test", function (done) {
             testUtil.get(fakeServerUrl + getEndpoint.path, 200, null).then(function (res) {
                 done();
-            });
+            }, done);
         });
 
         it("POST to /test with empty body returns 400", function (done) {
             testUtil.post(fakeServerUrl + postEndpoint.path, 400, null, null).then(function (res) {
                 done();
-            });
+            }, done);
         });
 
         it("POST to /test", function (done) {
             testUtil.post(fakeServerUrl + postEndpoint.path, postEndpoint.statusCode, null, {}).then(function (res) {
                 done();
-            });
+            }, done);
+        });
+
+        it("PUT to /test", function (done) {
+            testUtil.put(fakeServerUrl + putEndpoint.path, putEndpoint.statusCode, null, {}).then(function (res) {
+                done();
+            }, done);
+        });
+
+        it("DELETE to /test", function (done) {
+            testUtil.delete(fakeServerUrl + deleteEndpoint.path, deleteEndpoint.statusCode, null, {}).then(function (res) {
+                done();
+            }, done);
         });
     });
 });
