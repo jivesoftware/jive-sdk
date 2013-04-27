@@ -5,7 +5,7 @@ var mustache = require('mustache');
 
 var oauthUtil = require('../lib/oauthUtil');
 
-var redirectHtmlTxt = "<html> <head> <script> window.location='{{{redirect}}}'; </script>" +
+exports.redirectHtmlTxt = "<html> <head> <script> window.location='{{{redirect}}}'; </script>" +
     "</head> <body> Redirecting ... </body> </html>";
 
 exports.fetchOAuth2Conf = function() {
@@ -117,6 +117,7 @@ exports.oauth2Callback = function(req, res ) {
 
     var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
 
+    var self = this;
     var proceed = function(context) {
         var redirectParams = '';
 
@@ -132,7 +133,7 @@ exports.oauth2Callback = function(req, res ) {
         }
 
         var redirect = decodeURIComponent(jiveRedirectUrl) + ( redirectParams ? '?' : '') + redirectParams;
-        var redirectHtml = mustache.render( redirectHtmlTxt, { 'redirect' : redirect } );
+        var redirectHtml = mustache.render( self.redirectHtmlTxt, { 'redirect' : redirect } );
 
         res.status(200);
         res.set({'Content-Type': 'text/html'});
