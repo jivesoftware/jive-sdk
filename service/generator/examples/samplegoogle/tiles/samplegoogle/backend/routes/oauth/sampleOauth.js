@@ -13,7 +13,7 @@ var tokenStore = jive.service.persistence();
 // overrides jive-sdk/routes/oauth.js to do something useful,
 // like storing access token for the viewer
 
-exports.fetchOAuth2Conf = function() {
+myOauth.fetchOAuth2Conf = function() {
     return jive.service.options['oauth2-google'];
 };
 
