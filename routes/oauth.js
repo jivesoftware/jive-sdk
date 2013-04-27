@@ -27,7 +27,7 @@ exports.authorizeUrl = function(req, res ) {
 
     var auth = req.headers['authorization'];
     if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {
-        errorResponse(403, 'Invalid or missing HMAC authorization header'  );
+        errorResponse(res, 403, 'Invalid or missing HMAC authorization header'  );
         return;
     }
 
