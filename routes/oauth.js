@@ -41,12 +41,22 @@ exports.authorizeUrl = function(req, res ) {
 
     var contextStr = query['context'];
     if ( contextStr ) {
-        var context = JSON.parse( decodeURI(contextStr) );
+        try {
+            var context = JSON.parse( decodeURI(contextStr) );
+        } catch ( e ) {
+            errorResponse( res, 400, 'Invalid context string, could not parse');
+            return;
+        }
     }
 
     var extraAuthParamsStr = query['extraAuthParams'];
     if ( extraAuthParamsStr ) {
-        var extraAuthParams = JSON.parse( decodeURI(extraAuthParamsStr ));
+        try {
+            var extraAuthParams = JSON.parse( decodeURI(extraAuthParamsStr ));
+        } catch ( e ) {
+            errorResponse( res, 400, 'Invalid extra auth param string, could not parse');
+            return;
+        }
     }
 
     var responseMap = oauthUtil.buildAuthorizeUrlResponseMap(
