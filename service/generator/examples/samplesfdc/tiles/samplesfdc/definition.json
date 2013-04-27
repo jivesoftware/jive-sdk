@@ -1,6 +1,6 @@
 {
     "sampleData" : {
-        "title" : "Sample List samplesfdc",
+        "title" : "Sample List {{{TILE_NAME}}}",
         "contents" : [ {
             "text" : "Item 1"
         }, {
@@ -12,9 +12,9 @@
             "listStyle" : "contentList"
         }
     },
-    "displayName" : "Tile samplesfdc",
-    "name" : "samplesfdc",
-    "description" : "samplesfdc",
+    "displayName" : "Sample SFDC ({{{TILE_NAME}}})",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "Sample SFDC OAuth2 dance",
     "style" : "LIST",
     "icons" : {
         "16" : "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",

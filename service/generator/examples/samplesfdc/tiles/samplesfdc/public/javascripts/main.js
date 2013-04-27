@@ -31,7 +31,7 @@ function doIt( host ) {
         var query = encodeURIComponent("SELECT Id, Name, Description, StageName, Amount FROM Opportunity");
 
         osapi.http.get({
-            'href' : host + '/samplesfdc/oauth/query?' +
+            'href' : host + '/{{{TILE_NAME}}}/oauth/query?' +
                 'id=' + ticketID +
                 "&ts=" + new Date().getTime() +
                 "&ticketID=" + ticketID +
@@ -91,7 +91,7 @@ function doIt( host ) {
         oauth2SuccessCallback : oauth2SuccessCallback,
         preOauth2DanceCallback : preOauth2DanceCallback,
         onLoadCallback : onLoadCallback,
-        authorizeUrl : host + '/samplesfdc/oauth/authorizeUrl'
+        authorizeUrl : host + '/{{{TILE_NAME}}}/oauth/authorizeUrl'
     };
 
     $("#btn_done").click( function() {

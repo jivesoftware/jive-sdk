@@ -38,7 +38,7 @@ function processTileInstance(instance) {
 exports.task = new jive.tasks.build(
     // runnable
     function() {
-        jive.tiles.findByDefinitionName( 'samplesfdc' ).then( function(instances) {
+        jive.tiles.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
             if ( instances ) {
                 instances.forEach( function( instance ) {
                     processTileInstance(instance);
