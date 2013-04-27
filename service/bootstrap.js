@@ -84,16 +84,11 @@ var setupExpressApp = function (app, rootDir, config) {
 
         app.use( jiveSdkApp );
 
-        // oauth2 endpoints are wired only if there are oauth2 properties
-        if ( jive.service.options['oauth2'] ) {
-            var oauth = require('../routes/oauth');
+        // oauth2 endpoints
+        jiveSdkApp.get('/javascripts/oauth2client.js', function(req, res) {
+            res.render('oauth2client.js');
+        });
 
-            // wire internal sdk endpoints
-            jiveSdkApp.get('/javascripts/oauth2client.js', function(req, res) {
-                res.render('oauth2client.js');
-            });
-
-        }
         p1.resolve();
     });
 
