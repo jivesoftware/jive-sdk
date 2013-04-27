@@ -1,8 +1,12 @@
 var http = require('http');
 var url = require('url');
 var jive = require('../api');
+var mustache = require('mustache');
 
 var oauthUtil = require('../lib/oauthUtil');
+
+var redirectHtmlTxt = "<html> <head> <script> window.location='{{{redirect}}}'; </script>" +
+    "</head> <body> Redirecting ... </body> </html>";
 
 exports.fetchOAuth2Conf = function() {
     return jive.service.options['oauth2'];
@@ -57,7 +61,7 @@ var errorResponse = function( res, code, error ){
 /**
  * Expects:
  * - code
- * - encoded state
+ * - state, which is a base64 encoded JSON structure containing at minimum jiveRedirectUrl attribute
  * @param req
  * @param res
  */
@@ -112,7 +116,11 @@ exports.oauth2Callback = function(req, res ) {
         }
 
         var redirect = decodeURIComponent(jiveRedirectUrl) + ( contextStr ? '?' : '') + contextStr;
-        res.render('oauth2Redirect.html', { 'redirect' : redirect } );
+        var redirectHtml = mustache.render( redirectHtmlTxt, { 'redirect' : redirect } );
+
+        res.status(200);
+        res.set({'Content-Type': 'text/html'});
+        res.send(redirectHtml);
     };
 
     var oauth2SuccessCallback = this.oauth2SuccessCallback;
