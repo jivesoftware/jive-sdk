@@ -27,7 +27,7 @@ exports.authorizeUrl = function(req, res ) {
     var responseMap = oauthUtil.buildAuthorizeUrlResponseMap(
         oauth2Conf, callback, { 'viewerID': viewerID } );
 
-    console.log('Sending', responseMap);
+    jive.logger.debug('Sending', responseMap);
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end( JSON.stringify(responseMap) );
@@ -41,9 +41,17 @@ exports.authorizeUrl = function(req, res ) {
  * @param callback
  */
 exports.oauth2SuccessCallback = function( state, originServerAccessTokenResponse, callback ) {
-    console.log(state);
-    console.log(originServerAccessTokenResponse);
+    jive.logger.debug('State', state);
+    jive.logger.debug('Origin server Access Token Response', originServerAccessTokenResponse);
     callback();
+};
+
+var errorResponse = function( res, code, error ){
+    res.status(code);
+    res.set({'Content-Type': 'application/json'});
+    var err = {'error':error};
+    res.send( JSON.stringify(err) );
+    jive.logger.debug(err);
 };
 
 /**
@@ -60,10 +68,33 @@ exports.oauth2Callback = function(req, res ) {
     var query = url_parts.query;
 
     var code = query['code'];
-    var state = JSON.parse( JSON.parse( jive.util.base64Decode(query['state'])) );
+    if ( !code ) {
+        errorResponse( res, 400, 'Authorization code required');
+        return;
+    }
+
+    var stateStr = query['state'];
+    if ( !stateStr ) {
+        errorResponse( res, 400, 'Missing state string');
+        return;
+    }
+
+    try {
+        var state = JSON.parse( JSON.parse( jive.util.base64Decode(stateStr)) );
+    } catch ( e ) {
+        errorResponse( res, 400, 'Invalid state string, cannot parse.');
+        return;
+    }
+
     var jiveRedirectUrl = state['jiveRedirectUrl'];
+    if ( !jiveRedirectUrl ) {
+        errorResponse( res, 400, 'Invalid state string, no jiveRedirectUrl provided.');
+        return;
+    }
 
     var postObject = oauthUtil.buildOauth2CallbackObject( oauth2Conf, code );
+    jive.logger.debug("Post object", postObject);
+
     var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
 
     var proceed = function(context) {
@@ -103,9 +134,7 @@ exports.oauth2Callback = function(req, res ) {
         },
         function(e) {
             // failure
-            res.status(500);
-            res.set({'Content-Type': 'application/json'});
-            res.send();
+            errorResponse( res, 500, e);
         }
     );
 
