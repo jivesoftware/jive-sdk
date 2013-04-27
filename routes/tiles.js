@@ -37,22 +37,9 @@ exports.registration = function( req, res ) {
     var code = req.body['code'];
 
     var auth = req.headers['authorization'];
-    if (auth && auth.indexOf('Basic ') == 0 ) {
-        var authParts = auth.split('Basic ');
-        var p = new Buffer(authParts[1], 'base64').toString();
-        var pParts = p.split(':');
-        var authClientId = pParts[0];
-        var authSecret = pParts[1];
-
-        if ( authClientId !== clientId || authSecret !== secret ) {
-            res.writeHead(403, { 'Content-Type': 'application/json' });
-            res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid HMAC authorization header' } ) );
-            return;
-        }
-    }
-    else {
-        res.writeHead(401, { 'Content-Type': 'application/json' });
-        res.end( JSON.stringify( { status: 401, 'error': 'Basic Auth header is required. Must provide clientID:clientSecret' } ) );
+    if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
         return;
     }
 

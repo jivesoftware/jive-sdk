@@ -16,10 +16,21 @@ exports.fetchOAuth2Conf = function() {
  * Expects:
  * - viewerID
  * - callback
+ * - base64 encoded Authorization header
  * @param req
  * @param res
  */
 exports.authorizeUrl = function(req, res ) {
+    var conf = jive.service.options;
+    var clientId = conf.clientId;
+    var secret = conf.clientSecret;
+
+    var auth = req.headers['authorization'];
+    if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {
+        errorResponse(403, 'Invalid or missing HMAC authorization header'  );
+        return;
+    }
+
     var oauth2Conf = this.fetchOAuth2Conf();
 
     var url_parts = url.parse(req.url, true);
