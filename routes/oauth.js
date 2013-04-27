@@ -39,8 +39,13 @@ exports.authorizeUrl = function(req, res ) {
     var viewerID = query['viewerID'];
     var callback = query['callback'];
 
+    var contextStr = query['context'];
+    if ( contextStr ) {
+        var context = JSON.parse( decodeURI(contextStr) );
+    }
+
     var responseMap = oauthUtil.buildAuthorizeUrlResponseMap(
-        oauth2Conf, callback, { 'viewerID': viewerID } );
+        oauth2Conf, callback, { 'viewerID': viewerID, 'context': context } );
 
     jive.logger.debug('Sending', responseMap);
 
@@ -113,20 +118,20 @@ exports.oauth2Callback = function(req, res ) {
     var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
 
     var proceed = function(context) {
-        var contextStr = '';
+        var redirectParams = '';
 
         if ( context && typeof context === 'object' ) {
             for (var key in context) {
                 if (context.hasOwnProperty(key)) {
-                    if (contextStr.length > 0) {
-                        contextStr += '&';
+                    if (redirectParams.length > 0) {
+                        redirectParams += '&';
                     }
-                    contextStr += encodeURIComponent(key) + '=' + encodeURIComponent(context[key]);
+                    redirectParams += encodeURIComponent(key) + '=' + encodeURIComponent(context[key]);
                 }
             }
         }
 
-        var redirect = decodeURIComponent(jiveRedirectUrl) + ( contextStr ? '?' : '') + contextStr;
+        var redirect = decodeURIComponent(jiveRedirectUrl) + ( redirectParams ? '?' : '') + redirectParams;
         var redirectHtml = mustache.render( redirectHtmlTxt, { 'redirect' : redirect } );
 
         res.status(200);

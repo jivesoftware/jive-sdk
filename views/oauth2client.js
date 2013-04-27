@@ -13,6 +13,7 @@ function OAuth2ServerFlow( options ) {
     var authorizeUrl =  options['authorizeUrl'] || serviceHost + '/authorizeUrl';
     var ticketURL =  options['ticketURL'];
     var authz = options['authz'] || 'signed';
+    var context = options['context'];
 
     var doOAuthDance = function(viewerID, oauth2CallbackUrl) {
         // do any preparation things necessary
@@ -23,6 +24,11 @@ function OAuth2ServerFlow( options ) {
         //Fetch the jive callback url - eg. http://server//gadgets/jiveOAuth2Callback
         var url = authorizeUrl + "?callback=" + oauth2CallbackUrl
             + "&ts=" + new Date().getTime() + "&viewerID=" + viewerID;
+
+        // any extra state to inform downstream operations
+        if ( context ) {
+            url += "&context=" + encodeURIComponent(JSON.stringify(context));
+        }
 
         //Pre open condition check
         var openCallback = function() {
