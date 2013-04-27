@@ -64,35 +64,51 @@ IntegrationServer.prototype.doOperation = function(operation) {
     var type = operation['type'];
 
     if ( type == "addTask" ) {
-        var task = function() {
-            jive.tiles.findByDefinitionName( "samplelist" ).then( function(instances) {
-                instances.forEach( function( instance ) {
-                    var dataToPush = {
-                        "data":
-                        {
-                            "title": "Account Details",
-                            "contents": [
-                                {
-                                    "name": "Value",
-                                    "value": "Updated " + new Date().getTime()
-                                }
-                            ]
-                        }
-                    };
+        var name = operation['name'] || 'samplelist';
+        var tileOrActivity = operation['tileOrActivity'] || 'tile';
 
-                    jive.tiles.pushData( instance, dataToPush).then(
-                        function(r) {
-                            console.log('Integration server sent pushedData: %s', JSON.stringify(r));
-                            process.send( {pushedData: r});
-                        }, function(r) {
-                            process.send( {pushedData: r});
-                        });
-                } );
-            });
-        };
+        if (tileOrActivity === 'tile') {
+            var task = function() {
+                jive.tiles.findByDefinitionName( name ).then( function(instances) {
+                    instances.forEach( function( instance ) {
+                        var dataToPush = {
 
-        var key = jive.tiles.definitions.addTasks( jive.tasks.build( task, 1000 ) );
-        return { "task": key };
+                        };
+
+                        jive.tiles.pushData( instance, dataToPush).then(
+                            function(r) {
+                                console.log('Integration server sent pushedData: %s', JSON.stringify(r));
+                                process.send( {pushedData: r});
+                            }, function(r) {
+                                process.send( {pushedData: r});
+                            });
+                    } );
+                });
+            };
+            var key = jive.tiles.definitions.addTasks( jive.tasks.build( task, 1000 ) );
+            return { "task": key };
+        } else {
+            var task = function() {
+                jive.extstreams.findByDefinitionName( name ).then( function(instances) {
+                    instances.forEach( function( instance ) {
+                        var dataToPush = {
+
+                        };
+
+                        jive.extstreams.pushActivity( instance, dataToPush).then(
+                            function(r) {
+                                console.log('Integration server sent pushedActivity: %s', JSON.stringify(r));
+                                process.send( {pushedActivity: r});
+                            }, function(r) {
+                                process.send( {pushedActivity: r});
+                            });
+                    } );
+                });
+            };
+
+            var key = jive.extstreams.definitions.addTasks( jive.tasks.build( task, 1000 ) );
+            return { "task": key };
+        }
 
     } else if ( type == "removeTask" ) {
         var task =  operation['task'];

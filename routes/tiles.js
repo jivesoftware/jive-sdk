@@ -106,30 +106,28 @@ exports.registration = function( req, res ) {
         if ( found ) {
             registerer(guid, jive.tiles);
         }
-        else {
-            errorResponse(res);
-        }
-    });
 
-    // try extstreams
-    jive.extstreams.definitions.findByTileName( name).then( function( found ) {
-        completedResponse = true;
-        if ( found ) {
-            registerer(guid, jive.extstreams);
-        }
-        else {
-            errorResponse(res);
-        }
-    });
+    }).then( function() {
+            // try extstreams
+            jive.extstreams.definitions.findByTileName( name).then( function( found ) {
+                completedResponse = true;
+                if ( found ) {
+                    registerer(guid, jive.extstreams);
+                }
+                else {
+                    errorResponse(res);
+                }
+            });
 
-    var errorResponse = function(res) {
-        if (!completedResponse) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(
-                JSON.stringify({status: 400, message: "No tile or external stream definition was found for the given name '" + name + "'"}));
-            completedResponse = true;
-        }
-    }
+            var errorResponse = function(res) {
+                if (!completedResponse) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(
+                        JSON.stringify({status: 400, message: "No tile or external stream definition was found for the given name '" + name + "'"}));
+                    completedResponse = true;
+                }
+            }
+    });
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
