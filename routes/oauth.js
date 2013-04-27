@@ -44,8 +44,13 @@ exports.authorizeUrl = function(req, res ) {
         var context = JSON.parse( decodeURI(contextStr) );
     }
 
+    var extraAuthParamsStr = query['extraAuthParams'];
+    if ( extraAuthParamsStr ) {
+        var extraAuthParams = JSON.parse( decodeURI(extraAuthParamsStr ));
+    }
+
     var responseMap = oauthUtil.buildAuthorizeUrlResponseMap(
-        oauth2Conf, callback, { 'viewerID': viewerID, 'context': context } );
+        oauth2Conf, callback, { 'viewerID': viewerID, 'context': context}, extraAuthParams );
 
     jive.logger.debug('Sending', responseMap);
 

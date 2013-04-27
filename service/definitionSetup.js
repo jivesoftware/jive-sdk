@@ -181,9 +181,17 @@ exports.setupDefinitionRoutes = function(app, definitionName, routesPath){
                 if ( typeof candidate == 'object' && candidate['verb'] && candidate['route'] ) {
                     // its a valid handler
                     var path =  candidate['path'] || key;
+
                     if ( path !== '/' ) {
-                        routeContextPath += "/" + path;
+                        if ( path.indexOf('/') === 0 ) {
+                            // in this case of /something
+                            // its an absolute route ... use that as the mapping
+                            routeContextPath = path;
+                        } else {
+                            routeContextPath += "/" + path;
+                        }
                     }
+
                     httpVerb = candidate['verb'];
                     app[httpVerb](routeContextPath, candidate['route']);
                     added = true;

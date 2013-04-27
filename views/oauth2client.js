@@ -14,6 +14,7 @@ function OAuth2ServerFlow( options ) {
     var ticketURL =  options['ticketURL'];
     var authz = options['authz'] || 'signed';
     var context = options['context'];
+    var extraAuthParams = options['extraAuthParams'];
 
     var doOAuthDance = function(viewerID, oauth2CallbackUrl) {
         // do any preparation things necessary
@@ -28,6 +29,11 @@ function OAuth2ServerFlow( options ) {
         // any extra state to inform downstream operations
         if ( context ) {
             url += "&context=" + encodeURIComponent(JSON.stringify(context));
+        }
+
+        // any extra auth parameters to attach
+        if ( extraAuthParams ) {
+            url += "&extraAuthParams=" + encodeURIComponent(JSON.stringify(extraAuthParams));
         }
 
         //Pre open condition check
