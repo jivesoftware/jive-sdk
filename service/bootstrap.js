@@ -89,12 +89,6 @@ var setupExpressApp = function (app, rootDir, config) {
             var oauth = require('../routes/oauth');
 
             // wire internal sdk endpoints
-            jiveSdkApp.get('/authorizeUrl', oauth.authorizeUrl.bind(oauth) );
-            jive.logger.debug("/authorizeUrl");
-
-            jiveSdkApp.get('/oauth2Callback', oauth.oauth2Callback.bind(oauth) );
-            jive.logger.debug("/oauth2Callback");
-
             jiveSdkApp.get('/javascripts/oauth2client.js', function(req, res) {
                 res.render('oauth2client.js');
             });
