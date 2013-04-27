@@ -140,17 +140,16 @@ function initLogger(options) {
     var logLevel = process.env['jive_logging_level'] || options['logLevel'] || options['loglevel'] || 'INFO';
     logLevel = logLevel.toUpperCase();
 
-    if (!logfile) {
-        logfile = 'logs/jive.log';
-    }
-    if (logfile.indexOf('logs/') === 0) {
-        if (!fs.existsSync('logs')) {
-            jive.logger.warn('logs subdirectory does not exist. Creating directory now.');
-            fs.mkdirSync('logs');
+    if (logfile) {
+        if (logfile.indexOf('logs/') === 0) {
+            if (!fs.existsSync('logs')) {
+                jive.logger.warn('logs subdirectory does not exist. Creating directory now.');
+                fs.mkdirSync('logs');
+            }
         }
+        log4js.loadAppender('file');
+        log4js.addAppender(log4js.appenders.file(logfile), 'jive-sdk');
     }
-    log4js.loadAppender('file');
-    log4js.addAppender(log4js.appenders.file(logfile), 'jive-sdk');
 
     jive.logger.setLevel(logLevel);
 
