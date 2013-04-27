@@ -1,0 +1,36 @@
+{
+    "sampleData" : {
+        "title" : "Jive Software Details",
+        "contents" : [ {
+            "text" : "Size: $100,000",
+            "icon" : "http://cdn1.iconfinder.com/data/icons/free-business-desktop-icons/128/Calculator.png",
+            "linkDescription" : "Monetary value of this account."
+        }, {
+            "text" : "Start Date: 1/5/2013",
+            "icon" : "http://cdn1.iconfinder.com/data/icons/free-business-desktop-icons/128/Calculator.png",
+            "linkDescription" : "Date when this account was opened.",
+            "action" : { "context": { "test" : "data" } }
+        }, {
+            "text" : "Territory: Alaska",
+            "icon" : "http://cdn1.iconfinder.com/data/icons/free-business-desktop-icons/128/Calculator.png",
+            "linkDescription" : "Area affected by this account.",
+            "action" : { "context": { "test" : "data" } }
+        } ],
+        "config" : {
+               "listStyle" : "contentList"
+        },
+        "action" : {
+            "text" : "Action Link",
+            "context" : { "test" : "data" }
+        }
+    },
+    "displayName" : "Sample List",
+    "name" : "samplelist",
+    "description" : "Dealroom details.",
+    "style" : "LIST",
+    "icons" : {
+        "16" : "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "48" : "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "128" : "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif"
+    }
+}

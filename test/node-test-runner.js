@@ -11,7 +11,9 @@ var configuration = {
     'clientId'      : '6bgwdhc0rwifutkywsua19c49yt2qs2r',
     'clientSecret'  : '6iyjdimjzg5jbmvozv03dj0ogdzi3y.XKSkGTDsYznPZLd0zM0ZU06ExHA.1.s',
     'serverType' : 'integrationServer',
-    'serverName' : "Test Integration Server"
+    'serverName' : "Test Integration Server",
+    'logFile' : 'logs/test-integration-server.log',
+    'persistence': 'memory'
 };
 
 jive.service.options = configuration;
@@ -44,11 +46,9 @@ function runMocha(serverProc) {
         });
 
         var runner = mocha.run(function () {
-            testUtil.stopServer(integrationServerProc).then(function() {
-                console.log("Integration server stopped");
-            });
 
-            console.log('finished');
+            testUtil.stopServer(integrationServerProc);
+
         });
 
         runner.on('pass', function (test) {

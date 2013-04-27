@@ -5,6 +5,8 @@
  * Time: 11:15 AM
  * To change this template use File | Settings | File Templates.
  */
+var http = require('http');
+
 exports.BaseServer = BaseServer;
 
 function BaseServer(app, config) {
@@ -39,7 +41,6 @@ BaseServer.prototype.doOperation = function(operation) {
 
     return null;
 }
-
 
 BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, headers) {
     var app = this.app;
@@ -77,4 +78,32 @@ BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, head
             res.end(body );
         } );
     }
+}
+
+BaseServer.prototype.start = function() {
+    var app = this.app;
+    var server = http.createServer(app);
+    this.server = server;
+    var configuration = this.config;
+
+    server.listen(configuration.port, function () {
+        console.log("Test server '" + configuration['serverName'] + "' listening on port " + configuration.port);
+        process.send( {serverStarted: true});
+    } );
+
+}
+
+BaseServer.prototype.stop = function(messageID) {
+    var self = this;
+    this.server.on('close', function() {
+        console.log("Server at port %d with name \"%s\" stopped", self.config.port, self.config.serverName);
+        process.send({
+            serverStopped: true,
+            id: messageID
+        });
+        process.exit();
+    });
+
+    this.server.close();
+
 }

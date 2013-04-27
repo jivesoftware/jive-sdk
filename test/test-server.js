@@ -2,7 +2,6 @@
  * Test server that accepts inter-process communication to modify its endpoints.
  */
 var express = require('express'),
-    routes = require('./testroutes'),
     http = require('http'),
     jive = require('../../jive-sdk'),
     uuid = require('node-uuid'),
@@ -35,7 +34,7 @@ if (IS_FORKED) {
         }
 
         if (m['pleaseStop'] === true) {
-            stopServer(m.id);
+            SERVER.stop(m.id);
         }
 
         if ( m['operation'] ) {
@@ -84,25 +83,7 @@ function startServer(configuration) {
 
     SERVER = new ServerType(app, configuration);
 
-    NODE_SERVER = http.createServer(app);
-    NODE_SERVER.listen(configuration.port, function () {
-        console.log("Test server '" + configuration['serverName'] + "' listening on port " + configuration.port);
-        if (IS_FORKED) {
-            process.send( {serverStarted: true});
-        }
-    } );
+    SERVER.start();
 }
 
-function stopServer(id) {
-    NODE_SERVER.on('close', function() {
-        console.log("Server at port %d with name \"%s\" stopped", SERVER.config.port, SERVER.config.serverName);
-        process.send({
-            serverStopped: true,
-            id: id
-        });
-        process.exit();
-    });
 
-    NODE_SERVER.close();
-
-}

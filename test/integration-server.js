@@ -12,47 +12,46 @@ function IntegrationServer(app, config) {
 
 IntegrationServer.prototype.setup = function() {
 
+
+}
+
+IntegrationServer.prototype.start = function() {
     var configuration = this.config,
-        app = this.app;
-    jive.service.options = configuration;
-    this.memory = new jive.persistence.memory();
-    jive.service.persistence(this.memory);
+        app = this.app,
+        self = this;
 
-    app.get( '/configure', function( req, res ) {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end( "<script>jive.tile.onOpen(function() { jive.tile.close({'config':'value'});});</script>" );
-    } );
+    var startServer = function() {
+        IntegrationServer.super_.prototype.start.call(self);
+    }
 
-    app.post( '/registration', jive.routes.registration );
-    app.get( '/tiles', jive.routes.tiles );
-    app.get( '/tilesInstall', jive.routes.installTiles );
+    var failServer = function(err) {
+        jive.logger.error('Error starting test integration server: %s!', JSON.stringify(err));
+    }
 
-    var definition = {
-        "sampleData": {"title": "Account Details",
-            "contents": [
-                {
-                    "name": "Value",
-                    "value": "Initial data"
-                }
-            ]},
-        "config": "/configure",
-        "register": "/registration",
-        "displayName": "Table Example",
-        "name": "sampletable",
-        "description": "Table example.",
-        "style": "TABLE",
-        "icons": {
-            "16": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
-            "48": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
-            "128": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif"
-        }
-    };
+    console.log('Starting test integration server with config %s', JSON.stringify(configuration));
+    jive.service.init(app, configuration)
 
-    var self = this;
+        .then( function() {
+            return jive.service.autowire()
+        } )
 
-    jive.tiles.definitions.save(definition).then(function() {
-        console.log('Initial memory: %s', JSON.stringify(self.memory.getDb()));
-    });
+        .then( function() {
+            return jive.service.start()
+        } )
+
+        .then(function() {
+            self.memory = jive.service.persistence();
+            console.log('Initial memory: %s', JSON.stringify(self.memory.getDb()));
+
+        })
+
+        .then( startServer, failServer );
+
+
+
+
+ /*   app.get( '/tiles', jive.routes.tiles );
+    app.get( '/tilesInstall', jive.routes.installTiles );*/
 
 }
 
@@ -66,7 +65,7 @@ IntegrationServer.prototype.doOperation = function(operation) {
 
     if ( type == "addTask" ) {
         var task = function() {
-            jive.tiles.findByDefinitionName( "sampletable" ).then( function(instances) {
+            jive.tiles.findByDefinitionName( "samplelist" ).then( function(instances) {
                 instances.forEach( function( instance ) {
                     var dataToPush = {
                         "data":
@@ -83,6 +82,7 @@ IntegrationServer.prototype.doOperation = function(operation) {
 
                     jive.tiles.pushData( instance, dataToPush).then(
                         function(r) {
+                            console.log('Integration server sent pushedData: %s', JSON.stringify(r));
                             process.send( {pushedData: r});
                         }, function(r) {
                             process.send( {pushedData: r});

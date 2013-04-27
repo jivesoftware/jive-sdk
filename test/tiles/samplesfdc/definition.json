@@ -1,0 +1,24 @@
+{
+    "sampleData" : {
+        "title" : "Sample List samplesfdc",
+        "contents" : [ {
+            "text" : "Item 1"
+        }, {
+            "text" : "Item 2"
+        }, {
+            "text" : "Item 3"
+        } ],
+        "config" : {
+            "listStyle" : "contentList"
+        }
+    },
+    "displayName" : "Tile samplesfdc",
+    "name" : "samplesfdc",
+    "description" : "samplesfdc",
+    "style" : "LIST",
+    "icons" : {
+        "16" : "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "48" : "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "128" : "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif"
+    }
+}

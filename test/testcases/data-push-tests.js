@@ -30,7 +30,7 @@ var setEnvironmentConfig = {
     "type": "setEnv",
     "env": {
         'jive_jiveid_servers_public': jiveIdBase,
-        'jive.logging.level': 'DEBUG'
+        'jive_logging_level': 'DEBUG'
     }
 }
 
@@ -66,7 +66,7 @@ var basicAuth = testUtil.makeBasicAuth(integrationConfig.clientId, integrationCo
 var registrationRequest =
 {
     "code": integrationConfig.clientSecret,
-    "name": "sampletable",
+    "name": "samplelist",
     "config": {"config": "value"},
     "url": fakeApiGatewayUrl + dataPushEndpoint.path,
     "guid": testUtil.makeGuid(fakeApiGatewayUrl, true, 1234)
@@ -174,7 +174,7 @@ describe('Data Push Tests', function () {
 
     });
 
-    it.only("Data Push Tests - verify 400 error from Jive ID is returned to error callback when refresh flow fails", function (done) {
+    it("Data Push Tests - verify 400 error from Jive ID is returned to error callback when refresh flow fails", function (done) {
 
         var dataPushFailEndpoint = {
             "type": "setEndpoint",
@@ -228,7 +228,7 @@ describe('Data Push Tests', function () {
 
         testUtil.sendOperation(goneEndpoint, fakeApiGatewayProc)
             .then(function () {
-                return testUtil.registerTile(integrationConfig, 'sampletable', dataUrl);
+                return testUtil.registerTile(integrationConfig, 'samplelist', dataUrl);
             })
             .then(function (id) {
                 tileId = id;
@@ -271,7 +271,7 @@ describe('Data Push Tests', function () {
         var badRegistrationRequest =
         {
             "code": integrationConfig.clientSecret,
-            "name": "sampletable",
+            "name": "samplelist",
             "config": {"config": "value"},
             "url": fakeApiGatewayUrl + '/fake/endpoint',
             "guid": testUtil.makeGuid(fakeApiGatewayUrl, true, 1234)

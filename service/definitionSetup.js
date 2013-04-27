@@ -231,6 +231,7 @@ exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
         (definitionDir.substring( definitionDir.lastIndexOf('/') + 1, definitionDir.length ) ); /// xxx todo this might not always work! use path
     var definitionPath = definitionDir + '/definition.json';
     var routesPath = definitionDir + '/backend/routes';
+    var servicesPath = definitionDir + '/backend';
 
     app.use( '/' + definitionName, express.static( definitionDir + '/public'  ) );
 
@@ -258,7 +259,7 @@ exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
 
         promises.push( fsexists(definitionDir).then( function(exists) {
             if ( exists ) {
-                return exports.setupDefinitionServices( definitionName, definitionDir );
+                return exports.setupDefinitionServices( definitionName, servicesPath );
             }
         }));
 

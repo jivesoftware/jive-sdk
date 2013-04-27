@@ -55,7 +55,7 @@ var basicAuth = testUtil.makeBasicAuth(integrationConfig.clientId, integrationCo
 var registrationRequest =
 {
     "code": integrationConfig.clientSecret,
-    "name": "sampletable",
+    "name": "samplelist",
     "config": {"config": "value"},
     "url": fakeApiGatewayUrl + dataPushEndpoint.path,
     "guid": testUtil.makeGuid(fakeApiGatewayUrl, true, 1234)
