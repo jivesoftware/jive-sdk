@@ -38,3 +38,13 @@ The tile data is the information that is displayed to the user. It is provided t
 	
 When this definition is installed into Jive, it will render, by default, the following:
 ![Sample tile with Table view style](./images/jive-stock-table-tile.png)
+
+
+### Action 
+One of the most exciting aspects of a tile is that it can cary along with it an action. Most tiles will be used to pull information from a backend system of record. Actions are a way for the user to interact with the back end system that is providing the data to the tile. Actions can either provide a link to an external Web page, or it can invoke an embedded experience and present the user with a dialog box. When using an embedded experience, as a developer, you will have full access to the Jive core javascript API and can make REST calls using AJAX via the osapi.http.get. 
+
+### Configuration
+In order to present the proper data to a user a tile will need to be configured. This is a custom view that is provided by the developer and invoked when the configure menu option is selected from the tile's context menu. Here's a screen capture from the stock price example:
+![Sample tile configuration view](./images/tile-configuration.png)
+
+
