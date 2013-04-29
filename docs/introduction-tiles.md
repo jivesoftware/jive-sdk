@@ -1,5 +1,7 @@
 # Introduction to Tiles
-Tiles are a new concept introduced that enable you can quickly and easily create powerful integrations with the Jive platform. At a high level, you can think of a tile as having four parts:
+Tiles are a new concept introduced that enable you can quickly and easily create powerful integrations with the Jive platform. Under the covers, Tiles build on the same powerful component model used by Jive Apps. However, Jive has simplified what it takes to actually create a tile by allowing the user to focus only on creating the proper views that will be used by the application. Besides a radical simplification of the overall programming model, as a developer, you have full access to the Jive Core, and the supported parts of the OpenSocial API.
+
+At a high level, you can think of a tile as having four parts:
 
 1. A Visual style
 2. Data
@@ -48,3 +50,5 @@ In order to present the proper data to a user a tile will need to be configured.
 ![Sample tile configuration view](./images/tile-configuration.png)
 
 
+#Summary
+Tiles are a new kind of integration that open unlimited integration possibilities. They are lightweight, flexible, and extremely powerful. 
