@@ -24,10 +24,10 @@ The steps below will generate out a sample application that you can use as the b
 
 The generated example needs to be configured with your own information, specifically, your credentials, and where you want the server to start. The configuration is in a very simple json file named jiveclientconfiguration.json. Here's what gets generated out of the box.
 
-`{ "clientUrl": "http://localhost",
-    "port": "8090",
-    "clientId": "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_JIVE!!!",
-    "clientSecret": "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_JIVE!!!"}`
+	{ "clientUrl": "http://localhost",
+    	"port": "8090",
+    	"clientId": "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_JIVE!!!",
+    	"clientSecret": "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_JIVE!!!"}
 
 What you should do is fill in the proper values for your server & port. The clientId and clientSecret are the credentials that you received when you registered with Jive as developer. (Note: We'll cover how to register with Jive later.)
 
