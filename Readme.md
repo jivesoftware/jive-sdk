@@ -1,5 +1,5 @@
 # Jive Purposeful Places Framework
- Purposeful Places are a brand new integration framework for Jive that allows you to quickly and easily external activity streams and content from virtually any system. Here's [a high level overview of Purposeful Places](https://github.com/jivesoftware/jive-sdk/raw/master/docs/overview.md). If you'd like to skip ahead, then jump right to the [Master Reference Doc](https://github.com/jivesoftware/jive-sdk/raw/master/docs/masterreferencedoc.md). Please make sure to post your feedback and comments in the [Jive Developer Community](https://community.jivesoftware.com/community/developer).
+ Purposeful Places are a brand new integration framework for Jive that allows you to quickly and easily external activity streams and content from virtually any system. Here's [a high level overview of Purposeful Places](https://github.com/jivesoftware/jive-sdk/blob/master/docs/overview.md). If you'd like to skip ahead, then jump right to the [Master Reference Doc](https://github.com/jivesoftware/jive-sdk/blob/master/docs/masterreferencedoc.md). Please make sure to post your feedback and comments in the [Jive Developer Community](https://community.jivesoftware.com/community/developer).
 
  This repository contains the node.js library to help you get started building purposeful places!
 
@@ -79,7 +79,7 @@ Click "Done" in the top left corner. That's it!! You've now successfully created
 ![Adding a tile](https://github.com/jivesoftware/jive-sdk/raw/master/docs/images/myfirstpurposefulplace.png)
 
 ## Learn More - Do More
-We will be adding more capability to the jive-sdk along with a ton of examples to get you started! You should check out the [Master Reference Document](https://github.com/jivesoftware/jive-sdk/raw/master/docs/masterreferencedoc.md) for a complete list of material to get you started. 
+We will be adding more capability to the jive-sdk along with a ton of examples to get you started! You should check out the [Master Reference Document](https://github.com/jivesoftware/jive-sdk/blob/master/docs/masterreferencedoc.md) for a complete list of material to get you started. 
 
 **Enjoy!**
 
