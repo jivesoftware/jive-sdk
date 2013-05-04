@@ -106,12 +106,6 @@ describe('Registration Authentication Tests', function () {
         });
     });
 
-    it("POST to /registration without basic auth should return 401", function (done) {
-        testUtil.post(base + "/registration", 401).then(function (res) {
-            done();
-        });
-    });
-
     it("POST to /registration with basic auth and no entity should return 400", function (done) {
         testUtil.post(base + "/registration", 400, null, {}, {"Authorization": basicAuth}).then(function (res) {
             done();
@@ -120,6 +114,12 @@ describe('Registration Authentication Tests', function () {
 
     it("POST to /registration with incorrect basic auth should return 403", function (done) {
         testUtil.post(base + "/registration", 403, null, {}, {"Authorization": "Basic blahblah"}, true).then(function (res) {
+            done();
+        });
+    });
+
+    it("POST to /registration without basic auth should return 201", function (done) {
+        testUtil.post(base + "/registration", 201, null, registrationRequest, {}, true).then(function (res) {
             done();
         });
     });

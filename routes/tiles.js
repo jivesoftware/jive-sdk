@@ -43,9 +43,9 @@ exports.registration = function( req, res ) {
         return;
     }
 
-    var completedResponse = false;
-
     var registerer = function( scope, instanceLibrary ) {
+        var deferred = q.defer();
+
         instanceLibrary.findByScope(guid).then( function(tileInstance) {
             // the instance exists
             // update the config only
@@ -57,18 +57,18 @@ exports.registration = function( req, res ) {
                     jive.events.emit("updateInstance." + name, tileInstance);
                     res.writeHead(204, {'Content-Type': 'application/json'});
                     res.end(JSON.stringify(tileInstance));
-                    completedResponse = true;
+                    deferred.resolve();
                 });
 
             } else {
-                return instanceLibrary.register(clientId, url, config, name, code).then(
+                return instanceLibrary.register(url, config, name, code).then(
                     function( tileInstance ) {
                         jive.logger.info("registered instance", tileInstance );
                         instanceLibrary.save(tileInstance).then(function() {
                             jive.events.emit("newInstance." + name, tileInstance);
                             res.writeHead(201, {'Content-Type': 'application/json'});
                             res.end(JSON.stringify(tileInstance));
-                            completedResponse = true;
+                            deferred.resolve();
                         });
 
                     },
@@ -79,42 +79,38 @@ exports.registration = function( req, res ) {
                         var statusObj = { status: 500, 'error': 'Failed to get acquire access token', 'detail' : err };
                         var body = JSON.stringify( statusObj );
                         res.end( body );
-                        completedResponse = true;
-                    } );
+                        deferred.reject();
+                     } );
             }
         });
 
+        return deferred.promise;
     };
 
-
     // try tiles
-    jive.tiles.definitions.findByTileName( name).then( function( found ) {
+    var tile;
+    var stream;
+    q.all([ jive.tiles.definitions.findByTileName( name).then( function(found ) { tile = found; }),
+            jive.extstreams.definitions.findByTileName( name ).then( function(found ) { stream = found; }) ] ).then(
 
-        if ( found ) {
-            registerer(guid, jive.tiles);
-        }
-
-    }).then( function() {
-            // try extstreams
-            jive.extstreams.definitions.findByTileName( name).then( function( found ) {
-                completedResponse = true;
-                if ( found ) {
-                    registerer(guid, jive.extstreams);
-                }
-                else {
-                    errorResponse(res);
-                }
-            });
-
-            var errorResponse = function(res) {
-                if (!completedResponse) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(
-                        JSON.stringify({status: 400, message: "No tile or external stream definition was found for the given name '" + name + "'"}));
-                    completedResponse = true;
-                }
+        function() {
+            if ( tile ) {
+                // register a tile instance
+                registerer(guid, jive.tiles);
+            } else if ( stream ) {
+                // register an external stream instance
+                registerer(guid, jive.extstreams);
+            } else {
+                // its neither tile nor externalstream, so return error
+                var statusObj = {
+                    status: 400,
+                    message: "No tile or external stream definition was found for the given name '" + name + "'"
+                };
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end( JSON.stringify(statusObj) );
             }
-    });
+        }
+    );
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

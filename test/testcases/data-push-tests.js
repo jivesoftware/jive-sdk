@@ -275,7 +275,7 @@ describe('Data Push Tests', function () {
             "config": {"config": "value"},
             "url": fakeApiGatewayUrl + '/fake/endpoint',
             "guid": testUtil.makeGuid(fakeApiGatewayUrl, true, 1234)
-        }
+        };
 
         testUtil.sendOperation(addTaskConfig, testRunner.serverProcess()).then(function (m) {
             taskKey = m['task'];
