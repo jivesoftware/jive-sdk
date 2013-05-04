@@ -24,8 +24,6 @@ var q = require('q');
 var jive = require("../api");
 var dev = require('./dev');
 
-// xxx todo - add oauth2 support end points here
-
 exports.registration = function( req, res ) {
     var conf = jive.service.options;
     var clientId = conf.clientId;
@@ -68,7 +66,17 @@ exports.registration = function( req, res ) {
                             jive.events.emit("newInstance." + name, tileInstance);
                             res.writeHead(201, {'Content-Type': 'application/json'});
                             res.end(JSON.stringify(tileInstance));
-                            deferred.resolve();
+
+                            var jiveCommunity = tileInstance['jiveCommunity'];
+                            if ( jiveCommunity ) {
+                                jive.service.persistence().save( "community", jiveCommunity, {
+                                    'jiveCommunity': jiveCommunity
+                                }).then( function() {
+                                    deferred.resolve();
+                                });
+                            } else {
+                                deferred.resolve();
+                            }
                         });
 
                     },
