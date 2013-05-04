@@ -277,20 +277,23 @@ describe('Data Push Tests', function () {
             "guid": testUtil.makeGuid(fakeApiGatewayUrl, true, 1234)
         };
 
+
+        var handler = function (res) {
+            if (res.statusCode != 404) {
+                console.log('DATA PUSH RESPONSE: %s', JSON.stringify(res));
+                assert.fail(res.statusCode, 404, "Expected data push to return 404 for invalid data URL");
+            }
+
+            return testUtil.sendOperation({"type": "removeTask", "task": taskKey}, testRunner.serverProcess());
+        };
+
         testUtil.sendOperation(addTaskConfig, testRunner.serverProcess()).then(function (m) {
             taskKey = m['task'];
             var promise = testUtil.waitForMessage(testRunner.serverProcess(), 'pushedData');
             testUtil.post(base + "/registration", 201, null, badRegistrationRequest, {"Authorization": basicAuth}, true);
             return promise;
 
-        }).then(function (res) {
-                if (res.statusCode != 404) {
-                    console.log('DATA PUSH RESPONSE: %s', JSON.stringify(res));
-                    assert.fail(res.statusCode, 404, "Expected data push to return 404 for invalid data URL");
-                }
-
-                return testUtil.sendOperation({"type": "removeTask", "task": taskKey}, testRunner.serverProcess());
-            })
+        }).then( handler )
             .then(function () {
                 done();
             }, done);
