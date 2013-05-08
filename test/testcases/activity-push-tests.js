@@ -113,7 +113,7 @@ describe('Activity push tests', function () {
     });
 
 
-    it("Data Push Tests - register tile and push data", function (done) {
+    it("Register tile and push activity", function (done) {
         var taskKey = null;
 
         testUtil.sendOperation(addTaskConfig, testRunner.serverProcess()).then(function (m) {
