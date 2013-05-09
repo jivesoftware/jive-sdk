@@ -5,8 +5,8 @@
     "clientSecret": "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_JIVE!!!",
 
     "oauth2-google" :{
-        "originServerAuthorizationUrl" : "https://login.salesforce.com/services/oauth2/authorize",
-        "originServerTokenRequestUrl" : "https://login.salesforce.com/services/oauth2/token",
+        "originServerAuthorizationUrl" : "https://accounts.google.com/o/oauth2/auth",
+        "originServerTokenRequestUrl" : "https://accounts.google.com/o/oauth2/token",
         "clientOAuth2CallbackUrl" : "http://localhost:8090/{{{TILE_NAME}}}/oauth/oauth2Callback",
         "oauth2ConsumerKey" : "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_GOOGLE!!!",
         "oauth2ConsumerSecret" : "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_GOOGLE!!!"
