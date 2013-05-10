@@ -9,24 +9,26 @@
   },
   "dependencies": {
     "express": "3.1.0",
-    "consolidate" : "0.9.0",
-    "underscore" : "1.4.4",
-    "q" : "0.9.3",
-    "request" : "2.16.6",
-    "mustache" : "0.7.2",
+    "consolidate": "0.9.0",
+    "underscore": "1.4.4",
+    "q": "0.9.3",
+    "request": "2.16.6",
+    "mustache": "0.7.2",
     "mocha": "1.9.0",
     "optimist": "0.4.0",
     "mongojs": "0.7.4",
     "mongodb": "1.2.14",
     "node-uuid": "1.4.0",
     "fs-extra": "0.6.0",
-    "log4js": "0.6.3"
+    "log4js": "0.6.3",
+    "xmlhttprequest": "~1.5.0",
+    "jquery": "~1.8.3"
   },
   "devDependencies": {},
   "optionalDependencies": {},
   "engines": {
-     "node": "*"
-   },
+    "node": "*"
+  },
   "contributors": [
     {
       "name": "Mark Weitzel",
@@ -46,9 +48,9 @@
     }
   ],
   "repository": {
-      "type": "git",
-      "url": "git://github.com/jivesoftware/jive-sdk"
-   },
+    "type": "git",
+    "url": "git://github.com/jivesoftware/jive-sdk"
+  },
   "keywords": [
     "jive",
     "framework",
@@ -59,5 +61,4 @@
   "bin": {
     "jive-sdk": "bin/jive-sdk.sh"
   }
-
 }
