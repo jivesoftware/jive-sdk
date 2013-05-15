@@ -33,6 +33,7 @@ exports.registration = function( req, res ) {
     var config = req.body['config'];
     var name = req.body['name'];
     var code = req.body['code'];
+    console.log(req.body);
 
     var auth = req.headers['authorization'];
     if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {

@@ -1,7 +1,7 @@
 {
   "name": "jive-sdk",
   "description": "Node.js framework for building purposeful places",
-  "version": "0.0.72",
+  "version": "0.0.73",
   "main": "api.js",
   "author": {
     "name": "Jive Software",
@@ -22,7 +22,7 @@
     "fs-extra": "0.6.0",
     "log4js": "0.6.3",
     "xmlhttprequest": "~1.5.0",
-    "jquery": "~1.8.3"
+    "jquery": "*"
   },
   "devDependencies": {},
   "optionalDependencies": {},

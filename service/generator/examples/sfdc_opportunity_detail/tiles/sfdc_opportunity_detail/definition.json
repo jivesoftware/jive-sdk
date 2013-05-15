@@ -1,0 +1,49 @@
+{
+    "sampleData": {
+        "title": "Opportunity",
+        "contents": [
+            {
+                "text": "Stage Name:",
+                "icon": "http://farm6.staticflickr.com/5106/5678094118_a78e6ff4e7.jpg",
+                "linkDescription": "Stage Name"
+            },
+            {
+                "text": "Type:",
+                "icon": "http://farm6.staticflickr.com/5106/5678094118_a78e6ff4e7.jpg",
+                "linkDescription": "Type"
+            },
+            {
+                "text": "Probability: 80%",
+                "icon": "http://farm6.staticflickr.com/5106/5678094118_a78e6ff4e7.jpg",
+                "linkDescription": "Close Date"
+            },
+            {
+                "text": "Amount: ",
+                "icon": "http://farm6.staticflickr.com/5106/5678094118_a78e6ff4e7.jpg",
+                "linkDescription": "Amount"
+            },
+            {
+                "text": "Expected Revenue: ",
+                "icon": "http://farm6.staticflickr.com/5106/5678094118_a78e6ff4e7.jpg",
+                "linkDescription": "Expected Revenue"
+            },
+            {
+                "text": "Close Date: ",
+                "icon": "http://farm6.staticflickr.com/5106/5678094118_a78e6ff4e7.jpg",
+                "linkDescription": "Close Date"
+            }
+        ],
+        "config": {
+            "listStyle": "contentList"
+        }
+    },
+    "displayName": "Tile {{{TILE_NAME}}}",
+    "name": "{{{TILE_NAME}}}",
+    "description": "{{{TILE_NAME}}}",
+    "style": "LIST",
+    "icons": {
+        "16": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "48": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "128": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif"
+    }
+}

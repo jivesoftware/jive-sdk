@@ -70,3 +70,6 @@ exports.routes = require('./routes/tiles');
 // service
 exports.service = require('./service/api');
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// coreV3
+exports.coreV3 = require('./lib/v3/api');
