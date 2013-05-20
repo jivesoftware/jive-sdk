@@ -17,7 +17,7 @@ Calendars are great for showing important dates that are important to the group.
   </tr>
   <tr>
     <td>events</td>
-    <td>Represents the action to be taken when a user clicks on the represented link. This can be simply a URL that navigates the user to another browser window or an embedded experience. Action is a json structure consisting of two elements, text and context. 
+    <td>An array of objects that represent the events displayed in the tile. 
 	<table>
 	  <th>Property</th>
 	  <th>Value</th>
@@ -32,23 +32,23 @@ Calendars are great for showing important dates that are important to the group.
 	    <td>The location of the event. This is a string. Any conversion of this information is the responsibility of the back end integration server.</td>
 		<td>No</td>
 	  </tr>
+	  <tr>
+	    <td>start</td>
+	    <td>The date and time that the event starts.</td>
+		<td>Yes</td>
+	  </tr>
+	  <tr>
+	    <td>description</td>
+	    <td>A short description of the event.</td>
+		<td>No</td>
+	  </tr>
+	  <tr>
+	    <td>action</td>
+	    <td>An action that is specific to the event. This takes the same parameter structure as an action on the event itself, i.e. "text" and "url" fields.</td>
+		<td>No</td>
+	  </tr>
 	</table>
    </td>
-	<td>No</td>
-  </tr>
-  <tr>
-    <td>start</td>
-    <td>The date and time that the event starts.</td>
-	<td>Yes</td>
-  </tr>
-  <tr>
-    <td>description</td>
-    <td>A short description of the event.</td>
-	<td>No</td>
-  </tr>
-  <tr>
-    <td>action</td>
-    <td>An action that is specific to the event. This takes the same parameter structure as an action on the event itself, i.e. "text" and "url" fields.</td>
 	<td>Yes</td>
   </tr>
   <tr>

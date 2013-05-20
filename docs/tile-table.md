@@ -41,7 +41,7 @@ When using a table, name and value are required, URL is optional.
 	  </tr>
 	  <tr>
 	    <td>context</td>
-	    <td>Additional information that is passed to the application when the view is rendered.</td>
+	    <td>Additional information that is passed to the application when the view is rendered. Note: When a context is provided, this is the indication to Jive to treat this action as an embedded experience. Providing context will result in a light box opening for the tile action. Omitting the action will simply redirect to the provided URL.</td>
 		<td>No</td>
 	  </tr>
 	</table>
