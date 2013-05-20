@@ -35,12 +35,12 @@ When using a table, name and value are required, URL is optional.
 	  <th>Value</th>
 	  <th>required</th>
 	  <tr>
-	    <td>action.text</td>
+	    <td>text</td>
 	    <td>The text to display representing the action. Typically, this is shown as a link.</td>
 		<td>Yes. Required within the scope of action.</td>
 	  </tr>
 	  <tr>
-	    <td>action.context</td>
+	    <td>context</td>
 	    <td>Additional information that is passed to the application when the view is rendered.</td>
 		<td>No</td>
 	  </tr>
@@ -77,7 +77,7 @@ When using a table, name and value are required, URL is optional.
   </tr>
 </table>
 
-#Eample JSON
+#Example JSON
 <pre>
 	{
 	    "sampleData" : {
