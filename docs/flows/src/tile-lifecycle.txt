@@ -1,0 +1,6 @@
+note left of Service: define tile \nbuild service
+Service -> Jive: contribute tile
+"Group Admin" -> "Group Admin": create social group
+Group Admin -> Jive: configure tile instance
+Jive -> Service: register tile instance
+Service -> Jive: datapush to tile instance
