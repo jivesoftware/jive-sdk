@@ -1,0 +1,10 @@
+Service -> "API Gateway": Push tile update
+"API Gateway" -> "Jive ID": Check update access token
+note right of "Jive ID": Jive ID determines that access token\nis expired
+"Jive ID" -> "API Gateway": 401 access denied
+"API Gateway" -> "Service": 401 access denied
+Service -> "Jive ID": Request new access token using refresh token
+"Jive ID" -> Service: provide new access token
+note left of Service: Service stores new access \ntoken
+Service -> "API Gateway": Push tile update
+"API Gateway" -> "Jive": Push tile update

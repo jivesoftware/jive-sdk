@@ -1,0 +1,8 @@
+Service -> "API Gateway": Push tile update
+"API Gateway" -> "Jive ID": Check update access token
+note right of "Jive ID": Jive ID determines that access token\nis valid
+"API Gateway" -> Jive: Push tile update
+note right of Jive: Jive determines that tile instance\ndoes not exist (was removed)
+Jive -> API Gateway: return 410
+API Gateway -> Service: return 410
+note left of Service: Service destroys tile instance
