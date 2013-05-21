@@ -1,0 +1,12 @@
+note left of Jive: On tile instance config, registration\ncontaining configuration is sent\n to API Gateway
+alt Jive sends registration to Service
+Jive -> "API Gateway": send registration
+"API Gateway" -> "Jive ID": request service, get authorization code
+"Jive ID" -> "API Gateway": return service + authorization code
+end
+alt Service processes registration
+"API Gateway" -> "Service": send registration + authorization code
+"Service" -> "Jive ID": request access and refresh tokens
+"Jive ID" -> "Service": return access and refresh tokens
+note right of Service: Store access and refresh tokens,\ntile instance configuration
+end
