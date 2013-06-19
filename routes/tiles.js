@@ -28,11 +28,12 @@ exports.registration = function( req, res ) {
     var conf = jive.service.options;
     var clientId = conf.clientId;
     var secret = conf.clientSecret;
-    var url = req.body['url'];
+    var pushUrl = req.body['url'];
     var guid = req.body['guid'];
     var config = req.body['config'];
     var name = req.body['name'];
     var code = req.body['code'];
+    var jiveUrl = req.body['jiveUrl'];
     console.log(req.body);
 
     var auth = req.headers['authorization'];
@@ -60,7 +61,7 @@ exports.registration = function( req, res ) {
                 });
 
             } else {
-                return instanceLibrary.register(url, config, name, code).then(
+                return instanceLibrary.register(jiveUrl, pushUrl, config, name, code).then(
                     function( tileInstance ) {
                         jive.logger.info("registered instance", tileInstance );
                         instanceLibrary.save(tileInstance).then(function() {
