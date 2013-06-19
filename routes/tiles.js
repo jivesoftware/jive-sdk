@@ -72,6 +72,7 @@ exports.registration = function( req, res ) {
                             var jiveCommunity = tileInstance['jiveCommunity'];
                             if ( jiveCommunity ) {
                                 jive.service.persistence().save( "community", jiveCommunity, {
+                                    'version' : jiveUrl ? 'post-samurai' : "samurai",
                                     'jiveCommunity': jiveCommunity
                                 }).then( function() {
                                     deferred.resolve();
