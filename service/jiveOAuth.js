@@ -6,15 +6,17 @@ exports.register = function( registration ) {
     var deferred = q.defer();
     var tenantId = registration['tenantID'];
     var jiveUrl = registration['jiveURL'];
+    var clientId = registration['clientID'];
+    var authorizationCode = registration['code'];
 
     var registrationToSave = JSON.parse( JSON.stringify(registration) );
 
     // do access token exchange
     client.requestAccessToken(
         {
-            'client_id' : registration['clientID'],
-            'code' : registration['code'],
-            'jiveUrl' : registration['jiveUrl']
+            'client_id' : clientId,
+            'code' : authorizationCode,
+            'jiveUrl' : jiveUrl
         },
 
         function(response) {
