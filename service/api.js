@@ -239,5 +239,10 @@ exports.start = function() {
     });
 };
 
+/**
+ * For storing relationship between this service and jive instances worldwide
+ */
+exports.jiveOAuth = require( './jiveOAuth');
+
 
 

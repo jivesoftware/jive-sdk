@@ -24,11 +24,25 @@ var q = require('q');
 var jive = require("../api");
 var dev = require('./dev');
 
+exports.unregister = function( req, res ) {
+    var conf = jive.service.options;
+    var clientId = conf.clientId;
+    var secret = conf.clientSecret;
+    var name = req.body['name'];
+    var jiveUrl = req.body['jiveUrl'];
+    var remoteTileId = req.body['id'];
+
+    // xxx todo - remove the tile instance
+    console.log("Unregister!!") ;
+};
+
 exports.registration = function( req, res ) {
     var conf = jive.service.options;
     var clientId = conf.clientId;
     var secret = conf.clientSecret;
     var pushUrl = req.body['url'];
+    // xxx todo save remoteTileId along with the tile instance (so it can be unregistered, see above)
+    var remoteTileId = req.body['id'];
     var guid = req.body['guid'];
     var config = req.body['config'];
     var name = req.body['name'];
@@ -123,9 +137,3 @@ exports.registration = function( req, res ) {
         }
     );
 };
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-// development routes
-
-exports.tiles = dev.tiles;
-exports.installTiles = dev.installTiles;
