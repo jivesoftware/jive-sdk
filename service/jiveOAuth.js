@@ -40,14 +40,17 @@ exports.register = function( registration ) {
         function(response) {
             // successfully exchanged for access token:
             // save registration
-            registrationToSave['OAuth'] = response;
+            registrationToSave['OAuth'] = response['entity'];
             jive.service.persistence().save('jiveTrustStore', tenantId, registrationToSave ).then(
                 function() {
-                    // successful save
+                    // successful save:
+                    // emit a registration saved event and resolve
+                    jive.events.emit("registeredJiveInstanceSuccess", registrationToSave);
                     deferred.resolve();
                 },
                 function(error) {
                     // error saving
+                    jive.events.emit("registeredJiveInstanceFailed", registrationToSave);
                     deferred.reject(error);
                 }
             );
@@ -55,6 +58,7 @@ exports.register = function( registration ) {
 
         function(error) {
             // failed to exchange for access token
+            jive.events.emit("registeredJiveInstanceFailed", registrationToSave);
             deferred.reject( error );
         }
     );
