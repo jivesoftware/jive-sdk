@@ -6,7 +6,7 @@ exports.oauthRegister = function(req, res ) {
 
     jive.logger.debug('Recieved client app registration', registration );
 
-    jive.service.jiveOAuth.register( registration).then(
+    jive.service.community.register( registration ).then(
         function() {
             // success
             res.writeHead(200, { 'Content-Type': 'application/json' });

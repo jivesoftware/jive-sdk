@@ -240,9 +240,9 @@ exports.start = function() {
 };
 
 /**
- * For storing relationship between this service and jive instances worldwide
+ * For managing jive communities registered with this service
  */
-exports.jiveOAuth = require( './jiveOAuth');
+exports.community = require('../lib/community');
 
 
 

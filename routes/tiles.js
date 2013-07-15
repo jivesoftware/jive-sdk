@@ -36,38 +36,18 @@ exports.unregister = function( req, res ) {
     console.log("Unregister!!") ;
 };
 
-exports.registration = function( req, res ) {
-    var conf = jive.service.options;
-    var clientId = conf.clientId;
-    var secret = conf.clientSecret;
-    var pushUrl = req.body['url'];
-    // xxx todo save remoteTileId along with the tile instance (so it can be unregistered, see above)
-    var remoteTileId = req.body['id'];
-    var guid = req.body['guid'];
-    var config = req.body['config'];
-    var name = req.body['name'];
-    var code = req.body['code'];
-    var jiveUrl = req.body['jiveUrl'];
-    console.log(req.body);
-
-    var auth = req.headers['authorization'];
-    if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {
-        res.writeHead(403, { 'Content-Type': 'application/json' });
-        res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
-        return;
-    }
-
-    var registerer = function( scope, instanceLibrary ) {
+var doRegistration = function (guid, config, name, res, jiveUrl, pushUrl, code) {
+    var registerer = function (scope, instanceLibrary) {
         var deferred = q.defer();
 
-        instanceLibrary.findByScope(guid).then( function(tileInstance) {
+        instanceLibrary.findByScope(guid).then(function (tileInstance) {
             // the instance exists
             // update the config only
-            if ( tileInstance ) {
+            if (tileInstance) {
                 // update the config
                 tileInstance['config'] = config;
 
-                instanceLibrary.save(tileInstance).then(function() {
+                instanceLibrary.save(tileInstance).then(function () {
                     jive.events.emit("updateInstance." + name, tileInstance);
                     res.writeHead(204, {'Content-Type': 'application/json'});
                     res.end(JSON.stringify(tileInstance));
@@ -76,20 +56,21 @@ exports.registration = function( req, res ) {
 
             } else {
                 return instanceLibrary.register(jiveUrl, pushUrl, config, name, code).then(
-                    function( tileInstance ) {
-                        jive.logger.info("registered instance", tileInstance );
-                        instanceLibrary.save(tileInstance).then(function() {
+                    function (tileInstance) {
+                        jive.logger.info("registered instance", tileInstance);
+                        instanceLibrary.save(tileInstance).then(function () {
                             jive.events.emit("newInstance." + name, tileInstance);
                             res.writeHead(201, {'Content-Type': 'application/json'});
                             res.end(JSON.stringify(tileInstance));
-
                             var jiveCommunity = tileInstance['jiveCommunity'];
-                            if ( jiveCommunity ) {
-                                jive.service.persistence().save( "community", jiveCommunity, {
-                                    'version' : jiveUrl ? 'post-samurai' : "samurai",
-                                    'jiveCommunity': jiveCommunity
-                                }).then( function() {
-                                    deferred.resolve();
+                            if (jiveCommunity) {
+                                jive.service.community.findByCommunity(jiveCommunity).then( function( community ) {
+                                    community = community || {};
+                                    community['jiveUrl'] = jiveUrl;
+                                    community['jiveCommunity'] = jiveCommunity;
+                                    jive.service.community.save(community).then(function () {
+                                        deferred.resolve();
+                                    });
                                 });
                             } else {
                                 deferred.resolve();
@@ -97,15 +78,15 @@ exports.registration = function( req, res ) {
                         });
 
                     },
-                     function(err) {
+                    function (err) {
                         jive.logger.error('Registration failure for', scope);
                         jive.logger.debug(scope, err);
                         res.writeHead(502, { 'Content-Type': 'application/json' });
-                        var statusObj = { status: 500, 'error': 'Failed to get acquire access token', 'detail' : err };
-                        var body = JSON.stringify( statusObj );
-                        res.end( body );
+                        var statusObj = { status: 500, 'error': 'Failed to get acquire access token', 'detail': err };
+                        var body = JSON.stringify(statusObj);
+                        res.end(body);
                         deferred.reject();
-                     } );
+                    });
             }
         });
 
@@ -115,14 +96,18 @@ exports.registration = function( req, res ) {
     // try tiles
     var tile;
     var stream;
-    q.all([ jive.tiles.definitions.findByTileName( name).then( function(found ) { tile = found; }),
-            jive.extstreams.definitions.findByTileName( name ).then( function(found ) { stream = found; }) ] ).then(
+    q.all([ jive.tiles.definitions.findByTileName(name).then(function (found) {
+            tile = found;
+        }),
+            jive.extstreams.definitions.findByTileName(name).then(function (found) {
+                stream = found;
+            }) ]).then(
 
-        function() {
-            if ( tile ) {
+        function () {
+            if (tile) {
                 // register a tile instance
                 registerer(guid, jive.tiles);
-            } else if ( stream ) {
+            } else if (stream) {
                 // register an external stream instance
                 registerer(guid, jive.extstreams);
             } else {
@@ -132,8 +117,66 @@ exports.registration = function( req, res ) {
                     message: "No tile or external stream definition was found for the given name '" + name + "'"
                 };
                 res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end( JSON.stringify(statusObj) );
+                res.end(JSON.stringify(statusObj));
             }
         }
     );
+};
+
+var findCredentials = function(jiveUrl) {
+    var deferred = q.defer();
+    var conf = jive.service.options;
+
+    // default to system credentials
+    var credentials = {
+        'clientId': conf.clientId,
+        'clientSecret': conf.clientSecret
+    };
+
+    if ( !jiveUrl) {
+        // default to service credentials -- cannot look it up by community
+        deferred.resolve( credentials );
+    } else {
+        // try to resolve trust by jiveUrl
+        jive.service.community.findByJiveURL( jiveUrl).then( function(community) {
+            if ( community ) {
+                credentials['clientId'] = community['clientId'];
+                credentials['clientSecret'] = community['clientSecret'];
+            }
+            deferred.resolve( credentials );
+        }) ;
+    }
+
+    return deferred.promise;
+};
+
+exports.registration = function( req, res ) {
+    var pushUrl = req.body['url'];
+    // xxx todo save remoteTileId along with the tile instance (so it can be unregistered, see above)
+    var remoteTileId = req.body['id'];
+    var guid = req.body['guid'];
+    var config = req.body['config'];
+    var name = req.body['name'];
+    var code = req.body['code'];
+    var jiveUrl = req.body['jiveUrl'];
+
+    findCredentials(jiveUrl).then( function(credentials) {
+        if ( credentials ) {
+            var clientId = credentials['clientId'];
+            var secret = credentials['clientSecret'];
+            var auth = req.headers['authorization'];
+
+            if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {
+                res.writeHead(403, { 'Content-Type': 'application/json' });
+                res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
+                return;
+            }
+
+            doRegistration(guid, config, name, res, jiveUrl, pushUrl, code);
+        } else {
+            // problem!
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
+        }
+    });
 };
