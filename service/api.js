@@ -244,5 +244,25 @@ exports.start = function() {
  */
 exports.community = require('../lib/community');
 
+/**
+ * For managing service webhooks
+ */
+exports.webhooks = require('../lib/webhooks');
+
+/**
+ * Computes the full service URL for this service, taking into account
+ * jiveclientconfiguration.json (clientUrl & port)
+ */
+exports.serviceURL = function() {
+    var conf = jive.service.options;
+    var url = conf['clientUrl'];
+
+    var port = conf['port'];
+    if ( port && port != 443 && port != 80 ) {
+        url += ':' + port;
+    }
+
+    return url;
+};
 
 
