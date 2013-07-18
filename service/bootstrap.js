@@ -70,9 +70,13 @@ var setupExpressApp = function (app, rootDir, config) {
         app.set('port', config['port']);
 
         jive.logger.debug('Global framework routes:');
-        app.post('/registration', jive.routes.registration);
+        app.post('/registration', jive.routes.tiles.registration);
+        app.post('/unregister', jive.routes.tiles.unregister);
+        app.post('/jive/oauth/register', jive.routes.jive.oauthRegister);
 
         jive.logger.debug("/registration");
+        jive.logger.debug("/unregister");
+        jive.logger.debug("/jive/oauth/register");
 
         // wire in an sdk app with its own views
         var jiveSdkApp = express();
@@ -95,8 +99,8 @@ var setupExpressApp = function (app, rootDir, config) {
     app.configure( 'development', function () {
         jive.logger.debug('Global dev framework routes:');
 
-        app.get('/tiles', jive.routes.tiles);
-        app.get('/tilesInstall', jive.routes.installTiles);
+        app.get('/tiles', jive.routes.dev.tiles);
+        app.get('/tilesInstall', jive.routes.dev.installTiles);
 
         jive.logger.debug("/tiles");
         jive.logger.debug("/tilesInstall");

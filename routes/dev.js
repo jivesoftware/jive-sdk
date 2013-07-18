@@ -99,6 +99,10 @@ function getProcessed(conf, all) {
                 processedTile['register'] = host + ( processedTile['register'].indexOf('/') == 0 ? "" : "/" ) + processedTile['register'];
             }
         }
+        if ( processedTile['unregister'] && processedTile['unregister'].indexOf('http') != 0 ) {
+            // assume its relative to host then
+            processedTile['unregister'] = host + ( processedTile['unregister'].indexOf('/') == 0 ? "" : "/" ) + processedTile['unregister'];
+        }
         if ( !processedTile['client_id'] ) {
             processedTile['client_id'] = conf.clientId;
         }
