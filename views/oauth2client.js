@@ -49,7 +49,8 @@ function OAuth2ServerFlow( options ) {
         // obtain the oauth url (points to oauth creds store like SFDC)
         osapi.http.get({
             'href' : url,
-            'authz': authz
+            'authz': authz,
+            'noCache': true
         }).execute(function(response){
             if ( response.status >= 400 && response.status <= 599 ) {
                 jiveAuthorizeUrlErrorCallback(response);
@@ -98,7 +99,8 @@ function OAuth2ServerFlow( options ) {
                             ticket ? ('ticketID=' + ticket) : ('viewerID=' + viewerID + "&ts=" + new Date().getTime())
                         ),
                         'format' : 'json',
-                        'authz': authz
+                        'authz': authz,
+                        'noCache': true
                     }).execute( function( response ) {
                         if ( response.status >= 400 && response.status <= 599 ) {
                             ticketErrorCallback(response);
