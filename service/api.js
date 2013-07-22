@@ -68,6 +68,23 @@ exports.persistence = function(_persistence) {
     return persistence;
 };
 
+var scheduler;
+exports.scheduler = function( _scheduler ) {
+
+    if ( _scheduler ) {
+        if ( !_scheduler['schedule']  || !_scheduler['unschedule'] || !_scheduler['getTasks'] ) {
+            throw 'Unsupported scheduler strategy - must implement schedule, unschedule, save getTasks.';
+        }
+        scheduler = _scheduler;
+    }
+
+    if ( !scheduler ) {
+        scheduler = new jive.scheduler.memory();
+    }
+
+    return scheduler;
+};
+
 /**
  * @param _app
  * @param options JSON or path to options file
@@ -132,7 +149,8 @@ exports.init = function(_app, options ) {
 
     return initialPromise
             .then(initLogger)
-            .then(initPersistence);
+            .then(initPersistence)
+            .then(initScheduler);
 };
 
 function initLogger(options) {
@@ -170,6 +188,25 @@ function initPersistence(options) {
         else {
             jive.logger.warn('Invalid persistence option given "' + persistence + '". Must be one of ' + Object.keys(jive.persistence));
             jive.logger.warn('Defaulting to file persistence');
+        }
+    }
+    return options;
+}
+
+function initScheduler(options) {
+    var scheduler = options['scheduler'];
+    if ( typeof scheduler === 'object' ) {
+        // set scheduler if the object is provided
+        exports.scheduler( options['scheduler'] );
+    }
+    else if ( typeof scheduler === 'string' ) {
+        //If a string is provided, and it's a valid type exported in jive.scheduler, then use that.
+        if (jive.scheduler[scheduler]) {
+            exports.scheduler(new jive.scheduler[scheduler]());
+        }
+        else {
+            jive.logger.warn('Invalid scheduler option given "' + scheduler + '". Must be one of ' + Object.keys(jive.scheduler));
+            jive.logger.warn('Defaulting to memory scheduler');
         }
     }
     return options;
