@@ -35,6 +35,11 @@ exports.persistence = {
     'mongo' : require('./lib/persistence/mongo')
 };
 
+exports.scheduler  = {
+    'memory' : require('./lib/scheduler'),
+    'redis' : require('./lib/scheduler-redis')
+};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // external streams and tiles (instances and definitions)
 // eg. jive.tiles
