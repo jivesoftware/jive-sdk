@@ -73,11 +73,11 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
                         var tasksToAdd = [];
                         if (typeof task === 'function' ) {
                             // its a function, create a wrapping task object
-                            tasksToAdd.push( jive.tasks.build( task ) );
+                            tasksToAdd.push( jive.tasks.build( task, 15000 ) );
                         } else if ( task['forEach'] ) {
                             task.forEach( function( t ) {
                                 if ( typeof t === 'function' ) {
-                                    tasksToAdd.push( jive.tasks.build( t ) );
+                                    tasksToAdd.push( jive.tasks.build( t, 15000 ) );
                                 } else if ( typeof t === 'object' ) {
                                     tasksToAdd.push( t );
                                 }
