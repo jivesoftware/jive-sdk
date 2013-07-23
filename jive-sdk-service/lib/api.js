@@ -44,6 +44,16 @@ var _dir = function(theDir, defaultDir ) {
 // Public
 
 /**
+ * For managing jive communities registered with this service
+ */
+exports.community = jive.community;
+
+/**
+ * For managing service webhooks
+ */
+exports.webhooks = jive.webhooks;
+
+/**
  * Configuration options
  */
 exports.options = {};
@@ -197,7 +207,7 @@ function initScheduler(options) {
     var scheduler = options['scheduler'];
     if ( typeof scheduler === 'object' ) {
         // set scheduler if the object is provided
-        exports.scheduler( options['scheduler'] );
+        exports.scheduler(scheduler);
     }
     else if ( typeof scheduler === 'string' ) {
         //If a string is provided, and it's a valid type exported in jive.scheduler, then use that.
@@ -277,16 +287,6 @@ exports.start = function() {
 };
 
 /**
- * For managing jive communities registered with this service
- */
-exports.community = require('../lib/community');
-
-/**
- * For managing service webhooks
- */
-exports.webhooks = require('../lib/webhooks');
-
-/**
  * Computes the full service URL for this service, taking into account
  * jiveclientconfiguration.json (clientUrl & port)
  */
@@ -301,5 +301,3 @@ exports.serviceURL = function() {
 
     return url;
 };
-
-

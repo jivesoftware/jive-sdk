@@ -14,8 +14,8 @@
  *    limitations under the License.
  */
 
-var jiveUtil = require('./jiveutil');
-var jive = require('../api');
+var jiveUtil = require('../jiveutil');
+var jive = require('../../../api');
 
 function Scheduler() {
 }

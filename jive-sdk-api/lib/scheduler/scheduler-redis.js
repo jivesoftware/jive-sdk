@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2013 Jive Software
  *
@@ -15,12 +14,11 @@
  *    limitations under the License.
  */
 
-var jiveUtil = require('./jiveutil');
-var jive = require('../api');
+var jive = require('../../api');
+var jiveUtil = jive.util;
 var kue = require('kue');
 var express = require('express');
 var redis = require('redis').createClient();
-var lock = require("redis-lock")(redis);
 
 var jobs;
 var tasks = {};
@@ -44,7 +42,7 @@ module.exports = Scheduler;
  * @param interval The interval to invoke the callback
  * @param cb The callback
  */
-Scheduler.prototype.schedule = function schedule(task, key, interval, context, callback, exclusiveLock){
+Scheduler.prototype.schedule = function schedule(task, key, interval, context, callback){
     if  (!task) {
         return;
     }
@@ -77,26 +75,17 @@ Scheduler.prototype.schedule = function schedule(task, key, interval, context, c
     //////////////////////////////////////////////////////////////////////////////
 
     var executionWrapper =  function() {
-
-//        lock(key, 300 * 1000, function(done) {
-
-            var jobID = jive.util.guid();
-            jobs.create(jobQueueName, {
-                'jobID' : jobID
-            } )
-            .save()
-            .on('complete', function() {
-                redis.get(jobID, function(err, reply) {
-                    console.log("done", "reply:", reply);
-                    if ( callback ) {
-                        callback( reply );
-                    }
-
-//                    done();
-                });
+        var jobID = jive.util.guid();
+        jobs.create(jobQueueName, {
+            'jobID' : jobID
+        }).on('complete', function() {
+            redis.get(jobID, function(err, reply) {
+                console.log("done", "reply:", reply);
+                if ( callback ) {
+                    callback( reply );
+                }
             });
-//        } );
-
+        }).save();
     };
 
     // schedule recurrent task
@@ -169,9 +158,3 @@ Scheduler.prototype.shutdown = function(){
         scheduler.unschedule(taskKey);
     });
 };
-
-//var lock = function( key, timeout, callback ) {
-//
-//
-//
-//};

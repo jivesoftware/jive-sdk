@@ -1,7 +1,7 @@
 var Mocha = require('mocha'),
     path = require('path'),
     fs = require('fs'),
-    jive = require('../../jive-sdk'),
+    jive = require('.'),
     http = require('http'),
     testUtil = require('./test-util');
 

@@ -14,8 +14,8 @@
  *    limitations under the License.
  */
 
-var task = require('./task');
-var jive = require('../api');
+var task = require('./');
+var jive = require('../../api');
 
 var jobHandlers = {};
 

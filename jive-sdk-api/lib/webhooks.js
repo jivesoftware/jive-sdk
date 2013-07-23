@@ -14,10 +14,10 @@
  *    limitations under the License.
  */
 
-var jive = require('../api');
+var jive = require('');
 var q = require('q');
-var client = require('../lib/client');
-var jiveUtil = require('../lib/jiveutil');
+var client = require('./client');
+var jiveUtil = require('./jiveutil');
 
 exports.save = function( webhook ) {
     return jive.service.persistence().save( "webhook", webhook['url'], webhook );

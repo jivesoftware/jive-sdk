@@ -20,7 +20,7 @@ var q = require('q');
 var fs = require('fs-extra');
 var uuid = require('node-uuid');
 var mustache = require('mustache');
-var jive = require('../api');
+var jive = require('');
 
 exports.guid = function() {
     return uuid.v4();

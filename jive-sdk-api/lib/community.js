@@ -14,9 +14,9 @@
  *    limitations under the License.
  */
 
-var jive = require('../api');
+var jive = require('');
 var q = require('q');
-var client = require('../lib/client');
+var client = require('./client');
 
 var returnOne = function(found ) {
     if ( found == null || found.length < 1 ) {

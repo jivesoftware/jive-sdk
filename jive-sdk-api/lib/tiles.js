@@ -22,7 +22,7 @@ var q = require('q');
 var util = require('util');
 var instances = require('./instances');
 var pusher = require('./dataPusher');
-var jive = require('../api');
+var jive = require('');
 
 var tiles = Object.create(instances);
 module.exports = tiles;

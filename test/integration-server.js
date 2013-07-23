@@ -1,4 +1,4 @@
-var jive = require('../../jive-sdk'),
+var jive = require('.'),
     util = require('util'),
     BaseServer = require('./base-server').BaseServer;
 

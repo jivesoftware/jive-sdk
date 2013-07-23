@@ -15,7 +15,7 @@
  */
 
 var q = require('q');
-var jive = require('../api');
+var jive = require('');
 
 var processFound = function(found, expectOne ) {
     if ( !expectOne ) {

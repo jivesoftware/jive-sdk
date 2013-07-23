@@ -24,7 +24,6 @@
     "xmlhttprequest": "~1.5.0",
     "jquery": "*",
     "redis" : "*",
-    "redis-lock" : "*",
     "kue" : "*"
   },
   "devDependencies": {},
@@ -62,6 +61,6 @@
     "api"
   ],
   "bin": {
-    "jive-sdk": "bin/jive-sdk.sh"
+    "jive-sdk": "jive-sdk-service/bin/jive-sdk.sh"
   }
 }

@@ -23,7 +23,7 @@
  * This will configure the client to use a different endpoint for Jive ID public.
  */
 
-var jive = require('../api');
+var jive = require('');
 var util = require('util');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
