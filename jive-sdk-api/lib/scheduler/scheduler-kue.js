@@ -38,11 +38,12 @@ module.exports = Scheduler;
 
 /**
  * Schedule a task.
+ * @param task the task we're scheduling.
  * @param key String with which you'll identify this task later
  * @param interval The interval to invoke the callback
  * @param cb The callback
  */
-Scheduler.prototype.schedule = function schedule(task, key, interval, context, callback){
+Scheduler.prototype.schedule = function schedule(task, key, interval, context){
     if  (!task) {
         return;
     }
@@ -74,67 +75,24 @@ Scheduler.prototype.schedule = function schedule(task, key, interval, context, c
     // scheduling
     //////////////////////////////////////////////////////////////////////////////
 
-    var executionWrapper =  function() {
-        var jobID = jive.util.guid();
-        jobs.create(jobQueueName, {
-            'jobID' : jobID
-        }).on('complete', function() {
-            redis.get(jobID, function(err, reply) {
-                console.log("done", "reply:", reply);
-                if ( callback ) {
-                    callback( reply );
-                }
-            });
-        }).save();
+    var executionWrapper =  function(key, interval) {
+        var meta = {};
+        meta['jobID'] = key;
+        meta['context'] = task.getContext();
+        if (interval) {
+            meta['interval'] = interval;
+        }
+        jobs.create(jobQueueName, meta).save();
     };
 
     // schedule recurrent task
-    if ( !jive.service.options.roles || !jive.service.options.roles['worker'] ) {
-        if ( interval ) {
-            // schedule for recurrent execution at some given interval
-            tasks[key] = setInterval(executionWrapper, interval);
-        } else {
-            // schedule for execution, once -- right now
-            executionWrapper();
-        }
+    if ( interval ) {
+        //put into queue, setting interval metadata
+        executionWrapper(key, interval);
+    } else {
+        // schedule for execution once
+        executionWrapper(key);
     }
-
-    //////////////////////////////////////////////////////////////////////////////
-    // execution
-    //////////////////////////////////////////////////////////////////////////////
-
-    //
-    // only workers get to execute
-    //
-    taskExecutors[key] = function(finalizer) {
-        return cb(context, finalizer)
-    };
-
-    if ( jive.service.options.roles && jive.service.options.roles['worker'] ) {
-        jobs.process(jobQueueName, 1, function(job, done) {
-            console.log("executing...");
-            var toExecute = taskExecutors[key];
-
-            var sentinel = setTimeout( function() {
-                    console.log("...executing...");
-                },
-                100
-            );
-
-            var finalize = function(result) {
-                if( result ) {
-                    redis.set(job.data.jobID, JSON.stringify(result), function() {
-                        clearTimeout(sentinel);
-                        done();
-                    });
-                }
-            };
-
-            toExecute( finalize );
-        });
-    }
-
-    ////////////////////////////////////////////
 
     jive.logger.debug("Scheduled task: " + key, interval);
 
@@ -142,10 +100,7 @@ Scheduler.prototype.schedule = function schedule(task, key, interval, context, c
 };
 
 Scheduler.prototype.unschedule = function unschedule(key){
-    if(tasks[key]){
-        clearInterval(tasks[key]);
-        delete tasks[key];
-    }
+
 };
 
 Scheduler.prototype.getTasks = function getTasks(){

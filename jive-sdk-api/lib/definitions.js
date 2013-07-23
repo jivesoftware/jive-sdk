@@ -15,7 +15,7 @@
  */
 
 var q = require('q');
-var jive = require('');
+var jive = require('../api');
 
 var processFound = function(found, expectOne ) {
     if ( !expectOne ) {
@@ -30,9 +30,9 @@ var processFound = function(found, expectOne ) {
     }
 };
 
-exports.persistence = function() {
-    return jive.service.persistence();
-};
+//exports.persistence = function() {
+//    return jive.service.persistence();
+//};
 
 exports.save = function (tileDefinition) {
     var self = this;
@@ -105,17 +105,17 @@ exports.addEventHandler = function(definitionName, eventName, handler, descripti
     );
 };
 
-exports.addTasks = function(tasks) {
+exports.addTasks = function(tasks, scheduler) {
     // register tasks
     if ( tasks ) {
         if ( tasks['forEach']) {
             var keys = [];
             tasks.forEach( function( task ) {
-                keys.push( jive.tasks.schedule(task) );
+                keys.push( scheduler.schedule(task) );
             });
             return keys;
         } else {
-            return jive.tasks.schedule(tasks);
+            return scheduler.schedule(tasks);
         }
     }
 };

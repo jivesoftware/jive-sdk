@@ -14,23 +14,8 @@
  *    limitations under the License.
  */
 
-var task = require('./');
-var jive = require('../../api');
+var task = require('./task');
 
-var jobHandlers = {};
-
-exports.build = function( runnable, interval, context, exclusiveLock ) {
-    return new task(runnable, interval, context, exclusiveLock );
-};
-
-exports.schedule = function(task, key, interval, context) {
-    jive.service.scheduler().schedule( task, key, interval, context );
-};
-
-exports.unschedule = function( key ) {
-    jive.service.scheduler().unschedule(key);
-};
-
-exports.clearAllTasks = function() {
-    jive.service.scheduler().shutdown();
+exports.build = function( runnable, interval, context) {
+    return new task(runnable, interval, context);
 };

@@ -79,10 +79,15 @@ exports.persistence = function(_persistence) {
 };
 
 var scheduler;
+/**
+ * Retrieves or sets the scheduling strategy. Defaults to memory (single node).
+ * @param _scheduler
+ * @returns {*}
+ */
 exports.scheduler = function( _scheduler ) {
 
     if ( _scheduler ) {
-        if ( !_scheduler['schedule']  || !_scheduler['unschedule'] || !_scheduler['getTasks'] ) {
+        if ( !_scheduler['schedule'] || !_scheduler['unschedule'] || !_scheduler['getTasks'] ) {
             throw 'Unsupported scheduler strategy - must implement schedule, unschedule, save getTasks.';
         }
         scheduler = _scheduler;

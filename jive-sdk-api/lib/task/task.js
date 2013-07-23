@@ -14,8 +14,6 @@
  *    limitations under the License.
  */
 
-var jive = require("../../../jive-sdk");
-
 /*
 * This produces a task object with reasonable defaults.
 * - At minimum, requires a runnable function

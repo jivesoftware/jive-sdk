@@ -34,9 +34,9 @@
  */
 
 var q = require('q');
-var jiveUtil = require('./jiveutil');
+var jive = require('../api');
+var jiveUtil = jive.util;
 var jiveClient = require('./client');
-var jive = require('');
 var pusher = require('./dataPusher');
 
 var returnOne = function(found ) {

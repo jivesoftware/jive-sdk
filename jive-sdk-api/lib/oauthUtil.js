@@ -1,6 +1,6 @@
 var url = require('url');
 var util = require('util');
-var jive = require('');
+var jive = require('../api');
 
 exports.buildAuthorizeUrlResponseMap = function( oauth2Conf, callback, context, extraAuthParams ) {
     var stateToEncode = { 'jiveRedirectUrl' : callback };

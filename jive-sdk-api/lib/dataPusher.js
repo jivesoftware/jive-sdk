@@ -15,7 +15,7 @@
  */
 
 var jiveClient = require('./client');
-var jive = require('');
+var jive = require('../api');
 var q = require('q');
 
 var doRefreshTokenFlow = function( instanceLibrary, instance ) {

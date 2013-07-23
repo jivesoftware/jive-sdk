@@ -26,7 +26,7 @@ exports.persistence = {
 
 exports.scheduler  = {
     'memory' : require('./lib/scheduler/scheduler'),
-    'redis' : require('./lib/scheduler/scheduler-redis')
+    'kue' : require('./lib/scheduler/scheduler-kue')
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

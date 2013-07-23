@@ -65,7 +65,8 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
             return recursiveDirectoryProcessor( null, definitionName, svcDir, svcDir,
                 function(app, definitionName, theFile, theDirectory) {
 
-                    var target = require(theDirectory + '/' + theFile);
+                    var taskPath = theDirectory + '/' + theFile;
+                    var target = require(taskPath);
 
                     // task
                     var task = target.task;
@@ -73,16 +74,18 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
                         var tasksToAdd = [];
                         if (typeof task === 'function' ) {
                             // its a function, create a wrapping task object
-                            tasksToAdd.push( jive.tasks.build( task, 15000 ) );
+                            tasksToAdd.push(jive.tasks.build(task, 15000, {'path':taskPath}));
                         } else if ( task['forEach'] ) {
                             task.forEach( function( t ) {
                                 if ( typeof t === 'function' ) {
-                                    tasksToAdd.push( jive.tasks.build( t, 15000 ) );
+                                    tasksToAdd.push( jive.tasks.build( t, 15000,{'path':taskPath} ) );
                                 } else if ( typeof t === 'object' ) {
+                                    t['path'] = taskPath;
                                     tasksToAdd.push( t );
                                 }
                             } );
                         } else if ( typeof task === 'object' ) {
+                            task['path'] = taskPath;
                             tasksToAdd.push( task );
                         }
 
@@ -90,7 +93,7 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
                         tasksToAdd.forEach( function(taskToAdd) {
                             taskToAdd.setKey( definitionName  + '.' + theFile + "." + taskToAdd.getInterval() );
                         });
-                        jive.extstreams.definitions.addTasks( tasksToAdd );
+                        jive.extstreams.definitions.addTasks(jive.scheduler(), tasksToAdd );
                     }
 
                     // event handler
