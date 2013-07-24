@@ -34,7 +34,7 @@
  */
 
 var q = require('q');
-var jive = require('../api');
+var jive = require('../../api');
 var jiveUtil = jive.util;
 var jiveClient = require('./client');
 var pusher = require('./dataPusher');
@@ -49,7 +49,7 @@ var returnOne = function(found ) {
 };
 
 exports.persistence = function() {
-    return jive.service.persistence();
+    return jive.context.persistence;
 };
 
 exports.getCollection = function() {
@@ -100,7 +100,7 @@ exports.remove = function (instanceID) {
 
 var findCredentials = function(jiveUrl) {
     var deferred = q.defer();
-    var conf = jive.service.options;
+    var conf = jive.context.config;
     var serviceCredentials = {
         'clientId': conf.clientId,
         'clientSecret': conf.clientSecret
@@ -108,7 +108,7 @@ var findCredentials = function(jiveUrl) {
 
     if ( jiveUrl) {
         // try to resolve trust by jiveUrl
-        jive.service.community.findByJiveURL( jiveUrl ).then( function(credentials) {
+        jive.community.findByJiveURL( jiveUrl ).then( function(credentials) {
             if( credentials ) {
                 deferred.resolve( credentials );
             } else {
@@ -143,7 +143,7 @@ var doRegister = function(options, pushUrl, config, name, jiveUrl, deferred) {
             instance['refreshToken'] = accessTokenResponse['refresh_token'];
             instance['scope'] = scope;
             instance['jiveCommunity'] = jiveUrl ?
-                jive.service.community.parseJiveCommunity(jiveUrl)
+                jive.community.parseJiveCommunity(jiveUrl)
               : decodeURIComponent(scope.split(/:/)[1].split('/')[0]).split(/:/)[0];
 
             deferred.resolve( instance );
@@ -207,14 +207,14 @@ exports.refreshAccessToken = function (instance) {
 
     // default
     var options = {
-        client_id: jive.service.options['clientId'],
+        client_id: jive.context.config['clientId'],
         refresh_token: instance['refreshToken']
     };
 
     if ( !jiveCommunity ) {
         doRefreshAccessToken(options, instance, deferred);
     } else {
-        jive.service.community.findByCommunity( jiveCommunity).then( function(community) {
+        jive.community.findByCommunity( jiveCommunity).then( function(community) {
             if ( community ) {
                 options['client_id'] = community['clientId'];
                 doRefreshAccessToken(options, instance, deferred);

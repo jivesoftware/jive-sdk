@@ -40,21 +40,22 @@ exports.tasks = require('./lib/task/tasks');
 //     jive.extstreams
 //     jive.extstreams.definitions
 
-var extstreams = require('./lib/extstreams');
-extstreams['definitions'] = require('./lib/extstreamsDefinitions');
+var extstreams = require('./lib/tile/extstreams');
+extstreams['definitions'] = require('./lib/tile/extstreamsDefinitions');
 exports.extstreams = extstreams;
 
-var tiles = require('./lib/tiles');
-tiles['definitions'] = require('./lib/tilesDefinitions');
+var tiles = require('./lib/tile/tiles');
+tiles['definitions'] = require('./lib/tile/tilesDefinitions');
 exports.tiles = tiles;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // events
-exports.events = require( './lib/events');
+exports.events = require( './lib/event/events');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // util
-exports.util = require('./lib/jiveutil');
+exports.util = require('./lib/util/jiveutil');
+exports.oauthUtil = require('./lib/util/oauthUtil');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // coreV3
@@ -62,8 +63,15 @@ exports.coreV3 = require('./lib/v3/api');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For managing jive communities registered with this service
-exports.community = require('./lib/community');
+exports.community = require('./lib/community/community');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For managing service webhooks
-exports.webhooks = require('./lib/webhooks');
+exports.webhooks = require('./lib/webhook/webhooks');
+
+// defaults - may be overriden
+exports.context = {
+    'persistence' : new exports.persistence.file(),
+    'scheduler' : new exports.scheduler.memory(),
+    'config' : {}
+};

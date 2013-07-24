@@ -40,7 +40,7 @@ IntegrationServer.prototype.start = function() {
         } )
 
         .then(function() {
-            self.memory = jive.service.persistence();
+            self.memory = jive.context.persistence;
             console.log('Initial memory: %s', JSON.stringify(self.memory.getDb()));
 
         })

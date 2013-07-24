@@ -3,7 +3,7 @@ var url = require('url');
 var jive = require('../api');
 var mustache = require('mustache');
 
-var oauthUtil = require('../api/oauthUtil');
+var oauthUtil = jive.oauthUtil;
 
 exports.redirectHtmlTxt = "<html> <head> <script> window.location='{{{redirect}}}'; </script>" +
     "</head> <body> Redirecting ... </body> </html>";

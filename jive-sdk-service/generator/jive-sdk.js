@@ -17,7 +17,7 @@
 var fs = require('fs-extra');
 var q = require('q');
 var path = require('path');
-var jive = require('../../api');
+var jive = require('../api');
 
 /**
  * jive-sdk create -type

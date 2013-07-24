@@ -46,6 +46,7 @@ exports.extstreams = api.extstreams;
 exports.tiles = api.tiles;
 exports.events = api.events;
 exports.util = api.util;
+exports.oauthUtil = api.oauthUtil;
 exports.coreV3 = api.coreV3;
 exports.community = api.community;
 exports.webhooks = api.webhooks;

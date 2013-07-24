@@ -23,7 +23,7 @@
  * This will configure the client to use a different endpoint for Jive ID public.
  */
 
-var jive = require('../api');
+var jive = require('../../api');
 var util = require('util');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,7 +201,7 @@ var extractExternalPropsUrl = function( instance ) {
 
 var makeExternalPropsHeader = function(instance ) {
     var auth = 'Bearer ' + instance['accessToken'];
-    return { 'X-Client-Id': jive.service.options['clientId'], 'Authorization' : auth };
+    return { 'X-Client-Id': jive.context.config['clientId'], 'Authorization' : auth };
 };
 
 exports.fetchExtendedProperties = function( instance ) {

@@ -14,19 +14,18 @@
  *    limitations under the License.
  */
 
-var jive = require('../api');
+var jive = require('../../api');
 var q = require('q');
-var client = require('./client');
-var jiveUtil = require('./jiveutil');
+var client = require('./../tile/client');
 
 exports.save = function( webhook ) {
-    return jive.service.persistence().save( "webhook", webhook['url'], webhook );
+    return jive.context.persistence.save( "webhook", webhook['url'], webhook );
 };
 
 exports.register = function( jiveCommunity, events, object, webhookCallback ) {
     var deferred = q.defer();
 
-    jive.service.community.findByCommunity(jiveCommunity).then( function(community) {
+    jive.community.findByCommunity(jiveCommunity).then( function(community) {
         if ( community ) {
 
             var webhookRequest = {

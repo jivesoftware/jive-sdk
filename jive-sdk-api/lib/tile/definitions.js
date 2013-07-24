@@ -15,7 +15,7 @@
  */
 
 var q = require('q');
-var jive = require('../api');
+var jive = require('../../api');
 
 var processFound = function(found, expectOne ) {
     if ( !expectOne ) {
@@ -30,9 +30,9 @@ var processFound = function(found, expectOne ) {
     }
 };
 
-//exports.persistence = function() {
-//    return jive.service.persistence();
-//};
+exports.persistence = function() {
+    return jive.context.persistence;
+};
 
 exports.save = function (tileDefinition) {
     var self = this;

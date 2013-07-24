@@ -75,6 +75,9 @@ exports.persistence = function(_persistence) {
     if ( !persistence) {
         persistence = new jive.persistence.file();
     }
+
+    jive.context.persistence = persistence;
+
     return persistence;
 };
 
@@ -120,6 +123,7 @@ exports.init = function(_app, options ) {
     var initialPromise;
     if ( typeof options === 'object' ) {
         exports.options = options;
+        jive.context.config = exports.options;
 
         initialPromise = q.fcall( function() {
             return options;
@@ -154,6 +158,7 @@ exports.init = function(_app, options ) {
         initialPromise = q.nfcall( fs.readFile, options, 'utf8').then( function (data) {
             var jiveConfig = JSON.parse(data);
             exports.options = jiveConfig;
+            jive.context.config = exports.options;
 
             jive.logger.debug('Startup configuration from', options);
             jive.logger.debug(jiveConfig);

@@ -15,7 +15,7 @@
  */
 
 var events = require('events');
-var jive = require('../api');
+var jive = require('../../api');
 
 exports = module.exports = new events.EventEmitter();
 

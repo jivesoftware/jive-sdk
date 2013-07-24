@@ -14,9 +14,9 @@
  *    limitations under the License.
  */
 
-var jive = require('../api');
+var jive = require('../../api');
 var q = require('q');
-var client = require('./client');
+var client = require('./../tile/client');
 
 var returnOne = function(found ) {
     if ( found == null || found.length < 1 ) {
@@ -34,11 +34,11 @@ exports.save = function(community ) {
         community['jiveCommunity'] = exports.parseJiveCommunity(jiveUrl);
     }
 
-    return jive.service.persistence().save( "community", community['jiveUrl'], community );
+    return jive.context.persistence.save( "community", community['jiveUrl'], community );
 };
 
 exports.find = function( filter, expectOne ) {
-    return jive.service.persistence().find("community", filter).then( function( found ) {
+    return jive.context.persistence.find("community", filter).then( function( found ) {
         return expectOne ? returnOne( found ) : found;
     } );
 };
@@ -77,11 +77,11 @@ exports.register = function( registration ) {
 
     if ( !clientId ) {
         // use global one
-        clientId = jive.service.options['clientId'];
+        clientId = jive.context.config['clientId'];
     }
     if ( !clientSecret ) {
         // use global one
-        clientSecret = jive.service.options['clientSecret'];
+        clientSecret = jive.context.config['clientSecret'];
     }
 
     // do access token exchange
