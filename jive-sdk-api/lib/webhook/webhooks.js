@@ -16,7 +16,6 @@
 
 var jive = require('../../api');
 var q = require('q');
-var client = require('./../tile/client');
 
 exports.save = function( webhook ) {
     return jive.context.persistence.save( "webhook", webhook['url'], webhook );
