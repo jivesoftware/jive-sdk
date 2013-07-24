@@ -34,16 +34,11 @@ exports.service = require('./lib/api');
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // from api
 var api = require('../jive-sdk-api/api');
-exports.persistence = api.persistence;
-exports.scheduler = api.scheduler;
-exports.tasks = api.tasks;
-exports.extstreams = api.extstreams;
-exports.tiles = api.tiles;
-exports.events = api.events;
-exports.util = api.util;
-exports.oauthUtil = api.oauthUtil;
-exports.coreV3 = api.coreV3;
-exports.community = api.community;
-exports.webhooks = api.webhooks;
-exports.context = api.context;
-exports.logger = api.logger;
+
+// export everything from the api
+for (var key in api) {
+    //copy all the fields
+    if ( api.hasOwnProperty(key) ) {
+        exports[key] = api[key];
+    }
+}
