@@ -15,8 +15,8 @@
  */
 
 var express = require('express'),
-    fs = require('fs'),
     path = require('path'),
+    service = require('./api'),
     jive = require('../api'),
     consolidate = require('consolidate'),
     q = require('q');
@@ -70,9 +70,9 @@ var setupExpressApp = function (app, rootDir, config) {
         app.set('port', config['port']);
 
         jive.logger.debug('Global framework routes:');
-        app.post('/registration', jive.routes.tiles.registration);
-        app.post('/unregister', jive.routes.tiles.unregister);
-        app.post('/jive/oauth/register', jive.routes.jive.oauthRegister);
+        app.post('/registration', service.routes.tiles.registration);
+        app.post('/unregister', service.routes.tiles.unregister);
+        app.post('/jive/oauth/register', service.routes.jive.oauthRegister);
 
         jive.logger.debug("/registration");
         jive.logger.debug("/unregister");
@@ -99,8 +99,8 @@ var setupExpressApp = function (app, rootDir, config) {
     app.configure( 'development', function () {
         jive.logger.debug('Global dev framework routes:');
 
-        app.get('/tiles', jive.routes.dev.tiles);
-        app.get('/tilesInstall', jive.routes.dev.installTiles);
+        app.get('/tiles', service.routes.dev.tiles);
+        app.get('/tilesInstall', service.routes.dev.installTiles);
 
         jive.logger.debug("/tiles");
         jive.logger.debug("/tilesInstall");

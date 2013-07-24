@@ -50,8 +50,8 @@ IntegrationServer.prototype.start = function() {
 
 
 
- /*   app.get( '/tiles', jive.routes.tiles );
-    app.get( '/tilesInstall', jive.routes.installTiles );*/
+ /*   app.get( '/tiles', jive.service.routes.tiles );
+    app.get( '/tilesInstall', jive.service.routes.installTiles );*/
 
 }
 

@@ -311,3 +311,12 @@ exports.serviceURL = function() {
 
     return url;
 };
+
+/**
+ * Public service routes
+ */
+exports.routes = {
+    'tiles' : require('../routes/tiles'),
+    'jive' : require('../routes/jive'),
+    'dev' : require('../routes/dev')
+};
