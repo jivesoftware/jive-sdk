@@ -153,6 +153,7 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
 
             delete options['host'];
             delete options['path'];
+            options['rejectUnauthorized'] = false;
 
             jive.logger.debug("Request: " + url + ", body: " + postBodyStr);
             request(options, function (error, response, body) {

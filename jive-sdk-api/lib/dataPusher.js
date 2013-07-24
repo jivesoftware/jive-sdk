@@ -34,9 +34,14 @@ var doRefreshTokenFlow = function( instanceLibrary, instance ) {
             } else {
                 // success
                 jive.logger.debug('Successfully refreshed token.');
-                instanceLibrary.save(updated).then(function(instanceToRetry) {
-                    jive.logger.debug("Retrying fetch.");
-                    deferred.resolve(instanceToRetry);
+
+                instanceLibrary.findByID(updated['id']).then( function(instanceToRetry) {
+                    if (instanceToRetry) {
+                        jive.logger.debug("Retrying fetch.");
+                        deferred.resolve(instanceToRetry);
+                    } else {
+                        deferred.reject(new Error("Failed to retrieve tile instance"));
+                    }
                 });
             }
         },

@@ -55,9 +55,61 @@ exports.findByCommunity = function( jiveCommunity ) {
     }, true );
 };
 
+exports.findByTenantID = function( tenantId ) {
+    return exports.find( {
+        'tenantId' : tenantId
+    }, true );
+};
+
+exports.findByTenantIDorJiveURL = function( tenantId, jiveURL ) {
+    if ( tenantId && !jiveURL ) {
+        return exports.findByTenantID(tenantId);
+    } else if ( !tenantId && jiveURL ) {
+        return exports.findByJiveURL(tenantId);
+    }
+
+    return exports.findByTenantID( tenantId).then( function(community) {
+        return community;
+    }).then( function( community ) {
+        if ( !community ) {
+            return exports.findByJiveURL( jiveURL).then( function(community) {
+                return community;
+            });
+        } else {
+            return community;
+        }
+    });
+};
+
 exports.parseJiveCommunity = function( jiveUrl ) {
     var parts = jiveUrl.split('http')[1].split('\/\/')[1].split(':')[0].split('/')[0].split('www.');
     return parts.length > 1 ? parts[1] : parts[0];
+};
+
+exports.getApplicableCredentials = function(jiveUrl, tenantId) {
+    var deferred = q.defer();
+    var conf = jive.service.options;
+
+    // default to system credentials
+    var credentials = {
+        'clientId': conf.clientId,
+        'clientSecret': conf.clientSecret
+    };
+
+    if ( !jiveUrl && !tenantId) {
+        // default to service credentials -- cannot look it up by community
+        deferred.resolve( credentials );
+    } else {
+        exports.findByTenantIDorJiveURL( tenantId, jiveUrl ).then( function(community) {
+            if ( community ) {
+                credentials['clientId'] = community['clientId'];
+                credentials['clientSecret'] = community['clientSecret'];
+            }
+            deferred.resolve( credentials );
+        });
+    }
+
+    return deferred.promise;
 };
 
 exports.register = function( registration ) {

@@ -98,82 +98,63 @@ exports.remove = function (instanceID) {
     return this.persistence().remove(this.getCollection(), instanceID );
 };
 
-var findCredentials = function(jiveUrl) {
-    var deferred = q.defer();
-    var conf = jive.service.options;
-    var serviceCredentials = {
-        'clientId': conf.clientId,
-        'clientSecret': conf.clientSecret
+var doRegister = function(options, pushUrl, config, name, jiveUrl, tenantId, deferred) {
+    // instance to save
+    var instance = {
+        url: pushUrl,
+        config: config,
+        name: name
     };
 
-    if ( jiveUrl) {
-        // try to resolve trust by jiveUrl
-        jive.service.community.findByJiveURL( jiveUrl ).then( function(credentials) {
-            if( credentials ) {
-                deferred.resolve( credentials );
-            } else {
-                // could not find community trust
-                deferred.resolve( serviceCredentials );
-            }
-        });
-    } else {
-        deferred.resolve(serviceCredentials);
-    }
-
-    return deferred.promise;
-};
-
-var doRegister = function(options, pushUrl, config, name, jiveUrl, deferred) {
-    jiveClient.requestAccessToken(options,
-        // success
-        function (response) {
-            jive.logger.debug("Reached Access Token Exchange callback", response);
-            var accessTokenResponse = response['entity'];
-
-            var instance = {
-                url: pushUrl,
-                config: config,
-                name: name
-            };
-
-            var scope = accessTokenResponse['scope'];
-
-            instance['accessToken'] = accessTokenResponse['access_token'];
-            instance['expiresIn'] = accessTokenResponse['expires_in'];
-            instance['refreshToken'] = accessTokenResponse['refresh_token'];
-            instance['scope'] = scope;
-            instance['jiveCommunity'] = jiveUrl ?
-                jive.service.community.parseJiveCommunity(jiveUrl)
-              : decodeURIComponent(scope.split(/:/)[1].split('/')[0]).split(/:/)[0];
-
+    jive.service.community.findByTenantIDorJiveURL(tenantId, jiveUrl).then( function(community) {
+        return community;
+    }).then( function(community) {
+        // if there is a community, then tie the instance to the communtiy, and do not do access token request
+        if ( community ) {
+            instance['jiveCommunity'] = community['jiveCommunity'];
             deferred.resolve( instance );
-        },
+        } else {
+            jiveClient.requestAccessToken(options,
+                // success
+                function (response) {
+                    jive.logger.debug("Reached Access Token Exchange callback", response);
+                    var accessTokenResponse = response['entity'];
+                    var scope = accessTokenResponse['scope'];
 
-        // failure
-        function(err) {
-            jive.logger.error("Failed access token exchange!", err);
-            deferred.reject( err );
+                    instance['accessToken'] = accessTokenResponse['access_token'];
+                    instance['expiresIn'] = accessTokenResponse['expires_in'];
+                    instance['refreshToken'] = accessTokenResponse['refresh_token'];
+                    instance['scope'] = scope;
+                    instance['jiveCommunity'] = jiveUrl ?
+                        jive.service.community.parseJiveCommunity(jiveUrl)
+                        : decodeURIComponent(scope.split(/:/)[1].split('/')[0]).split(/:/)[0];
+
+                    deferred.resolve( instance );
+                },
+
+                // failure
+                function(err) {
+                    jive.logger.error("Failed access token exchange!", err);
+                    deferred.reject( err );
+                }
+            );
         }
-    );
+    });
+
 };
 
-exports.register = function (jiveUrl, pushUrl, config, name, code ) {
+exports.register = function (jiveUrl, pushUrl, tenantId, config, name, code ) {
     var deferred = q.defer();
 
-    return findCredentials(jiveUrl).then( function(credentials) {
-
-        // default to global clientID/secret
-        var clientId = credentials['clientId'];
-        var clientSecret = credentials['clientSecret'];
-
+    return jive.service.community.getApplicableCredentials(jiveUrl, tenantId).then( function(credentials) {
         var options = {
-            client_id: clientId,
-            client_secret: clientSecret,
+            client_id: credentials['clientId'],
+            client_secret: credentials['clientSecret'],
             code: code,
             jiveUrl: jiveUrl
         };
 
-        doRegister(options, pushUrl, config, name, jiveUrl, deferred );
+        doRegister(options, pushUrl, config, name, jiveUrl, tenantId, deferred );
 
         return deferred.promise;
     });
@@ -185,11 +166,13 @@ function doRefreshAccessToken(options, instance, deferred) {
             if (response.statusCode >= 200 && response.statusCode <= 299) {
                 var accessTokenResponse = response['entity'];
 
+                var result = {};
+
                 // success
-                instance['accessToken'] = accessTokenResponse['access_token'];
-                instance['expiresIn'] = accessTokenResponse['expires_in'];
-                instance['refreshToken'] = accessTokenResponse['refresh_token'];
-                deferred.resolve(instance);
+                result['accessToken'] = accessTokenResponse['access_token'];
+                result['expiresIn'] = accessTokenResponse['expires_in'];
+                result['refreshToken'] = accessTokenResponse['refresh_token'];
+                deferred.resolve(result);
             } else {
                 jive.logger.error('error refreshing access token for ', instance);
                 deferred.reject(response);
@@ -202,6 +185,7 @@ function doRefreshAccessToken(options, instance, deferred) {
     );
 }
 exports.refreshAccessToken = function (instance) {
+    var thisLibrary = this;
     var deferred = q.defer();
     var jiveCommunity = instance['jiveCommunity'];
 
@@ -211,16 +195,54 @@ exports.refreshAccessToken = function (instance) {
         refresh_token: instance['refreshToken']
     };
 
+    var doInstanceTokenUpdate = function(options) {
+        doRefreshAccessToken(options, instance).then(
+            function(result) {
+                instance['accessToken'] = result['access_token'];
+                instance['expiresIn'] = result['expires_in'];
+                instance['refreshToken'] = result['refresh_token'];
+
+                thisLibrary.save(instance).then(function(saved) {
+                    deferred.resolve(saved);
+                });
+            },
+            function(error) {
+                deferred.reject( error );
+            }
+        );
+    };
+
     if ( !jiveCommunity ) {
-        doRefreshAccessToken(options, instance, deferred);
+        doInstanceTokenUpdate(options);
     } else {
         jive.service.community.findByCommunity( jiveCommunity).then( function(community) {
             if ( community ) {
+                // community trust exists, then use that
                 options['client_id'] = community['clientId'];
-                doRefreshAccessToken(options, instance, deferred);
+                if ( community['oauth'] && community['oauth']['refreshToken'] ) {
+                    options['refresh_token'] = community['oauth']['refreshToken'];
+                    doRefreshAccessToken(options, instance, deferred).then(
+                        function(result) {
+                            // update community, and save it
+                            community['oauth']['accessToken'] = result['accessToken'];
+                            community['oauth']['refreshToken'] = result['refreshToken'];
+                            community['oauth']['expiresIn'] = result['expiresIn'];
+                            jive.service.community.save( community ).then(
+                                function() { deferred.resolve(result); },
+                                function (error) { deferred.reject(error) }
+                            );
+                        },
+                        function(error) {
+                            deferred.reject(error);
+                        }
+                    );
+                } else {
+                    // no refresh token -- cannot use community trust
+                    doInstanceTokenUpdate(options);
+                }
             } else {
                 // could not find community trust
-                doRefreshAccessToken(options, instance, deferred);
+                doInstanceTokenUpdate(options);
             }
         });
     }

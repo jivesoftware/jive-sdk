@@ -36,7 +36,7 @@ exports.unregister = function( req, res ) {
     console.log("Unregister!!") ;
 };
 
-var doRegistration = function (guid, config, name, res, jiveUrl, pushUrl, code) {
+var doRegistration = function (guid, config, name, res, jiveUrl, pushUrl, code, tenantId) {
     var registerer = function (scope, instanceLibrary) {
         var deferred = q.defer();
 
@@ -55,7 +55,7 @@ var doRegistration = function (guid, config, name, res, jiveUrl, pushUrl, code) 
                 });
 
             } else {
-                return instanceLibrary.register(jiveUrl, pushUrl, config, name, code).then(
+                return instanceLibrary.register(jiveUrl, pushUrl, tenantId, config, name, code).then(
                     function (tileInstance) {
                         jive.logger.info("registered instance", tileInstance);
                         instanceLibrary.save(tileInstance).then(function () {
@@ -123,33 +123,6 @@ var doRegistration = function (guid, config, name, res, jiveUrl, pushUrl, code) 
     );
 };
 
-var findCredentials = function(jiveUrl) {
-    var deferred = q.defer();
-    var conf = jive.service.options;
-
-    // default to system credentials
-    var credentials = {
-        'clientId': conf.clientId,
-        'clientSecret': conf.clientSecret
-    };
-
-    if ( !jiveUrl) {
-        // default to service credentials -- cannot look it up by community
-        deferred.resolve( credentials );
-    } else {
-        // try to resolve trust by jiveUrl
-        jive.service.community.findByJiveURL( jiveUrl).then( function(community) {
-            if ( community ) {
-                credentials['clientId'] = community['clientId'];
-                credentials['clientSecret'] = community['clientSecret'];
-            }
-            deferred.resolve( credentials );
-        }) ;
-    }
-
-    return deferred.promise;
-};
-
 exports.registration = function( req, res ) {
     var pushUrl = req.body['url'];
     // xxx todo save remoteTileId along with the tile instance (so it can be unregistered, see above)
@@ -159,8 +132,9 @@ exports.registration = function( req, res ) {
     var name = req.body['name'];
     var code = req.body['code'];
     var jiveUrl = req.body['jiveUrl'];
+    var tenantId = req.body['tenantID'];
 
-    findCredentials(jiveUrl).then( function(credentials) {
+    jive.service.community.getApplicableCredentials(jiveUrl, tenantId).then( function( credentials ) {
         if ( credentials ) {
             var clientId = credentials['clientId'];
             var secret = credentials['clientSecret'];
@@ -172,7 +146,7 @@ exports.registration = function( req, res ) {
                 return;
             }
 
-            doRegistration(guid, config, name, res, jiveUrl, pushUrl, code);
+            doRegistration(guid, config, name, res, jiveUrl, pushUrl, code, tenantId);
         } else {
             // problem!
             res.writeHead(403, { 'Content-Type': 'application/json' });

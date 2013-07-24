@@ -25,6 +25,7 @@
 
 var jive = require('../api');
 var util = require('util');
+var q = require('q');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Private
@@ -60,26 +61,59 @@ var jiveIDEndpointProvider = {
     }
 };
 
-var tilePush = function (method, tileInstance, data, pushURL) {
-    var auth = 'Bearer ' + tileInstance['accessToken'];
-    var reqHeaders = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': auth
-    };
+var accessTokenFor = function( tileInstance ) {
+    var deferred = q.defer();
 
-    return jive.util.buildRequest(pushURL, method, data, reqHeaders);
+    // use tile access token, if its available
+    if ( tileInstance['accessToken'] ) {
+        deferred.resolve( tileInstance['accessToken'] );
+    }
+
+    jive.service.community.findByCommunity(tileInstance['jiveCommunity']).then( function( community ){
+        if ( community ) {
+            if ( community['oauth'] && community['oauth']['accessToken'] ) {
+                deferred.resolve( community['oauth']['accessToken']);
+            } else {
+                deferred.resolve( null );
+            }
+        }
+    });
+
+    return deferred.promise;
+};
+
+var tilePush = function (method, tileInstance, data, pushURL) {
+    return accessTokenFor( tileInstance).then( function(accessToken) {
+        if ( !accessToken ) {
+            throw new Error("No access token resolved");
+        }
+
+        var auth = 'Bearer ' + accessToken;
+        var reqHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': auth
+        };
+
+        return jive.util.buildRequest(pushURL, method, data, reqHeaders);
+    });
 };
 
 var tileFetch = function (tileInstance, fetchURL) {
-    var auth = 'Bearer ' + tileInstance['accessToken'];
-    var reqHeaders = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': auth
-    };
+    return accessTokenFor( tileInstance).then( function(accessToken) {
+        if ( !accessToken ) {
+            throw new Error("No access token resolved");
+        }
 
-    return jive.util.buildRequest(fetchURL, 'GET', null, reqHeaders);
+        var auth = 'Bearer ' + accessToken;
+        var reqHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': auth
+        };
+
+        return jive.util.buildRequest(fetchURL, 'GET', null, reqHeaders);
+    });
 };
 
 exports.tileFetch = tileFetch;
@@ -200,21 +234,29 @@ var extractExternalPropsUrl = function( instance ) {
 
 
 var makeExternalPropsHeader = function(instance ) {
-    var auth = 'Bearer ' + instance['accessToken'];
-    return { 'X-Client-Id': jive.service.options['clientId'], 'Authorization' : auth };
+    return accessTokenFor( instance).then( function(accessToken) {
+        var auth = 'Bearer ' + accessToken;
+        return { 'X-Client-Id': jive.service.options['clientId'], 'Authorization' : auth };
+    } );
 };
 
 exports.fetchExtendedProperties = function( instance ) {
-    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
-        'GET', null, makeExternalPropsHeader(instance) );
+    return makeExternalPropsHeader( instance ).then( function(propsHeader) {
+        return jive.util.buildRequest( extractExternalPropsUrl( instance ),
+            'GET', null,propsHeader );
+    });
 };
 
 exports.pushExtendedProperties = function( instance, props ) {
-    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
-        'POST', props, makeExternalPropsHeader(instance)  );
+    return makeExternalPropsHeader( instance ).then( function(propsHeader) {
+        return jive.util.buildRequest( extractExternalPropsUrl( instance ),
+            'POST', null,propsHeader );
+    });
 };
 
 exports.removeExtendedProperties = function( instance ) {
-    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
-        'DELETE', null, makeExternalPropsHeader(instance) );
+    return makeExternalPropsHeader( instance ).then( function(propsHeader) {
+        return jive.util.buildRequest( extractExternalPropsUrl( instance ),
+            'DELETE', null,propsHeader );
+    });
 };
