@@ -15,7 +15,7 @@
  */
 
 var jiveUtil = require('../util/jiveutil');
-var jive = require('../../../api');
+var jive = require('../../api');
 
 function Scheduler() {
 }
