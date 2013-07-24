@@ -1,7 +1,7 @@
 //sets up jQuery to use XMLHttpRequest for transport and creates the global jQuery object
 require("./jquery-transport"); 
 var core = require("./core");
-var jive = require('.');
+var jive = require('../../api');
 var $ = jQuery;
 
 function queryToDeferred(response, deferred) {

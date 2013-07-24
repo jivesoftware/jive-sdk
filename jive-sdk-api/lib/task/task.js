@@ -21,6 +21,8 @@
 * - Assigned a random string key by default, a different one can be set
 */
 
+var jive = require("../../api");
+
 module.exports = function( _runnable, _interval, _context, _exclusiveLock ) {
 
     if ( !_runnable ) {

@@ -93,7 +93,7 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
                         tasksToAdd.forEach( function(taskToAdd) {
                             taskToAdd.setKey( definitionName  + '.' + theFile + "." + taskToAdd.getInterval() );
                         });
-                        jive.extstreams.definitions.addTasks(jive.scheduler(), tasksToAdd );
+                        jive.extstreams.definitions.addTasks(jive.context.scheduler, tasksToAdd );
                     }
 
                     // event handler

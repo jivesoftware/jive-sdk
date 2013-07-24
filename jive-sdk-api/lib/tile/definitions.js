@@ -105,7 +105,7 @@ exports.addEventHandler = function(definitionName, eventName, handler, descripti
     );
 };
 
-exports.addTasks = function(tasks, scheduler) {
+exports.addTasks = function(scheduler, tasks) {
     // register tasks
     if ( tasks ) {
         if ( tasks['forEach']) {

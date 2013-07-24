@@ -18,11 +18,6 @@
  * This is the main entry point of the api.
  */
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// logging
-var logger = require('log4js').getLogger('jive-sdk');
-logger.setLevel(process.env['jive_logging_level'] || 'INFO');
-exports.logger = logger;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // routes
@@ -50,3 +45,5 @@ exports.oauthUtil = api.oauthUtil;
 exports.coreV3 = api.coreV3;
 exports.community = api.community;
 exports.webhooks = api.webhooks;
+exports.context = api.context;
+exports.logger = api.logger;
