@@ -61,28 +61,36 @@ var eventExecutor = function( handler ) {
             done();
         };
 
-        var promise = handler(context);
-        if ( promise ){
-            promise.then (
-                // success
-                function(result) {
-                    redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
-                        next();
-                    });
-                },
-
-                // error
-                function(err) {
-                    redisClient.set(jobID, JSON.stringify({ 'err' : err }), function() {
-                        next();
-                    });
-                }
-            );
-        } else {
-            // no promise ... we're immediately done
+        var result = handler(context);
+        if ( !result ) {
+            // no result ... we're immediately done
             next();
-        }
+        } else {
+            if ( result['then'] ) {
+                // its a promise
+                var promise = result;
+                promise.then (
+                    // success
+                    function(result) {
+                        redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
+                            next();
+                        });
+                    },
 
+                    // error
+                    function(err) {
+                        redisClient.set(jobID, JSON.stringify({ 'err' : err }), function() {
+                            next();
+                        });
+                    }
+                );
+            } else {
+                // its not a promise - just set the result and be done
+                redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
+                    next();
+                });
+            }
+        }
     };
 };
 
