@@ -77,6 +77,11 @@ Scheduler.prototype.getTasks = function getTasks(){
     return Object.keys(tasks);
 };
 
+Scheduler.prototype.isScheduled = function( eventID ) {
+    // todo
+    return false;
+};
+
 Scheduler.prototype.shutdown = function(){
     var scheduler = this;
     this.getTasks().forEach(function(taskKey){

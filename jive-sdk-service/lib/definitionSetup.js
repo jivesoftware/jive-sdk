@@ -17,7 +17,8 @@
 var fs = require('fs'),
     q  = require('q'),
     path  = require('path'),
-    jive = require('../api');
+    jive = require('../api'),
+    service = require('./api');
 
 var express = require('express');
 var consolidate = require('consolidate');
@@ -59,7 +60,12 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
     q.fcall( function() {
         // add base events
         jive.events.baseEvents.forEach( function( handlerInfo ) {
-            jive.extstreams.definitions.addEventHandler( definitionName, handlerInfo['event'], handlerInfo['handler'], handlerInfo['description'] );
+            jive.events.addDefinitionEventListener(
+                handlerInfo['event'],
+                definitionName,
+                handlerInfo['handler'],
+                handlerInfo['description']
+            );
         });
     }).then( function() {
             return recursiveDirectoryProcessor( null, definitionName, svcDir, svcDir,
@@ -68,22 +74,44 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
                     var taskPath = theDirectory + '/' + theFile;
                     var target = require(taskPath);
 
-                    // event handler
-                    if ( target.eventHandlers ) {
-                        target.eventHandlers.forEach( function( handlerInfo ) {
-                            jive.extstreams.definitions.addEventHandler(
-                                definitionName,
-                                handlerInfo['event'],
-                                handlerInfo['handler'],
-                                handlerInfo['description'] || 'Unique to definition' );
-                            if (handlerInfo['interval']) {
-                                var context = undefined;
-                                jive.context.scheduler.schedule(handlerInfo['event'], context, handlerInfo['interval']);
-                            }
+                    // recurrent tasks
+                    // these are scheduled only if they haven't yet been scheduled by some other node
+                    var tasks = target.task ;
+                    if ( tasks ) {
+                        var tasksToAdd = [];
+                        if ( tasks['forEach'] ) {
+                            tasks.forEach( function(t) { tasksToAdd.push(t); });
+                        } else {
+                            tasksToAdd.push( tasks );
+                        }
+
+                        // enforce a standard event ID - unique to the tile that supplied it
+                        tasksToAdd.forEach( function(taskToAdd) {
+                            var eventID = taskToAdd['eventID'] + '.' + definitionName;
+                            service.scheduler().isScheduled(eventID).then( function(scheduled){
+                                if (!scheduled) {
+                                    service.scheduler().schedule( eventID, taskToAdd['context'], taskToAdd['interval'] );
+                                } else {
+                                    jive.logger.debug("Skipping schedule of " + eventID );
+                                }
+                            });
                         });
                     }
 
-                    // definitionjson
+                    // event handlers
+                    // these get contributed to workers listening on kue
+                    if ( target.eventHandlers ) {
+                        target.eventHandlers.forEach( function( handlerInfo ) {
+                            jive.events.addDefinitionEventListener(
+                                handlerInfo['event'],
+                                definitionName,
+                                handlerInfo['handler'],
+                                handlerInfo['description'] || 'Unique to definition'
+                            );
+                        });
+                    }
+
+                    // definition json
                     if ( target.definitionJSON ) {
                         var definition = target.definitionJSON;
                         definition.id = definition.id === '{{{definition_id}}}' ? null : definition.id;

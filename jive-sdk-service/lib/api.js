@@ -327,3 +327,18 @@ exports.routes = {
     'jive' : require('../routes/jive'),
     'dev' : require('../routes/dev')
 };
+
+/**
+ * Interrogate the role of this node
+ */
+exports.role = {
+    'isWorker' : function() {
+        return exports.options['role'] === 'worker';
+    },
+    'isPusher' : function() {
+        return exports.options['role'] === 'pusher';
+    },
+    'isHttp' : function() {
+        return exports.options['role'] === 'http';
+    }
+};

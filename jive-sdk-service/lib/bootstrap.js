@@ -33,12 +33,6 @@ var validateServiceOptions = function (options) {
     }
 
     var errors = [];
-    if ( !options['clientId'] ) {
-        errors.push('Setup parameter clientID is required. Please acquire this from Jive Software.');
-    }
-    if ( !options['clientSecret'] ) {
-        errors.push('Setup parameter clientSecret is required. Please acquire this from Jive Software.');
-    }
     if ( !options['clientUrl'] ) {
         errors.push('Setup parameter clientUrl is required');
     }
@@ -111,8 +105,50 @@ var setupExpressApp = function (app, rootDir, config) {
     return q.all( [ p1, p2 ] );
 };
 
+var setupWorker = function() {
+    var deferred = q.defer();
+
+    if ( service.role.isWorker() ) {
+        var worker = require('../workers/worker');
+        worker.init( jive.events.eventHandlerMap );
+        deferred.resolve();
+    } else {
+        deferred.resolve();
+    }
+
+    deferred.resolve();
+
+    return deferred.promise;
+};
+
+var setupHttp = function(app, rootDir, options) {
+    var deferred = q.defer();
+
+    if ( service.role.isHttp() ) {
+        setupExpressApp(app, rootDir, options).then( function() {
+            jive.logger.info("Http node setup");
+            deferred.resolve();
+        });
+    } else {
+        deferred.resolve();
+    }
+
+    return deferred.promise;
+};
+
+var setupPusher = function() {
+    var deferred = q.defer();
+    if ( service.role.isPusher() ) {
+        // do pusher setup here
+        deferred.resolve();
+    } else {
+        deferred.resolve();
+    }
+
+    return deferred.promise;
+};
+
 /**
- * TODO send app to multiple HTTP nodes (number of nodes in config)
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
  */
@@ -129,7 +165,11 @@ exports.start = function( app, options, rootDir, tilesDir ) {
     alreadyBootstrapped = true;
 
     validateServiceOptions(options);
-    return setupExpressApp(app, rootDir, options).then( function() {
-        jive.logger.info("Bootstrap complete.");
-    });
+
+    return setupWorker()
+        .then( function() { return setupPusher() } )
+        .then( function() { return setupHttp(app, rootDir, options) })
+        .then( function() {
+            jive.logger.info("Bootstrap complete.");
+        });
 };

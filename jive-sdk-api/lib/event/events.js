@@ -20,11 +20,16 @@ pusher = require('../tile/dataPusher.js');
 
 exports = module.exports = new events.EventEmitter();
 
+exports.eventHandlerMap = {};
+
 exports.addDefinitionEventListener = function( event, definitionName, handler, description ) {
     var eventID = event + "." + definitionName;
     jive.logger.debug("Registered event for", definitionName,": '" + event + "' ", description ||'' );
     exports.addListener( eventID, handler );
+
+    exports.eventHandlerMap[eventID] = handler;
 };
+
 
 /**
  * This is an array of events which will be applied to every autowired tile
