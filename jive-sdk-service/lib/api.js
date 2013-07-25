@@ -166,8 +166,6 @@ exports.init = function(_app, options ) {
             var jiveConfig = JSON.parse(data);
             exports.options = jiveConfig;
             jive.context.config = exports.options;
-            if (jiveConfig.persistence) jive.context.persistence = jiveConfig.persistence;
-            if (jiveConfig.scheduler) jive.context.scheduler = jiveConfig.scheduler;
 
             jive.logger.debug('Startup configuration from', options);
             jive.logger.debug(jiveConfig);

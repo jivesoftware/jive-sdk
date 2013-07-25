@@ -22,15 +22,11 @@ var jobs;
 var tasks = {};
 
 var taskExecutors = {};
-var jobQueueName = "_defaultJobQueue";
 
 function Scheduler(_jobQueueName) {
     jobs = kue.createQueue();
     jobs.promote();
-    if ( _jobQueueName ) {
-        jobQueueName = _jobQueueName;
-    }
-    console.log("Redis Scheduler Initialized for queue", jobQueueName);
+    console.log("Redis Scheduler Initialized for queue");
 }
 
 module.exports = Scheduler;
@@ -42,35 +38,28 @@ module.exports = Scheduler;
  * @param interval optional, time until this event should be fired again
  */
 Scheduler.prototype.schedule = function schedule(eventID, context, interval){
-    //generate a key for this job
-    var key = jive.util.guid();
-    //////////////////////////////////////////////////////////////////////////////
-    // scheduling
-    //////////////////////////////////////////////////////////////////////////////
-
-    var executionWrapper =  function(key, interval) {
+    var executionWrapper =  function(interval) {
         var meta = {};
-        meta['jobID'] = key;
         meta['eventID'] = eventID;
         meta['context'] = context;
         if (interval) {
             meta['interval'] = interval;
         }
-        jobs.create(jobQueueName, meta).save();
+        jobs.create("dataPush", meta).save();
     };
 
     // schedule recurrent task
     if ( interval ) {
         //put into queue, setting interval metadata
-        executionWrapper(key, interval);
+        executionWrapper(interval);
     } else {
         // schedule for execution once
-        executionWrapper(key);
+        executionWrapper();
     }
 
-    jive.logger.debug("Scheduled task: " + key, interval);
+    jive.logger.debug("Scheduled task: " + eventID, interval);
 
-    return key;
+    return eventID;
 };
 
 Scheduler.prototype.unschedule = function unschedule(key){

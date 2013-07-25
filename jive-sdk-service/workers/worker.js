@@ -21,7 +21,7 @@ var jobs = kue.createQueue();
 
 jobs.promote();
 
-jobs.process('datapush', function(job, done) {
+jobs.process('dataPush', function(job, done) {
     //run task
     var tile = job.data;
 
