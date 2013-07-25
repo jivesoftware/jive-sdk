@@ -14,14 +14,9 @@
  *    limitations under the License.
  */
 
-kue = require('kue');
-jive = require('../api');
+var jive = require('jive-sdk');
 
-jobs = kue.createQueue();
-
-jobs.process('push', function(job, done) {
-    var tileInstance = job.data.tileInstance;
-    var data = job.data.data;
-    jive.events.emit('pushToJive', tileInstance, data);
-    done();
-});
+exports.route = function(req, res) {
+    var conf = jive.service.options;
+    res.render('configuration.html', { host: conf.clientUrl + ':' + conf.port });
+};

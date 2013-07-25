@@ -14,14 +14,11 @@
  *    limitations under the License.
  */
 
-kue = require('kue');
-jive = require('../api');
+var jive = require('jive-sdk');
+var util = require('util');
 
-jobs = kue.createQueue();
-
-jobs.process('push', function(job, done) {
-    var tileInstance = job.data.tileInstance;
-    var data = job.data.data;
-    jive.events.emit('pushToJive', tileInstance, data);
-    done();
-});
+exports.route = function(req, res) {
+    var conf = jive.service.options;
+//    console.log("req", util.inspect(req));
+    res.render('action.html', { jira_host: conf.jiraHost,  host: conf.clientUrl + ':' + conf.port });
+};

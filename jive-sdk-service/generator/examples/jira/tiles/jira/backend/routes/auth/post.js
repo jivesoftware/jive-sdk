@@ -14,14 +14,22 @@
  *    limitations under the License.
  */
 
-kue = require('kue');
-jive = require('../api');
+var jive = require('jive-sdk');
+var util = require('util');
+var request = require('request');
 
-jobs = kue.createQueue();
-
-jobs.process('push', function(job, done) {
-    var tileInstance = job.data.tileInstance;
-    var data = job.data.data;
-    jive.events.emit('pushToJive', tileInstance, data);
-    done();
-});
+exports.route = function(req, res) {
+    var authStore = jive.service.persistence();
+    var body = req.body;
+    authStore.save('auth', body.viewer, {
+        viewer: body.viewer,
+        user:body.user,
+        pass:body.pass
+    }).then(function(response) {
+        res.send({
+            "written":true,
+            "user":response.user,
+            "pass":response.pass
+        }, 200);
+    });
+};

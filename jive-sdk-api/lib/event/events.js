@@ -16,6 +16,7 @@
 
 var events = require('events');
 var jive = require('../../api');
+pusher = require('../tile/dataPusher.js');
 
 exports = module.exports = new events.EventEmitter();
 
@@ -76,5 +77,11 @@ exports.baseEvents = [
             jive.logger.info('Comment push to', theInstance.url, response? response.statusCode : '', theInstance.name);
         },
         'description' : 'Framework handler'
+    },
+    {
+        'event':'pushToJive',
+        'handler':function(tileInstance, data) {
+            pusher.pushData(tileInstance, data);
+        }
     }
 ];

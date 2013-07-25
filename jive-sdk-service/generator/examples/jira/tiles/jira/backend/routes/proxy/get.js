@@ -14,14 +14,27 @@
  *    limitations under the License.
  */
 
-kue = require('kue');
-jive = require('../api');
+var jive = require('jive-sdk');
+var util = require('util');
+var request = require('request');
 
-jobs = kue.createQueue();
+exports.route = function(req, res) {
+    console.log("query:"+JSON.stringify(req.query));
+    request({
+        'uri':req.query.url,
+        'auth': {
+            'user':req.query.user,
+            'pass':req.query.pass
+        }
+    }, function(err, resp, body) {
+        if (err) {
+            console.log("error proxying request:", req.query.url, JSON.stringify(err));
+            console.log(body);
+        }
+        else {
+            console.log("returning",body);
+            res.send(body,200);
+        }
+    });
 
-jobs.process('push', function(job, done) {
-    var tileInstance = job.data.tileInstance;
-    var data = job.data.data;
-    jive.events.emit('pushToJive', tileInstance, data);
-    done();
-});
+};
