@@ -60,39 +60,40 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
     q.fcall( function() {
         // add base events
         jive.events.baseEvents.forEach( function( handlerInfo ) {
-            jive.events.addDefinitionEventListener(
+            jive.events.addSystemEventListener(
                 handlerInfo['event'],
-                definitionName,
                 handlerInfo['handler'],
                 handlerInfo['description']
             );
         });
-    }).then( function() {
+    }).then(function() {
             return recursiveDirectoryProcessor( null, definitionName, svcDir, svcDir,
                 function(app, definitionName, theFile, theDirectory) {
-
                     var taskPath = theDirectory + '/' + theFile;
                     var target = require(taskPath);
 
                     // recurrent tasks
                     // these are scheduled only if they haven't yet been scheduled by some other node
-                    var tasks = target.task ;
-                    if ( tasks ) {
+                    var tasks = target.task;
+                    if (tasks) {
                         var tasksToAdd = [];
-                        if ( tasks['forEach'] ) {
-                            tasks.forEach( function(t) { tasksToAdd.push(t); });
+                        if (tasks['forEach']) {
+                            tasks.forEach(function(t) {
+                                tasksToAdd.push(t);
+                            });
                         } else {
-                            tasksToAdd.push( tasks );
+                            tasksToAdd.push(tasks);
                         }
-
                         // enforce a standard event ID - unique to the tile that supplied it
-                        tasksToAdd.forEach( function(taskToAdd) {
-                            var eventID = taskToAdd['eventID'] + '.' + definitionName;
-                            service.scheduler().isScheduled(eventID).then( function(scheduled){
+                        tasksToAdd.forEach(function(taskToAdd) {
+                            var eventID = taskToAdd['eventID'];
+                            taskToAdd.context['eventID'] = eventID;
+                            taskToAdd.context['tileName'] = definitionName;
+                            service.scheduler().isScheduled(eventID).then(function(scheduled){
                                 if (!scheduled) {
-                                    service.scheduler().schedule( eventID, taskToAdd['context'], taskToAdd['interval'] );
+                                    service.scheduler().schedule('work', taskToAdd['context'], taskToAdd['interval']);
                                 } else {
-                                    jive.logger.debug("Skipping schedule of " + eventID );
+                                    jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
                                 }
                             });
                         });
@@ -124,7 +125,7 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
                     return legalServiceFileExtensions.indexOf(path.extname( currentFsItem ) ) > -1;
                 }
             );
-    } )
+    });
 };
 
 var recursiveDirectoryProcessor = function(app, definitionName, currentFsItem, root, processorFunction, filterFunction ) {

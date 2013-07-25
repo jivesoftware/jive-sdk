@@ -26,86 +26,93 @@ var jive = require('../api');
 
 var redisClient;
 var jobs;
+var eventHandlers;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // helpers
 
 /**
- * Create a closure around the handler
+ * run the job we took off the work queue
  * @param handler
  * @return {Function}
  */
-var eventExecutor = function( handler ) {
+function eventExecutor(job, done) {
+    var meta = job.data;
+    var context = meta['context'];
+    var jobID = meta['jobID'];
+    var interval = job.data.interval;
+    var eventID = meta['eventID'];
+    var tileName = context['tileName'];
 
-    return function( job, done ) {
-        var meta = job.data;
-        var context = meta['context'];
-        var jobID = meta['jobID'];
-        var interval = job.data.interval;
-        var eventID = meta['eventID'];
-
-        var next = function() {
-            if ( !interval ) {
-                done();
-                return;
-            }
-
-            // schedule new task if recurrent job, and is not already scheduled
-            jive.service.scheduler().isScheduled(eventID).then( function (scheduled ) {
-                if ( !scheduled ) {
-                    // schedule a recurrent task
-                    jobs.create(eventID, meta).delay(interval).save();
-                }
-            });
-
+    var next = function() {
+        if (!interval) {
             done();
-        };
+            return;
+        }
 
-        var result = handler(context);
-        if ( !result ) {
-            // no result ... we're immediately done
-            next();
-        } else {
-            if ( result['then'] ) {
-                // its a promise
-                var promise = result;
-                promise.then (
-                    // success
-                    function(result) {
+        // schedule new task if recurrent job, and is not already scheduled
+        jive.service.scheduler().isScheduled(eventID).then( function (scheduled ) {
+            if ( !scheduled ) {
+                // schedule a recurrent task
+                jobs.create('work', meta).delay(interval).save();
+            }
+        });
+
+        done();
+    };
+
+    var handler;
+    if (tileName) {
+        handler = eventHandlers[tileName][eventID];
+    }
+    else {
+        handler = eventHandlers[eventID];
+    }
+
+    var result = handler(context);
+    if ( !result ) {
+        // no result ... we're immediately done
+        next();
+    } else {
+        if ( result['then'] ) {
+            // its a promise
+            var promise = result;
+            promise.then(
+                // success
+                function(result) {
+                    if (result) {
                         redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
                             next();
                         });
-                    },
-
-                    // error
-                    function(err) {
-                        redisClient.set(jobID, JSON.stringify({ 'err' : err }), function() {
-                            next();
-                        });
                     }
-                );
-            } else {
-                // its not a promise - just set the result and be done
-                redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
-                    next();
-                });
-            }
+                    else {
+                        next();
+                    }
+                },
+                // error
+                function(err) {
+                    redisClient.set(jobID, JSON.stringify({ 'err' : err }), function() {
+                        next();
+                    });
+                }
+            );
+        } else {
+            // its not a promise - save the result
+            redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
+                next();
+            });
         }
-    };
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
-exports.init = function( eventHandlers ) {
+exports.init = function(handlers) {
     redisClient = require('redis').createClient();
     jobs = kue.createQueue();
     jobs.promote();
 
-    for (var eventID in eventHandlers) {
-        if ( eventHandlers.hasOwnProperty(eventID) ) {
-            var eventHandler = eventHandlers[eventID];
-            jobs.process( eventID, eventExecutor( eventHandler ) );
-        }
-    }
+    eventHandlers = handlers;
+    jobs.process('work', eventExecutor);
 };

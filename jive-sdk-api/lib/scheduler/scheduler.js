@@ -26,50 +26,33 @@ var tasks = {};
 
 /**
  * Schedule a task.
- * @param key String with which you'll identify this task later
+ * @param eventID which event to fire
+ * @param context what to pass to the event
  * @param interval The interval to invoke the callback
- * @param cb The callback
  */
-Scheduler.prototype.schedule = function schedule(task, key, interval, context){
-    if  (!task) {
-        return;
+Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
+    var handler
+    if (context['tileName']) {
+        handler = jive.events.eventHandlerMap[context['tileName']][eventID];
     }
-
-    var cb = typeof task === 'function' ? task : undefined;
-    if ( task.getRunnable ) {
-        cb = task.getRunnable();
+    else {
+        handler = jive.events.eventHandlerMap[eventID];
     }
-
-    if ( !cb ) {
-        return;
+    if (interval) {
+        tasks[eventID] = setInterval(function() {
+            handler(context)
+        }, interval);
     }
-
-    if ( task.getInterval ) {
-        interval = task.getInterval();
+    else {
+        handler(context);
     }
-
-    if ( task.getKey ) {
-        key = task.getKey();
-    }
-
-    if ( !key ) {
-        key = jiveUtil.guid();
-    }
-
-    if ( !interval ) {
-        interval = 15000;
-    }
-
-    this.unschedule(key);
-    tasks[key] = setInterval( function() { cb(context) }, interval);
-    jive.logger.debug("Scheduled task: " + key, interval);
-    return key;
+    jive.logger.debug("Scheduled task: " + eventID, interval);
 };
 
-Scheduler.prototype.unschedule = function unschedule(key){
-    if(tasks[key]){
-        clearInterval(tasks[key]);
-        delete tasks[key];
+Scheduler.prototype.unschedule = function unschedule(eventID){
+    if(scheduler.isScheduled(eventID)) {
+        clearInterval(tasks[eventID]);
+        delete tasks[eventID];
     }
 };
 
@@ -78,7 +61,9 @@ Scheduler.prototype.getTasks = function getTasks(){
 };
 
 Scheduler.prototype.isScheduled = function( eventID ) {
-    // todo
+    if (tasks[eventID]) {
+        return true;
+    }
     return false;
 };
 

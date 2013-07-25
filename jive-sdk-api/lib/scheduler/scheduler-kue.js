@@ -20,8 +20,9 @@ var express = require('express');
 var q = require('q');
 
 var jobs;
-var tasks = {};
 var redisClient;
+
+jobQueueName = 'work';
 
 function Scheduler() {
     redisClient = require('redis').createClient();
@@ -48,91 +49,78 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
         deferred = q.defer();
     }
 
-    var executionWrapper =  function(interval) {
-        var meta = {};
+    var meta = {};
 
-        var jobID = jive.util.guid();
-        meta['jobID'] = jobID;
-        meta['eventID'] = eventID;
-        meta['context'] = context;
-        if (interval) {
-            meta['interval'] = interval;
+    var jobID = jive.util.guid();
+    meta['jobID'] = jobID;
+    meta['eventID'] = eventID;
+    meta['context'] = context;
+    if (interval) {
+        meta['interval'] = interval;
+    }
+    jobs.create(jobQueueName, meta).on('complete', function() {
+        if ( !deferred ) {
+            // we're done if there is no promise to fulfill (e.g. tile pushes)
+            return;
         }
-        jobs.create(eventID, meta).save().on('complete', function() {
-            if ( !deferred ) {
-                // we're done if there is no promise to fulfill
-                return;
-            }
 
-            // there is a promise to fulfill:
-            // once the job is done, retrieve any results that were cached on redis by some worker
-            // then resolve or reject the promise accordingly.
-            // todo: destroy result stored under jobID in redis
-            // so we don't hold onto old results ... maybe this is a reaper task? or we
-            // do it inline here?
+        // there is a promise to fulfill:
+        // once the job is done, retrieve any results that were cached on redis by some worker
+        // then resolve or reject the promise accordingly.
+        // todo: destroy result stored under jobID in redis
+        // so we don't hold onto old results ... maybe this is a reaper task? or we
+        // do it inline here?
 
-            redisClient.get(jobID, function(err, jobResult) {
-                if ( !err ) {
-                    deferred.resolve( jobResult ? JSON.parse(jobResult)['result'] : null );
+        redisClient.get(jobID, function(err, jobResult) {
+            if ( !err ) {
+                deferred.resolve( jobResult ? JSON.parse(jobResult)['result'] : null );
+            } else {
+                if ( !jobResult ) {
+                    deferred.resolve();
                 } else {
-                    if ( !jobResult ) {
-                        deferred.resolve();
+                    var parsed = JSON.parse(jobResult);
+                    if ( parsed['err'] ) {
+                        deferred.reject(  parsed['err'] );
                     } else {
-                        var parsed = JSON.parse(jobResult);
-                        if ( parsed['err'] ) {
-                            deferred.reject(  parsed['err'] );
-                        } else {
-                            deferred.resolve( parsed['result']);
-                        }
+                        deferred.resolve( parsed['result']);
                     }
                 }
-            });
+            }
         });
-    };
-
-    // schedule recurrent task
-    if ( interval ) {
-        //put into queue, setting interval metadata
-        executionWrapper(interval);
-    } else {
-        // schedule for execution once
-        executionWrapper();
-    }
+    }).save();
 
     jive.logger.debug("Scheduled task: " + eventID, interval || '(no interval)');
 
-    if ( deferred ){
+    if (deferred) {
         return deferred.promise;
     }
 };
 
-Scheduler.prototype.unschedule = function unschedule(key){
-
+Scheduler.prototype.unschedule = function unschedule(job){
+    job.remove();
 };
 
-Scheduler.prototype.isScheduled = function( eventID ) {
+Scheduler.prototype.isScheduled = function(eventID) {
     var deferred = q.defer();
-
-    kue.Job.rangeByType (eventID, 'delayed', 0, 10, 'asc', function (err, selectedJobs) {
-        if ( selectedJobs.length > 0 ) {
+    scheduler.getTasks().forEach(function(job) {
+        if (job.data['eventID'] == eventID) {
             deferred.resolve(true);
-        } else {
-            kue.Job.rangeByType (eventID, 'inactive', 0, 10, 'asc', function (err, selectedJobs) {
-                deferred.resolve( selectedJobs.length > 0 );
-            });
         }
     });
-
     return deferred.promise;
 };
 
 Scheduler.prototype.getTasks = function getTasks(){
-    return Object.keys(tasks);
+    kue.Job.rangeByType(jobQueueName, 'delayed', 0, 10, 'asc', function (err, delayedJobs) {
+        kue.Job.rangeByType(jobQueueName, 'inactive', 0, 10, 'asc', function (err, inactiveJobs) {
+            return delayedJobs.concat(inactiveJobs);
+        });
+    });
 };
 
 Scheduler.prototype.shutdown = function(){
     var scheduler = this;
-    this.getTasks().forEach(function(taskKey){
-        scheduler.unschedule(taskKey);
+    this.getTasks().forEach(function(job){
+        scheduler.unschedule(job);
     });
 };

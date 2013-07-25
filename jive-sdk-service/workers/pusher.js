@@ -17,11 +17,18 @@
 kue = require('kue');
 jive = require('../api');
 
-jobs = kue.createQueue();
+var jobs;
+var eventHandlers;
 
-jobs.process('push', function(job, done) {
+function process(job, done) {
     var tileInstance = job.data.tileInstance;
     var data = job.data.data;
-    jive.events.emit('pushToJive', tileInstance, data);
+    eventHandlers['pushToJive'](tileInstance, data);
     done();
-});
+}
+
+exports.init = function(handlers) {
+    jobs = kue.createQueue();
+    eventHandlers = handlers;
+    jobs.process('pushToJive', process);
+}
