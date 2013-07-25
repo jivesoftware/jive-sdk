@@ -44,7 +44,7 @@ module.exports = Scheduler;
 Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
     var deferred;
 
-    if ( interval ) {
+    if ( !interval ) {
         deferred = q.defer();
     }
 
@@ -73,15 +73,16 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
 
             redisClient.get(jobID, function(err, jobResult) {
                 if ( !err ) {
-                    deferred.resolve( jobResult ? jobResult['result'] : null );
+                    deferred.resolve( jobResult ? JSON.parse(jobResult)['result'] : null );
                 } else {
                     if ( !jobResult ) {
                         deferred.resolve();
                     } else {
-                        if ( jobResult['err'] ) {
-                            deferred.reject(  jobResult['err'] );
+                        var parsed = JSON.parse(jobResult);
+                        if ( parsed['err'] ) {
+                            deferred.reject(  parsed['err'] );
                         } else {
-                            deferred.resolve( jobResult['result']);
+                            deferred.resolve( parsed['result']);
                         }
                     }
                 }
