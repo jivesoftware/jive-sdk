@@ -19,10 +19,10 @@ var jive = require('../../api');
 
 exports = module.exports = new events.EventEmitter();
 
-    exports.addDefinitionEventListener = function( event, definitionName, listener, description ) {
+exports.addDefinitionEventListener = function( event, definitionName, handler, description ) {
     var eventID = event + "." + definitionName;
     jive.logger.debug("Registered event for", definitionName,": '" + event + "' ", description ||'' );
-    exports.addListener( eventID, listener );
+    exports.addListener( eventID, handler );
 };
 
 /**
@@ -78,4 +78,3 @@ exports.baseEvents = [
         'description' : 'Framework handler'
     }
 ];
-

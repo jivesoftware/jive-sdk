@@ -14,8 +14,24 @@
  *    limitations under the License.
  */
 
-var task = require('./task');
+kue = require('kue');
+jive = require('../api');
 
-exports.build = function( runnable, interval, context) {
-    return new task(runnable, interval, context);
-};
+var jobs = kue.createQueue();
+
+jobs.promote();
+
+jobs.process('datapush', function(job, done) {
+    //run task
+    var tile = job.data;
+
+    //part of exec involved calling jive.tiles.pushData(), which will put formatted data into the push queue
+    jive.events.emit(job.data.eventID, job.data.context);
+
+    //schedule new task
+    var interval = job.data.interval;
+    if (interval) {
+        jobs.create('datapush', job.data).delay(interval).save();
+    }
+    done();
+});

@@ -100,6 +100,8 @@ exports.scheduler = function( _scheduler ) {
         scheduler = new jive.scheduler.memory();
     }
 
+    jive.context.scheduler = scheduler;
+
     return scheduler;
 };
 
@@ -109,7 +111,12 @@ exports.scheduler = function( _scheduler ) {
  * @param definitionsToAutowire optional arraylist of tile names under [app root]/tiles to autowire
  */
 exports.init = function(_app, options ) {
-    app = _app;
+    if (_app) {
+        app = _app;
+    }
+    else {
+        app = express();
+    }
     rootDir =  rootDir || process.cwd();
     tilesDir = rootDir + '/tiles';
 
@@ -159,6 +166,8 @@ exports.init = function(_app, options ) {
             var jiveConfig = JSON.parse(data);
             exports.options = jiveConfig;
             jive.context.config = exports.options;
+            if (jiveConfig.persistence) jive.context.persistence = jiveConfig.persistence;
+            if (jiveConfig.scheduler) jive.context.scheduler = jiveConfig.scheduler;
 
             jive.logger.debug('Startup configuration from', options);
             jive.logger.debug(jiveConfig);

@@ -13,28 +13,3 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-/**
- * Library for manipulating tile instances.
- */
-
-var q = require('q');
-var util = require('util');
-var jive = require('../../api');
-var instances = require('./instances');
-//var pusher = require('./dataPusher');
-
-var tiles = Object.create(instances);
-module.exports = tiles;
-
-tiles.getCollection = function() {
-    return "tileInstance";
-};
-
-tiles.pushData = function (tileInstance, data) {
-    var task = jive.tasks.build(function() {
-        pusher.pushData(tileInstance, data);
-    });
-//    return pusher.pushData(tileInstance, data);
-};
-

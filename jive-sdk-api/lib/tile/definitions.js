@@ -100,22 +100,5 @@ exports.remove = function (tileDefinitionID) {
  */
 exports.addEventHandler = function(definitionName, eventName, handler, description) {
     // register event listeners
-    jive.events.addDefinitionEventListener(
-        eventName, definitionName, handler, description
-    );
-};
-
-exports.addTasks = function(scheduler, tasks) {
-    // register tasks
-    if ( tasks ) {
-        if ( tasks['forEach']) {
-            var keys = [];
-            tasks.forEach( function( task ) {
-                keys.push( scheduler.schedule(task) );
-            });
-            return keys;
-        } else {
-            return scheduler.schedule(tasks);
-        }
-    }
+    jive.events.addDefinitionEventListener(eventName, definitionName, handler, description);
 };

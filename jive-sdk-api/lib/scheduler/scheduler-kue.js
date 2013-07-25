@@ -15,10 +15,8 @@
  */
 
 var jive = require('../../api');
-var jiveUtil = jive.util;
 var kue = require('kue');
 var express = require('express');
-var redis = require('redis').createClient();
 
 var jobs;
 var tasks = {};
@@ -28,6 +26,7 @@ var jobQueueName = "_defaultJobQueue";
 
 function Scheduler(_jobQueueName) {
     jobs = kue.createQueue();
+    jobs.promote();
     if ( _jobQueueName ) {
         jobQueueName = _jobQueueName;
     }
@@ -38,39 +37,13 @@ module.exports = Scheduler;
 
 /**
  * Schedule a task.
- * @param task the task we're scheduling.
- * @param key String with which you'll identify this task later
- * @param interval The interval to invoke the callback
- * @param cb The callback
+ * @param eventID the named event to fire to perform this task
+ * @param context arguments to provide to the event handler
+ * @param interval optional, time until this event should be fired again
  */
-Scheduler.prototype.schedule = function schedule(task, key, interval, context){
-    if  (!task) {
-        return;
-    }
-
-    var cb = typeof task === 'function' ? task : undefined;
-    if ( task.getRunnable ) {
-        cb = task.getRunnable();
-    }
-
-    if ( !cb ) {
-        return;
-    }
-
-    if ( task.getInterval ) {
-        interval = task.getInterval();
-    }
-
-    if ( task.getKey ) {
-        key = task.getKey();
-    }
-
-    if ( !key ) {
-        key = jiveUtil.guid();
-    }
-
-    this.unschedule(key);
-
+Scheduler.prototype.schedule = function schedule(eventID, context, interval){
+    //generate a key for this job
+    var key = jive.util.guid();
     //////////////////////////////////////////////////////////////////////////////
     // scheduling
     //////////////////////////////////////////////////////////////////////////////
@@ -78,7 +51,8 @@ Scheduler.prototype.schedule = function schedule(task, key, interval, context){
     var executionWrapper =  function(key, interval) {
         var meta = {};
         meta['jobID'] = key;
-        meta['context'] = task.getContext();
+        meta['eventID'] = eventID;
+        meta['context'] = context;
         if (interval) {
             meta['interval'] = interval;
         }

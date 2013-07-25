@@ -14,27 +14,14 @@
  *    limitations under the License.
  */
 
-/**
- * Library for manipulating tile instances.
- */
+kue = require('kue');
+pusher = require('../../jive-sdk-api/lib/tile/dataPusher.js');
 
-var q = require('q');
-var util = require('util');
-var jive = require('../../api');
-var instances = require('./instances');
-//var pusher = require('./dataPusher');
+jobs = kue.createQueue();
 
-var tiles = Object.create(instances);
-module.exports = tiles;
-
-tiles.getCollection = function() {
-    return "tileInstance";
-};
-
-tiles.pushData = function (tileInstance, data) {
-    var task = jive.tasks.build(function() {
-        pusher.pushData(tileInstance, data);
-    });
-//    return pusher.pushData(tileInstance, data);
-};
-
+jobs.process('push', function(job, done) {
+    var tileInstance = job.data.tileInstance;
+    var data = job.data.data;
+    pusher.pushData(tileInstance, data);
+    done();
+});

@@ -112,7 +112,7 @@ var setupExpressApp = function (app, rootDir, config) {
 };
 
 /**
- *
+ * TODO send app to multiple HTTP nodes (number of nodes in config)
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
  */
