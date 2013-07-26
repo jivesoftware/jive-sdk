@@ -87,11 +87,14 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
                         // enforce a standard event ID - unique to the tile that supplied it
                         tasksToAdd.forEach(function(taskToAdd) {
                             var eventID = taskToAdd['eventID'];
+                            if ( !taskToAdd['context'] ) {
+                                taskToAdd['context'] = {};
+                            }
                             taskToAdd.context['eventID'] = eventID;
                             taskToAdd.context['tileName'] = definitionName;
                             service.scheduler().isScheduled(eventID).then(function(scheduled){
                                 if (!scheduled) {
-                                    service.scheduler().schedule('work', taskToAdd['context'], taskToAdd['interval']);
+                                    service.scheduler().schedule(eventID, taskToAdd['context'], taskToAdd['interval']);
                                 } else {
                                     jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
                                 }

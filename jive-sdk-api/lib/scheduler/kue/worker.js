@@ -22,11 +22,12 @@
  */
 
 var kue = require('kue');
-var jive = require('../api');
+var jive = require('../../../api');  // !! xxx todo is there an alternative to this????
 
 var redisClient;
 var jobs;
 var eventHandlers;
+var queueName;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // helpers
@@ -51,10 +52,10 @@ function eventExecutor(job, done) {
         }
 
         // schedule new task if recurrent job, and is not already scheduled
-        jive.service.scheduler().isScheduled(eventID).then( function (scheduled ) {
+        jive.context.scheduler.isScheduled(eventID).then( function (scheduled ) {
             if ( !scheduled ) {
                 // schedule a recurrent task
-                jobs.create('work', meta).delay(interval).save();
+                jobs.create(queueName, meta).delay(interval).save();
             }
         });
 
@@ -67,6 +68,13 @@ function eventExecutor(job, done) {
     }
     else {
         handler = eventHandlers[eventID];
+    }
+
+    if ( !handler ) {
+        // could find no handler for the eventID
+        // we're done
+        done();
+        return;
     }
 
     var result = handler(context);
@@ -108,11 +116,12 @@ function eventExecutor(job, done) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
-exports.init = function(handlers) {
+exports.init = function(_queueName, handlers) {
+    queueName = _queueName;
     redisClient = require('redis').createClient();
     jobs = kue.createQueue();
     jobs.promote();
 
     eventHandlers = handlers;
-    jobs.process('work', eventExecutor);
+    jobs.process(queueName, eventExecutor);
 };

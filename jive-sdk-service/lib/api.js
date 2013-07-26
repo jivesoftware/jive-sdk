@@ -91,7 +91,7 @@ exports.scheduler = function( _scheduler ) {
 
     if ( _scheduler ) {
         if ( !_scheduler['schedule'] || !_scheduler['unschedule'] || !_scheduler['getTasks'] ) {
-            throw 'Unsupported scheduler strategy - must implement schedule, unschedule, save getTasks.';
+            throw 'Unsupported scheduler strategy - must implement schedule, unschedule, isScheduled, getTasks.';
         }
         scheduler = _scheduler;
     }
@@ -333,12 +333,12 @@ exports.routes = {
  */
 exports.role = {
     'isWorker' : function() {
-        return exports.options['role'] === 'worker';
+        return !exports.options['role'] || exports.options['role'] === 'worker';
     },
     'isPusher' : function() {
-        return exports.options['role'] === 'pusher';
+        return !exports.options['role'] || exports.options['role'] === 'pusher';
     },
     'isHttp' : function() {
-        return exports.options['role'] === 'http';
+        return !exports.options['role'] || exports.options['role'] === 'http';
     }
 };

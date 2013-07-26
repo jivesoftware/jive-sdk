@@ -25,6 +25,9 @@ exports.eventHandlerMap = {};
 exports.addDefinitionEventListener = function( event, definitionName, handler, description ) {
     jive.logger.debug("Registered event for", definitionName,": '" + event + "' ", description ||'' );
     exports.addListener( event+'.'+definitionName, handler );
+    if ( !exports.eventHandlerMap[definitionName] ) {
+        exports.eventHandlerMap[definitionName] = {};
+    }
     exports.eventHandlerMap[definitionName][event] = handler;
 };
 

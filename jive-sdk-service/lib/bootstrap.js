@@ -105,12 +105,11 @@ var setupExpressApp = function (app, rootDir, config) {
     return q.all( [ p1, p2 ] );
 };
 
-var setupWorker = function() {
+var setupScheduler = function() {
     var deferred = q.defer();
 
-    if ( service.role.isWorker() ) {
-        var worker = require('../workers/worker');
-        worker.init( jive.events.eventHandlerMap );
+    if ( service.role.isWorker() || service.role.isPusher() ) {
+        service.scheduler().init( jive.events.eventHandlerMap, {'role' : service.options.role } );
         deferred.resolve();
     } else {
         deferred.resolve();
@@ -136,18 +135,6 @@ var setupHttp = function(app, rootDir, options) {
     return deferred.promise;
 };
 
-var setupPusher = function() {
-    var deferred = q.defer();
-    if ( service.role.isPusher() ) {
-        // do pusher setup here
-        deferred.resolve();
-    } else {
-        deferred.resolve();
-    }
-
-    return deferred.promise;
-};
-
 /**
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
@@ -166,8 +153,7 @@ exports.start = function( app, options, rootDir, tilesDir ) {
 
     validateServiceOptions(options);
 
-    return setupWorker()
-        .then( function() { return setupPusher() } )
+    return setupScheduler()
         .then( function() { return setupHttp(app, rootDir, options) })
         .then( function() {
             jive.logger.info("Bootstrap complete.");
