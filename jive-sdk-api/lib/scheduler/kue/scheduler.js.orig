@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-var jive = require('../../api');
+var jive = require('../../../api');
 var kue = require('kue');
 var express = require('express');
 var q = require('q');
@@ -22,7 +22,9 @@ var q = require('q');
 var jobs;
 var redisClient;
 
-jobQueueName = 'work';
+var jobQueueName = 'work';
+var pushQueueName = 'push';
+var pushQueueBoundEvents = [ 'pushToJive' ];
 
 function Scheduler() {
     redisClient = require('redis').createClient();
@@ -32,6 +34,48 @@ function Scheduler() {
 }
 
 module.exports = Scheduler;
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// helpers
+
+var queueFor = function(eventID) {
+    if ( pushQueueBoundEvents.indexOf( eventID ) != -1 ) {
+        return pushQueueName;
+    } else {
+        return jobQueueName;
+    }
+};
+
+var searchForJobs = function( queueName ) {
+    var deferred = q.defer();
+    var foundJobs = [];
+    kue.Job.rangeByType(queueName, 'delayed', 0, 10, 'asc', function (err, delayedJobs) {
+        if ( delayedJobs ) {
+            foundJobs = foundJobs.concat( delayedJobs );
+        }
+        kue.Job.rangeByType(queueName, 'inactive', 0, 10, 'asc', function (err, inactiveJobs) {
+            foundJobs = foundJobs.concat( inactiveJobs );
+            deferred.resolve( foundJobs );
+        });
+    });
+    return deferred.promise;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// public
+
+Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
+
+    var isWorker = options['role'] === 'worker';
+    var isPusher = options['role'] === 'pusher';
+
+    if ( !(isPusher || isWorker) ) {
+        // schedule no workers to listen on queued events if neither pusher nor worker
+        return;
+    }
+
+    require('./worker').init( isPusher ? pushQueueName : jobQueueName, _eventHandlerMap );
+};
 
 /**
  * Schedule a task.
@@ -58,7 +102,8 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
     if (interval) {
         meta['interval'] = interval;
     }
-    jobs.create(jobQueueName, meta).on('complete', function() {
+
+    jobs.create( queueFor(eventID), meta).on('complete', function() {
         if ( !deferred ) {
             // we're done if there is no promise to fulfill (e.g. tile pushes)
             return;
@@ -104,21 +149,50 @@ Scheduler.prototype.unschedule = function unschedule(eventID){
     });
 };
 
+/**
+ * Returns a promise indicating if the event is already scheduled
+ * @param eventID
+ */
 Scheduler.prototype.isScheduled = function(eventID) {
     var deferred = q.defer();
+<<<<<<< HEAD:jive-sdk-api/lib/scheduler/scheduler-kue.js
     this.getTasks().forEach(function(job) {
         if (job.data['eventID'] == eventID) {
             deferred.resolve(true);
+=======
+
+    this.getTasks().then( function( tasks ) {
+        var found = false;
+        for ( var i = 0; i < tasks.length; i++ ) {
+            var job = tasks[i];
+            if (job.data['eventID'] == eventID) {
+                found = true;
+                break;
+            }
+>>>>>>> HA_aron:jive-sdk-api/lib/scheduler/kue/scheduler.js
         }
+        deferred.resolve( found );
     });
+
     return deferred.promise;
 };
 
-Scheduler.prototype.getTasks = function getTasks(){
-    kue.Job.rangeByType(jobQueueName, 'delayed', 0, 10, 'asc', function (err, delayedJobs) {
-        kue.Job.rangeByType(jobQueueName, 'inactive', 0, 10, 'asc', function (err, inactiveJobs) {
-            return delayedJobs.concat(inactiveJobs);
-        });
+/**
+ * Returns a promise which resolves with the jobs currently scheduled (recurrent or dormant)
+ */
+Scheduler.prototype.getTasks = function getTasks() {
+    var foundJobs = [];
+
+    return searchForJobs(jobQueueName).then( function(jobs) {
+        if ( jobs ) {
+            foundJobs = foundJobs.concat( jobs );
+        }
+        return searchForJobs(pushQueueName);
+    }).then( function(pushJobs) {
+        if ( pushJobs ) {
+            foundJobs = foundJobs.concat( pushJobs );
+        }
+        return foundJobs;
     });
 };
 

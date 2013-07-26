@@ -14,7 +14,6 @@
  *    limitations under the License.
  */
 
-var jiveUtil = require('../util/jiveutil');
 var jive = require('../../api');
 
 function Scheduler() {
@@ -24,6 +23,12 @@ module.exports = Scheduler;
 
 var tasks = {};
 
+var eventHandlerMap = {};
+
+Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
+    eventHandlerMap = _eventHandlerMap;
+};
+
 /**
  * Schedule a task.
  * @param eventID which event to fire
@@ -31,12 +36,12 @@ var tasks = {};
  * @param interval The interval to invoke the callback
  */
 Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
-    var handler
+    var handler;
     if (context['tileName']) {
-        handler = jive.events.eventHandlerMap[context['tileName']][eventID];
+        handler = eventHandlerMap[context['tileName']][eventID];
     }
     else {
-        handler = jive.events.eventHandlerMap[eventID];
+        handler = eventHandlerMap[eventID];
     }
     if (interval) {
         tasks[eventID] = setInterval(function() {
@@ -50,7 +55,7 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
 };
 
 Scheduler.prototype.unschedule = function unschedule(eventID){
-    if(scheduler.isScheduled(eventID)) {
+    if(this.isScheduled(eventID)) {
         clearInterval(tasks[eventID]);
         delete tasks[eventID];
     }
@@ -61,10 +66,14 @@ Scheduler.prototype.getTasks = function getTasks(){
 };
 
 Scheduler.prototype.isScheduled = function( eventID ) {
+    var deferred = q.defer();
     if (tasks[eventID]) {
-        return true;
+        deferred.resolve(true);
+    } else {
+        deferred.resolve(false);
     }
-    return false;
+
+    return deferred.promise;
 };
 
 Scheduler.prototype.shutdown = function(){

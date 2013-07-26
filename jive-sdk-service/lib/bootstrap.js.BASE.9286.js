@@ -105,11 +105,12 @@ var setupExpressApp = function (app, rootDir, config) {
     return q.all( [ p1, p2 ] );
 };
 
-var setupScheduler = function() {
+var setupWorker = function() {
     var deferred = q.defer();
 
-    if ( service.role.isWorker() || service.role.isPusher() ) {
-        service.scheduler().init( jive.events.eventHandlerMap, {'role' : service.options.role } );
+    if ( service.role.isWorker() ) {
+        var worker = require('../workers/worker');
+        worker.init( jive.events.eventHandlerMap );
         deferred.resolve();
     } else {
         deferred.resolve();
@@ -135,13 +136,10 @@ var setupHttp = function(app, rootDir, options) {
     return deferred.promise;
 };
 
-<<<<<<< HEAD
 var setupPusher = function() {
     var deferred = q.defer();
     if ( service.role.isPusher() ) {
         // do pusher setup here
-        var pusher = require('../workers/pusher');
-        pusher.init(jive.events.eventHandlerMap);
         deferred.resolve();
     } else {
         deferred.resolve();
@@ -150,8 +148,6 @@ var setupPusher = function() {
     return deferred.promise;
 };
 
-=======
->>>>>>> HA_aron
 /**
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
@@ -165,12 +161,13 @@ exports.start = function( app, options, rootDir, tilesDir ) {
 
     jive.logger.info("Running bootstrap.");
 
-    // mark this already bootstrapped so we don't do it again
+    // mark already bootstrapped so we don't do it again
     alreadyBootstrapped = true;
 
     validateServiceOptions(options);
 
-    return setupScheduler()
+    return setupWorker()
+        .then( function() { return setupPusher() } )
         .then( function() { return setupHttp(app, rootDir, options) })
         .then( function() {
             jive.logger.info("Bootstrap complete.");

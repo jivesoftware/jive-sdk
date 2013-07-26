@@ -33,7 +33,7 @@ exports.persistence = {
 
 exports.scheduler  = {
     'memory' : require('./lib/scheduler/scheduler'),
-    'kue' : require('./lib/scheduler/scheduler-kue')
+    'kue' : require('./lib/scheduler/kue/scheduler')
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
