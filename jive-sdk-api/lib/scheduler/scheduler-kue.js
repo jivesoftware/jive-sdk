@@ -96,13 +96,17 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
     }
 };
 
-Scheduler.prototype.unschedule = function unschedule(job){
-    job.remove();
+Scheduler.prototype.unschedule = function unschedule(eventID){
+    this.getTasks().forEach(function(job) {
+        if (job.data['eventID'] == eventID) {
+            job.remove();
+        }
+    });
 };
 
 Scheduler.prototype.isScheduled = function(eventID) {
     var deferred = q.defer();
-    scheduler.getTasks().forEach(function(job) {
+    this.getTasks().forEach(function(job) {
         if (job.data['eventID'] == eventID) {
             deferred.resolve(true);
         }

@@ -112,7 +112,6 @@ exports.init = function(handlers) {
     redisClient = require('redis').createClient();
     jobs = kue.createQueue();
     jobs.promote();
-
     eventHandlers = handlers;
     jobs.process('work', eventExecutor);
 };

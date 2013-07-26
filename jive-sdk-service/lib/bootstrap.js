@@ -140,6 +140,8 @@ var setupPusher = function() {
     var deferred = q.defer();
     if ( service.role.isPusher() ) {
         // do pusher setup here
+        var pusher = require('../workers/pusher');
+        pusher.init(jive.events.eventHandlerMap);
         deferred.resolve();
     } else {
         deferred.resolve();
@@ -161,7 +163,7 @@ exports.start = function( app, options, rootDir, tilesDir ) {
 
     jive.logger.info("Running bootstrap.");
 
-    // mark already bootstrapped so we don't do it again
+    // mark this already bootstrapped so we don't do it again
     alreadyBootstrapped = true;
 
     validateServiceOptions(options);
