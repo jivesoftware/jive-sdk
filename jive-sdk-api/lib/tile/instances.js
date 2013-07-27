@@ -58,7 +58,7 @@ exports.getCollection = function() {
 
 exports.save = function (instance) {
     if (!instance.id) {
-        instance.id = jiveUtil.guid();
+        instance.id = jive.util.guid();
     }
 
     return this.persistence().save(this.getCollection(), instance.id, instance );

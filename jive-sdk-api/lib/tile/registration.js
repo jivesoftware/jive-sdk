@@ -43,6 +43,12 @@ exports.registration = function(context) {
             } else {
                 return instanceLibrary.register(jiveUrl, pushUrl, config, name, code).then(
                     function (tileInstance) {
+                        if ( !tileInstance ) {
+                            var statusObj = { status: 500, 'error': 'Failed to register' };
+                            deferred.reject(statusObj);
+                            return;
+                        }
+
                         jive.logger.info("registered instance", tileInstance);
                         instanceLibrary.save(tileInstance).then(function () {
                             jive.events.emit("newInstance." + name, tileInstance);
