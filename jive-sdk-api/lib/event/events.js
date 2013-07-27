@@ -42,6 +42,10 @@ exports.addSystemEventListener = function(event, handler, description) {
     }
 };
 
+exports.addLocalEventListener = function( event, handler ) {
+    exports.addListener( event, handler );
+};
+
 /**
  * There are events that pusher nodes are allowed to handle.
  * @type {Array}

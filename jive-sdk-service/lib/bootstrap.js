@@ -108,6 +108,15 @@ var setupExpressApp = function (app, rootDir, config) {
 var setupScheduler = function() {
     var deferred = q.defer();
 
+    // add base events
+    jive.events.baseEvents.forEach( function( handlerInfo ) {
+        jive.events.addSystemEventListener(
+            handlerInfo['event'],
+            handlerInfo['handler'],
+            handlerInfo['description']
+        );
+    });
+
     if ( service.role.isWorker() || service.role.isPusher() ) {
         service.scheduler().init( jive.events.eventHandlerMap, {'role' : service.options.role } );
         deferred.resolve();
@@ -157,5 +166,6 @@ exports.start = function( app, options, rootDir, tilesDir ) {
         .then( function() { return setupHttp(app, rootDir, options) })
         .then( function() {
             jive.logger.info("Bootstrap complete.");
+            jive.events.emit("serviceBootstrapped");
         });
 };

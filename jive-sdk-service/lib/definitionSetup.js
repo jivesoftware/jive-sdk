@@ -53,96 +53,89 @@ function fsexists(path) {
  * @param svcDir
  * @return {*}
  */
-exports.setupDefinitionServices = function( definitionName, svcDir ) {
+exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
 
-    q.fcall( function() {
-        // add base events
-        jive.events.baseEvents.forEach( function( handlerInfo ) {
-            jive.events.addSystemEventListener(
-                handlerInfo['event'],
-                handlerInfo['handler'],
-                handlerInfo['description']
-            );
-        });
-    }).then(function() {
-            return recursiveDirectoryProcessor( null, definitionName, svcDir, svcDir,
-                function(app, definitionName, theFile, theDirectory) {
-                    var taskPath = theDirectory + '/' + theFile;
-                    var target = require(taskPath);
+    return recursiveDirectoryProcessor( null, definitionName, svcDir, svcDir,
+        function(app, definitionName, theFile, theDirectory) {
+            var taskPath = theDirectory + '/' + theFile;
+            var target = require(taskPath);
 
-                    // recurrent tasks
-                    // these are scheduled only if they haven't yet been scheduled by some other node
-                    var tasks = target.task;
-                    if (!service.role.isHttp() && tasks) {
-                        var tasksToAdd = [];
-                        if (tasks['forEach']) {
-                            tasks.forEach(function(t) {
-                                tasksToAdd.push(t);
-                            });
-                        } else {
-                            tasksToAdd.push(tasks);
-                        }
-                        // enforce a standard event ID - unique to the tile that supplied it
-                        tasksToAdd.forEach(function(taskToAdd) {
-                            var eventID = taskToAdd['event'];
-                            var handler = taskToAdd['handler'];
-                            if ( !taskToAdd['context'] ) {
-                                taskToAdd['context'] = {};
-                            }
-                            taskToAdd['context']['event'] = eventID;
-                            taskToAdd['context']['tileName'] = definitionName;
-
-                            if ( handler ) {
-                                // task came with a handler; mix it into the list of target eventHandlers
-                                if ( target.eventHandlers ) {
-                                    target.eventHandlers.push(
-                                        {
-                                            'event' : eventID,
-                                            'handler' : handler
-                                        }
-                                    );
-                                }
-                            }
-
-                            jive.context.scheduler.isScheduled(eventID).then(function(scheduled){
-                                if (!scheduled) {
-                                    jive.context.scheduler.schedule(eventID, taskToAdd['context'], taskToAdd['interval']);
-                                } else {
-                                    jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
-                                }
-                            });
-                        });
-                    }
-
-                    // event handlers
-                    // these get contributed to workers listening on kue
-                    if ( target.eventHandlers ) {
-                        target.eventHandlers.forEach( function( handlerInfo ) {
-                            jive.events.addDefinitionEventListener(
-                                handlerInfo['event'],
-                                definitionName,
-                                handlerInfo['handler'],
-                                handlerInfo['description'] || 'Unique to definition'
-                            );
-                        });
-                    }
-
-                    // definition json
-                    if ( target.definitionJSON ) {
-                        var definition = target.definitionJSON;
-                        definition.id = definition.id === '{{{definition_id}}}' ? null : definition.id;
-                        var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams.definitions : jive.tiles.definitions;
-                        return apiToUse.save(definition);
-                    }
-                },
-
-                function(currentFsItem) {
-                    return legalServiceFileExtensions.indexOf(path.extname( currentFsItem ) ) > -1;
+            // recurrent tasks
+            // these are scheduled only if they haven't yet been scheduled by some other node
+            var tasks = target.task;
+            if (!service.role.isHttp() && tasks) {
+                var tasksToAdd = [];
+                if (tasks['forEach']) {
+                    tasks.forEach(function(t) {
+                        tasksToAdd.push(t);
+                    });
+                } else {
+                    tasksToAdd.push(tasks);
                 }
-            );
-    });
+                // enforce a standard event ID - unique to the tile that supplied it
+                tasksToAdd.forEach(function(taskToAdd) {
+                    var eventID = taskToAdd['event'];
+                    var handler = taskToAdd['handler'];
+                    if ( !taskToAdd['context'] ) {
+                        taskToAdd['context'] = {};
+                    }
+                    taskToAdd['context']['event'] = eventID;
+                    taskToAdd['context']['tileName'] = definitionName;
+
+                    if ( handler ) {
+                        target.eventHandlers = target.eventHandlers || [];
+
+                        // task came with a handler; mix it into the list of target eventHandlers
+                        if ( target.eventHandlers ) {
+                            target.eventHandlers.push( {
+                                'event' : eventID,
+                                'handler' : handler
+                            });
+                        }
+                    }
+
+                    // only attempt to schedule events after bootstrapped is complete
+                    jive.events.addLocalEventListener( "serviceBootstrapped", function() {
+                        jive.context.scheduler.isScheduled(eventID).then(function(scheduled){
+                            if (!scheduled) {
+                                jive.context.scheduler.schedule(eventID, taskToAdd['context'], taskToAdd['interval']);
+                            } else {
+                                jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
+                            }
+                        });
+                    });
+
+                });
+            }
+
+            // event handlers
+            // these get contributed to workers listening on kue
+            if ( target.eventHandlers ) {
+                target.eventHandlers.forEach( function( handlerInfo ) {
+                    jive.events.addDefinitionEventListener(
+                        handlerInfo['event'],
+                        definitionName,
+                        handlerInfo['handler'],
+                        handlerInfo['description'] || 'Unique to definition'
+                    );
+                });
+            }
+
+            // definition json
+            if ( target.definitionJSON ) {
+                var definition = target.definitionJSON;
+                definition.id = definition.id === '{{{definition_id}}}' ? null : definition.id;
+                var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams.definitions : jive.tiles.definitions;
+                return apiToUse.save(definition);
+            }
+        },
+
+        function(currentFsItem) {
+            return legalServiceFileExtensions.indexOf(path.extname( currentFsItem ) ) > -1;
+        }
+    );
 };
 
 var recursiveDirectoryProcessor = function(app, definitionName, currentFsItem, root, processorFunction, filterFunction ) {
@@ -294,7 +287,7 @@ exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
 
         promises.push( fsexists(definitionDir).then( function(exists) {
             if ( exists ) {
-                return exports.setupDefinitionServices( definitionName, servicesPath );
+                return exports.setupDefinitionServices( app, definitionName, servicesPath );
             }
         }));
 
