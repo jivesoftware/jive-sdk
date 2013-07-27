@@ -229,13 +229,20 @@ exports.refreshAccessToken = function (instance) {
 };
 
 exports.getExternalProps = function( instance ) {
-    return pusher.fetchExtendedProperties( instance );
+    return jive.context.scheduler.schedule('getExternalProps', {
+        'instance' : instance
+    } );
 };
 
 exports.setExternalProps = function( instance, props ) {
-    return pusher.pushExtendedProperties( instance, props );
+    return jive.context.scheduler.schedule('setExternalProps', {
+        'instance' : instance,
+        'props' : props
+    } );
 };
 
 exports.deleteExternalProps = function( instance ){
-    return pusher.removeExtendedProperties( instance );
+    return jive.context.scheduler.schedule('deleteExternalProps', {
+        'instance' : instance
+    } );
 };

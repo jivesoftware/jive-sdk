@@ -188,5 +188,26 @@ exports.baseEvents = [
             return pusher.getPaginated( context['extstream'], context['commentsURL'] );
         },
         'description' : 'Framework handler'
+    },
+    {
+        'event': 'getExternalProps',
+        'handler':function(context) {
+            return pusher.fetchExtendedProperties( context['instance'] );
+        },
+        'description' : 'Framework handler'
+    },
+    {
+        'event': 'setExternalProps',
+        'handler':function(context) {
+            return pusher.pushExtendedProperties( context['instance'], context['props'] );
+        },
+        'description' : 'Framework handler'
+    },
+    {
+        'event': 'deleteExternalProps',
+        'handler':function(context) {
+            return pusher.removeExtendedProperties( context['instance'] );
+        },
+        'description' : 'Framework handler'
     }
 ];
