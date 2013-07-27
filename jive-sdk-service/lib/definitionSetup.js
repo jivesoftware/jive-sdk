@@ -65,7 +65,7 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
             // recurrent tasks
             // these are scheduled only if they haven't yet been scheduled by some other node
             var tasks = target.task;
-            if (!service.role.isHttp() && tasks) {
+            if ( ( service.role.isWorker() || service.role.isPusher() ) && tasks) {
                 var tasksToAdd = [];
                 if (tasks['forEach']) {
                     tasks.forEach(function(t) {
