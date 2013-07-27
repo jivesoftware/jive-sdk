@@ -21,11 +21,12 @@ var jive = require('jive-sdk')
     , http = require('q-io/http')
     , jira = require('./jira.js');
 
-exports.task = new jive.tasks.build(function() {
-    jive.tiles.findByDefinitionName('jira').then(function(tiles) {
-        tiles.forEach(pushUpdate);
-    });
-}, 60000);
+exports.task = [
+    {
+        'event':'update',
+        'interval':10000
+    }
+]
 
 function pushUpdate(tile) {
     console.log('pushing update: '+ tile.name +', '+ tile.id, tile);
@@ -97,7 +98,14 @@ function prepareData(tile, data, callback, filterName) {
 }
 
 exports.eventHandlers = [
-
+    {
+        'event': 'update',
+        'handler': function() {
+            jive.tiles.findByDefinitionName('jira').then(function(tiles) {
+                tiles.forEach(pushUpdate);
+            });
+        }
+    },
     {
         'event': 'newInstance',
         'handler' : function(theInstance){
@@ -105,7 +113,6 @@ exports.eventHandlers = [
             pushUpdate(theInstance);
         }
     },
-
     {
         'event': 'updateInstance',
         'handler' : function(theInstance){
@@ -113,26 +120,22 @@ exports.eventHandlers = [
             pushUpdate(theInstance);
         }
     },
-
     {
         'event': 'destroyingInstance',
         'handler' : function(theInstance){
             // override
         }
     },
-
     {
         'event': 'destroyedInstance',
         'handler' : function(theInstance){
             // override
         }
     },
-
     {
         'event': 'dataPushed',
         'handler' : function(theInstance, pushedData, response){
             // override
         }
     }
-
 ];

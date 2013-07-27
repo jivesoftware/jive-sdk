@@ -36,93 +36,6 @@ exports.unregister = function( req, res ) {
     console.log("Unregister!!") ;
 };
 
-var doRegistration = function (guid, config, name, res, jiveUrl, pushUrl, code) {
-    var registerer = function (scope, instanceLibrary) {
-        var deferred = q.defer();
-
-        instanceLibrary.findByScope(guid).then(function (tileInstance) {
-            // the instance exists
-            // update the config only
-            if (tileInstance) {
-                // update the config
-                tileInstance['config'] = config;
-
-                instanceLibrary.save(tileInstance).then(function () {
-                    jive.events.emit("updateInstance." + name, tileInstance);
-                    res.writeHead(204, {'Content-Type': 'application/json'});
-                    res.end(JSON.stringify(tileInstance));
-                    deferred.resolve();
-                });
-
-            } else {
-                return instanceLibrary.register(jiveUrl, pushUrl, config, name, code).then(
-                    function (tileInstance) {
-                        jive.logger.info("registered instance", tileInstance);
-                        instanceLibrary.save(tileInstance).then(function () {
-                            jive.events.emit("newInstance." + name, tileInstance);
-                            res.writeHead(201, {'Content-Type': 'application/json'});
-                            res.end(JSON.stringify(tileInstance));
-                            var jiveCommunity = tileInstance['jiveCommunity'];
-                            if (jiveCommunity) {
-                                jive.service.community.findByCommunity(jiveCommunity).then( function( community ) {
-                                    community = community || {};
-                                    community['jiveUrl'] = jiveUrl;
-                                    community['jiveCommunity'] = jiveCommunity;
-                                    jive.service.community.save(community).then(function () {
-                                        deferred.resolve();
-                                    });
-                                });
-                            } else {
-                                deferred.resolve();
-                            }
-                        });
-
-                    },
-                    function (err) {
-                        jive.logger.error('Registration failure for', scope);
-                        jive.logger.debug(scope, err);
-                        res.writeHead(502, { 'Content-Type': 'application/json' });
-                        var statusObj = { status: 500, 'error': 'Failed to get acquire access token', 'detail': err };
-                        var body = JSON.stringify(statusObj);
-                        res.end(body);
-                        deferred.reject();
-                    });
-            }
-        });
-
-        return deferred.promise;
-    };
-
-    // try tiles
-    var tile;
-    var stream;
-    q.all([ jive.tiles.definitions.findByTileName(name).then(function (found) {
-            tile = found;
-        }),
-            jive.extstreams.definitions.findByTileName(name).then(function (found) {
-                stream = found;
-            }) ]).then(
-
-        function () {
-            if (tile) {
-                // register a tile instance
-                registerer(guid, jive.tiles);
-            } else if (stream) {
-                // register an external stream instance
-                registerer(guid, jive.extstreams);
-            } else {
-                // its neither tile nor externalstream, so return error
-                var statusObj = {
-                    status: 400,
-                    message: "No tile or external stream definition was found for the given name '" + name + "'"
-                };
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(statusObj));
-            }
-        }
-    );
-};
-
 var findCredentials = function(jiveUrl) {
     var deferred = q.defer();
     var conf = jive.service.options;
@@ -150,6 +63,7 @@ var findCredentials = function(jiveUrl) {
     return deferred.promise;
 };
 
+//only thing this should do inline is validating credentials
 exports.registration = function( req, res ) {
     var pushUrl = req.body['url'];
     // xxx todo save remoteTileId along with the tile instance (so it can be unregistered, see above)
@@ -172,7 +86,7 @@ exports.registration = function( req, res ) {
                 return;
             }
 
-            doRegistration(guid, config, name, res, jiveUrl, pushUrl, code);
+            schedule(guid, config, name, jiveUrl, pushUrl, code, res);
         } else {
             // problem!
             res.writeHead(403, { 'Content-Type': 'application/json' });
@@ -180,3 +94,28 @@ exports.registration = function( req, res ) {
         }
     });
 };
+
+function makeContext(guid, config, name, jiveUrl, pushUrl, code) {
+    return {
+        'guid':guid,
+        'config':config,
+        'name':name,
+        'jiveUrl':jiveUrl,
+        'pushUrl':pushUrl,
+        'code':code
+    }
+}
+
+function schedule(guid, config, name, jiveUrl, pushUrl, code, res) {
+    var promise = jive.context.scheduler.schedule('registration', makeContext(guid, config, name, jiveUrl, pushUrl, code));
+    var success = function (result) {
+        res.writeHead(200);
+        res.end(JSON.stringify(result));
+    }
+    var fail = function (result) {
+        var status = result.status || 500;
+        res.writeHead(status);
+        res.end(JSON.stringify(result));
+    }
+    promise.then(success, fail);
+}

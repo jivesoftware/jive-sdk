@@ -24,7 +24,6 @@ var redisClient;
 
 var jobQueueName = 'work';
 var pushQueueName = 'push';
-var pushQueueBoundEvents = [ 'pushToJive' ];
 
 function Scheduler() {
     redisClient = require('redis').createClient();
@@ -39,7 +38,7 @@ module.exports = Scheduler;
 // helpers
 
 var queueFor = function(eventID) {
-    if ( pushQueueBoundEvents.indexOf( eventID ) != -1 ) {
+    if (jive.events.pushQueueEvents.indexOf(eventID) != -1 ) {
         return pushQueueName;
     } else {
         return jobQueueName;
@@ -69,12 +68,12 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     var isWorker = options['role'] === 'worker';
     var isPusher = options['role'] === 'pusher';
 
-    if ( !(isPusher || isWorker) ) {
+    if (!(isPusher || isWorker)) {
         // schedule no workers to listen on queued events if neither pusher nor worker
         return;
     }
 
-    require('./worker').init( isPusher ? pushQueueName : jobQueueName, _eventHandlerMap );
+    require('./worker').init(isPusher ? pushQueueName : jobQueueName, _eventHandlerMap);
 };
 
 /**
@@ -103,7 +102,7 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
         meta['interval'] = interval;
     }
 
-    jobs.create( queueFor(eventID), meta).on('complete', function() {
+    jobs.create(queueFor(eventID), meta).on('complete', function() {
         if ( !deferred ) {
             // we're done if there is no promise to fulfill (e.g. tile pushes)
             return;

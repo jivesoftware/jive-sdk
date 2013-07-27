@@ -83,25 +83,23 @@ exports.persistence = function(_persistence) {
 
 var scheduler;
 /**
- * Retrieves or sets the scheduling strategy. Defaults to memory (single node).
+ * Retrieves or sets the scheduling strategy. Defaults to memory (single node). todo
  * @param _scheduler
  * @returns {*}
  */
 exports.scheduler = function( _scheduler ) {
-
     if ( _scheduler ) {
         if ( !_scheduler['schedule'] || !_scheduler['unschedule'] || !_scheduler['getTasks'] ) {
             throw 'Unsupported scheduler strategy - must implement schedule, unschedule, isScheduled, getTasks.';
         }
         scheduler = _scheduler;
+
+        if ( !scheduler ) {
+            scheduler = new jive.scheduler.memory();
+        }
+        jive.context.scheduler = scheduler;
     }
-
-    if ( !scheduler ) {
-        scheduler = new jive.scheduler.memory();
-    }
-
-    jive.context.scheduler = scheduler;
-
+    scheduler = jive.context.scheduler;
     return scheduler;
 };
 

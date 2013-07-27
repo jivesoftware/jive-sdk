@@ -75,7 +75,7 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
                     // recurrent tasks
                     // these are scheduled only if they haven't yet been scheduled by some other node
                     var tasks = target.task;
-                    if (tasks) {
+                    if (!service.role.isHttp() && tasks) {
                         var tasksToAdd = [];
                         if (tasks['forEach']) {
                             tasks.forEach(function(t) {
@@ -86,15 +86,15 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
                         }
                         // enforce a standard event ID - unique to the tile that supplied it
                         tasksToAdd.forEach(function(taskToAdd) {
-                            var eventID = taskToAdd['eventID'];
+                            var eventID = taskToAdd['event'];
                             if ( !taskToAdd['context'] ) {
                                 taskToAdd['context'] = {};
                             }
-                            taskToAdd.context['eventID'] = eventID;
-                            taskToAdd.context['tileName'] = definitionName;
-                            service.scheduler().isScheduled(eventID).then(function(scheduled){
+                            taskToAdd['context']['event'] = eventID;
+                            taskToAdd['context']['tileName'] = definitionName;
+                            jive.context.scheduler.isScheduled(eventID).then(function(scheduled){
                                 if (!scheduled) {
-                                    service.scheduler().schedule(eventID, taskToAdd['context'], taskToAdd['interval']);
+                                    jive.context.scheduler.schedule(eventID, taskToAdd['context'], taskToAdd['interval']);
                                 } else {
                                     jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
                                 }

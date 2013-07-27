@@ -17,6 +17,7 @@
 var events = require('events');
 var jive = require('../../api');
 var pusher = require('../tile/dataPusher.js');
+var regHandler = require('../tile/registration.js');
 
 exports = module.exports = new events.EventEmitter();
 
@@ -39,6 +40,13 @@ exports.addSystemEventListener = function(event, handler, description) {
     }
 }
 
+/**
+ * There are events that pusher nodes are allowed to handle.
+ * @type {Array}
+ */
+exports.pushQueueEvents = [
+    'pushToJive'
+]
 /**
  * This is an array of events which will be applied to every autowired tile
  * @type {Array}
@@ -71,7 +79,7 @@ exports.baseEvents = [
     {
         'event': 'dataPushed',
         'handler' : function(theInstance, pushedData, response){
-            jive.logger.info('Data push to', theInstance.url, response? response.statusCode : '', theInstance.name);
+            jive.logger.info('Data push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
         },
         'description' : 'Framework handler'
     },
@@ -79,7 +87,7 @@ exports.baseEvents = [
     {
         'event': 'activityPushed',
         'handler' : function(theInstance, pushedData, response){
-            jive.logger.info('Activity push to', theInstance.url, response? response.statusCode : '', theInstance.name);
+            jive.logger.info('Activity push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
         },
         'description' : 'Framework handler'
     },
@@ -87,7 +95,7 @@ exports.baseEvents = [
     {
         'event': 'commentPushed',
         'handler' : function(theInstance, pushedData, response){
-            jive.logger.info('Comment push to', theInstance.url, response? response.statusCode : '', theInstance.name);
+            jive.logger.info('Comment push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
         },
         'description' : 'Framework handler'
     },
@@ -95,6 +103,18 @@ exports.baseEvents = [
         'event':'pushToJive',
         'handler':function(tileInstance, data) {
             pusher.pushData(tileInstance, data);
+        }
+    },
+    {
+        'event':'registration',
+        'handler':function(context) {
+            regHandler.registration(context);
+        }
+    },
+    {
+        'event':'clientAppRegistration',
+        'handler':function(context) {
+            jive.service.community.register(context);
         }
     }
 ];

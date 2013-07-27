@@ -135,23 +135,6 @@ var setupHttp = function(app, rootDir, options) {
     return deferred.promise;
 };
 
-<<<<<<< HEAD
-var setupPusher = function() {
-    var deferred = q.defer();
-    if ( service.role.isPusher() ) {
-        // do pusher setup here
-        var pusher = require('../workers/pusher');
-        pusher.init(jive.events.eventHandlerMap);
-        deferred.resolve();
-    } else {
-        deferred.resolve();
-    }
-
-    return deferred.promise;
-};
-
-=======
->>>>>>> HA_aron
 /**
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified

@@ -26,8 +26,8 @@ exports.authorizeUrl = function(req, res ) {
     var secret = conf.clientSecret;
 
     var auth = req.headers['authorization'];
-    if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {
-        errorResponse(res, 403, 'Invalid or missing HMAC authorization header'  );
+    if (!jive.util.basicAuthorizationHeaderValid(auth, clientId, secret)) {
+        errorResponse(res, 403, 'Invalid or missing HMAC authorization header');
         return;
     }
 
@@ -43,7 +43,7 @@ exports.authorizeUrl = function(req, res ) {
     if ( contextStr ) {
         try {
             var context = JSON.parse( decodeURI(contextStr) );
-        } catch ( e ) {
+        } catch (e) {
             errorResponse( res, 400, 'Invalid context string, could not parse');
             return;
         }
@@ -53,7 +53,7 @@ exports.authorizeUrl = function(req, res ) {
     if ( extraAuthParamsStr ) {
         try {
             var extraAuthParams = JSON.parse( decodeURI(extraAuthParamsStr ));
-        } catch ( e ) {
+        } catch (e) {
             errorResponse( res, 400, 'Invalid extra auth param string, could not parse');
             return;
         }
@@ -161,7 +161,7 @@ exports.oauth2Callback = function(req, res ) {
         function(response) {
             // success
             if ( response.statusCode >= 200 && response.statusCode < 299 ) {
-                if (  oauth2SuccessCallback ) {
+                if (oauth2SuccessCallback) {
                     oauth2SuccessCallback( state, response, proceed );
                 } else {
                     proceed();

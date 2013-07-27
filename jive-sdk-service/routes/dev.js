@@ -127,7 +127,7 @@ function getProcessed(conf, all) {
  *
  * Takes the following URL parameters:
  * - jiveHost: required target Jive host
- * - jivePort: optinoal target Jive Port, defaults to 80 if not specified
+ * - jivePort: optional target Jive Port, defaults to 80 if not specified
  * - context: optional non-root context path (eg. /sbs)
  * @param req
  * @param res
