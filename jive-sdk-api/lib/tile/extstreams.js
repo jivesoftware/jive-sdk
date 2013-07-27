@@ -32,11 +32,18 @@ extstreams.getCollection = function() {
 };
 
 extstreams.pushActivity = function ( tileInstance, activity) {
-    return pusher.pushActivity(tileInstance, activity);
+    return jive.context.scheduler.schedule('pushActivityToJive', {
+        'tileInstance' : tileInstance,
+        'activity' : activity
+    } );
 };
 
 var pushComment = function ( tileInstance, comment, commentURL) {
-    return pusher.pushComment(tileInstance, commentURL, comment);
+    return jive.context.scheduler.schedule('pushCommentToJive', {
+        'tileInstance' : tileInstance,
+        'commentURL' : commentURL,
+        'comment' : comment
+    } );
 };
 
 /**
@@ -48,23 +55,10 @@ var pushComment = function ( tileInstance, comment, commentURL) {
  * @returns a promise that resolves with a response object. response.entity is the created comment that is returned from Jive
  */
 extstreams.commentOnActivity = function(activity, comment ) {
-    if (!(activity && activity.resources && activity.resources.comments && activity.resources.comments.ref)
-        || !activity.parent) {
-
-        throw new Error('Error in jive.extstreams.commentOnActivity: input activity is not a valid Jive object.' +
-            'It is missing the resources.comments.ref field or parent field.');
-    }
-    var commentsURL = activity.resources.comments.ref;
-    var parentInstanceURL = activity.parent + '/activities';
-
-    return extstreams.findByURL(parentInstanceURL).then(function(extstream) {
-        if (!comment.externalID){
-            comment.externalID = extstream.name + '_' + 'comment' + '_' + String(new Date().getTime());
-            jive.logger.warn(util.format('No externalID field given when creating new comment. Assigning ID %s', comment.externalID ));
-        }
-        return pushComment(extstream, comment, commentsURL);
-    });
-
+    return jive.context.scheduler.schedule('commentOnActivity', {
+        'activity' : activity,
+        'comment' : comment
+    } );
 };
 
 /**
@@ -75,14 +69,12 @@ extstreams.commentOnActivity = function(activity, comment ) {
  * @param comment
  */
 extstreams.commentOnActivityByExternalID = function(extstream, externalActivityID, comment) {
-    var dataURL = extstream['url'];
-    var commentsURL = dataURL.replace(/activities$/, 'extactivities/') + externalActivityID + '/comments';
-    if (!comment.externalID){
-        comment.externalID = extstream.name + '_' + 'comment' + '_' + String(new Date().getTime());
-        jive.logger.warn(util.format('No externalID field given when creating new comment. Assigning ID %s', comment.externalID ));
-    }
-    return pushComment(extstream, comment, commentsURL);
-}
+    return jive.context.scheduler.schedule('commentOnActivityByExternalID', {
+        'extstream' : extstream,
+        'externalActivityID' : externalActivityID,
+        'comment' : comment
+    } );
+};
 
 //Change default options here
 var DEFAULT_OPTS = {
@@ -107,26 +99,10 @@ var DEFAULT_OPTS = {
  * @returns a promise that resolves to a response. response.entity is the list of comments. See  See https://developers.jivesoftware.com/api/rest/index.html#lists
  */
 extstreams.fetchCommentsOnActivity = function(activity, opts) {
-    opts = opts || DEFAULT_OPTS;
-    if (!(activity && activity.resources && activity.resources.comments && activity.resources.comments.ref)
-        || !activity.parent) {
-        throw new Error('Error in jive.extstreams.fetchCommentsOnActivity: ' +
-            'input activity is not a valid Jive object. It is missing the resources.comments.ref field or parent field.');
-    }
-
-    var commentsURL = activity.resources.comments.ref;
-
-    commentsURL += buildQueryString(opts['fieldList'], opts['itemsPerPage'], opts['commentSourceType']);
-
-    var parentInstanceURL = activity.parent + '/activities';
-    return extstreams.findByURL(parentInstanceURL).then( function(extstream) {
-        return pusher.getPaginated(extstream, commentsURL );
-    }).then(function(response){
-            if (response.entity && response.entity.list) {
-                response.entity.list = filterComments(response.entity.list, opts['commentSourceType'], opts['publishedAfter']);
-            }
-            return response;
-        });
+    return jive.context.scheduler.schedule('fetchCommentsOnActivity', {
+        'activity' : activity,
+        'opts' : opts || DEFAULT_OPTS
+    } );
 };
 
 /**
@@ -136,84 +112,8 @@ extstreams.fetchCommentsOnActivity = function(activity, opts) {
  * @returns a promise that resolves to a response. response.entity is the list of comments. See  See https://developers.jivesoftware.com/api/rest/index.html#lists
  */
 extstreams.fetchAllCommentsForExtstream = function(extstream, opts) {
-
-    opts = opts || DEFAULT_OPTS;
-
-    var dataURL = extstream['url'];
-    var commentsURL = commentsUrlFromDataUrl(dataURL);
-
-    commentsURL += buildQueryString(opts['fieldList'], opts['itemsPerPage'], opts['commentSourceType']);
-
-    return pusher.getPaginated(extstream, commentsURL).then(function(response) {
-
-        if (response.entity && response.entity.list) {
-            response.entity.list = filterComments(response.entity.list, opts['commentSourceType'], opts['publishedAfter']);
-        }
-        return response;
-    });
-
+    return jive.context.scheduler.schedule('fetchAllCommentsForExtstream', {
+        'extstream' : extstream,
+        'opts' : opts || DEFAULT_OPTS
+    } );
 };
-
-function buildQueryString(optionalFieldList, optionalItemsPerPage, commentSourceType) {
-    var queryStr = '';
-    if (optionalFieldList || optionalItemsPerPage || (commentSourceType && commentSourceType.toUpperCase() === 'JIVE')) {
-        queryStr += '?';
-
-        var q = false;
-        if (optionalFieldList) {
-            if (optionalFieldList.indexOf('externalID') < 0) { //Must return the externalID to be able to filter properly by comment source
-                optionalFieldList.push('externalID');
-            }
-            if (optionalFieldList.indexOf('published') < 0) { //Need publish date for filtering
-                optionalFieldList.push('published');
-            }
-            queryStr +=  'fields=' + encodeURIComponent(optionalFieldList.join(','));
-            q = true;
-        }
-        if (optionalItemsPerPage) {
-            queryStr += (q ? '&' : '') + 'count=' + optionalItemsPerPage;
-            q = true;
-        }
-        if (commentSourceType && commentSourceType.toUpperCase() === 'JIVE') {
-            queryStr += (q ? '&' : '') + 'filter=omitExternal'; //For efficiency add filter that omits external comments
-            q = true;
-        }
-    }
-
-    return queryStr;
-
-}
-
-//Sort of a hack to build the comments URL, because we are not storing the "resources" JSON from a Jive external stream object currently
-function commentsUrlFromDataUrl(dataURL) {
-     return dataURL.slice(0, dataURL.indexOf('activities')) + 'comments';
-}
-
-//Helper to filter comments based on whether the externalID field is present
-function filterComments(list, commentSourceType, publishedAfter) {
-    if (commentSourceType && commentSourceType.toUpperCase() != 'ALL') {
-
-        if (commentSourceType.toUpperCase() == 'JIVE') {
-            list = list.filter(function(comment) {
-                return comment.externalID == undefined;
-            }) ;
-        }
-        else if (commentSourceType.toUpperCase() == 'EXTERNAL') {
-            list = list.filter(function(comment) {
-                return comment.externalID != undefined;
-            }) ;
-        }
-    }
-
-    if (publishedAfter) {
-        list = list.filter(function(comment) {
-           var published = new Date(comment['published']);
-           if (isNaN(published.getTime())) {
-               return true;
-           }
-           return published.getTime() > publishedAfter;
-        });
-    }
-
-    return list;
-}

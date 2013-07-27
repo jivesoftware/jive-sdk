@@ -31,10 +31,9 @@ tiles.getCollection = function() {
 };
 
 tiles.pushData = function (tileInstance, data) {
-    var context = {
+    return jive.context.scheduler.schedule('pushDataToJive', {
         'tileInstance' : tileInstance,
         'data' : data
-    };
-    return jive.context.scheduler.schedule('pushToJive', context );
+    } );
 };
 
