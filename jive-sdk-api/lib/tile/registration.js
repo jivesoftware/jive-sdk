@@ -48,11 +48,11 @@ exports.registration = function(context) {
                             jive.events.emit("newInstance." + name, tileInstance);
                             var jiveCommunity = tileInstance['jiveCommunity'];
                             if (jiveCommunity) {
-                                jive.service.community.findByCommunity(jiveCommunity).then( function( community ) {
+                                jive.community.findByCommunity(jiveCommunity).then( function( community ) {
                                     community = community || {};
                                     community['jiveUrl'] = jiveUrl;
                                     community['jiveCommunity'] = jiveCommunity;
-                                    jive.service.community.save(community).then(function () {
+                                    jive.community.save(community).then(function () {
                                         deferred.resolve(tileInstance);
                                     });
                                 });

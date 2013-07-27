@@ -51,7 +51,7 @@ var findCredentials = function(jiveUrl) {
         deferred.resolve( credentials );
     } else {
         // try to resolve trust by jiveUrl
-        jive.service.community.findByJiveURL( jiveUrl).then( function(community) {
+        jive.community.findByJiveURL( jiveUrl).then( function(community) {
             if ( community ) {
                 credentials['clientId'] = community['clientId'];
                 credentials['clientSecret'] = community['clientSecret'];
