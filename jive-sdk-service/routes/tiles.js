@@ -111,11 +111,11 @@ function schedule(guid, config, name, jiveUrl, pushUrl, code, res) {
     var success = function (result) {
         res.writeHead(200);
         res.end(JSON.stringify(result));
-    }
+    };
     var fail = function (result) {
         var status = result.status || 500;
         res.writeHead(status);
         res.end(JSON.stringify(result));
-    }
+    };
     promise.then(success, fail);
 }

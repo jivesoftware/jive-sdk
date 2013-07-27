@@ -22,7 +22,6 @@ var q = require('q');
 var util = require('util');
 var jive = require('../../api');
 var instances = require('./instances');
-//var pusher = require('./dataPusher');
 
 var tiles = Object.create(instances);
 module.exports = tiles;
@@ -32,9 +31,10 @@ tiles.getCollection = function() {
 };
 
 tiles.pushData = function (tileInstance, data) {
-    var task = jive.tasks.build(function() {
-        pusher.pushData(tileInstance, data);
-    });
-//    return pusher.pushData(tileInstance, data);
+    var context = {
+        'tileInstance' : tileInstance,
+        'data' : data
+    };
+    return jive.context.scheduler.schedule('pushToJive', context );
 };
 
