@@ -29,7 +29,6 @@ function Scheduler() {
     redisClient = require('redis').createClient();
     jobs = kue.createQueue();
     jobs.promote();
-    console.log("Redis Scheduler Initialized for queue");
 }
 
 module.exports = Scheduler;
@@ -65,15 +64,23 @@ var searchForJobs = function( queueName ) {
 
 Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
 
-    var isWorker = options['role'] === 'worker';
-    var isPusher = options['role'] === 'pusher';
+    var isWorker = !options || !options['role'] || options['role'] === 'worker';
+    var isPusher = !options || !options['role'] || options['role'] === 'pusher';
 
     if (!(isPusher || isWorker)) {
         // schedule no workers to listen on queued events if neither pusher nor worker
         return;
     }
 
-    require('./worker').init(isPusher ? pushQueueName : jobQueueName, _eventHandlerMap);
+    if ( isWorker  ) {
+        require('./worker').init(jobQueueName, _eventHandlerMap);
+    }
+
+    if ( isPusher  ) {
+        require('./worker').init(pushQueueName, _eventHandlerMap);
+    }
+
+    jive.logger.info("Redis Scheduler Initialized for queue");
 };
 
 /**
