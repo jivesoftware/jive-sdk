@@ -114,7 +114,7 @@ exports.baseEvents = [
     {
         'event':'clientAppRegistration',
         'handler':function(context) {
-            jive.service.community.register(context);
+            jive.community.register(context);
         }
     }
 ];
