@@ -87,11 +87,25 @@ exports.setupDefinitionServices = function( definitionName, svcDir ) {
                         // enforce a standard event ID - unique to the tile that supplied it
                         tasksToAdd.forEach(function(taskToAdd) {
                             var eventID = taskToAdd['event'];
+                            var handler = taskToAdd['handler'];
                             if ( !taskToAdd['context'] ) {
                                 taskToAdd['context'] = {};
                             }
                             taskToAdd['context']['event'] = eventID;
                             taskToAdd['context']['tileName'] = definitionName;
+
+                            if ( handler ) {
+                                // task came with a handler; mix it into the list of target eventHandlers
+                                if ( target.eventHandlers ) {
+                                    target.eventHandlers.push(
+                                        {
+                                            'event' : eventID,
+                                            'handler' : handler
+                                        }
+                                    );
+                                }
+                            }
+
                             jive.context.scheduler.isScheduled(eventID).then(function(scheduled){
                                 if (!scheduled) {
                                     jive.context.scheduler.schedule(eventID, taskToAdd['context'], taskToAdd['interval']);
