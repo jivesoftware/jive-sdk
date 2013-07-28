@@ -32,10 +32,13 @@ var queueName;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // helpers
 
+function scheduleCleanup(jobID) {
+    // cleanup the job in 30 seconds. somebody better have consumed the job result in 30 seconds
+    jive.context.scheduler.schedule('cleanupJobID', { 'jobID': jobID}, null, 30 * 1000);
+}
+
 /**
  * run the job we took off the work queue
- * @param handler
- * @return {Function}
  */
 function eventExecutor(job, done) {
     var meta = job.data;
@@ -55,7 +58,7 @@ function eventExecutor(job, done) {
         jive.context.scheduler.isScheduled(eventID).then( function (scheduled ) {
             if ( !scheduled ) {
                 // schedule a recurrent task
-                jobs.create(queueName, meta).delay(interval).save();
+                jive.context.scheduler.schedule( eventID, context, interval );
             }
         });
 
@@ -64,9 +67,13 @@ function eventExecutor(job, done) {
 
     var handler;
     if (tileName) {
-        handler = eventHandlers[tileName][eventID];
-    }
-    else {
+        var tileEventHandlers = eventHandlers[tileName];
+        if ( !tileEventHandlers ) {
+            done();
+            return;
+        }
+        handler = tileEventHandlers[eventID];
+    } else {
         handler = eventHandlers[eventID];
     }
 
@@ -91,6 +98,7 @@ function eventExecutor(job, done) {
                     if (result) {
                         redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
                             next();
+                            scheduleCleanup(jobID);
                         });
                     }
                     else {
@@ -101,6 +109,7 @@ function eventExecutor(job, done) {
                 function(err) {
                     redisClient.set(jobID, JSON.stringify({ 'err' : err }), function() {
                         next();
+                        scheduleCleanup(jobID);
                     });
                 }
             );
@@ -108,10 +117,11 @@ function eventExecutor(job, done) {
             // its not a promise - save the result
             redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
                 next();
+                scheduleCleanup(jobID);
             });
         }
     }
-};
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public

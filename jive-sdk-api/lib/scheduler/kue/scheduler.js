@@ -72,6 +72,14 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
         return;
     }
 
+    // kue specific cleanup job that should run periodically
+    // to reap the job result records in redis
+    _eventHandlerMap['cleanupJobID'] = function(context) {
+        var jobID = context['jobID'];
+        redisClient.del(jobID);
+        jive.logger.debug("Cleaned up", jobID);
+    };
+
     if ( isWorker  ) {
         require('./worker').init(jobQueueName, _eventHandlerMap);
     }
@@ -92,7 +100,7 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
  * Returns a promise that gets invoked when the scheduled task has completed execution
  * only if its not a recurrent task
  */
-Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
+Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
     var deferred;
 
     if ( !interval ) {
@@ -108,9 +116,19 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
     if (interval) {
         meta['interval'] = interval;
     }
+    if ( delay ) {
+        meta['delay'] = delay;
+    }
 
-    jobs.create(queueFor(eventID), meta).on('complete', function() {
+    var job = jobs.create(queueFor(eventID), meta);
+    if ( interval || delay ) {
+        job.delay(interval && !delay ? interval : delay);
+    }
+    job.on('complete', function() {
         if ( !deferred ) {
+            // cleanup
+            redisClient.del(jobID);
+
             // we're done if there is no promise to fulfill (e.g. tile pushes)
             return;
         }
@@ -118,9 +136,6 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
         // there is a promise to fulfill:
         // once the job is done, retrieve any results that were cached on redis by some worker
         // then resolve or reject the promise accordingly.
-        // todo: destroy result stored under jobID in redis
-        // so we don't hold onto old results ... maybe this is a reaper task? or we
-        // do it inline here?
 
         redisClient.get(jobID, function(err, jobResult) {
             if ( !err ) {
@@ -137,6 +152,9 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
                     }
                 }
             }
+
+            // cleanup
+            redisClient.del(jobID);
         });
     }).save();
 
@@ -184,12 +202,12 @@ Scheduler.prototype.getTasks = function getTasks() {
     var foundJobs = [];
 
     return searchForJobs(jobQueueName).then( function(jobs) {
-        if ( jobs ) {
+        if ( jobs && jobs.length > 0 ) {
             foundJobs = foundJobs.concat( jobs );
         }
         return searchForJobs(pushQueueName);
     }).then( function(pushJobs) {
-        if ( pushJobs ) {
+        if ( pushJobs && pushJobs.length > 0  ) {
             foundJobs = foundJobs.concat( pushJobs );
         }
         return foundJobs;

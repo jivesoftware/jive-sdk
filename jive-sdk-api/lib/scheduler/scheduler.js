@@ -36,7 +36,7 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
  * @param context what to pass to the event
  * @param interval The interval to invoke the callback
  */
-Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
+Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
     var handler;
     if (context['tileName']) {
         handler = eventHandlerMap[context['tileName']][eventID];
@@ -45,12 +45,29 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval) {
         handler = eventHandlerMap[eventID];
     }
     if (interval) {
-        tasks[eventID] = setInterval(function() {
-            handler(context)
-        }, interval);
+        var wrapper;
+        if ( delay ) {
+            wrapper = setTimeout( function() {
+                setInterval(function() {
+                    handler(context)
+                }, interval);
+            }, delay );
+        } else {
+            wrapper = setInterval(function() {
+                handler(context)
+            }, interval);
+        }
+
+        tasks[eventID] = wrapper;
     }
     else {
-        handler(context);
+        if ( delay ) {
+            setTimeout( function() {
+                handler(context)
+            }, delay );
+        } else {
+            handler(context);
+        }
     }
     jive.logger.debug("Scheduled task: " + eventID, interval);
 };
