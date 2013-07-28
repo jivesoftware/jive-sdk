@@ -28,7 +28,7 @@ var pushQueueName = 'push';
 function Scheduler() {
     redisClient = require('redis').createClient();
     jobs = kue.createQueue();
-    jobs.promote();
+    jobs.promote(1000);
 }
 
 module.exports = Scheduler;
