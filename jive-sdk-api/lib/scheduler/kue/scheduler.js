@@ -59,17 +59,19 @@ var searchForJobs = function( queueName ) {
             }
             kue.Job.rangeByType(queueName, 'active', 0, 10, 'asc', function (err, activeJobs) {
                 if ( activeJobs ) {
-                    activeJobs.forEach( function(job) {
-                        var elapsed = ( new Date().getTime() - job.updated_at ) / 1000;
-                        if ( elapsed > 60 ) {
-                            // jobs shouldn't run more than 60 seconds
-                            console.log('job', job.id, 'expired, removing');
-                            job.remove();
-                        } else {
-                            foundJobs.push( job );
-                        }
-                    });
+                    foundJobs = foundJobs.concat( activeJobs );
                 }
+
+                foundJobs.forEach( function(job) {
+                    var elapsed = ( new Date().getTime() - job.updated_at ) / 1000;
+                    if ( elapsed > 60 && job.data.eventID != 'cleanupJobID') {
+                        // jobs shouldn't run more than 60 seconds
+                        console.log('job', job.id, 'expired, removing');
+                        job.remove();
+                    } else {
+                        foundJobs.push( job );
+                    }
+                });
                 deferred.resolve( foundJobs );
             });
         });

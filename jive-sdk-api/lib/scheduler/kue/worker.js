@@ -126,5 +126,5 @@ Worker.prototype.init = function init(_queueName, handlers) {
     jobs = kue.createQueue();
     jobs.promote();
     eventHandlers = handlers;
-    jobs.process(queueName, 10, eventExecutor);
+    jobs.process(queueName, 100, eventExecutor);
 };
