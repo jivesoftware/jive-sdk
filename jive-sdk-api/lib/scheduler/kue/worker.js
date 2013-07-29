@@ -40,7 +40,9 @@ var queueName;
 function scheduleCleanup(eventID, jobID) {
     // cleanup the job in 30 seconds. somebody better have consumed the job result in 30 seconds
     if ( eventID != 'cleanupJobID' ) {
-        jive.context.scheduler.schedule('cleanupJobID', { 'jobID': jobID}, null, 30 * 1000);
+        jive.context.scheduler.schedule('cleanupJobID', { 'jobID': jobID}, null, 30 * 1000).then( function() {
+            jive.logger.debug("Cleaned up", jobID);
+        });
     }
 }
 
@@ -51,26 +53,11 @@ function eventExecutor(job, done) {
     var meta = job.data;
     var context = meta['context'];
     var jobID = meta['jobID'];
-    var interval = job.data.interval;
     var eventID = meta['eventID'];
     var tileName = context['tileName'];
 
     var next = function() {
         scheduleCleanup(eventID, jobID);
-
-        if (!interval) {
-            done();
-            return;
-        }
-
-        // schedule new task if recurrent job, and is not already scheduled
-        jive.context.scheduler.isScheduled(eventID).then( function (scheduled ) {
-            if ( !scheduled ) {
-                // schedule a recurrent task
-                jive.context.scheduler.schedule( eventID, context, interval );
-            }
-        });
-
         done();
     };
 
@@ -139,5 +126,5 @@ Worker.prototype.init = function init(_queueName, handlers) {
     jobs = kue.createQueue();
     jobs.promote();
     eventHandlers = handlers;
-    jobs.process(queueName, eventExecutor);
+    jobs.process(queueName, 10, eventExecutor);
 };

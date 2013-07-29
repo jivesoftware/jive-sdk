@@ -98,13 +98,7 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
 
                     // only attempt to schedule events after bootstrapped is complete
                     jive.events.addLocalEventListener( "serviceBootstrapped", function() {
-                        jive.context.scheduler.isScheduled(eventID).then(function(scheduled){
-                            if (!scheduled) {
-                                jive.context.scheduler.schedule(eventID, taskToAdd['context'], taskToAdd['interval']);
-                            } else {
-                                jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
-                            }
-                        });
+                        jive.context.scheduler.schedule(eventID, taskToAdd['context'], taskToAdd['interval']);
                     });
 
                 });

@@ -57,7 +57,21 @@ var searchForJobs = function( queueName ) {
             if ( inactiveJobs ) {
                 foundJobs = foundJobs.concat( inactiveJobs );
             }
-            deferred.resolve( foundJobs );
+            kue.Job.rangeByType(queueName, 'active', 0, 10, 'asc', function (err, activeJobs) {
+                if ( activeJobs ) {
+                    activeJobs.forEach( function(job) {
+                        var elapsed = ( new Date().getTime() - job.updated_at ) / 1000;
+                        if ( elapsed > 60 ) {
+                            // jobs shouldn't run more than 60 seconds
+                            console.log('job', job.id, 'expired, removing');
+                            job.remove();
+                        } else {
+                            foundJobs.push( job );
+                        }
+                    });
+                }
+                deferred.resolve( foundJobs );
+            });
         });
     });
     return deferred.promise;
@@ -96,6 +110,27 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     jive.logger.info("Redis Scheduler Initialized for queue");
 };
 
+var localTasks = {};
+
+function scheduleLocalRecurrentTask(delay, self, eventID, context, interval) {
+    if ( localTasks[eventID] ) {
+        jive.log.debug("Event", eventID, "already scheduled, skipping.");
+        return;
+    }
+
+    setTimeout(function () {
+        localTasks[eventID] = setInterval(function () {
+            self.isScheduled(eventID).then(function (scheduled) {
+                if (!scheduled) {
+                    self.schedule(eventID, context, null, delay);
+                } else {
+                    jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
+                }
+            });
+        }, interval);
+    }, delay || 1);
+}
+
 /**
  * Schedule a task.
  * @param eventID the named event to fire to perform this task
@@ -106,6 +141,15 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
  * only if its not a recurrent task
  */
 Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
+    var self = this;
+
+    if ( interval ) {
+        // if there is an interval, try to execute this task periodically
+        // it will only fire if it isn't already running somewhere
+        scheduleLocalRecurrentTask(delay, self, eventID, context, interval);
+        return;
+    }
+
     var deferred;
 
     if ( !interval ) {
@@ -138,10 +182,8 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
             return;
         }
 
-        // there is a promise to fulfill:
         // once the job is done, retrieve any results that were cached on redis by some worker
         // then resolve or reject the promise accordingly.
-
         redisClient.get(jobID, function(err, jobResult) {
             if ( !err ) {
                 deferred.resolve( jobResult ? JSON.parse(jobResult)['result'] : null );
@@ -171,6 +213,8 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
 };
 
 Scheduler.prototype.unschedule = function unschedule(eventID){
+    clearInterval(localTasks[eventID]);
+
     this.getTasks().forEach(function(job) {
         if (job.data['eventID'] == eventID) {
             job.remove();
