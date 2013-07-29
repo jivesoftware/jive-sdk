@@ -24,6 +24,11 @@
 var kue = require('kue');
 var jive = require('../../../api');  // !! xxx todo is there an alternative to this????
 
+function Worker() {
+}
+
+module.exports = Worker;
+
 var redisClient;
 var jobs;
 var eventHandlers;
@@ -32,9 +37,11 @@ var queueName;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // helpers
 
-function scheduleCleanup(jobID) {
+function scheduleCleanup(eventID, jobID) {
     // cleanup the job in 30 seconds. somebody better have consumed the job result in 30 seconds
-    jive.context.scheduler.schedule('cleanupJobID', { 'jobID': jobID}, null, 30 * 1000);
+    if ( eventID != 'cleanupJobID' ) {
+        jive.context.scheduler.schedule('cleanupJobID', { 'jobID': jobID}, null, 30 * 1000);
+    }
 }
 
 /**
@@ -49,6 +56,8 @@ function eventExecutor(job, done) {
     var tileName = context['tileName'];
 
     var next = function() {
+        scheduleCleanup(eventID, jobID);
+
         if (!interval) {
             done();
             return;
@@ -98,7 +107,6 @@ function eventExecutor(job, done) {
                     if (result) {
                         redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
                             next();
-                            scheduleCleanup(jobID);
                         });
                     }
                     else {
@@ -109,7 +117,6 @@ function eventExecutor(job, done) {
                 function(err) {
                     redisClient.set(jobID, JSON.stringify({ 'err' : err }), function() {
                         next();
-                        scheduleCleanup(jobID);
                     });
                 }
             );
@@ -117,7 +124,6 @@ function eventExecutor(job, done) {
             // its not a promise - save the result
             redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
                 next();
-                scheduleCleanup(jobID);
             });
         }
     }
@@ -126,7 +132,8 @@ function eventExecutor(job, done) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
-exports.init = function(_queueName, handlers) {
+
+Worker.prototype.init = function init(_queueName, handlers) {
     queueName = _queueName;
     redisClient = require('redis').createClient();
     jobs = kue.createQueue();

@@ -18,6 +18,7 @@ var jive = require('../../../api');
 var kue = require('kue');
 var express = require('express');
 var q = require('q');
+var worker = require('./worker');
 
 var jobs;
 var redisClient;
@@ -36,7 +37,8 @@ module.exports = Scheduler;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // helpers
 
-var queueFor = function(eventID) {
+var queueFor = function(meta) {
+    var eventID = meta['eventID'];
     if (jive.events.pushQueueEvents.indexOf(eventID) != -1 ) {
         return pushQueueName;
     } else {
@@ -52,12 +54,15 @@ var searchForJobs = function( queueName ) {
             foundJobs = foundJobs.concat( delayedJobs );
         }
         kue.Job.rangeByType(queueName, 'inactive', 0, 10, 'asc', function (err, inactiveJobs) {
-            foundJobs = foundJobs.concat( inactiveJobs );
+            if ( inactiveJobs ) {
+                foundJobs = foundJobs.concat( inactiveJobs );
+            }
             deferred.resolve( foundJobs );
         });
     });
     return deferred.promise;
 };
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public
@@ -81,11 +86,11 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     };
 
     if ( isWorker  ) {
-        require('./worker').init(jobQueueName, _eventHandlerMap);
+        new worker().init(jobQueueName, _eventHandlerMap);
     }
 
     if ( isPusher  ) {
-        require('./worker').init(pushQueueName, _eventHandlerMap);
+        new worker().init(pushQueueName, _eventHandlerMap);
     }
 
     jive.logger.info("Redis Scheduler Initialized for queue");
@@ -120,7 +125,7 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
         meta['delay'] = delay;
     }
 
-    var job = jobs.create(queueFor(eventID), meta);
+    var job = jobs.create(queueFor(meta), meta);
     if ( interval || delay ) {
         job.delay(interval && !delay ? interval : delay);
     }
