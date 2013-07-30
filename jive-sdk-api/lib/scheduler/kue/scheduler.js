@@ -37,8 +37,7 @@ module.exports = Scheduler;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // helpers
 
-var queueFor = function(meta) {
-    var eventID = meta['eventID'];
+var queueFor = function(eventID) {
     if (jive.events.pushQueueEvents.indexOf(eventID) != -1 ) {
         return pushQueueName;
     } else {
@@ -79,7 +78,6 @@ var searchForJobs = function( queueName ) {
     return deferred.promise;
 };
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
@@ -96,16 +94,24 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     // kue specific cleanup job that should run periodically
     // to reap the job result records in redis
     _eventHandlerMap['cleanupJobID'] = function(context) {
+        var deferred = q.defer();
         var jobID = context['jobID'];
-        redisClient.del(jobID);
-        jive.logger.debug("Cleaned up", jobID);
+        redisClient.del(jobID, function(err, reply) {
+            if (!err) {
+                jive.logger.debug("Cleaned up", jobID);
+                deferred.resolve();
+            }
+            else {
+                deferred.reject(err);
+            }
+        });
+        return deferred;
     };
 
     if ( isWorker  ) {
         new worker().init(jobQueueName, _eventHandlerMap);
     }
-
-    if ( isPusher  ) {
+    else if ( isPusher  ) {
         new worker().init(pushQueueName, _eventHandlerMap);
     }
 
@@ -124,13 +130,13 @@ function scheduleLocalRecurrentTask(delay, self, eventID, context, interval) {
         localTasks[eventID] = setInterval(function () {
             self.isScheduled(eventID).then(function (scheduled) {
                 if (!scheduled) {
-                    self.schedule(eventID, context, null, delay);
+                    self.schedule(eventID, context, null, delay || interval);
                 } else {
                     jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
                 }
             });
         }, interval);
-    }, delay || 1);
+    }, delay || interval || 1);
 }
 
 /**
@@ -171,7 +177,7 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
         meta['delay'] = delay;
     }
 
-    var job = jobs.create(queueFor(meta), meta);
+    var job = jobs.create(queueFor(eventID), meta);
     if ( interval || delay ) {
         job.delay(interval && !delay ? interval : delay);
     }
@@ -205,9 +211,9 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
             // cleanup
             redisClient.del(jobID);
         });
-    }).save();
-
+    });
     jive.logger.debug("Scheduled task: " + eventID, interval || '(no interval)');
+    job.save();
 
     if (deferred) {
         return deferred.promise;

@@ -68,7 +68,6 @@ exports.baseEvents = [
         },
         'description' : 'Framework handler'
     },
-
     {
         'event': 'destroyingInstance',
         'handler' : function(theInstance){
@@ -76,7 +75,6 @@ exports.baseEvents = [
         },
         'description' : 'Framework handler'
     },
-
     {
         'event': 'destroyedInstance',
         'handler' : function(theInstance){
@@ -84,7 +82,6 @@ exports.baseEvents = [
         },
         'description' : 'Framework handler'
     },
-
     {
         'event': 'dataPushed',
         'handler' : function(theInstance, pushedData, response){
@@ -92,7 +89,6 @@ exports.baseEvents = [
         },
         'description' : 'Framework handler'
     },
-
     {
         'event': 'activityPushed',
         'handler' : function(theInstance, pushedData, response){

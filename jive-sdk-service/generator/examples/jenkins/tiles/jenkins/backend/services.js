@@ -33,9 +33,6 @@ exports.task = new jive.tasks.build(function() {
     });
 }, 60000);
 
-//"cfw6fmp5e409r4gq78lijb1pjsqx76rg",
-//"llgdjatvu4noh902u3vpqdajv8w686.o5PHAGLN3kfeNP5tk6JrxAAufKE.1.s"
-
 function pushUpdate(tile) {
     console.log('pushing update: '+ tile.name +', '+ tile.id, tile);
 

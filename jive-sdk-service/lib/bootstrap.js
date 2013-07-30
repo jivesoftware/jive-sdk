@@ -118,6 +118,7 @@ var setupScheduler = function() {
     });
 
     if ( service.role.isWorker() || service.role.isPusher() ) {
+        jive.logger.info("Starting service in ", service.options.role, "mode");
         service.scheduler().init( jive.events.eventHandlerMap, {'role' : service.options.role } );
         deferred.resolve();
     } else {
@@ -133,6 +134,7 @@ var setupHttp = function(app, rootDir, options) {
     var deferred = q.defer();
 
     if ( service.role.isHttp() ) {
+        jive.logger.warn('Starting service in HTTP mode');
         setupExpressApp(app, rootDir, options).then( function() {
             jive.logger.info("Http node setup");
             deferred.resolve();
