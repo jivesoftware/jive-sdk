@@ -14,51 +14,91 @@
  *    limitations under the License.
  */
 
-var count = 0;
 var jive = require("jive-sdk");
+var q = require('q');
 
 function processTileInstance(instance) {
     jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id);
 
-    count++;
-
-    var dataToPush = {
-        data: {
-            "title": "Simple Counter",
-            "contents": [
-                {
-                    "text": "Current count: " + count,
-                    "icon": "http://farm4.staticflickr.com/3136/5870956230_2d272d31fd_z.jpg",
-                    "linkDescription": "Current counter."
-                }
-            ],
-            "config": {
-                "listStyle": "contentList"
-            },
-            "action": {
-                "text": "Add a Todo",
-                "context": {
-                    "mode": "add"
+    function getFormattedData(count) {
+        return {
+            data: {
+                "title": "Simple Counter",
+                "contents": [
+                    {
+                        "text": "Current count: " + count,
+                        "icon": "http://farm4.staticflickr.com/3136/5870956230_2d272d31fd_z.jpg",
+                        "linkDescription": "Current counter."
+                    }
+                ],
+                "config": {
+                    "listStyle": "contentList"
+                },
+                "action": {
+                    "text": "Add a Todo",
+                    "context": {
+                        "mode": "add"
+                    }
                 }
             }
-        }
-    };
+        };
+    }
 
-    jive.tiles.pushData(instance, dataToPush);
+    var store = jive.service.persistence();
+    store.find('exampleStore', {
+        'key':'count'
+    }).then(function(found) {
+            if (found.length > 0) {
+                found = found[0].count;
+            }
+            else {
+                found = parseInt(instance.config.startSequence,10);
+            }
+            store.save('exampleStore', 'count', {
+                'key':'count',
+                'count':found+1
+            }).then(function() {
+                    return jive.tiles.pushData(instance, getFormattedData(found));
+                });
+        }, function() {
+            //some error
+            store.save('exampleStore', 'count', {
+                'key':'count',
+                'count':instance.config.startSequence
+            }).then(function() {
+                    return jive.tiles.pushData(instance, getFormattedData(found));
+                });
+        });
 }
 
-exports.task = new jive.tasks.build(
-    // runnable
-    function() {
-        jive.tiles.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
-            if ( instances ) {
-                instances.forEach( function( instance ) {
-                    processTileInstance(instance);
-                });
-            }
-        });
-    },
+var pushData = function() {
+    var deferred = q.defer();
+    jive.tiles.findByDefinitionName('example').then(function(instances) {
+        if (instances) {
+            q.all(instances.map(processTileInstance)).then(function() {
+                deferred.resolve(); //success
+            }, function() {
+                deferred.reject(); //failure
+            });
+        }
+        else {
+            console.log("No jive instances to push to");
+            deferred.resolve();
+        }
+    });
+    return deferred.promise;
+};
 
-    // interval (optional)
-    5000
-);
+exports.task = [
+    {
+        'event' : 'pushDataTileInstance',
+        'interval' : 10000
+    }
+];
+
+exports.eventHandlers = [
+    {
+        'event' : 'pushDataTileInstance',
+        'handler' : pushData
+    }
+];
