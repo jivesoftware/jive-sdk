@@ -48,41 +48,31 @@ function processTileInstance(instance) {
     store.find('exampleStore', {
         'key':'count'
     }).then(function(found) {
-            if (found.length > 0) {
-                found = found[0].count;
-            }
-            else {
-                found = parseInt(instance.config.startSequence,10);
-            }
-            store.save('exampleStore', 'count', {
-                'key':'count',
-                'count':found+1
-            }).then(function() {
-                    return jive.tiles.pushData(instance, getFormattedData(found));
-                });
-        }, function() {
-            //some error
-            store.save('exampleStore', 'count', {
-                'key':'count',
-                'count':instance.config.startSequence
-            }).then(function() {
-                    return jive.tiles.pushData(instance, getFormattedData(found));
-                });
+        found = found.length > 0 ? found[0].count : parseInt(instance.config.startSequence, 10);
+
+        store.save('exampleStore', 'count', {
+            'key':'count',
+            'count':found+1
+        }).then(function() {
+            return jive.tiles.pushData(instance, getFormattedData(found));
         });
+    }, function(err) {
+        //some error
+        jive.logger.debug('Error encountered, push failed', err);
+    });
 }
 
 var pushData = function() {
     var deferred = q.defer();
-    jive.tiles.findByDefinitionName('example').then(function(instances) {
+    jive.tiles.findByDefinitionName('{{{TILE_NAME}}}').then(function(instances) {
         if (instances) {
             q.all(instances.map(processTileInstance)).then(function() {
                 deferred.resolve(); //success
             }, function() {
                 deferred.reject(); //failure
             });
-        }
-        else {
-            console.log("No jive instances to push to");
+        } else {
+            jive.logger.debug("No jive instances to push to");
             deferred.resolve();
         }
     });

@@ -25,6 +25,7 @@ var redisClient;
 
 var jobQueueName = 'work';
 var pushQueueName = 'push';
+var scheduleLocalTasks = false;
 
 function Scheduler() {
     redisClient = require('redis').createClient();
@@ -116,12 +117,18 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
         new worker().init(pushQueueName, _eventHandlerMap);
     }
 
+    scheduleLocalTasks = isWorker;
+
     jive.logger.info("Redis Scheduler Initialized for queue");
 };
 
 var localTasks = {};
 
 function scheduleLocalRecurrentTask(delay, self, eventID, context, interval) {
+    if ( !scheduleLocalTasks ) {
+        return;
+    }
+
     if ( localTasks[eventID] ) {
         jive.log.debug("Event", eventID, "already scheduled, skipping.");
         return;
