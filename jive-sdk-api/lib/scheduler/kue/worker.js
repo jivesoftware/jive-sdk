@@ -119,11 +119,11 @@ function eventExecutor(job, done) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
-Worker.prototype.init = function init(_queueName, handlers) {
+Worker.prototype.init = function init(_queueName, handlers, concurrentJobs) {
     queueName = _queueName;
     redisClient = require('redis').createClient();
     jobs = kue.createQueue();
     jobs.promote(1000);
     eventHandlers = handlers;
-    jobs.process(queueName, 1, eventExecutor);
+    jobs.process(queueName, concurrentJobs || 100, eventExecutor);
 };
