@@ -57,13 +57,13 @@ var doDestroyInstance = function(instance, instanceLibrary, response) {
     var deferred = q.defer();
 
     // push was rejected with a 'gone'
-    jive.events.emit("destroyingInstance." + instance['name'], instance);
+    jive.events.emit("destroyingInstance", instance);
 
     // destroy the instance
     if ( instance ) {
         instanceLibrary.remove(instance['id']).then( function() {
             jive.logger.log('Destroying tile instance from database after receiving 410 GONE response', instance);
-            jive.events.emit("destroyedInstance." + instance['name'], instance);
+            jive.events.emit("destroyedInstance", instance);
             deferred.resolve(response);
         });
     } else {
@@ -149,7 +149,11 @@ var push = function (pushOperation, type, instance, dataToPush, pushURL, retryIf
     return pushOperation( instance, dataToPush, pushURL ).then(
         // successful push
         function (response) {
-            jive.events.emit( type + "Pushed." + instance['name'], instance, dataToPush, response);
+            jive.events.emit( type + "Pushed", {
+                'theInstance' : instance,
+                'pushedData' : dataToPush,
+                'response' : response
+            });
             return response;
         },
 

@@ -74,7 +74,7 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
                 } else {
                     tasksToAdd.push(tasks);
                 }
-                // enforce a standard event ID - unique to the tile that supplied it
+
                 tasksToAdd.forEach(function(taskToAdd) {
                     var eventID = taskToAdd['event'];
                     var handler = taskToAdd['handler'];
@@ -96,7 +96,7 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
                         }
                     }
 
-                    // only attempt to schedule events after bootstrapped is complete
+                    // only attempt to schedule events after bootstrap is complete
                     jive.events.addLocalEventListener( "serviceBootstrapped", function() {
                         jive.context.scheduler.schedule(eventID, taskToAdd['context'], taskToAdd['interval']);
                     });
@@ -105,15 +105,18 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
             }
 
             // event handlers
-            // these get contributed to workers listening on kue
             if ( target.eventHandlers ) {
                 target.eventHandlers.forEach( function( handlerInfo ) {
-                    jive.events.addDefinitionEventListener(
-                        handlerInfo['event'],
-                        definitionName,
-                        handlerInfo['handler'],
-                        handlerInfo['description'] || 'Unique to definition'
-                    );
+                    if ( jive.events.globalEvents.indexOf(handlerInfo['event']) != -1 ) {
+                        jive.events.addSystemEventListener(handlerInfo['event'],  handlerInfo['handler']);
+                    }  else {
+                        jive.events.addDefinitionEventListener(
+                            handlerInfo['event'],
+                            definitionName,
+                            handlerInfo['handler'],
+                            handlerInfo['description'] || 'Unique to definition'
+                        );
+                    }
                 });
             }
 

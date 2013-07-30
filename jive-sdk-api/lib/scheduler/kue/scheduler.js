@@ -83,7 +83,7 @@ var searchForJobs = function( queueName ) {
 // public
 
 Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
-
+    var self = this;
     var isWorker = !options || !options['role'] || options['role'] === 'worker';
     var isPusher = !options || !options['role'] || options['role'] === 'pusher';
 
@@ -118,6 +118,13 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     }
 
     scheduleLocalTasks = isWorker;
+
+    // setup listeners
+    jive.events.globalEvents.forEach( function(event) {
+        jive.events.addLocalEventListener( event, function(context ) {
+            self.schedule( event, context );
+        });
+    });
 
     jive.logger.info("Redis Scheduler Initialized for queue");
 };

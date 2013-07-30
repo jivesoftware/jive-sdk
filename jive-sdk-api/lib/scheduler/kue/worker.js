@@ -21,6 +21,7 @@
  * It can subscribe to many queues.
  */
 
+var q = require('q');
 var kue = require('kue');
 var jive = require('../../../api');  // !! xxx todo is there an alternative to this????
 
@@ -61,58 +62,62 @@ function eventExecutor(job, done) {
         done();
     };
 
-    var handler;
+    var handlers;
     if (tileName) {
         var tileEventHandlers = eventHandlers[tileName];
         if ( !tileEventHandlers ) {
             done();
             return;
         }
-        handler = tileEventHandlers[eventID];
+        handlers = tileEventHandlers[eventID];
     } else {
-        handler = eventHandlers[eventID];
+        handlers = eventHandlers[eventID];
     }
 
-    if ( !handler ) {
-        // could find no handler for the eventID
-        // we're done
+    if ( !handlers ) {
+        // could find no handlers for the eventID; we're done
         done();
         return;
     }
 
-    var result = handler(context);
-    if ( !result ) {
-        // no result ... we're immediately done
-        next();
-    } else {
-        if ( result['then'] ) {
+    if ( typeof handlers === 'function' ) {
+        // normalize single handler into an array
+        handlers = [ handlers ];
+    }
+
+    var promises = [];
+    handlers.forEach( function(handler) {
+        var result = handler(context);
+        if ( result && result['then'] ) {
             // its a promise
-            var promise = result;
-            promise.then(
-                // success
-                function(result) {
-                    if (result) {
-                        redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
-                            next();
-                        });
-                    }
-                    else {
-                        next();
-                    }
-                },
-                // error
-                function(err) {
-                    redisClient.set(jobID, JSON.stringify({ 'err' : err }), function() {
+            promises.push( result );
+        }
+    });
+
+    if ( promises.length > 0 ) {
+        q.all( promises ).then(
+            // success
+            function(result) {
+                if (result) {
+                    // if just one result, don't bother storing an array
+                    result = result['forEach'] && result.length == 1 ? result[0] : result;
+                    redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
                         next();
                     });
+                } else {
+                    next();
                 }
-            );
-        } else {
-            // its not a promise - save the result
-            redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
-                next();
-            });
-        }
+            },
+
+            // error
+            function(err) {
+                redisClient.set(jobID, JSON.stringify({ 'err' : err }), function() {
+                    next();
+                });
+            }
+        );
+    } else {
+        next();
     }
 }
 

@@ -45,7 +45,7 @@ function processTileInstance(instance) {
     }
 
     var store = jive.service.persistence();
-    store.find('exampleStore', {
+    return store.find('exampleStore', {
         'key':'count'
     }).then(function(found) {
         found = found.length > 0 ? found[0].count : parseInt(instance.config.startSequence, 10);
@@ -90,5 +90,10 @@ exports.eventHandlers = [
     {
         'event' : 'pushDataTileInstance',
         'handler' : pushData
+    },
+
+    {
+        'event' : 'newInstance',
+        'handler' : processTileInstance
     }
 ];

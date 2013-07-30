@@ -36,7 +36,7 @@ exports.registration = function(context) {
                 tileInstance['config'] = config;
 
                 instanceLibrary.save(tileInstance).then(function () {
-                    jive.events.emit("updateInstance." + name, tileInstance);
+                    jive.events.emit("updateInstance", tileInstance);
                     deferred.resolve(tileInstance);
                 });
 
@@ -51,7 +51,7 @@ exports.registration = function(context) {
 
                         jive.logger.info("registered instance", tileInstance);
                         instanceLibrary.save(tileInstance).then(function () {
-                            jive.events.emit("newInstance." + name, tileInstance);
+                            jive.events.emit("newInstance", tileInstance);
                             var jiveCommunity = tileInstance['jiveCommunity'];
                             if (jiveCommunity) {
                                 jive.community.findByCommunity(jiveCommunity).then( function( community ) {

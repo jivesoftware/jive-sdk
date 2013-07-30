@@ -28,6 +28,23 @@ var eventHandlerMap = {};
 
 Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     eventHandlerMap = _eventHandlerMap;
+
+    // setup listeners
+    jive.events.globalEvents.forEach( function(event) {
+        var handlers = eventHandlerMap[event];
+
+        if ( handlers ) {
+            if ( typeof handlers === 'function' ) {
+                // normalize single handler into an array
+                handlers = [ handlers ];
+            }
+
+            handlers.forEach( function( handler ) {
+                jive.events.addLocalEventListener( event, handler );
+            });
+        }
+
+    });
 };
 
 /**
@@ -37,24 +54,30 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
  * @param interval The interval to invoke the callback
  */
 Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
-    var handler;
+    var handlers;
     if (context['tileName']) {
-        handler = eventHandlerMap[context['tileName']][eventID];
+        handlers = eventHandlerMap[context['tileName']][eventID];
+    } else {
+        handlers = eventHandlerMap[eventID];
     }
-    else {
-        handler = eventHandlerMap[eventID];
-    }
+
+    handlers = handlers || [];
+
     if (interval) {
         var wrapper;
         if ( delay ) {
             wrapper = setTimeout( function() {
                 setInterval(function() {
-                    handler(context)
+                    handlers.forEach( function(handler) {
+                        handler(context)
+                    });
                 }, interval);
             }, delay );
         } else {
             wrapper = setInterval(function() {
-                handler(context)
+                handlers.forEach( function(handler) {
+                    handler(context)
+                });
             }, interval);
         }
 
@@ -63,10 +86,14 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
     else {
         if ( delay ) {
             setTimeout( function() {
-                handler(context)
+                handlers.forEach( function(handler) {
+                    handler(context)
+                });
             }, delay );
         } else {
-            handler(context);
+            handlers.forEach( function(handler) {
+                handler(context)
+            });
         }
     }
     jive.logger.debug("Scheduled task: " + eventID, interval);

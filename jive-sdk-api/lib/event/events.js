@@ -27,19 +27,25 @@ exports.eventHandlerMap = {};
 
 exports.addDefinitionEventListener = function( event, definitionName, handler, description ) {
     jive.logger.debug("Registered event for", definitionName,": '" + event + "' ", description ||'' );
-    exports.addListener( event+'.'+definitionName, handler );
+
     if ( !exports.eventHandlerMap[definitionName] ) {
         exports.eventHandlerMap[definitionName] = {};
     }
-    exports.eventHandlerMap[definitionName][event] = handler;
+
+    if (!exports.eventHandlerMap[definitionName][event]) {
+        exports.eventHandlerMap[definitionName][event] = [];
+    }
+    exports.eventHandlerMap[definitionName][event].push( handler );
 };
 
 exports.addSystemEventListener = function(event, handler, description) {
     jive.logger.debug("Registered system event ", event,": ", description);
+
     if (!exports.eventHandlerMap[event]) {
-        exports.addListener(event, handler);
-        exports.eventHandlerMap[event] = handler;
+        exports.eventHandlerMap[event] = [];
     }
+
+    exports.eventHandlerMap[event].push( handler );
 };
 
 exports.addLocalEventListener = function( event, handler ) {
@@ -56,6 +62,15 @@ exports.pushQueueEvents = [
     'pushCommentToJive'
 ];
 
+exports.globalEvents = [
+    'newInstance',
+    'updateInstance',
+    'destroyedInstance',
+    'dataPushed',
+    'activityPushed',
+    'commentPushed'
+];
+
 /**
  * This is an array of system defined events
  * @type {Array}
@@ -63,42 +78,45 @@ exports.pushQueueEvents = [
 exports.baseEvents = [
     {
         'event': 'newInstance',
-        'handler' : function(theInstance){
-            jive.logger.info("A new instance was created", theInstance);
+        'handler' : function(context){
+            jive.logger.info("A new instance was created", context);
         },
         'description' : 'Framework handler'
     },
     {
-        'event': 'destroyingInstance',
-        'handler' : function(theInstance){
-            jive.logger.info("Instance is being destroyed", theInstance);
+        'event': 'updateInstance',
+        'handler' : function(context){
+            jive.logger.info("An instance was updated", context);
         },
         'description' : 'Framework handler'
     },
     {
         'event': 'destroyedInstance',
-        'handler' : function(theInstance){
-            jive.logger.info("Instance has been destroyed", theInstance);
+        'handler' : function(context){
+            jive.logger.info("Instance has been destroyed", context);
         },
         'description' : 'Framework handler'
     },
     {
         'event': 'dataPushed',
-        'handler' : function(theInstance, pushedData, response){
+        'handler' : function(context){
+            var theInstance = context['theInstance'], pushedData = context['pushedData'], response = context['response'];
             jive.logger.info('Data push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
         },
         'description' : 'Framework handler'
     },
     {
         'event': 'activityPushed',
-        'handler' : function(theInstance, pushedData, response){
+        'handler' : function(context){
+            var theInstance = context['theInstance'], pushedData = context['pushedData'], response = context['response'];
             jive.logger.info('Activity push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
         },
         'description' : 'Framework handler'
     },
     {
         'event': 'commentPushed',
-        'handler' : function(theInstance, pushedData, response){
+        'handler' : function(context){
+            var theInstance = context['theInstance'], pushedData = context['pushedData'], response = context['response'];
             jive.logger.info('Comment push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
         },
         'description' : 'Framework handler'
