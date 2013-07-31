@@ -57,6 +57,7 @@ function eventExecutor(job, done) {
     var tileName = context['tileName'];
 
     var next = function() {
+        redisClient.set( eventID + ':lastrun', new Date().getTime());
         scheduleCleanup(eventID, jobID);
         done();
     };

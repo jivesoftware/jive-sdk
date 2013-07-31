@@ -35,7 +35,11 @@ exports.addDefinitionEventListener = function( event, definitionName, handler, d
     if (!exports.eventHandlerMap[definitionName][event]) {
         exports.eventHandlerMap[definitionName][event] = [];
     }
-    exports.eventHandlerMap[definitionName][event].push( handler );
+
+    // duplicate tile definition event listeners aren't permitted
+    if ( exports.eventHandlerMap[definitionName][event].indexOf(handler) == - 1 ) {
+        exports.eventHandlerMap[definitionName][event].push( handler );
+    }
 };
 
 exports.addSystemEventListener = function(event, handler, description) {
@@ -45,6 +49,8 @@ exports.addSystemEventListener = function(event, handler, description) {
         exports.eventHandlerMap[event] = [];
     }
 
+    // duplicate system event listeners are permitted, tile-contributed
+    // system event handlers
     exports.eventHandlerMap[event].push( handler );
 };
 

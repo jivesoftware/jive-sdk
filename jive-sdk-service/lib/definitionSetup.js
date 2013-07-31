@@ -75,14 +75,17 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
                     tasksToAdd.push(tasks);
                 }
 
-                tasksToAdd.forEach(function(taskToAdd) {
-                    var eventID = taskToAdd['event'];
-                    var handler = taskToAdd['handler'];
-                    if ( !taskToAdd['context'] ) {
-                        taskToAdd['context'] = {};
+                tasksToAdd.forEach(function(task) {
+                    var eventID = task['event'], handler = task['handler'],  interval = task['interval'] || 15 * 1000,
+                        context = task['context'] || {};
+
+                    if ( !eventID ) {
+                        // if no eventID -- then the event is <tilename>.<interval>
+                        eventID = definitionName + ( interval ? '.' + interval : '' );
                     }
-                    taskToAdd['context']['event'] = eventID;
-                    taskToAdd['context']['tileName'] = definitionName;
+
+                    context['event'] = eventID;
+                    context['tileName'] = definitionName;
 
                     if ( handler ) {
                         target.eventHandlers = target.eventHandlers || [];
@@ -98,9 +101,8 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
 
                     // only attempt to schedule events after bootstrap is complete
                     jive.events.addLocalEventListener( "serviceBootstrapped", function() {
-                        jive.context.scheduler.schedule(eventID, taskToAdd['context'], taskToAdd['interval']);
+                        jive.context.scheduler.schedule(eventID, context, interval);
                     });
-
                 });
             }
 

@@ -27,21 +27,15 @@ var redisClient;
 var jobQueueName = 'work';
 var pushQueueName = 'push';
 var scheduleLocalTasks = false;
+var localTasks = {};
 
 function Scheduler(options) {
-    //set up kue, optionally with a custom redis location.
-    redisClient = new worker().makeRedisClient(options);
-    kue.redis.createClient = function() {
-        return new worker().makeRedisClient(options);
-    }
-    jobs = kue.createQueue();
-    jobs.promote(1000);
 }
 
 module.exports = Scheduler;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-// helpers
+// private helpers
 
 var queueFor = function(eventID) {
     if (jive.events.pushQueueEvents.indexOf(eventID) != -1 ) {
@@ -84,25 +78,48 @@ var searchForJobs = function( queueName ) {
     return deferred.promise;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-// public
+var setupKue = function(options) {
+    //set up kue, optionally with a custom redis location.
+    redisClient = new worker().makeRedisClient(options);
+    kue.redis.createClient = function() {
+        return new worker().makeRedisClient(options);
+    }
+    jobs = kue.createQueue();
+    jobs.promote(1000);
+    return options;
+};
 
-Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
-    var self = this;
-    var isWorker = !options || !options['role'] || options['role'] === jive.constants.roles.WORKER;
-    var isPusher = !options || !options['role'] || options['role'] === jive.constants.roles.PUSHER;
-
-    if (!(isPusher || isWorker)) {
-        // schedule no workers to listen on queued events if neither pusher nor worker
+var scheduleLocalRecurrentTask = function(delay, self, eventID, context, interval) {
+    if ( !scheduleLocalTasks ) {
         return;
     }
 
-    var opts = {};
-    if (options.redisLocation && options.redisPort) {
-        opts['redisLocation'] = options.redisLocation;
-        opts['redisPort'] = options.redisPort;
+    if ( localTasks[eventID] ) {
+        jive.log.debug("Event", eventID, "already scheduled, skipping.");
+        return;
     }
 
+    setTimeout(function () {
+        localTasks[eventID] = setInterval(function () {
+            // evaluate the event last ran; if its before interval is up
+            // then prevent locally scheduled job from being scheduled
+            redisClient.get( eventID + ':lastrun', function(err, result) {
+                var now = new Date().getTime();
+                if ( err || !result || (  now - result >= interval ) ) {
+                    self.isScheduled(eventID).then(function (scheduled) {
+                        if (!scheduled) {
+                            self.schedule(eventID, context, null, delay || interval);
+                        } else {
+                            jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
+                        }
+                    });
+                }
+            });
+        }, interval);
+    }, delay || interval || 1);
+};
+
+function setupCleanupTasks(_eventHandlerMap) {
     // kue specific cleanup job that should run periodically
     // to reap the job result records in redis
     _eventHandlerMap['cleanupJobID'] = function(context) {
@@ -119,6 +136,23 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
         });
         return deferred;
     };
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// public
+
+Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
+    var self = this;
+    var isWorker = !serviceConfig || !serviceConfig['role'] || serviceConfig['role'] === jive.constants.roles.WORKER;
+    var isPusher = !serviceConfig || !serviceConfig['role'] || serviceConfig['role'] === jive.constants.roles.PUSHER;
+
+    var opts = setupKue(serviceConfig);
+    if (!(isPusher || isWorker)) {
+        // schedule no workers to listen on queued events if neither pusher nor worker
+        return;
+    }
+
+    setupCleanupTasks(_eventHandlerMap);
 
     if ( isWorker  ) {
         opts['queueName'] = jobQueueName;
@@ -141,31 +175,6 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
 
     jive.logger.info("Redis Scheduler Initialized for queue");
 };
-
-var localTasks = {};
-
-function scheduleLocalRecurrentTask(delay, self, eventID, context, interval) {
-    if ( !scheduleLocalTasks ) {
-        return;
-    }
-
-    if ( localTasks[eventID] ) {
-        jive.log.debug("Event", eventID, "already scheduled, skipping.");
-        return;
-    }
-
-    setTimeout(function () {
-        localTasks[eventID] = setInterval(function () {
-            self.isScheduled(eventID).then(function (scheduled) {
-                if (!scheduled) {
-                    self.schedule(eventID, context, null, delay || interval);
-                } else {
-                    jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
-                }
-            });
-        }, interval);
-    }, delay || interval || 1);
-}
 
 /**
  * Schedule a task.
@@ -192,12 +201,12 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
         deferred = q.defer();
     }
 
-    var meta = {};
-
     var jobID = jive.util.guid();
-    meta['jobID'] = jobID;
-    meta['eventID'] = eventID;
-    meta['context'] = context;
+    var meta = {
+        'jobID' : jobID,
+        'eventID' : eventID,
+        'context' : context
+    };
     if (interval) {
         meta['interval'] = interval;
     }
