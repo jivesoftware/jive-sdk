@@ -88,8 +88,8 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     //set up kue. This is before the check for pusher/worker so that http nodes are able to post jobs to the queue.
     var opts = {};
     if (options.REDIS_LOCATION && options.REDIS_PORT) {
-        opts['REDIS_LOCATION'] = options.REDIS_LOCATION;
-        opts['REDIS_PORT'] = options.REDIS_PORT;
+        opts['redisLocation'] = options.REDIS_LOCATION;
+        opts['redisPort'] = options.REDIS_PORT;
         redisClient = redis.createClient(options.REDIS_PORT, options.REDIS_LOCATION);
     }
     else {

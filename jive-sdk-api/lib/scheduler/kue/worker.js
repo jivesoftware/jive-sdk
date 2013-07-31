@@ -128,8 +128,8 @@ function eventExecutor(job, done) {
 Worker.prototype.init = function init(handlers, options) {
     eventHandlers = handlers;
     queueName = options['queueName'];
-    if (options['REDIS_LOCATION'] && options['REDIS_PORT']) {
-        redisClient = redis.createClient(options['REDIS_PORT'], options['REDIS_LOCATION']);
+    if (options['redisLocation'] && options['redisPort']) {
+        redisClient = redis.createClient(options['redisPort'], options['redisLocation']);
     }
     else {
         redisClient = redis.createClient();

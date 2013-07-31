@@ -121,9 +121,9 @@ var setupScheduler = function() {
     var opts = {
         'role':service.options.role
     };
-    if (service.options['REDIS_LOCATION'] && service.options['REDIS_PORT']) {
-        opts['REDIS_LOCATION'] = service.options['REDIS_LOCATION'];
-        opts['REDIS_PORT'] = service.options['REDIS_PORT'];
+    if (service.options['redisLocation'] && service.options['redisPort']) {
+        opts['redisLocation'] = service.options['redisLocation'];
+        opts['redisPort'] = service.options['redisPort'];
     }
     service.scheduler().init(jive.events.eventHandlerMap, opts);
     deferred.resolve();
