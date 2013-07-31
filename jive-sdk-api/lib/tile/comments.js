@@ -34,7 +34,7 @@ exports.commentOnActivity = function(activity, comment) {
         }
 
         // schedule the comment push
-        return jive.context.scheduler.schedule('pushCommentToJive', {
+        return jive.context.scheduler.schedule(jive.constants.tileEventNames.PUSH_COMMENT_TO_JIVE, {
             'tileInstance' : extstream,
             'comment' : comment,
             'commentsURL' : commentsURL
@@ -51,7 +51,7 @@ exports.commentOnActivityByExternalID = function(extstream, externalActivityID, 
     }
 
     // schedule the comment push
-    return jive.context.scheduler.schedule('pushCommentToJive', {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.PUSH_COMMENT_TO_JIVE, {
         'tileInstance' : extstream,
         'comment' : comment,
         'commentsURL' : commentsURL
@@ -71,7 +71,7 @@ exports.fetchCommentsOnActivity = function(activity, opts) {
     var parentInstanceURL = activity.parent + '/activities';
 
     return jive.extstreams.findByURL(parentInstanceURL).then( function(extstream) {
-        return jive.context.scheduler.schedule('getPaginatedResults', {
+        return jive.context.scheduler.schedule(jive.constants.tileEventNames.GET_PAGINATED_RESULTS, {
             'extstream' : extstream,
             'commentsURL' : commentsURL
         } );
@@ -92,7 +92,7 @@ exports.fetchAllCommentsForExtstream = function(extstream, opts) {
 
     commentsURL += buildQueryString(opts['fieldList'], opts['itemsPerPage'], opts['commentSourceType']);
 
-    var promise = jive.context.scheduler.schedule('getPaginatedResults', {
+    var promise = jive.context.scheduler.schedule(jive.constants.tileEventNames.GET_PAGINATED_RESULTS, {
         'extstream' : extstream,
         'commentsURL' : commentsURL
     } );

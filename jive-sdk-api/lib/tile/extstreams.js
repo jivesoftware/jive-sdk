@@ -32,14 +32,14 @@ extstreams.getCollection = function() {
 };
 
 extstreams.pushActivity = function ( tileInstance, activity) {
-    return jive.context.scheduler.schedule('pushActivityToJive', {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.PUSH_ACTIVITY_TO_JIVE, {
         'tileInstance' : tileInstance,
         'activity' : activity
     } );
 };
 
 var pushComment = function ( tileInstance, comment, commentURL) {
-    return jive.context.scheduler.schedule('pushCommentToJive', {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.PUSH_COMMENT_TO_JIVE, {
         'tileInstance' : tileInstance,
         'commentURL' : commentURL,
         'comment' : comment
@@ -55,7 +55,7 @@ var pushComment = function ( tileInstance, comment, commentURL) {
  * @returns a promise that resolves with a response object. response.entity is the created comment that is returned from Jive
  */
 extstreams.commentOnActivity = function(activity, comment ) {
-    return jive.context.scheduler.schedule('commentOnActivity', {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.COMMENT_ON_ACTIVITY, {
         'activity' : activity,
         'comment' : comment
     } );
@@ -69,7 +69,7 @@ extstreams.commentOnActivity = function(activity, comment ) {
  * @param comment
  */
 extstreams.commentOnActivityByExternalID = function(extstream, externalActivityID, comment) {
-    return jive.context.scheduler.schedule('commentOnActivityByExternalID', {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID, {
         'extstream' : extstream,
         'externalActivityID' : externalActivityID,
         'comment' : comment
@@ -99,7 +99,7 @@ var DEFAULT_OPTS = {
  * @returns a promise that resolves to a response. response.entity is the list of comments. See  See https://developers.jivesoftware.com/api/rest/index.html#lists
  */
 extstreams.fetchCommentsOnActivity = function(activity, opts) {
-    return jive.context.scheduler.schedule('fetchCommentsOnActivity', {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.FETCH_COMMENTS_ON_ACTIVITY, {
         'activity' : activity,
         'opts' : opts || DEFAULT_OPTS
     } );
@@ -112,7 +112,7 @@ extstreams.fetchCommentsOnActivity = function(activity, opts) {
  * @returns a promise that resolves to a response. response.entity is the list of comments. See  See https://developers.jivesoftware.com/api/rest/index.html#lists
  */
 extstreams.fetchAllCommentsForExtstream = function(extstream, opts) {
-    return jive.context.scheduler.schedule('fetchAllCommentsForExtstream', {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.FETCH_ALL_COMMENTS_FOR_EXT_STREAM, {
         'extstream' : extstream,
         'opts' : opts || DEFAULT_OPTS
     } );

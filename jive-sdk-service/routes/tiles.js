@@ -107,7 +107,7 @@ function makeContext(guid, config, name, jiveUrl, pushUrl, code) {
 }
 
 function schedule(guid, config, name, jiveUrl, pushUrl, code, res) {
-    var promise = jive.context.scheduler.schedule('registration', makeContext(guid, config, name, jiveUrl, pushUrl, code));
+    var promise = jive.context.scheduler.schedule(jive.constants.tileEventNames.INSTANCE_REGISTRATION, makeContext(guid, config, name, jiveUrl, pushUrl, code));
     var success = function (result) {
         res.writeHead(200);
         res.end(JSON.stringify(result));

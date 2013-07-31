@@ -10,7 +10,7 @@ exports.oauthRegister = function(req, res ) {
 };
 
 function schedule(registration, res) {
-    var promise =  jive.context.scheduler.schedule('clientAppRegistration', registration);
+    var promise =  jive.context.scheduler.schedule(jive.constants.tileEventNames.CLIENT_APP_REGISTRATION, registration);
     var success = function() {
         // success
         res.writeHead(200, { 'Content-Type': 'application/json' });

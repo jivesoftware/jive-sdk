@@ -229,20 +229,20 @@ exports.refreshAccessToken = function (instance) {
 };
 
 exports.getExternalProps = function( instance ) {
-    return jive.context.scheduler.schedule('getExternalProps', {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.GET_EXTERNAL_PROPS, {
         'instance' : instance
     } );
 };
 
 exports.setExternalProps = function( instance, props ) {
-    return jive.context.scheduler.schedule('setExternalProps', {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.SET_EXTERNAL_PROPS, {
         'instance' : instance,
         'props' : props
     } );
 };
 
 exports.deleteExternalProps = function( instance ){
-    return jive.context.scheduler.schedule('deleteExternalProps', {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.DELETE_EXTERNAL_PROPS, {
         'instance' : instance
     } );
 };

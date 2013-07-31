@@ -78,7 +78,7 @@ var doDestroyInstance = function(instance, instanceLibrary, response) {
  * Analyzes provided response, and does the following:
  * - if 400 - 409, then this is likely a bad access token problem. in this case, perform the s
  *   token flow; if that is successful, perform the successful token refresh callback; otherwise perform the
- *   unsuccessful rrefresh callback.
+ *   unsuccessful refresh callback.
  * - if 410, then this is caused by the remote instance being permanently deactivated; the integration
  *   should destroy the locally registered instance.
  * - otherwise its unknown error; call the error callback.
@@ -260,7 +260,7 @@ exports.getPaginated = function(instance, url) {
         }
 
         entity.next = function() {
-            return jive.context.scheduler.schedule('getPaginatedResults', {
+            return jive.context.scheduler.schedule(jive.constants.tileEventNames.GET_PAGINATED_RESULTS, {
                 'extstream' : instance,
                 'commentsURL' : entity.links.next
             } );

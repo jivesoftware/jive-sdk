@@ -23,6 +23,7 @@
 
 var q = require('q');
 var kue = require('kue');
+var redis = require('redis');
 var jive = require('../../../api');  // !! xxx todo is there an alternative to this????
 
 function Worker() {
@@ -124,11 +125,19 @@ function eventExecutor(job, done) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
-Worker.prototype.init = function init(_queueName, handlers, concurrentJobs) {
-    queueName = _queueName;
-    redisClient = require('redis').createClient();
+Worker.prototype.init = function init(handlers, options) {
+    eventHandlers = handlers;
+    queueName = options['queueName'];
+    if (options['REDIS_LOCATION'] && options['REDIS_PORT']) {
+        redisClient = redis.createClient(options['REDIS_PORT'], options['REDIS_LOCATION']);
+    }
+    else {
+        redisClient = redis.createClient();
+    }
+    kue.redis.createClient = function() {
+        return redisClient;
+    }
     jobs = kue.createQueue();
     jobs.promote(1000);
-    eventHandlers = handlers;
-    jobs.process(queueName, concurrentJobs || 100, eventExecutor);
+    jobs.process(queueName, options['concurrentJobs'] || 100, eventExecutor);
 };

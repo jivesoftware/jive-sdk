@@ -57,18 +57,18 @@ exports.addLocalEventListener = function( event, handler ) {
  * @type {Array}
  */
 exports.pushQueueEvents = [
-    'pushDataToJive',
-    'pushActivityToJive',
-    'pushCommentToJive'
+    jive.constants.tileEventNames.PUSH_DATA_TO_JIVE,
+    jive.constants.tileEventNames.PUSH_ACTIVITY_TO_JIVE,
+    jive.constants.tileEventNames.PUSH_COMMENT_TO_JIVE
 ];
 
 exports.globalEvents = [
-    'newInstance',
-    'updateInstance',
-    'destroyedInstance',
-    'dataPushed',
-    'activityPushed',
-    'commentPushed'
+    jive.constants.globalEventNames.NEW_INSTANCE,
+    jive.constants.globalEventNames.INSTANCE_UPDATED,
+    jive.constants.globalEventNames.INSTANCE_REMOVED,
+    jive.constants.globalEventNames.DATA_PUSHED,
+    jive.constants.globalEventNames.ACTIVITY_PUSHED,
+    jive.constants.globalEventNames.COMMENT_PUSHED
 ];
 
 /**
@@ -77,28 +77,28 @@ exports.globalEvents = [
  */
 exports.baseEvents = [
     {
-        'event': 'newInstance',
+        'event': jive.constants.globalEventNames.NEW_INSTANCE,
         'handler' : function(context){
             jive.logger.info("A new instance was created", context);
         },
         'description' : 'Framework handler'
     },
     {
-        'event': 'updateInstance',
+        'event': jive.constants.globalEventNames.INSTANCE_UPDATED,
         'handler' : function(context){
             jive.logger.info("An instance was updated", context);
         },
         'description' : 'Framework handler'
     },
     {
-        'event': 'destroyedInstance',
+        'event': jive.constants.globalEventNames.INSTANCE_REMOVED,
         'handler' : function(context){
             jive.logger.info("Instance has been destroyed", context);
         },
         'description' : 'Framework handler'
     },
     {
-        'event': 'dataPushed',
+        'event': jive.constants.globalEventNames.DATA_PUSHED,
         'handler' : function(context){
             var theInstance = context['theInstance'], pushedData = context['pushedData'], response = context['response'];
             jive.logger.info('Data push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
@@ -106,7 +106,7 @@ exports.baseEvents = [
         'description' : 'Framework handler'
     },
     {
-        'event': 'activityPushed',
+        'event': jive.constants.globalEventNames.ACTIVITY_PUSHED,
         'handler' : function(context){
             var theInstance = context['theInstance'], pushedData = context['pushedData'], response = context['response'];
             jive.logger.info('Activity push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
@@ -114,15 +114,16 @@ exports.baseEvents = [
         'description' : 'Framework handler'
     },
     {
-        'event': 'commentPushed',
+        'event': jive.constants.globalEventNames.COMMENT_PUSHED,
         'handler' : function(context){
             var theInstance = context['theInstance'], pushedData = context['pushedData'], response = context['response'];
             jive.logger.info('Comment push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
         },
         'description' : 'Framework handler'
     },
+
     {
-        'event':'pushDataToJive',
+        'event':jive.constants.tileEventNames.PUSH_DATA_TO_JIVE,
         'handler':function(context) {
             var tileInstance = context['tileInstance'];
             var data = context['data'];
@@ -131,7 +132,7 @@ exports.baseEvents = [
         'description' : 'Framework handler'
     },
     {
-        'event':'pushActivityToJive',
+        'event':jive.constants.tileEventNames.PUSH_ACTIVITY_TO_JIVE,
         'handler':function(context) {
             var tileInstance = context['tileInstance'];
             var activity = context['activity'];
@@ -140,7 +141,7 @@ exports.baseEvents = [
         'description' : 'Framework handler'
     },
     {
-        'event':'pushCommentToJive',
+        'event':jive.constants.tileEventNames.PUSH_COMMENT_TO_JIVE,
         'handler':function(context) {
             var tileInstance = context['tileInstance'];
             var data = context['data'];
@@ -151,7 +152,7 @@ exports.baseEvents = [
         'description' : 'Framework handler'
     },
     {
-        'event':'commentOnActivity',
+        'event':jive.constants.tileEventNames.COMMENT_ON_ACTIVITY,
         'handler':function(context) {
             var activity = context['activity'];
             var comment = context['comment'];
@@ -160,7 +161,7 @@ exports.baseEvents = [
         'description' : 'Framework handler'
     },
     {
-        'event':'commentOnActivityByExternalID',
+        'event':jive.constants.tileEventNames.COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID,
         'handler':function(context) {
             var extstream = context['extstream'];
             var externalActivityID = context['externalActivityID'];
@@ -170,7 +171,7 @@ exports.baseEvents = [
         'description' : 'Framework handler'
     },
     {
-        'event':'fetchCommentsOnActivity',
+        'event':jive.constants.tileEventNames.FETCH_COMMENTS_ON_ACTIVITY,
         'handler':function(context) {
             var activity = context['activity'];
             var opts = context['opts'];
@@ -179,7 +180,7 @@ exports.baseEvents = [
         'description' : 'Framework handler'
     },
     {
-        'event':'fetchAllCommentsForExtstream',
+        'event':jive.constants.tileEventNames.FETCH_ALL_COMMENTS_FOR_EXT_STREAM,
         'handler':function(context) {
             var extstream = context['extstream'];
             var opts = context['opts'];
@@ -188,41 +189,41 @@ exports.baseEvents = [
         'description' : 'Framework handler'
     },
     {
-        'event':'registration',
+        'event':jive.constants.tileEventNames.INSTANCE_REGISTRATION,
         'handler':function(context) {
             return regHandler.registration(context);
         }
     },
     {
-        'event':'clientAppRegistration',
+        'event':jive.constants.tileEventNames.CLIENT_APP_REGISTRATION,
         'handler':function(context) {
             return jive.community.register(context);
         },
         'description' : 'Framework handler'
     },
     {
-        'event': 'getPaginatedResults',
+        'event': jive.constants.tileEventNames.GET_PAGINATED_RESULTS,
         'handler':function(context) {
             return pusher.getPaginated( context['extstream'], context['commentsURL'] );
         },
         'description' : 'Framework handler'
     },
     {
-        'event': 'getExternalProps',
+        'event': jive.constants.tileEventNames.GET_EXTERNAL_PROPS,
         'handler':function(context) {
             return pusher.fetchExtendedProperties( context['instance'] );
         },
         'description' : 'Framework handler'
     },
     {
-        'event': 'setExternalProps',
+        'event': jive.constants.tileEventNames.SET_EXTERNAL_PROPS,
         'handler':function(context) {
             return pusher.pushExtendedProperties( context['instance'], context['props'] );
         },
         'description' : 'Framework handler'
     },
     {
-        'event': 'deleteExternalProps',
+        'event': jive.constants.tileEventNames.DELETE_EXTERNAL_PROPS,
         'handler':function(context) {
             return pusher.removeExtendedProperties( context['instance'] );
         },

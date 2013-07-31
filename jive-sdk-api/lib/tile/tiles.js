@@ -31,7 +31,7 @@ tiles.getCollection = function() {
 };
 
 tiles.pushData = function (tileInstance, data) {
-    return jive.context.scheduler.schedule('pushDataToJive', {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.PUSH_DATA_TO_JIVE, {
         'tileInstance' : tileInstance,
         'data' : data
     } );

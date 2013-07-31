@@ -19,6 +19,7 @@ var kue = require('kue');
 var express = require('express');
 var q = require('q');
 var worker = require('./worker');
+var redis = require('redis');
 
 var jobs;
 var redisClient;
@@ -28,9 +29,6 @@ var pushQueueName = 'push';
 var scheduleLocalTasks = false;
 
 function Scheduler() {
-    redisClient = require('redis').createClient();
-    jobs = kue.createQueue();
-    jobs.promote(1000);
 }
 
 module.exports = Scheduler;
@@ -84,8 +82,24 @@ var searchForJobs = function( queueName ) {
 
 Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     var self = this;
-    var isWorker = !options || !options['role'] || options['role'] === 'worker';
-    var isPusher = !options || !options['role'] || options['role'] === 'pusher';
+    var isWorker = !options || !options['role'] || options['role'] === jive.constants.roles.WORKER;
+    var isPusher = !options || !options['role'] || options['role'] === jive.constants.roles.PUSHER;
+
+    //set up kue. This is before the check for pusher/worker so that http nodes are able to post jobs to the queue.
+    var opts = {};
+    if (options.REDIS_LOCATION && options.REDIS_PORT) {
+        opts['REDIS_LOCATION'] = options.REDIS_LOCATION;
+        opts['REDIS_PORT'] = options.REDIS_PORT;
+        redisClient = redis.createClient(options.REDIS_PORT, options.REDIS_LOCATION);
+    }
+    else {
+        redisClient = redis.createClient();
+    }
+    kue.redis.createClient = function() {
+        return redisClient;
+    }
+    jobs = kue.createQueue();
+    jobs.promote(1000);
 
     if (!(isPusher || isWorker)) {
         // schedule no workers to listen on queued events if neither pusher nor worker
@@ -97,7 +111,7 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     _eventHandlerMap['cleanupJobID'] = function(context) {
         var deferred = q.defer();
         var jobID = context['jobID'];
-        redisClient.del(jobID, function(err, reply) {
+        redisClient.del(jobID, function(err) {
             if (!err) {
                 jive.logger.debug("Cleaned up", jobID);
                 deferred.resolve();
@@ -110,11 +124,13 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     };
 
     if ( isWorker  ) {
-        new worker().init(jobQueueName, _eventHandlerMap);
+        opts['queueName'] = jobQueueName;
+        new worker().init(_eventHandlerMap, opts);
     }
 
     if ( isPusher  ) {
-        new worker().init(pushQueueName, _eventHandlerMap);
+        opts['queueName'] = pushQueueName;
+        new worker().init(_eventHandlerMap, opts);
     }
 
     scheduleLocalTasks = isWorker;
@@ -200,7 +216,7 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
         if ( !deferred ) {
             // cleanup
             redisClient.del(jobID);
-
+            job.remove();
             // we're done if there is no promise to fulfill (e.g. tile pushes)
             return;
         }
@@ -225,6 +241,7 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
 
             // cleanup
             redisClient.del(jobID);
+            job.remove();
         });
     });
     jive.logger.debug("Scheduled task: " + eventID, interval || '(no interval)');

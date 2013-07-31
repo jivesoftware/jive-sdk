@@ -331,12 +331,12 @@ exports.routes = {
  */
 exports.role = {
     'isWorker' : function() {
-        return !exports.options['role'] || exports.options['role'] === 'worker';
+        return !exports.options['role'] || exports.options['role'] === jive.constants.roles.WORKER;
     },
     'isPusher' : function() {
-        return !exports.options['role'] || exports.options['role'] === 'pusher';
+        return !exports.options['role'] || exports.options['role'] === jive.constants.roles.PUSHER;
     },
     'isHttp' : function() {
-        return !exports.options['role'] || exports.options['role'] === 'http';
+        return !exports.options['role'] || exports.options['role'] === jive.constants.roles.HTTP_HANDLER;
     }
 };

@@ -109,7 +109,7 @@ var setupScheduler = function() {
     var deferred = q.defer();
 
     // add base events
-    jive.events.baseEvents.forEach( function( handlerInfo ) {
+    jive.events.baseEvents.forEach(function(handlerInfo) {
         jive.events.addSystemEventListener(
             handlerInfo['event'],
             handlerInfo['handler'],
@@ -117,14 +117,15 @@ var setupScheduler = function() {
         );
     });
 
-    if ( service.role.isWorker() || service.role.isPusher() ) {
-        jive.logger.info("Starting service in ", service.options.role, "mode");
-        service.scheduler().init( jive.events.eventHandlerMap, {'role' : service.options.role } );
-        deferred.resolve();
-    } else {
-        deferred.resolve();
+    jive.logger.info("Starting service in ", service.options.role, "mode");
+    var opts = {
+        'role':service.options.role
+    };
+    if (service.options['REDIS_LOCATION'] && service.options['REDIS_PORT']) {
+        opts['REDIS_LOCATION'] = service.options['REDIS_LOCATION'];
+        opts['REDIS_PORT'] = service.options['REDIS_PORT'];
     }
-
+    service.scheduler().init(jive.events.eventHandlerMap, opts);
     deferred.resolve();
 
     return deferred.promise;
