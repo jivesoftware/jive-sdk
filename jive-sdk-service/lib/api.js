@@ -208,7 +208,7 @@ function initPersistence(options) {
     else if ( typeof persistence === 'string' ) {
         //If a string is provided, and it's a valid type exported in jive.persistence, then use that.
         if (jive.persistence[persistence]) {
-            exports.persistence(new jive.persistence[persistence]());
+            exports.persistence(new jive.persistence[persistence](options)); //pass options, such as location of DB for mongoDB.
         }
         else {
             jive.logger.warn('Invalid persistence option given "' + persistence + '". Must be one of ' + Object.keys(jive.persistence));
@@ -227,7 +227,7 @@ function initScheduler(options) {
     else if ( typeof scheduler === 'string' ) {
         //If a string is provided, and it's a valid type exported in jive.scheduler, then use that.
         if (jive.scheduler[scheduler]) {
-            exports.scheduler(new jive.scheduler[scheduler]());
+            exports.scheduler(new jive.scheduler[scheduler](options)); //pass options, such as location of redis for Kue.
         }
         else {
             jive.logger.warn('Invalid scheduler option given "' + scheduler + '". Must be one of ' + Object.keys(jive.scheduler));

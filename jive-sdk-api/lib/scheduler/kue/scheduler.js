@@ -28,7 +28,14 @@ var jobQueueName = 'work';
 var pushQueueName = 'push';
 var scheduleLocalTasks = false;
 
-function Scheduler() {
+function Scheduler(options) {
+    //set up kue, optionally with a custom redis location.
+    redisClient = new worker().makeRedisClient(options);
+    kue.redis.createClient = function() {
+        return new worker().makeRedisClient(options);
+    }
+    jobs = kue.createQueue();
+    jobs.promote(1000);
 }
 
 module.exports = Scheduler;
@@ -85,25 +92,15 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     var isWorker = !options || !options['role'] || options['role'] === jive.constants.roles.WORKER;
     var isPusher = !options || !options['role'] || options['role'] === jive.constants.roles.PUSHER;
 
-    //set up kue. This is before the check for pusher/worker so that http nodes are able to post jobs to the queue.
+    if (!(isPusher || isWorker)) {
+        // schedule no workers to listen on queued events if neither pusher nor worker
+        return;
+    }
+
     var opts = {};
     if (options.redisLocation && options.redisPort) {
         opts['redisLocation'] = options.redisLocation;
         opts['redisPort'] = options.redisPort;
-        redisClient = redis.createClient(options.redisPort, options.redisLocation);
-    }
-    else {
-        redisClient = redis.createClient();
-    }
-    kue.redis.createClient = function() {
-        return redisClient;
-    }
-    jobs = kue.createQueue();
-    jobs.promote(1000);
-
-    if (!(isPusher || isWorker)) {
-        // schedule no workers to listen on queued events if neither pusher nor worker
-        return;
     }
 
     // kue specific cleanup job that should run periodically

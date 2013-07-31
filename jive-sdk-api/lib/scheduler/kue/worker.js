@@ -29,8 +29,6 @@ var jive = require('../../../api');  // !! xxx todo is there an alternative to t
 function Worker() {
 }
 
-module.exports = Worker;
-
 var redisClient;
 var jobs;
 var eventHandlers;
@@ -124,19 +122,27 @@ function eventExecutor(job, done) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public
+module.exports = Worker;
+
+Worker.prototype.makeRedisClient = function(options) {
+    var redisClient;
+    if (options['redisLocation'] && options['redisPort']) {
+        var redisClient = redis.createClient(options['redisPort'], options['redisLocation']);
+    }
+    else {
+        var redisClient = redis.createClient();
+    }
+    return redisClient;
+}
 
 Worker.prototype.init = function init(handlers, options) {
     eventHandlers = handlers;
     queueName = options['queueName'];
-    if (options['redisLocation'] && options['redisPort']) {
-        redisClient = redis.createClient(options['redisPort'], options['redisLocation']);
-    }
-    else {
-        redisClient = redis.createClient();
-    }
+    var self = this;
     kue.redis.createClient = function() {
-        return redisClient;
-    }
+        return self.makeRedisClient(options);
+    };
+    redisClient = self.makeRedisClient(options);
     jobs = kue.createQueue();
     jobs.promote(1000);
     jobs.process(queueName, options['concurrentJobs'] || 100, eventExecutor);
