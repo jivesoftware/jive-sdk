@@ -76,8 +76,14 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
                 }
 
                 tasksToAdd.forEach(function(task) {
-                    var eventID = task['event'], handler = task['handler'],
-                        interval = task['interval'], context = task['context'] || {};
+                    var eventID = task['event'], handler = task['handler'],  interval = task['interval'] || 15 * 1000,
+                        context = task['context'] || {};
+
+                    if ( !eventID ) {
+                        // if no eventID -- then the event is <tilename>.<interval>
+                        eventID = definitionName + ( interval ? '.' + interval : '' );
+                    }
+
                     context['event'] = eventID;
                     context['tileName'] = definitionName;
 
