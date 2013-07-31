@@ -76,8 +76,7 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
                 }
 
                 tasksToAdd.forEach(function(taskToAdd) {
-                    var eventID = taskToAdd['event'];
-                    var handler = taskToAdd['handler'];
+                    var eventID = taskToAdd['event'], handler = taskToAdd['handler'];
                     if ( !taskToAdd['context'] ) {
                         taskToAdd['context'] = {};
                     }

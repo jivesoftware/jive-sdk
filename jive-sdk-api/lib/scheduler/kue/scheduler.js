@@ -35,7 +35,7 @@ function Scheduler() {
 module.exports = Scheduler;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-// helpers
+// private helpers
 
 var queueFor = function(eventID) {
     if (jive.events.pushQueueEvents.indexOf(eventID) != -1 ) {
@@ -199,12 +199,12 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
         deferred = q.defer();
     }
 
-    var meta = {};
-
     var jobID = jive.util.guid();
-    meta['jobID'] = jobID;
-    meta['eventID'] = eventID;
-    meta['context'] = context;
+    var meta = {
+        'jobID' : jobID,
+        'eventID' : eventID,
+        'context' : context
+    };
     if (interval) {
         meta['interval'] = interval;
     }
