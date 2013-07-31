@@ -117,15 +117,7 @@ var setupScheduler = function() {
         );
     });
 
-    jive.logger.info("Starting service in ", service.options.role, "mode");
-    var opts = {
-        'role':service.options.role
-    };
-    if (service.options['redisLocation'] && service.options['redisPort']) {
-        opts['redisLocation'] = service.options['redisLocation'];
-        opts['redisPort'] = service.options['redisPort'];
-    }
-    service.scheduler().init(jive.events.eventHandlerMap, opts);
+    service.scheduler().init(jive.events.eventHandlerMap, service.options);
     deferred.resolve();
 
     return deferred.promise;
@@ -169,6 +161,7 @@ exports.start = function( app, options, rootDir, tilesDir ) {
         .then( function() { return setupHttp(app, rootDir, options) })
         .then( function() {
             jive.logger.info("Bootstrap complete.");
+            jive.logger.info("Started service in ", service.options.role || 'self-contained', "mode");
             jive.events.emit("serviceBootstrapped");
         });
 };

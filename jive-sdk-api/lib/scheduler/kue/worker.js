@@ -130,13 +130,10 @@ Worker.prototype.init = function init(handlers, options) {
     queueName = options['queueName'];
     if (options['redisLocation'] && options['redisPort']) {
         redisClient = redis.createClient(options['redisPort'], options['redisLocation']);
-    }
-    else {
+    } else {
         redisClient = redis.createClient();
     }
-    kue.redis.createClient = function() {
-        return redisClient;
-    }
+
     jobs = kue.createQueue();
     jobs.promote(1000);
     jobs.process(queueName, options['concurrentJobs'] || 100, eventExecutor);
