@@ -106,11 +106,18 @@ var scheduleLocalRecurrentTask = function(delay, self, eventID, context, interva
 
     setTimeout(function () {
         localTasks[eventID] = setInterval(function () {
-            self.isScheduled(eventID).then(function (scheduled) {
-                if (!scheduled) {
-                    self.schedule(eventID, context, null, delay || interval);
-                } else {
-                    jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
+            // evaluate the event last ran; if its before interval is up
+            // then prevent locally scheduled job from being scheduled
+            redisClient.get( eventID + ':lastrun', function(err, result) {
+                var now = new Date().getTime();
+                if ( err || !result || (  now - result >= interval ) ) {
+                    self.isScheduled(eventID).then(function (scheduled) {
+                        if (!scheduled) {
+                            self.schedule(eventID, context, null, delay || interval);
+                        } else {
+                            jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
+                        }
+                    });
                 }
             });
         }, interval);
