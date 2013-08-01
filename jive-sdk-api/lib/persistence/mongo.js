@@ -44,17 +44,12 @@ module.exports = function(serviceConfig) {
     var db = require('mongojs').connect(databaseUrl);
 
     /**
-     * Fetches a named collection from the mongo db schema if collection exists; otherwise lazily create the collection.
+     * Collections are created dynamically in mongodb.
      * @param collectionID
      * @return {*}
      */
     var getCollection = function( collectionID ) {
-        var collection = db[collectionID];
-        if ( collection ) {
-            return collection;
-        } else {
-            return db.collection(collectionID);
-        }
+        return db.collection(collectionID);
     };
 
     return {
@@ -72,7 +67,7 @@ module.exports = function(serviceConfig) {
             var deferred = q.defer();
 
             var collection = getCollection(collectionID);
-            collection.save( data, function(err, saved ) {
+            collection.update({'id':key}, data, {'upsert':true}, function(err, saved ) {
                 if( err || !saved ) throw err;
                 else {
                     deferred.resolve(data);
@@ -92,10 +87,6 @@ module.exports = function(serviceConfig) {
             var deferred = q.defer();
 
             var collection = getCollection(collectionID);
-            if (!collection ) {
-                deferred.resolve(null);
-                return;
-            }
 
             collection.find(criteria, function(err, items) {
                 if( err || !items || items.length < 1) {
