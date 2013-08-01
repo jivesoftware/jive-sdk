@@ -126,15 +126,12 @@ function eventExecutor(job, done) {
 module.exports = Worker;
 
 Worker.prototype.makeRedisClient = function(options) {
-    var redisClient;
     if (options['redisLocation'] && options['redisPort']) {
-        var redisClient = redis.createClient(options['redisPort'], options['redisLocation']);
+        return redis.createClient(options['redisPort'], options['redisLocation']);
     }
-    else {
-        var redisClient = redis.createClient();
-    }
-    return redisClient;
-}
+
+    return redis.createClient();
+};
 
 Worker.prototype.init = function init(handlers, options) {
     eventHandlers = handlers;
