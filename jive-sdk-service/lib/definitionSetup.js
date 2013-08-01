@@ -72,7 +72,16 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
                         tasksToAdd.push(t);
                     });
                 } else {
-                    tasksToAdd.push(tasks);
+                    if ( typeof tasks === 'function' ) {
+                        // if the task provided is just a function, then
+                        // convert it into an object with reasonable defaults
+                        tasksToAdd.push( {
+                            'handler' : tasks,
+                            'interval' : 15 * 1000 // 15 second interval default
+                        } );
+                    } else {
+                        tasksToAdd.push(tasks);
+                    }
                 }
 
                 tasksToAdd.forEach(function(task) {

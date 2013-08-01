@@ -14,15 +14,35 @@
  *    limitations under the License.
  */
 
-var count = 0;
-
 var jive = require("jive-sdk");
+
+function getFormattedData(count) {
+    return {
+        "activity": {
+            "action": {
+                "name": "posted",
+                "description": "Activity " + count
+            },
+            "actor": {
+                "name": "Actor Name",
+                "email": "actor@email.com"
+            },
+            "object": {
+                "type": "website",
+                "url": "http://www.google.com",
+                "image": "http://placehold.it/102x102",
+                "title": "Activity " + count,
+                "description": "Activity " + count
+            },
+            "externalID": '' + new Date().getTime()
+        }
+    };
+}
 
 exports.task = function() {
     jive.extstreams.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
         if ( instances ) {
             instances.forEach( function( instance ) {
-
                 var config = instance['config'];
                 if ( config && config['posting'] === 'off' ) {
                     return;
@@ -30,31 +50,22 @@ exports.task = function() {
 
                 jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
 
-                count++;
+                var store = jive.service.persistence();
+                return store.find('exampleStore', {
+                    'key':'count'
+                }).then(function(count) {
+                    count = count.length > 0 ? count[0].count : parseInt(instance.config.startSequence, 10);
+                    store.save('exampleStore', 'count', {
+                        'key':'count',
+                        'count':count+1
+                    }).then(function() {
+                        jive.extstreams.pushActivity(instance, getFormattedData(count));
+                    });
+                }, function(err) {
+                    //some error
+                    jive.logger.debug('Error encountered, push failed', err);
+                });
 
-                var dataToPush = {
-                    "activity":
-                    {
-                        "action":{
-                            "name":"posted",
-                            "description":"Activity " + count
-                        },
-                        "actor":{
-                            "name":"Actor Name",
-                            "email":"actor@email.com"
-                        },
-                        "object":{
-                            "type":"website",
-                            "url":"http://www.google.com",
-                            "image":"http://placehold.it/102x102",
-                            "title":"Activity " + count,
-                            "description":"Activity " + count
-                        },
-                        "externalID": '' + new Date().getTime()
-                    }
-                };
-
-                jive.extstreams.pushActivity(instance, dataToPush);
             });
         }
     });

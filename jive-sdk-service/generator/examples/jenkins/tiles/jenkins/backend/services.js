@@ -92,7 +92,7 @@ function prepareData(data, callback) {
 exports.eventHandlers = [
 
     {
-        'event': 'newInstance',
+        'event': jive.constants.globalEvents.NEW_INSTANCE,
         'handler' : function(theInstance){
             jive.logger.info("Caught newInstance event, trying to push now.");
             pushUpdate(theInstance);
@@ -100,32 +100,10 @@ exports.eventHandlers = [
     },
 
     {
-        'event': 'updateInstance',
+        'event': jive.constants.globalEvents.INSTANCE_UPDATED,
         'handler' : function(theInstance){
             jive.logger.info("Caught updateInstance event, trying to push now.");
             pushUpdate(theInstance);
         }
-    },
-
-    {
-        'event': 'destroyingInstance',
-        'handler' : function(theInstance){
-            // override
-        }
-    },
-
-    {
-        'event': 'destroyedInstance',
-        'handler' : function(theInstance){
-            // override
-        }
-    },
-
-    {
-        'event': 'dataPushed',
-        'handler' : function(theInstance, pushedData, response){
-            // override
-        }
     }
-
 ];

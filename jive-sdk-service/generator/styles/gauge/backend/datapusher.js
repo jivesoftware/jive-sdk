@@ -14,19 +14,15 @@
  *    limitations under the License.
  */
 
-var count = 0;
-
 var jive = require("jive-sdk");
 
-exports.task = function(context) {
+exports.task = function() {
     var statusNames = [ "Poor", "Fair", "Good", "Excellent", "Outstanding" ];
 
     jive.tiles.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
         if ( instances ) {
             instances.forEach( function( instance ) {
                 jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
-
-                count++;
 
                 var level = Number(instance.config.level);
                 var dataToPush = {

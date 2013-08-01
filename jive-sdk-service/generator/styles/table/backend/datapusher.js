@@ -14,8 +14,6 @@
  *    limitations under the License.
  */
 
-var count = 0;
-
 var jive = require("jive-sdk");
 
 exports.task = function() {
