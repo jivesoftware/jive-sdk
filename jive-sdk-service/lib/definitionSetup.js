@@ -72,21 +72,18 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
                         tasksToAdd.push(t);
                     });
                 } else {
-                    if ( typeof tasks === 'function' ) {
-                        // if the task provided is just a function, then
-                        // convert it into an object with reasonable defaults
-                        tasksToAdd.push( {
-                            'handler' : tasks,
-                            'interval' : 15 * 1000 // 15 second interval default
-                        } );
-                    } else {
-                        tasksToAdd.push(tasks);
-                    }
+                    // if the task provided is just a function, then convert to object with 60 second interval
+                    tasksToAdd.push(typeof tasks === 'function' ?  { 'handler': tasks, 'interval': 60 * 1000 } : tasks);
                 }
 
                 tasksToAdd.forEach(function(task) {
-                    var eventID = task['event'], handler = task['handler'],  interval = task['interval'] || 15 * 1000,
+                    var eventID = task['event'], handler = task['handler'],  interval = task['interval'] || 60 * 1000,
                         context = task['context'] || {};
+
+                    if ( !handler ) {
+                        throw new Error('Task for tile definition "'
+                            + definitionName + '" must specify a function handler.');
+                    }
 
                     if ( !eventID ) {
                         // if no eventID -- then the event is <tilename>.<interval>
@@ -118,6 +115,15 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
             // event handlers
             if ( target.eventHandlers ) {
                 target.eventHandlers.forEach( function( handlerInfo ) {
+                    if ( !handlerInfo['event'] ) {
+                        throw new Error('Event handler for tile definition "'
+                            + definitionName + '" must specify an event name.');
+                    }
+                    if ( !handlerInfo['handler'] ) {
+                        throw new Error('Event handler for tile definition "'
+                            + definitionName + '" must specify a function handler.');
+                    }
+
                     if ( jive.events.globalEvents.indexOf(handlerInfo['event']) != -1 ) {
                         jive.events.addSystemEventListener(handlerInfo['event'],  handlerInfo['handler']);
                     }  else {
