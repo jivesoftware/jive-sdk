@@ -18,22 +18,12 @@
 var q = require('q');
 var jive = require('../../api');
 
-/**
- * @param app
- * @constructor
- */
-function Mongo(app) {
-    var databaseUrl = "mydb";
-    if ( app && app.settings && app.settings['databaseUrl'] ) {
-        databaseUrl = app.settings['databaseUrl'];
-    }
-    db = require("mongojs").connect(databaseUrl);
-}
+module.exports = function(serviceConfig) {
+    var databaseUrl;
 
-module.exports = function(databaseUrl) {
     // setup database url
-    if ( !databaseUrl ) {
-        databaseUrl = jive.context.config['databaseUrl'];
+    if (serviceConfig ) {
+        databaseUrl = serviceConfig['databaseUrl'];
     }
 
     if ( !databaseUrl ) {

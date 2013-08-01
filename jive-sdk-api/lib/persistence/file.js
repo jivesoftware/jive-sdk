@@ -18,7 +18,7 @@ var fs = require('fs');
 var q = require('q');
 var jive = require('../../api');
 
-module.exports = function(_path) {
+module.exports = function(serviceConfig) {
 
     jive.logger.warn("******************************");
     jive.logger.warn("File persistence is configured.");
@@ -36,7 +36,7 @@ module.exports = function(_path) {
     var cacheSize = 0;
     var dirtyCount = 0;
     var dirtyCollectionIDs = {};
-    var path = _path || "db";
+    var path = serviceConfig && serviceConfig['dataDirPath'] ? serviceConfig['dataDirPath'] : "db";
 
     jive.logger.debug("File persistence dir at '" + path + "'");
 
