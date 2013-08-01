@@ -25,6 +25,13 @@ exports = module.exports = new events.EventEmitter();
 
 exports.eventHandlerMap = {};
 
+/**
+ * Definition event listeners are events contributed by user tiles.
+ * @param event - the event id
+ * @param definitionName - the name of the tile
+ * @param handler - the function to call
+ * @param description
+ */
 exports.addDefinitionEventListener = function( event, definitionName, handler, description ) {
     jive.logger.debug("Registered event for", definitionName,": '" + event + "' ", description ||'' );
 
@@ -42,8 +49,14 @@ exports.addDefinitionEventListener = function( event, definitionName, handler, d
     }
 };
 
+/**
+ * A System-level event listener, like the ones in the baseEvents array below.
+ * @param event
+ * @param handler
+ * @param description
+ */
 exports.addSystemEventListener = function(event, handler, description) {
-    jive.logger.debug("Registered system event ", event,": ", description);
+    jive.logger.debug("Registered system event ", event,": ", description || 'no description');
 
     if (!exports.eventHandlerMap[event]) {
         exports.eventHandlerMap[event] = [];
