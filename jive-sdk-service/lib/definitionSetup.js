@@ -62,6 +62,13 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
             var taskPath = theDirectory + '/' + theFile;
             var target = require(taskPath);
 
+            if (  jive.events.globalEvents.indexOf(definitionName) != -1
+               || jive.events.pushQueueEvents.indexOf(definitionName) != -1  ) {
+
+                throw new Error('Illegal definition name ' + definitionName + ', collides with a reserved system identifier.' +
+                    'Please choose a different definition name.');
+            }
+
             // recurrent tasks
             // these are scheduled only if they haven't yet been scheduled by some other node
             var tasks = target.task;
