@@ -172,8 +172,6 @@ var recursiveDirectoryProcessor = function(app, definitionName, currentFsItem, r
                 }
             }
         }
-    }).catch(function(err){
-        jive.logger.error('Error processing tile definitions', err);
     });
 };
 
@@ -300,8 +298,6 @@ exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
         }));
 
         return q.all(promises);
-    }).fail(function(f) {
-        jive.logger.error(f);
     });
 };
 
