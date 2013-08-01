@@ -18,7 +18,7 @@ var fs = require('fs'),
     q  = require('q'),
     path  = require('path'),
     jive = require('../api'),
-    service = require('./api');
+    service = require('./service');
 
 var express = require('express');
 var consolidate = require('consolidate');

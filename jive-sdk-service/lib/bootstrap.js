@@ -16,7 +16,7 @@
 
 var express = require('express'),
     path = require('path'),
-    service = require('./api'),
+    service = require('./service'),
     jive = require('../api'),
     consolidate = require('consolidate'),
     q = require('q');
