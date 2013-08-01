@@ -125,8 +125,17 @@ exports.init = function(_app, options ) {
     app.use(app.router);
     app.use(express.errorHandler());
 
+    var applyOverrides = function(config) {
+        // override role
+        var roleFromEnv = process.env['jive_sdk_service_role'];
+        if ( roleFromEnv ) {
+            config['role'] = roleFromEnv;
+        }
+    };
+
     var initialPromise;
     if ( typeof options === 'object' ) {
+        applyOverrides(options);
         exports.options = options;
         jive.context.config = exports.options;
 
@@ -162,6 +171,8 @@ exports.init = function(_app, options ) {
 
         initialPromise = q.nfcall( fs.readFile, options, 'utf8').then( function (data) {
             var jiveConfig = JSON.parse(data);
+            applyOverrides(jiveConfig);
+
             exports.options = jiveConfig;
             jive.context.config = exports.options;
 
