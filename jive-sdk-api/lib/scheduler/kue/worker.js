@@ -37,13 +37,23 @@ var queueName;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // helpers
 
-function scheduleCleanup(eventID, jobID) {
+function scheduleCleanup(jobID) {
+    function cleanup(jobID) {
+        return function() {
+            redisClient.del(jobID, function(err) {
+                if (!err) {
+                    jive.logger.debug("Cleaned up", jobID);
+                }
+                else {
+                    jive.logger.debug("Error cleaning up", jobID);
+                }
+            });
+        }
+    };
+
     // cleanup the job in 30 seconds. somebody better have consumed the job result in 30 seconds
-    if ( eventID != 'cleanupJobID' ) {
-        jive.context.scheduler.schedule('cleanupJobID', { 'jobID': jobID}, null, 30 * 1000).then( function() {
-            jive.logger.debug("Cleaned up", jobID);
-        });
-    }
+    //if this worker goes down during or before cleanup, a reaper task will do the cleanup eventually
+    setTimeout(cleanup(jobID), 30*1000);
 }
 
 /**
@@ -55,13 +65,21 @@ function eventExecutor(job, done) {
     var jobID = meta['jobID'];
     var eventID = meta['eventID'];
     var tileName = context['tileName'];
+    jive.logger.debug('processing', jobID, ':', eventID);
+    //schedule the next iteration right away so that if this node dies, we don't lose the job.
+    //no matter what, when a new worker is brought in to replace a crashed worker, it will load any lost jobs from persistence.
+    //if this is a one-time job, then we don't care about the next iteration, it can just fail.
+    if (meta['interval']) {
+        jive.context.scheduler.schedule(eventID, context, meta['interval']);
+    }
 
     var next = function() {
-        redisClient.set( eventID + ':lastrun', new Date().getTime());
-        scheduleCleanup(eventID, jobID);
+        redisClient.set(eventID+':lastrun', new Date().getTime());
+        scheduleCleanup(jobID);
         done();
     };
 
+    //execute the job
     var handlers;
     if (tileName) {
         var tileEventHandlers = eventHandlers[tileName];
@@ -87,7 +105,7 @@ function eventExecutor(job, done) {
 
     var promises = [];
     handlers.forEach( function(handler) {
-        var result = handler(context);
+        var result = handler(context); //this actually runs the user code
         if ( result && result['then'] ) {
             // its a promise
             promises.push( result );
@@ -95,15 +113,20 @@ function eventExecutor(job, done) {
     });
 
     if ( promises.length > 0 ) {
-        q.all( promises ).then(
+        q.all(promises).then(
             // success
             function(result) {
                 if (result) {
                     // if just one result, don't bother storing an array
                     result = result['forEach'] && result.length == 1 ? result[0] : result;
-                    redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
+                    if (result) { //need to check if the promise inside the array contained a value
+                        redisClient.set(jobID, JSON.stringify({'result':result}), function() {
+                            next();
+                        });
+                    }
+                    else {
                         next();
-                    });
+                    }
                 } else {
                     next();
                 }

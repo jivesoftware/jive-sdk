@@ -114,7 +114,7 @@ function setupTasks(tasks, definitionName, target) {
         }
 
         //if the task defined a handler, and the event ID for this task doesn't already have a handler associated with it, add the handler to the event map.
-        if (handler && existingEventsForTile[eventID].length == 0) {
+        if (handler && existingEventsForTile[eventID].length == 0) { //todo intermittent fail on this line
             jive.events.addDefinitionEventListener(eventID, definitionName, handler, null);
             target.eventHandlers = target.eventHandlers || [];
 
@@ -128,6 +128,14 @@ function setupTasks(tasks, definitionName, target) {
         // only attempt to schedule events after bootstrap is complete
         jive.events.addLocalEventListener("serviceBootstrapped", function () {
             jive.context.scheduler.schedule(eventID, context, interval);
+//            jive.context.scheduler.isScheduled(eventID).then(function(scheduled) {
+//                if (!scheduled) {
+//                    jive.context.scheduler.schedule(eventID, context, interval);
+//                }
+//                else {
+//                    jive.logger.debug("Already scheduled", eventID);
+//                }
+//            });
         });
     });
 }
@@ -171,7 +179,7 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
                 setupTasks(tasks, definitionName, target);
             }
 
-            // definition json
+            // definition json todo remove
             if ( target.definitionJSON ) {
                 var definition = target.definitionJSON;
                 definition.id = definition.id === '{{{definition_id}}}' ? null : definition.id;
