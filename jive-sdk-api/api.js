@@ -81,6 +81,7 @@ exports.webhooks = require('./lib/webhook/webhooks');
 exports.tasks = require('./lib/task/tasks');
 
 // defaults - may be overriden
+// todo this is causing a print of file persistence usage on startup
 exports.context = {
     'persistence' : new exports.persistence.file(),
     'scheduler' : new exports.scheduler.memory(),
