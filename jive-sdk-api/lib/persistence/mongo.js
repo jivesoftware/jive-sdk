@@ -66,9 +66,12 @@ module.exports = function(serviceConfig) {
         save : function( collectionID, key, data) {
             var deferred = q.defer();
 
+            data['id'] = key;
             var collection = getCollection(collectionID);
             collection.update({'id':key}, data, {'upsert':true}, function(err, saved ) {
-                if( err || !saved ) throw err;
+                if( err || !saved ) {
+                    throw err;
+                }
                 else {
                     deferred.resolve(data);
                 }

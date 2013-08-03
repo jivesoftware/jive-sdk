@@ -60,83 +60,134 @@ exports.parseJiveCommunity = function( jiveUrl ) {
     return parts.length > 1 ? parts[1] : parts[0];
 };
 
+function validateRegistration(registration) {
+    var validationBlock = JSON.parse( JSON.stringify(registration) );
+    var jiveSignature = validationBlock['jiveSignature'];
+    var clientSecret = validationBlock['clientSecret'];
+    var jiveSignatureUrl = validationBlock['jiveSignatureURL'];
+    delete validationBlock['jiveSignature'];
+
+    var crypto = require("crypto");
+    var sha256 = crypto.createHash("sha256");
+    sha256.update(clientSecret, "utf8");
+    validationBlock['clientSecret'] = sha256.digest("hex");
+
+    var buffer = '';
+
+    validationBlock = jive.util.sortObject(validationBlock);
+    for (var key in validationBlock) {
+        if (validationBlock.hasOwnProperty(key)) {
+            var value = validationBlock[key];
+            buffer += key + ':' + value + '\n';
+        }
+    }
+
+    var headers = {
+        'X-Jive-MAC' : jiveSignature
+    };
+
+    return jive.util.buildRequest(jiveSignatureUrl, 'POST', buffer, headers);
+}
+
 exports.register = function( registration ) {
     var deferred = q.defer();
-    var jiveSignature = registration['jiveSignature'];
 
-    // xxx todo - validate jiveSignature, then do access token exchange
+    validateRegistration(registration).then(
+        // success
+        function() {
+            var registrationToSave = JSON.parse( JSON.stringify(registration) );
 
-    var registrationToSave = JSON.parse( JSON.stringify(registration) );
+            var jiveSignature = registration['jiveSignature'];
+            var authorizationCode = registration['code'];
+            var scope = registration['scope'];
+            var tenantId = registration['tenantId'];
+            var jiveUrl = registration['jiveUrl'];
+            var clientId = registration['clientId'];
+            var clientSecret = registration['clientSecret'];
 
-    var authorizationCode = registration['code'];
-    var scope = registration['scope'];
-    var tenantId = registration['tenantId'];
-    var jiveUrl = registration['jiveUrl'];
-    var clientId = registration['clientId'];
-    var clientSecret = registration['clientSecret'];
+            if ( !clientId ) {
+                // use global one
+                clientId = jive.context.config['clientId'];
+            }
+            if ( !clientSecret ) {
+                // use global one
+                clientSecret = jive.context.config['clientSecret'];
+            }
 
-    if ( !clientId ) {
-        // use global one
-        clientId = jive.context.config['clientId'];
-    }
-    if ( !clientSecret ) {
-        // use global one
-        clientSecret = jive.context.config['clientSecret'];
-    }
+            // do access token exchange
+            function persistCommunity(oauthResponse) {
+                exports.findByJiveURL(jiveUrl).then(function (community) {
+                    community = community || {};
 
-    // do access token exchange
-    client.requestAccessToken(
-        {
-            'client_secret' : clientSecret,
-            'client_id' : clientId,
-            'code' : authorizationCode,
-            'jiveUrl' : jiveUrl,
-            'scope' : scope,
-            'tenantId' : tenantId
-        },
+                    var oauth;
+                    if ( oauthResponse ) {
+                        oauth = community['oauth'] || oauthResponse['entity'];
+                        oauth['code'] = authorizationCode || oauth['code'];
+                        oauth['jiveSignature'] = jiveSignature || oauth['jiveSignature'];
+                        oauth['scope'] = oauthResponse['entity']['scope'] || oauth['scope'];
+                        oauth['expiresIn'] = oauthResponse['entity']['expires_in'] || oauth['expiresIn'];
+                        oauth['accessToken'] = oauthResponse['entity']['access_token'] || oauth['accessToken'];
+                    }
 
-        function(response) {
-            // successfully exchanged for access token:
-            // save registration
+                    community['jiveUrl' ] = jiveUrl || community['jiveUrl' ];
+                    community['version' ] = 'post-samurai';
+                    community['tenantId' ] = tenantId || community['tenantId' ];
+                    community['clientId' ] = clientId || community['clientId' ];
+                    community['clientSecret' ] = clientSecret || community['clientSecret' ];
 
-            exports.findByCommunity( jiveUrl ).then( function(community) {
-                community = community || {};
+                    if ( oauth ) {
+                        community[ 'oauth' ] = oauth;
+                    }
 
-                var oauth = community['oauth'] || response['entity'];
-                oauth['code'] = authorizationCode || oauth['code'];
-                oauth['jiveSignature'] = jiveSignature || oauth['jiveSignature'];
-                oauth['scope'] = response['entity']['scope'] || oauth['scope'];
-                oauth['expiresIn'] = response['entity']['expires_in'] || oauth['expiresIn'];
-                oauth['accessToken'] = response['entity']['access_token'] || oauth['accessToken'];
+                    exports.save(community).then(
+                        function () {
+                            // successful save:
+                            // emit a registration saved event and resolve
+                            jive.events.emit("registeredJiveInstanceSuccess", community);
+                            deferred.resolve();
+                        },
+                        function (error) {
+                            // error saving
+                            jive.events.emit("registeredJiveInstanceFailed", community);
+                            deferred.reject(error);
+                        }
+                    );
+                });
+            }
 
-                community['jiveUrl' ] = jiveUrl || community['jiveUrl' ] ;
-                community['version' ] = 'post-samurai';
-                community['tenantId' ] = tenantId || community['tenantId' ];
-                community['clientId' ] = clientId || community['clientId' ];
-                community['clientSecret' ] = clientSecret || community['clientSecret' ];
-                community[ 'oauth' ] = oauth;
-
-                exports.save( community ).then(
-                    function() {
-                        // successful save:
-                        // emit a registration saved event and resolve
-                        jive.events.emit("registeredJiveInstanceSuccess", community);
-                        deferred.resolve();
+            if ( authorizationCode ) {
+                client.requestAccessToken(
+                    {
+                        'client_secret' : clientSecret,
+                        'client_id' : clientId,
+                        'code' : authorizationCode,
+                        'jiveUrl' : jiveUrl,
+                        'scope' : scope,
+                        'tenantId' : tenantId
                     },
+
+                    function(response) {
+                        // successfully exchanged for access token:
+                        // save registration
+                        persistCommunity(response);
+                    },
+
                     function(error) {
-                        // error saving
-                        jive.events.emit("registeredJiveInstanceFailed", community );
-                        deferred.reject(error);
+                        // failed to exchange for access token
+                        jive.events.emit("registeredJiveInstanceFailed", registrationToSave);
+                        deferred.reject( error );
                     }
                 );
-            });
-
+            } else {
+                persistCommunity();
+            }
         },
 
-        function(error) {
-            // failed to exchange for access token
-            jive.events.emit("registeredJiveInstanceFailed", registrationToSave);
-            deferred.reject( error );
+        // error
+        function(err) {
+            jive.events.emit("registeredJiveInstanceFailed", err );
+            deferred.reject(new Error("Failed jive signature validation: "
+                + JSON.stringify(err)));
         }
     );
 
