@@ -80,10 +80,21 @@ exports.webhooks = require('./lib/webhook/webhooks');
 // For creating tasks
 exports.tasks = require('./lib/task/tasks');
 
-// defaults - may be overriden
-// todo this is causing a print of file persistence usage on startup
+var createDefaultMethods = function( methods, message ) {
+    var object = {};
+    methods.forEach( function( method ) {
+        var methodFunction = function() {
+            throw new Error(message);
+        };
+        object[method] = methodFunction;
+    });
+    return object;
+};
+
+// defaults - must be overridden
 exports.context = {
-    'persistence' : null,
-    'scheduler' : null,
+    'persistence' :  createDefaultMethods( [ 'find', 'save', 'remove'], 'Undefined persistence'),
+    'scheduler' : createDefaultMethods( [ 'init', 'schedule', 'unschedule', 'isScheduled', 'getTasks', 'shutdown'],
+        'Undefined scheduler'),
     'config' : {}
 };

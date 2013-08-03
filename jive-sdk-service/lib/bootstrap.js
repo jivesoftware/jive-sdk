@@ -38,7 +38,6 @@ var validateServiceOptions = function (options) {
     }
 
     if ( errors.length > 0 ) {
-        // clientID and secret must be available at this point!
         throw 'Errors were found in ' +
             ' in the configuration:\n' + errors;
     }
