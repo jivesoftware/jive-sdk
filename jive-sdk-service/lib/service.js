@@ -129,6 +129,9 @@ exports.init = function(_app, options ) {
         if ( !config['persistence'] ) {
             config['persistence'] = 'file';
         }
+        if ( !config['scheduler'] ) {
+            config['scheduler'] = 'memory';
+        }
     };
 
    var applyOverrides = function(config) {
