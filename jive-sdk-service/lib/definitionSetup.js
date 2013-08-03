@@ -43,100 +43,11 @@ function fsexists(path) {
     return deferred.promise;
 }
 
-function setupEvents(target, definitionName) {
-    function throwEventDefinitionError(tail) {
-        throw new Error('Event handler for tile definition "'
-            + definitionName + '" must specify', tail, '.');
-    }
-
-    target.eventHandlers.forEach(function(handlerInfo) {
-        if (!handlerInfo['event']) {
-            throwEventDefinitionError("an event name");
-        }
-        if (!handlerInfo['handler']) {
-            throwEventDefinitionError("a function handler");
-        }
-
-        if (jive.events.globalEvents.indexOf(handlerInfo['event']) != -1) {
-            jive.events.addSystemEventListener(handlerInfo['event'], handlerInfo['handler'], null);
-        } else {
-            jive.events.addDefinitionEventListener(
-                handlerInfo['event'],
-                definitionName,
-                handlerInfo['handler'],
-                handlerInfo['description'] || 'Unique to definition'
-            );
-        }
-    });
-}
-
-function setupTasks(tasks, definitionName, target) {
-    var tasksToAdd = [];
-    if (tasks['forEach']) {
-        tasks.forEach(function (t) {
-            tasksToAdd.push(t);
-        });
-    } else {
-        // if the task provided is just a function, then convert to object with 60 second interval
-        tasksToAdd.push(typeof tasks === 'function' ? { 'handler': tasks, 'interval': 60 * 1000 } : tasks);
-    }
-
-    tasksToAdd.forEach(function (task) {
-        var eventID = task['event'],
-            handler = task['handler'],
-            interval = task['interval'] || 60 * 1000,
-            context = task['context'] || {};
-
-        if (!eventID) {
-            // if no eventID -- then the event is <tilename>.<interval>
-            eventID = definitionName + ( interval ? '.' + interval : '' );
-        }
-
-        context['event'] = eventID;
-        context['tileName'] = definitionName;
-
-        var existingEventsForTile = jive.events.eventHandlerMap[definitionName];
-
-        function throwNoHandlerError() {
-            throw new Error('Task for tile definition "'
-                + definitionName + '" must specify a function handler or reference an event with a function handler.');
-        }
-
-        if (existingEventsForTile) {
-            if (!handler && !existingEventsForTile[eventID]) { //if there is no handler, and the associated event also has no handler
-                throwNoHandlerError();
-            }
-        }
-        else {
-            if (!handler) {
-                throwNoHandlerError();
-            }
-        }
-
-        //if the task defined a handler, and the event ID for this task doesn't already have a handler associated with it, add the handler to the event map.
-        if (handler && existingEventsForTile[eventID].length == 0) {
-            jive.events.addDefinitionEventListener(eventID, definitionName, handler, null);
-            target.eventHandlers = target.eventHandlers || [];
-
-            // task came with a handler; mix it into the list of target eventHandlers
-            target.eventHandlers.push({
-                'event': eventID,
-                'handler': handler
-            });
-        }
-
-        // only attempt to schedule events after bootstrap is complete
-        jive.events.addLocalEventListener("serviceBootstrapped", function () {
-            jive.context.scheduler.schedule(eventID, context, interval);
-        });
-    });
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
 /**
- * Returns a promise when definition tasks, life cycle events,
+ * Returns a promise when defintion tasks, life cycle events,
  * and other things in the service directory have been processed.
  * @param definitionName
  * @param svcDir
@@ -158,17 +69,79 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
                     'Please choose a different definition name.');
             }
 
-            //add event handlers before tasks, so that tasks can reference events
-            // event handlers
-            if ( target.eventHandlers ) {
-                setupEvents(target, definitionName);
-            }
-
             // recurrent tasks
             // these are scheduled only if they haven't yet been scheduled by some other node
             var tasks = target.task;
             if ( ( service.role.isWorker() || service.role.isPusher() ) && tasks) {
-                setupTasks(tasks, definitionName, target);
+                var tasksToAdd = [];
+                if (tasks['forEach']) {
+                    tasks.forEach(function(t) {
+                        tasksToAdd.push(t);
+                    });
+                } else {
+                    // if the task provided is just a function, then convert to object with 60 second interval
+                    tasksToAdd.push(typeof tasks === 'function' ?  { 'handler': tasks, 'interval': 60 * 1000 } : tasks);
+                }
+
+                tasksToAdd.forEach(function(task) {
+                    var eventID = task['event'], handler = task['handler'],  interval = task['interval'] || 60 * 1000,
+                        context = task['context'] || {};
+
+                    if ( !handler ) {
+                        throw new Error('Task for tile definition "'
+                            + definitionName + '" must specify a function handler.');
+                    }
+
+                    if ( !eventID ) {
+                        // if no eventID -- then the event is <tilename>.<interval>
+                        eventID = definitionName + ( interval ? '.' + interval : '' );
+                    }
+
+                    context['event'] = eventID;
+                    context['tileName'] = definitionName;
+
+                    if ( handler ) {
+                        target.eventHandlers = target.eventHandlers || [];
+
+                        // task came with a handler; mix it into the list of target eventHandlers
+                        if ( target.eventHandlers ) {
+                            target.eventHandlers.push( {
+                                'event' : eventID,
+                                'handler' : handler
+                            });
+                        }
+                    }
+
+                    // only attempt to schedule events after bootstrap is complete
+                    jive.events.addLocalEventListener( "serviceBootstrapped", function() {
+                        jive.context.scheduler.schedule(eventID, context, interval);
+                    });
+                });
+            }
+
+            // event handlers
+            if ( target.eventHandlers ) {
+                target.eventHandlers.forEach( function( handlerInfo ) {
+                    if ( !handlerInfo['event'] ) {
+                        throw new Error('Event handler for tile definition "'
+                            + definitionName + '" must specify an event name.');
+                    }
+                    if ( !handlerInfo['handler'] ) {
+                        throw new Error('Event handler for tile definition "'
+                            + definitionName + '" must specify a function handler.');
+                    }
+
+                    if ( jive.events.globalEvents.indexOf(handlerInfo['event']) != -1 ) {
+                        jive.events.addSystemEventListener(handlerInfo['event'],  handlerInfo['handler']);
+                    }  else {
+                        jive.events.addDefinitionEventListener(
+                            handlerInfo['event'],
+                            definitionName,
+                            handlerInfo['handler'],
+                            handlerInfo['description'] || 'Unique to definition'
+                        );
+                    }
+                });
             }
 
             // definition json
