@@ -45,35 +45,62 @@ var queueFor = function(eventID) {
     }
 };
 
+var removeJob = function( job ) {
+    var deferred = q.defer();
+    job.remove(function() {
+        jive.logger.debug('job', job.id, job['data']['eventID'], 'expired, removed');
+        deferred.resolve();
+    });
+
+    return deferred.promise;
+};
+
+var jobByQueueAndType = function(queueName, type) {
+    var deferred = q.defer();
+
+    kue.Job.rangeByType(queueName, 'delayed', 0, 1, 'asc', function (err, delayedJobs) {
+    });
+
+    return deferred.promise;
+};
+
 var searchForJobs = function( queueName ) {
     var deferred = q.defer();
     var foundJobs = [];
-    kue.Job.rangeByType(queueName, 'delayed', 0, 10, 'asc', function (err, delayedJobs) {
+    kue.Job.rangeByType(queueName, 'delayed', 0, 1, 'asc', function (err, delayedJobs) {
         if ( delayedJobs ) {
             foundJobs = foundJobs.concat( delayedJobs );
         }
-        kue.Job.rangeByType(queueName, 'inactive', 0, 10, 'asc', function (err, inactiveJobs) {
-            if ( inactiveJobs ) {
-                foundJobs = foundJobs.concat( inactiveJobs );
-            }
-            kue.Job.rangeByType(queueName, 'active', 0, 10, 'asc', function (err, activeJobs) {
-                if ( activeJobs ) {
-                    foundJobs = foundJobs.concat( activeJobs );
-                }
+//        kue.Job.rangeByType(queueName, 'inactive', 0, 1, 'asc', function (err, inactiveJobs) {
+//            if ( inactiveJobs && inactiveJobs.length > 0 ) {
+//                foundJobs = foundJobs.concat( inactiveJobs );
+//            }
+            kue.Job.rangeByType(queueName, 'active', 0, 1, 'asc', function (err, activeJobs) {
+                activeJobs = activeJobs || [];
 
-                foundJobs.forEach( function(job) {
+                var promises = [];
+
+                activeJobs.forEach( function(job) {
                     var elapsed = ( new Date().getTime() - job.updated_at ) / 1000;
-                    if ( elapsed > 60 && job.data.eventID != 'cleanupJobID') {
-                        // jobs shouldn't run more than 60 seconds
-                        console.log('job', job.id, 'expired, removing');
-                        job.remove();
+                    jive.logger.debug(elapsed, 'since update:',job['data']['eventID']);
+                    if ( elapsed > 20 && job.data.eventID != 'jive.reaper') {
+                        // jobs shouldn't be inactive for more than 20 seconds
+                        promises.push( removeJob( job ));
                     } else {
                         foundJobs.push( job );
                     }
                 });
-                deferred.resolve( foundJobs );
+
+                if ( promises.length > 0 ) {
+                    promises.reduce(q.when, q()).then( function() {
+                        deferred.resolve( foundJobs );
+                    }, function() {});
+                } else {
+                    deferred.resolve( foundJobs );
+                }
+
             });
-        });
+//        });
     });
     return deferred.promise;
 };
@@ -83,7 +110,7 @@ var setupKue = function(options) {
     redisClient = new worker().makeRedisClient(options);
     kue.redis.createClient = function() {
         return new worker().makeRedisClient(options);
-    }
+    };
     jobs = kue.createQueue();
     jobs.promote(1000);
     return options;
@@ -95,45 +122,78 @@ var scheduleLocalRecurrentTask = function(delay, self, eventID, context, interva
     }
 
     if ( localTasks[eventID] ) {
-        jive.log.debug("Event", eventID, "already scheduled, skipping.");
+        jive.logger.debug("Event", eventID, "already scheduled, skipping.");
         return;
     }
 
     setTimeout(function () {
-        localTasks[eventID] = setInterval(function () {
-            // evaluate the event last ran; if its before interval is up
-            // then prevent locally scheduled job from being scheduled
+        // evaluate the event last ran; if its before interval is up
+        // then prevent locally scheduled job from being scheduled
+        var execute = function() {
             redisClient.get( eventID + ':lastrun', function(err, result) {
                 var now = new Date().getTime();
-                if ( err || !result || (  now - result >= interval ) ) {
+                var elapsed = now - result;
+                if ( err || !result || (  elapsed >= interval ) ) {
                     self.isScheduled(eventID).then(function (scheduled) {
                         if (!scheduled) {
-                            self.schedule(eventID, context, null, delay || interval);
+                            jive.logger.info('scheduling', eventID);
+                            var schedule = self.schedule(eventID, context);
+                            if ( schedule ) {
+                                schedule.then( function(result) {
+                                    jive.logger.info('all done', eventID);
+                                    setTimeout( execute, interval );
+                                });
+                            } else {
+                                setTimeout( execute, interval );
+                            }
                         } else {
                             jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
+                            setTimeout( execute, interval );
                         }
                     });
+                } else {
+                    setTimeout( execute, interval );
                 }
+
             });
-        }, interval);
+        };
+
+        execute();
+
     }, delay || interval || 1);
+
 };
 
 function setupCleanupTasks(_eventHandlerMap) {
     // kue specific cleanup job that should run periodically
     // to reap the job result records in redis
-    _eventHandlerMap['cleanupJobID'] = function(context) {
+    _eventHandlerMap['jive.reaper'] = function() {
         var deferred = q.defer();
-        var jobID = context['jobID'];
-        redisClient.del(jobID, function(err) {
-            if (!err) {
-                jive.logger.debug("Cleaned up", jobID);
+
+        jive.logger.info("Running reaper");
+        kue.Job.rangeByState('complete', 0, 2000, 'asc', function (err, jobs) {
+            var promises = [];
+            if ( jobs ) {
+                jobs.forEach( function(job) {
+                    var elapsed = ( new Date().getTime() - job.created_at ) / 1000;
+                    if ( elapsed > 30) {
+                        // if completed more than 5 seconds ago, nuke it
+                        promises.push( removeJob(job) );
+                    }
+                });
+            }
+
+            if ( promises.length > 0 ) {
+                promises.reduce(q.when, q()).then( function() {
+                    jive.logger.info("Cleaned up", promises.length);
+                    deferred.resolve();
+                }, function() {});
+            } else {
+                jive.logger.info("Cleaned up nothing");
                 deferred.resolve();
             }
-            else {
-                deferred.reject(err);
-            }
         });
+
         return deferred;
     };
 }
@@ -173,6 +233,9 @@ Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
         });
     });
 
+    // schedule a periodic repear task
+    self.schedule('jive.reaper', {}, 10 * 1000 );
+
     jive.logger.info("Redis Scheduler Initialized for queue");
 };
 
@@ -187,6 +250,7 @@ Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
  */
 Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
     var self = this;
+    context = context || {};
 
     if ( interval ) {
         // if there is an interval, try to execute this task periodically
@@ -195,11 +259,7 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
         return;
     }
 
-    var deferred;
-
-    if ( !interval ) {
-        deferred = q.defer();
-    }
+    var deferred = q.defer();
 
     var jobID = jive.util.guid();
     var meta = {
@@ -218,20 +278,21 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
     if ( interval || delay ) {
         job.delay(interval && !delay ? interval : delay);
     }
-    job.on('complete', function() {
-        if ( !deferred ) {
-            // cleanup
-            redisClient.del(jobID);
-            job.remove();
-            // we're done if there is no promise to fulfill (e.g. tile pushes)
-            return;
-        }
 
+    job.on('complete', function() {
         // once the job is done, retrieve any results that were cached on redis by some worker
         // then resolve or reject the promise accordingly.
-        redisClient.get(jobID, function(err, jobResult) {
+
+        kue.Job.get( job.id, function( err, latestJobState ) {
+
+            if ( !latestJobState ) {
+                deferred.resolve();
+                return;
+            }
+
+            var jobResult = latestJobState['data']['result'];
             if ( !err ) {
-                deferred.resolve( jobResult ? JSON.parse(jobResult)['result'] : null );
+                deferred.resolve( jobResult ? jobResult['result'] : null );
             } else {
                 if ( !jobResult ) {
                     deferred.resolve();
@@ -244,18 +305,12 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
                     }
                 }
             }
-
-            // cleanup
-            redisClient.del(jobID);
-            job.remove();
         });
     });
     jive.logger.debug("Scheduled task: " + eventID, interval || '(no interval)');
     job.save();
 
-    if (deferred) {
-        return deferred.promise;
-    }
+    return deferred.promise;
 };
 
 Scheduler.prototype.unschedule = function unschedule(eventID){

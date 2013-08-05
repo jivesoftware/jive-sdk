@@ -37,15 +37,6 @@ var queueName;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // helpers
 
-function scheduleCleanup(eventID, jobID) {
-    // cleanup the job in 30 seconds. somebody better have consumed the job result in 30 seconds
-    if ( eventID != 'cleanupJobID' ) {
-        jive.context.scheduler.schedule('cleanupJobID', { 'jobID': jobID}, null, 30 * 1000).then( function() {
-            jive.logger.debug("Cleaned up", jobID);
-        });
-    }
-}
-
 /**
  * run the job we took off the work queue
  */
@@ -57,10 +48,18 @@ function eventExecutor(job, done) {
     var tileName = context['tileName'];
 
     var next = function() {
-        redisClient.set( eventID + ':lastrun', new Date().getTime());
-        scheduleCleanup(eventID, jobID);
-        done();
+        if ( liveNess ) {
+            clearTimeout(liveNess);
+        }
+        redisClient.set( eventID + ':lastrun', new Date().getTime(), function() {
+            done();
+        });
     };
+
+    var liveNess = setInterval( function() {
+        // update the job every 1 seconds to ensure liveness
+        job.update();
+    }, 1000);
 
     var handlers;
     if (tileName) {
@@ -87,10 +86,14 @@ function eventExecutor(job, done) {
 
     var promises = [];
     handlers.forEach( function(handler) {
-        var result = handler(context);
-        if ( result && result['then'] ) {
-            // its a promise
-            promises.push( result );
+        try {
+            var result = handler(context);
+            if ( result && result['then'] ) {
+                // its a promise
+                promises.push( result );
+            }
+        } catch (e ) {
+            console.log(e);
         }
     });
 
@@ -101,7 +104,8 @@ function eventExecutor(job, done) {
                 if (result) {
                     // if just one result, don't bother storing an array
                     result = result['forEach'] && result.length == 1 ? result[0] : result;
-                    redisClient.set(jobID, JSON.stringify({ 'result' : result }), function() {
+                    job.data['result'] = { 'result' : result };
+                    job.update( function() {
                         next();
                     });
                 } else {
@@ -111,11 +115,13 @@ function eventExecutor(job, done) {
 
             // error
             function(err) {
-                redisClient.set(jobID, JSON.stringify({ 'err' : err }), function() {
+                jive.logger.error("Error!", err);
+                job.data['result'] = { 'err' : err };
+                job.update( function() {
                     next();
                 });
             }
-        );
+        ).done();
     } else {
         next();
     }
@@ -143,5 +149,5 @@ Worker.prototype.init = function init(handlers, options) {
     redisClient = self.makeRedisClient(options);
     jobs = kue.createQueue();
     jobs.promote(1000);
-    jobs.process(queueName, options['concurrentJobs'] || 100, eventExecutor);
+    jobs.process(queueName, options['concurrentJobs'] || 25, eventExecutor);
 };
