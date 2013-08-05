@@ -26,8 +26,6 @@ var redisClient;
 
 var jobQueueName = 'work';
 var pushQueueName = 'push';
-var scheduleLocalTasks = false;
-var localTasks = {};
 
 function Scheduler(options) {
 }
@@ -116,54 +114,6 @@ var setupKue = function(options) {
     return options;
 };
 
-var scheduleLocalRecurrentTask = function(delay, self, eventID, context, interval) {
-    if ( !scheduleLocalTasks ) {
-        return;
-    }
-
-    if ( localTasks[eventID] ) {
-        jive.logger.debug("Event", eventID, "already scheduled, skipping.");
-        return;
-    }
-
-    setTimeout(function () {
-        // evaluate the event last ran; if its before interval is up
-        // then prevent locally scheduled job from being scheduled
-        var execute = function() {
-            redisClient.get( eventID + ':lastrun', function(err, result) {
-                var now = new Date().getTime();
-                var elapsed = now - result;
-                if ( err || !result || (  elapsed >= interval ) ) {
-                    self.isScheduled(eventID).then(function (scheduled) {
-                        if (!scheduled) {
-                            jive.logger.info('scheduling', eventID);
-                            var schedule = self.schedule(eventID, context);
-                            if ( schedule ) {
-                                schedule.then( function(result) {
-                                    jive.logger.info('all done', eventID);
-                                    setTimeout( execute, interval );
-                                });
-                            } else {
-                                setTimeout( execute, interval );
-                            }
-                        } else {
-                            jive.logger.debug("Skipping schedule of " + eventID, " - Already scheduled");
-                            setTimeout( execute, interval );
-                        }
-                    });
-                } else {
-                    setTimeout( execute, interval );
-                }
-
-            });
-        };
-
-        execute();
-
-    }, delay || interval || 1);
-
-};
-
 function setupCleanupTasks(_eventHandlerMap) {
     // kue specific cleanup job that should run periodically
     // to reap the job result records in redis
@@ -201,6 +151,11 @@ function setupCleanupTasks(_eventHandlerMap) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
+/**
+ * Initialize the scheduler
+ * @param _eventHandlerMap - an object that trasnlates eventIDs into functions to run
+ * @param serviceConfig - configuration options such as the location of the redis server.
+ */
 Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
     var self = this;
     var isWorker = !serviceConfig || !serviceConfig['role'] || serviceConfig['role'] === jive.constants.roles.WORKER;
@@ -223,8 +178,6 @@ Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
         opts['queueName'] = pushQueueName;
         new worker().init(_eventHandlerMap, opts);
     }
-
-    scheduleLocalTasks = isWorker;
 
     // setup listeners
     jive.events.globalEvents.forEach( function(event) {
@@ -249,18 +202,7 @@ Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
  * only if its not a recurrent task
  */
 Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
-    var self = this;
-    context = context || {};
-
-    if ( interval ) {
-        // if there is an interval, try to execute this task periodically
-        // it will only fire if it isn't already running somewhere
-        scheduleLocalRecurrentTask(delay, self, eventID, context, interval);
-        return;
-    }
-
     var deferred = q.defer();
-
     var jobID = jive.util.guid();
     var meta = {
         'jobID' : jobID,
@@ -275,10 +217,9 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
     }
 
     var job = jobs.create(queueFor(eventID), meta);
-    if ( interval || delay ) {
+    if (interval || delay) {
         job.delay(interval && !delay ? interval : delay);
     }
-
     job.on('complete', function() {
         // once the job is done, retrieve any results that were cached on redis by some worker
         // then resolve or reject the promise accordingly.
@@ -294,14 +235,14 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
             if ( !err ) {
                 deferred.resolve( jobResult ? jobResult['result'] : null );
             } else {
-                if ( !jobResult ) {
+                if (!jobResult) {
                     deferred.resolve();
                 } else {
                     var parsed = JSON.parse(jobResult);
-                    if ( parsed['err'] ) {
-                        deferred.reject(  parsed['err'] );
+                    if (parsed['err']) {
+                        deferred.reject(parsed['err']);
                     } else {
-                        deferred.resolve( parsed['result']);
+                        deferred.resolve(parsed['result']);
                     }
                 }
             }
@@ -314,8 +255,6 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
 };
 
 Scheduler.prototype.unschedule = function unschedule(eventID){
-    clearInterval(localTasks[eventID]);
-
     this.getTasks().forEach(function(job) {
         if (job.data['eventID'] == eventID) {
             job.remove();

@@ -46,6 +46,13 @@ function eventExecutor(job, done) {
     var jobID = meta['jobID'];
     var eventID = meta['eventID'];
     var tileName = context['tileName'];
+    jive.logger.debug('processing', jobID, ':', eventID);
+    //schedule the next iteration right away so that if this node dies, we don't lose the job.
+    //no matter what, when a new worker is brought in to replace a crashed worker, it will load any lost jobs from persistence.
+    //if this is a one-time job, then we don't care about the next iteration, it can just fail.
+    if (meta['interval']) {
+        jive.context.scheduler.schedule(eventID, context, meta['interval']);
+    }
 
     var next = function() {
         if ( liveNess ) {
