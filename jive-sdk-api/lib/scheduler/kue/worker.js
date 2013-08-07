@@ -49,14 +49,18 @@ function eventExecutor(job, done) {
     jive.logger.debug('processing', jobID, ':', eventID);
     //schedule the next iteration right away so that if this node dies, we don't lose the job.
     //no matter what, when a new worker is brought in to replace a crashed worker, it will load any lost jobs from persistence.
-    //if this is a one-time job, then we don't care about the next iteration, it can just fail.
+    //if this is a one-time job, then there is no next iteration, it can just fail.
     if (meta['interval']) {
-        jive.context.scheduler.schedule(eventID, context, meta['interval']);
+        jive.context.scheduler.searchTasks(eventID, ['delayed']).then(function(found) {
+            if (!found) {
+                jive.context.scheduler.schedule(eventID, context, meta['interval']);
+            }
+        });
     }
 
     var next = function() {
         if ( liveNess ) {
-            clearTimeout(liveNess);
+            clearInterval(liveNess);
         }
         redisClient.set( eventID + ':lastrun', new Date().getTime(), function() {
             done();
