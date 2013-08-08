@@ -29,7 +29,6 @@ var jive = require('../../../api');  // !! xxx todo is there an alternative to t
 function Worker() {
 }
 
-var redisClient;
 var jobs;
 var eventHandlers;
 var queueName;
@@ -37,23 +36,15 @@ var queueName;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // helpers
 
-function scheduleCleanup(jobID) {
-    function cleanup(jobID) {
-        return function() {
-            redisClient.del(jobID, function(err) {
-                if (!err) {
-                    jive.logger.debug("Cleaned up", jobID);
-                }
-                else {
-                    jive.logger.debug("Error cleaning up", jobID);
-                }
-            });
+function oldJobKiller(activeJobs) {
+    activeJobs.forEach(function(job) {
+        var elapsed = ( new Date().getTime() - job['updated_at']);
+//        jive.logger.debug(elapsed/1000, 'since update:',job['data']['eventID']);
+        if (elapsed > job.data.timeout && job.data.eventID != 'jive.reaper') { //don't kill the reaper
+            // jobs shouldn't be inactive for more than 20 seconds
+            job.remove();
         }
-    };
-
-    // cleanup the job in 30 seconds. somebody better have consumed the job result in 30 seconds
-    //if this worker goes down during or before cleanup, a reaper task will do the cleanup eventually
-    setTimeout(cleanup(jobID), 30*1000);
+    });
 }
 
 /**
@@ -65,36 +56,72 @@ function eventExecutor(job, done) {
     var jobID = meta['jobID'];
     var eventID = meta['eventID'];
     var tileName = context['tileName'];
-    jive.logger.debug('processing', jobID, ':', eventID);
-    //schedule the next iteration right away so that if this node dies, we don't lose the job.
-    //no matter what, when a new worker is brought in to replace a crashed worker, it will load any lost jobs from persistence.
-    //if this is a one-time job, then we don't care about the next iteration, it can just fail.
-    if (meta['interval']) {
-        jive.context.scheduler.schedule(eventID, context, meta['interval']);
-    }
 
     var next = function() {
-        redisClient.set(eventID+':lastrun', new Date().getTime());
-        scheduleCleanup(jobID);
-        done();
+        if (liveNess) {
+            clearInterval(liveNess);
+        }
+        if (meta['interval']) {
+            jive.context.scheduler.searchTasks(eventID, ['inactive','delayed']).then(function(foundDelayed) {
+                jive.context.scheduler.schedule(eventID, context, meta['interval']);
+                if (foundDelayed.length != 0) {
+                    foundDelayed.forEach(function(job) {
+                        job.remove(); //remove older delayed jobs
+                    });
+                }
+                done();
+            });
+        }
+        else {
+            done();
+        }
     };
 
-    //execute the job
+    var liveNess = setInterval(function() {
+        // update the job every 1 seconds to ensure liveness
+        job.update();
+    }, 1000);
+
+    //schedule the next iteration right away so that if this node dies, we don't lose the job.
+    //no matter what, when a new worker is brought in to replace a crashed worker, it will load any lost jobs from persistence.
+    //if this is a one-time job, then there is no next iteration, it can just fail.
+    if (meta['interval']) {
+        jive.context.scheduler.searchTasks(eventID, ['active']).then(function(foundActives) {
+            if (foundActives.length > 1) {
+                //we are an overlapping job. don't execute.
+                oldJobKiller(foundActives); //look for expired active jobs (remnants of a crashed worker) and remove them
+                next();
+            }
+            else {
+                jive.context.scheduler.searchTasks(eventID, ['delayed']).then(function(foundDelayed) {
+                    if (foundDelayed.length == 0) {
+                        jive.context.scheduler.schedule(eventID, context, meta['interval']);
+                    }
+                    jive.logger.debug('running handler:', jobID, ':', eventID);
+                    runHandlers(job, eventID, tileName, context, next);
+                });
+            }
+        });
+    }
+    else {
+        runHandlers(job, eventID, tileName, context, next);
+    }
+}
+
+function runHandlers(job, eventID, tileName, context, next) {
     var handlers;
     if (tileName) {
         var tileEventHandlers = eventHandlers[tileName];
-        if ( !tileEventHandlers ) {
-            done();
-            return;
+        if (tileEventHandlers) {
+            handlers = tileEventHandlers[eventID];
         }
-        handlers = tileEventHandlers[eventID];
     } else {
         handlers = eventHandlers[eventID];
     }
 
     if ( !handlers ) {
         // could find no handlers for the eventID; we're done
-        done();
+        next();
         return;
     }
 
@@ -105,28 +132,28 @@ function eventExecutor(job, done) {
 
     var promises = [];
     handlers.forEach( function(handler) {
-        var result = handler(context); //this actually runs the user code
-        if ( result && result['then'] ) {
-            // its a promise
-            promises.push( result );
+        try {
+            var result = handler(context);
+            if ( result && result['then'] ) {
+                // its a promise
+                promises.push( result );
+            }
+        } catch (e) {
+            console.log(e);
         }
     });
 
     if ( promises.length > 0 ) {
-        q.all(promises).then(
+        q.all( promises ).then(
             // success
             function(result) {
                 if (result) {
                     // if just one result, don't bother storing an array
                     result = result['forEach'] && result.length == 1 ? result[0] : result;
-                    if (result) { //need to check if the promise inside the array contained a value
-                        redisClient.set(jobID, JSON.stringify({'result':result}), function() {
-                            next();
-                        });
-                    }
-                    else {
+                    job.data['result'] = { 'result' : result };
+                    job.update( function() {
                         next();
-                    }
+                    });
                 } else {
                     next();
                 }
@@ -134,11 +161,13 @@ function eventExecutor(job, done) {
 
             // error
             function(err) {
-                redisClient.set(jobID, JSON.stringify({ 'err' : err }), function() {
+                jive.logger.error("Error!", err);
+                job.data['result'] = { 'err' : err };
+                job.update( function() {
                     next();
                 });
             }
-        );
+        ).done();
     } else {
         next();
     }
@@ -152,7 +181,6 @@ Worker.prototype.makeRedisClient = function(options) {
     if (options['redisLocation'] && options['redisPort']) {
         return redis.createClient(options['redisPort'], options['redisLocation']);
     }
-
     return redis.createClient();
 };
 
@@ -163,8 +191,7 @@ Worker.prototype.init = function init(handlers, options) {
     kue.redis.createClient = function() {
         return self.makeRedisClient(options);
     };
-    redisClient = self.makeRedisClient(options);
     jobs = kue.createQueue();
     jobs.promote(1000);
-    jobs.process(queueName, options['concurrentJobs'] || 100, eventExecutor);
+    jobs.process(queueName, eventExecutor); //, options['concurrentJobs'] || 25
 };

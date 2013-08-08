@@ -19,10 +19,8 @@ var kue = require('kue');
 var express = require('express');
 var q = require('q');
 var worker = require('./worker');
-var redis = require('redis');
 
 var jobs;
-var redisClient;
 
 var jobQueueName = 'work';
 var pushQueueName = 'push';
@@ -43,49 +41,111 @@ var queueFor = function(eventID) {
     }
 };
 
-var searchForJobs = function( queueName ) {
+var removeJob = function( job ) {
     var deferred = q.defer();
-    var foundJobs = [];
-    kue.Job.rangeByType(queueName, 'delayed', 0, 10, 'asc', function (err, delayedJobs) {
-        if ( delayedJobs ) {
-            foundJobs = foundJobs.concat( delayedJobs );
-        }
-        kue.Job.rangeByType(queueName, 'inactive', 0, 10, 'asc', function (err, inactiveJobs) {
-            if ( inactiveJobs ) {
-                foundJobs = foundJobs.concat( inactiveJobs );
-            }
-            kue.Job.rangeByType(queueName, 'active', 0, 10, 'asc', function (err, activeJobs) {
-                if ( activeJobs ) {
-                    foundJobs = foundJobs.concat( activeJobs );
-                }
+    job.remove(function() {
+        jive.logger.debug('job', job.id, job['data']['eventID'], 'expired, removed');
+        deferred.resolve();
+    });
 
-                foundJobs.forEach( function(job) {
-                    var elapsed = ( new Date().getTime() - job.updated_at ) / 1000;
-                    if ( elapsed > 60 && job.data.eventID != 'cleanupJobID') {
-                        // jobs shouldn't run more than 60 seconds
-                        console.log('job', job.id, 'expired, removing');
-                        job.remove();
-                    } else {
-                        foundJobs.push( job );
-                    }
-                });
-                deferred.resolve( foundJobs );
-            });
+    return deferred.promise;
+};
+
+/**
+ * Return all jobs in the given queue that have one of the given states.
+ * @param queueName - name of the queue
+ * @param types - array of strings containing the job statuses we want (e.g. ['delayed']).
+ * @returns a promise for an array of jobs.
+ */
+var searchJobsByQueueAndTypes = function(queueName, types) {
+    var deferred = q.defer();
+    if (!types) {
+        types = ['delayed','active','inactive'];
+    }
+    if (!types.forEach) {
+        types = [types];
+    }
+    var promises = [];
+    types.forEach(function(type) {
+        var defer = q.defer();
+        promises.push(defer.promise);
+        kue.Job.rangeByType(queueName, type, 0, 1, 'asc', function(err,jobs) {
+            if (err) {
+                defer.reject(err);
+            }
+            else {
+                defer.resolve(jobs);
+            }
         });
+    });
+    q.all(promises).then(function(jobArrays) {
+        deferred.resolve(jobArrays.reduce(function(prev, curr) {
+            return prev.concat(curr);
+        }, []));
+    }, function(err) {
+        deferred.reject(err);
     });
     return deferred.promise;
 };
 
+var findTasksInSet = function(eventID, tasks) {
+    var found = [];
+    for ( var i = 0; i < tasks.length; i++ ) {
+        var job = tasks[i];
+        if (job.data['eventID'] == eventID) {
+            found.push(job);
+        }
+    }
+    return found;
+}
+
 var setupKue = function(options) {
     //set up kue, optionally with a custom redis location.
-    redisClient = new worker().makeRedisClient(options);
     kue.redis.createClient = function() {
         return new worker().makeRedisClient(options);
-    }
+    };
     jobs = kue.createQueue();
     jobs.promote(1000);
     return options;
 };
+
+function setupCleanupTasks(_eventHandlerMap) {
+    // kue specific cleanup job that should run periodically
+    // to reap completed job records from redis
+    _eventHandlerMap['jive.reaper'] = function() {
+        var deferred = q.defer();
+
+        jive.logger.info("Running reaper");
+        kue.Job.rangeByState('complete', 0, 2000, 'asc', function (err, jobs) {
+            if (err) {
+                console.log('err', err);
+                deferred.reject(err);
+            }
+            var promises = [];
+            if ( jobs ) {
+                jobs.forEach( function(job) {
+                    var elapsed = ( new Date().getTime() - job.created_at ) / 1000;
+                    if ( elapsed > 30) {
+                        // if completed more than 5 seconds ago, nuke it
+                        promises.push( removeJob(job) );
+                    }
+                });
+            }
+
+            if ( promises.length > 0 ) {
+                promises.reduce(q.when, q()).then( function() {
+                    jive.logger.info("Reaper: Cleaned up", promises.length);
+                    deferred.resolve();
+                }, function() {});
+            } else {
+                jive.logger.info("Reaper: Cleaned up nothing");
+                deferred.resolve();
+            }
+        });
+
+        return deferred;
+    };
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public
@@ -106,6 +166,8 @@ Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
         return;
     }
 
+    setupCleanupTasks(_eventHandlerMap);
+
     if ( isWorker  ) {
         opts['queueName'] = jobQueueName;
         new worker().init(_eventHandlerMap, opts);
@@ -116,16 +178,18 @@ Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
         new worker().init(_eventHandlerMap, opts);
     }
 
-    //todo remove later
-    jobs.on('job complete', function(id) {
-        jive.logger.debug('job', id, 'compelte');
-    });
-
     // setup listeners
     jive.events.globalEvents.forEach( function(event) {
         jive.events.addLocalEventListener( event, function(context ) {
-            self.schedule( event, context );
+            self.schedule( event, context ); //todo maybe add a check for already scheduled?
         });
+    });
+
+    // schedule a periodic repear task. Make sure there's only ever one reaper task.
+    self.searchTasks('jive.reaper', ['active', 'delayed', 'inactive']).then(function(found) {
+        if (found.length == 0) {
+            self.schedule('jive.reaper', {}, 10 * 1000 );
+        }
     });
 
     jive.logger.info("Redis Scheduler Initialized for queue");
@@ -133,6 +197,7 @@ Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
 
 /**
  * Schedule a task.
+ * If this is invoked, the task WILL get scheduled (no checks for duplicates)
  * @param eventID the named event to fire to perform this task
  * @param context arguments to provide to the event handler
  * @param interval optional, time until this event should be fired again
@@ -141,21 +206,17 @@ Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
  * only if its not a recurrent task
  */
 Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
-    var deferred;
+    var deferred = q.defer();
     var jobID = jive.util.guid();
     var meta = {
         'jobID' : jobID,
         'eventID' : eventID,
+        'timeout' : context.timeout,
         'context' : context
     };
-
     if (interval) {
         meta['interval'] = interval;
     }
-    else {
-        deferred = q.defer();
-    }
-
     if ( delay ) {
         meta['delay'] = delay;
     }
@@ -165,18 +226,17 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
         job.delay(interval && !delay ? interval : delay);
     }
     job.on('complete', function() {
-        if (!deferred) {
-            // cleanup
-            redisClient.del(jobID);
-            job.remove();
-            // we're done if there is no promise to fulfill (e.g. tile pushes)
-            return;
-        }
         // once the job is done, retrieve any results that were cached on redis by some worker
         // then resolve or reject the promise accordingly.
-        redisClient.get(jobID, function (err, jobResult) {
-            if (!err) {
-                deferred.resolve(jobResult ? JSON.parse(jobResult)['result'] : null);
+
+        kue.Job.get( job.id, function( err, latestJobState ) {
+            if ( !latestJobState ) {
+                deferred.resolve();
+                return;
+            }
+            var jobResult = latestJobState['data']['result'];
+            if ( !err ) {
+                deferred.resolve( jobResult ? jobResult['result'] : null );
             } else {
                 if (!jobResult) {
                     deferred.resolve();
@@ -189,19 +249,18 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
                     }
                 }
             }
-            // cleanup
-            redisClient.del(jobID);
-            job.remove();
         });
     });
-    jive.logger.debug("Scheduled task: " + eventID, interval || '(no interval)', 'into', queueFor(eventID),'queue');
+    jive.logger.debug("Scheduled task: " + eventID, interval || '(no interval)');
     job.save();
 
-    if (deferred) {
-        return deferred.promise;
-    }
+    return deferred.promise;
 };
 
+/**
+ * Remove the task from the queue.
+ * @param eventID
+ */
 Scheduler.prototype.unschedule = function unschedule(eventID){
     this.getTasks().forEach(function(job) {
         if (job.data['eventID'] == eventID) {
@@ -216,33 +275,40 @@ Scheduler.prototype.unschedule = function unschedule(eventID){
  */
 Scheduler.prototype.isScheduled = function(eventID) {
     var deferred = q.defer();
-
-    this.getTasks().then( function( tasks ) {
+    this.getTasks().then(function(tasks) {
         var found = false;
-        for ( var i = 0; i < tasks.length; i++ ) {
-            var job = tasks[i];
-            if (job.data['eventID'] == eventID) {
-                found = true;
-                break;
-            }
-        }
-        deferred.resolve( found );
+        if (findTasksInSet(eventID, tasks).length > 0) {
+            found = true;
+        };
+        deferred.resolve(found);
     });
-
     return deferred.promise;
 };
+
+/**
+ * Search only tasks with one of the given statuses for a task with the given eventID.
+ * @param eventID - task to search for
+ * @param statuses - array of strings containing the job statuses we want (e.g. ['delayed']).
+ * @returns {*}
+ */
+Scheduler.prototype.searchTasks = function(eventID, statuses) {
+    var deferred = q.defer();
+    searchJobsByQueueAndTypes(queueFor(eventID), statuses).then(function(tasks) {
+        deferred.resolve(findTasksInSet(eventID, tasks));
+    });
+    return deferred.promise;
+}
 
 /**
  * Returns a promise which resolves with the jobs currently scheduled (recurrent or dormant)
  */
 Scheduler.prototype.getTasks = function getTasks() {
     var foundJobs = [];
-
-    return searchForJobs(jobQueueName).then( function(jobs) {
+    return searchJobsByQueueAndTypes(jobQueueName).then( function(jobs) {
         if ( jobs && jobs.length > 0 ) {
             foundJobs = foundJobs.concat( jobs );
         }
-        return searchForJobs(pushQueueName);
+        return searchJobsByQueueAndTypes(pushQueueName);
     }).then( function(pushJobs) {
         if ( pushJobs && pushJobs.length > 0  ) {
             foundJobs = foundJobs.concat( pushJobs );
