@@ -63,13 +63,18 @@ function eventExecutor(job, done) {
         }
         if (meta['interval']) {
             jive.context.scheduler.searchTasks(eventID, ['inactive','delayed']).then(function(foundDelayed) {
-                jive.context.scheduler.schedule(eventID, context, meta['interval']);
-                if (foundDelayed.length != 0) {
-                    foundDelayed.forEach(function(job) {
-                        job.remove(); //remove older delayed jobs
-                    });
-                }
-                done();
+                jive.context.scheduler.schedule(eventID, context, meta['interval'], null, function() {
+                    if (foundDelayed.length != 0) {
+                        foundDelayed.forEach(function(job) {
+                            job.remove(); //remove older delayed jobs, like the backup we scheduled earlier
+                            jive.logger.debug('cleaned up:', eventID);
+                        });
+                    }
+                    else {
+                        jive.logger.debug('cleaned up nothing', eventID);
+                    }
+                    done();
+                });
             });
         }
         else {
@@ -87,18 +92,23 @@ function eventExecutor(job, done) {
     //if this is a one-time job, then there is no next iteration, it can just fail.
     if (meta['interval']) {
         jive.context.scheduler.searchTasks(eventID, ['active']).then(function(foundActives) {
-            if (foundActives.length > 1) {
+            console.log(new Date(), 'active jobs:', eventID, foundActives.length, ';active job:',foundActives[0].id,';current job:', job.id);
+            if (foundActives.length > 1 || (foundActives.length == 1 && foundActives[0].id != job.id)) {
                 //we are an overlapping job. don't execute.
+                console.log('not executing:', eventID);
                 oldJobKiller(foundActives); //look for expired active jobs (remnants of a crashed worker) and remove them
                 next();
             }
             else {
                 jive.context.scheduler.searchTasks(eventID, ['delayed']).then(function(foundDelayed) {
                     if (foundDelayed.length == 0) {
-                        jive.context.scheduler.schedule(eventID, context, meta['interval']);
+                        jive.context.scheduler.schedule(eventID, context, meta['interval'], null, function() { //even if this worker crashes, this job will execute on another node.
+                            runHandlers(job, eventID, tileName, context, next);
+                        });
                     }
-                    jive.logger.debug('running handler:', jobID, ':', eventID);
-                    runHandlers(job, eventID, tileName, context, next);
+                    else {
+                        runHandlers(job, eventID, tileName, context, next);
+                    }
                 });
             }
         });
@@ -193,5 +203,5 @@ Worker.prototype.init = function init(handlers, options) {
     };
     jobs = kue.createQueue();
     jobs.promote(1000);
-    jobs.process(queueName, eventExecutor); //, options['concurrentJobs'] || 25
+    jobs.process(queueName, options['concurrentJobs'] || 25, eventExecutor); //
 };

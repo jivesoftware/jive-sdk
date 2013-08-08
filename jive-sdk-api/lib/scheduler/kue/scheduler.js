@@ -126,7 +126,7 @@ function setupCleanupTasks(_eventHandlerMap) {
                 jobs.forEach( function(job) {
                     var elapsed = ( new Date().getTime() - job.created_at ) / 1000;
                     if ( elapsed > 30) {
-                        // if completed more than 5 seconds ago, nuke it
+                        // if completed more than 30 seconds ago, nuke it
                         promises.push( removeJob(job) );
                     }
                 });
@@ -205,10 +205,11 @@ Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
  * Returns a promise that gets invoked when the scheduled task has completed execution
  * only if its not a recurrent task
  */
-Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
+Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay, callback) {
     var deferred = q.defer();
     var jobID = jive.util.guid();
     var meta = {
+        'title' : eventID,
         'jobID' : jobID,
         'eventID' : eventID,
         'timeout' : context.timeout,
@@ -251,8 +252,17 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
             }
         });
     });
-    jive.logger.debug("Scheduled task: " + eventID, interval || '(no interval)');
-    job.save();
+//    jive.logger.debug("Scheduled task: " + eventID, interval || '(no interval)');
+    job.save(function(err) {
+        if (err) {
+            deferred.reject(err);
+        }
+        else {
+            if (callback) {
+                callback();
+            }
+        }
+    });
 
     return deferred.promise;
 };
