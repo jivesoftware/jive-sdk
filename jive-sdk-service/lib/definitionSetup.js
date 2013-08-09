@@ -85,7 +85,7 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
 
                 tasksToAdd.forEach(function(task) {
                     var eventID = task['event'], handler = task['handler'],  interval = task['interval'] || 60 * 1000,
-                        context = task['context'] || {};
+                        context = task['context'] || {}, timeout = task['timeout'];
 
                     if ( !handler ) {
                         throw new Error('Task for tile definition "'
@@ -114,11 +114,7 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
 
                     // only attempt to schedule events after bootstrap is complete
                     jive.events.addLocalEventListener( "serviceBootstrapped", function() {
-                        jive.context.scheduler.isScheduled(eventID).then(function(found) {
-                            if (!found) { //only schedule it if it's not already scheduled (or active).
-                                jive.context.scheduler.schedule(eventID, context, interval);
-                            }
-                        });
+                        jive.context.scheduler.schedule(eventID, context, interval, undefined, undefined, timeout );
                     });
                 });
             }

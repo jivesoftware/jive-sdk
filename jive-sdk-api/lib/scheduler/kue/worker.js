@@ -37,105 +37,124 @@ var queueName;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // helpers
 
+function shouldRun( meta ) {
+
+    var eventID = meta['eventID'];
+    var jobID = meta['jobID'];
+    var exclusive = meta['exclusive'];
+
+    if (!exclusive ) {
+        return q.resolve(true);
+    }
+
+    return jive.context.scheduler.getTasks(eventID).then( function(tasks) {
+        var runningJob;
+
+        for ( var i = 0; i < tasks.length; i++ ) {
+            var task = tasks[i];
+            if ( task['data']['jobID'] !== jobID  ) {
+                runningJob = task['data']['jobID'] + " : " + task['data']['eventID'];
+                break;
+            }
+
+        }
+
+        return !runningJob;
+    } );
+}
+
 /**
  * run the job we took off the work queue
  */
 function eventExecutor(job, done) {
     var meta = job.data;
-    var context = meta['context'];
-    var jobID = meta['jobID'];
-    var eventID = meta['eventID'];
-    var tileName = context['tileName'];
-    jive.logger.debug('processing', jobID, ':', eventID);
-    //schedule the next iteration right away so that if this node dies, we don't lose the job.
-    //no matter what, when a new worker is brought in to replace a crashed worker, it will load any lost jobs from persistence.
-    //if this is a one-time job, then there is no next iteration, it can just fail.
-    if (meta['interval']) {
-        jive.context.scheduler.searchTasks(eventID, ['delayed']).then(function(found) {
-            if (!found) {
-                jive.context.scheduler.schedule(eventID, context, meta['interval']);
-            }
-        });
-    }
 
-    var next = function() {
-        if ( liveNess ) {
-            clearInterval(liveNess);
+    shouldRun(meta).then( function(shouldRun) {
+
+        var context = meta['context'];
+        var eventID = meta['eventID'];
+        var tileName = context['tileName'];
+
+        if ( !shouldRun ) {
+            jive.logger.error("Execution aborted: " + JSON.stringify(meta,4 ));
+            return;
         }
-        redisClient.set( eventID + ':lastrun', new Date().getTime(), function() {
-            done();
-        });
-    };
 
-    var liveNess = setInterval( function() {
-        // update the job every 1 seconds to ensure liveness
-        job.update();
-    }, 1000);
+        var next = function() {
+            if ( liveNess ) {
+                clearTimeout(liveNess);
+            }
+            redisClient.set( eventID + ':lastrun', new Date().getTime(), function() {
+                done();
+            });
+        };
 
-    var handlers;
-    if (tileName) {
-        var tileEventHandlers = eventHandlers[tileName];
-        if ( !tileEventHandlers ) {
+        var liveNess = setInterval( function() {
+            // update the job every 1 seconds to ensure liveness
+            job.update();
+        }, 1000);
+
+        var handlers;
+        if (tileName) {
+            var tileEventHandlers = eventHandlers[tileName];
+            if ( !tileEventHandlers ) {
+                done();
+                return;
+            }
+            handlers = tileEventHandlers[eventID];
+        } else {
+            handlers = eventHandlers[eventID];
+        }
+
+        if ( !handlers ) {
+            // could find no handlers for the eventID; we're done
             done();
             return;
         }
-        handlers = tileEventHandlers[eventID];
-    } else {
-        handlers = eventHandlers[eventID];
-    }
 
-    if ( !handlers ) {
-        // could find no handlers for the eventID; we're done
-        done();
-        return;
-    }
+        if ( typeof handlers === 'function' ) {
+            // normalize single handler into an array
+            handlers = [ handlers ];
+        }
 
-    if ( typeof handlers === 'function' ) {
-        // normalize single handler into an array
-        handlers = [ handlers ];
-    }
-
-    var promises = [];
-    handlers.forEach( function(handler) {
-        try {
+        var promises = [];
+        handlers.forEach( function(handler) {
             var result = handler(context);
             if ( result && result['then'] ) {
                 // its a promise
                 promises.push( result );
             }
-        } catch (e ) {
-            console.log(e);
-        }
-    });
+        });
 
-    if ( promises.length > 0 ) {
-        q.all( promises ).then(
-            // success
-            function(result) {
-                if (result) {
-                    // if just one result, don't bother storing an array
-                    result = result['forEach'] && result.length == 1 ? result[0] : result;
-                    job.data['result'] = { 'result' : result };
+        if ( promises.length > 0 ) {
+            q.all( promises ).then(
+                // success
+                function(result) {
+                    if (result) {
+                        // if just one result, don't bother storing an array
+                        result = result['forEach'] && result.length == 1 ? result[0] : result;
+                        job.data['result'] = { 'result' : result };
+                        job.update( function() {
+                            next();
+                        });
+                    } else {
+                        next();
+                    }
+                },
+
+                // error
+                function(err) {
+                    jive.logger.error("Error!", err);
+                    job.data['result'] = { 'err' : err };
                     job.update( function() {
                         next();
                     });
-                } else {
-                    next();
                 }
-            },
-
-            // error
-            function(err) {
-                jive.logger.error("Error!", err);
-                job.data['result'] = { 'err' : err };
-                job.update( function() {
-                    next();
-                });
-            }
-        ).done();
-    } else {
-        next();
-    }
+            ).done();
+        } else {
+            next();
+        }
+    });
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -160,5 +179,5 @@ Worker.prototype.init = function init(handlers, options) {
     redisClient = self.makeRedisClient(options);
     jobs = kue.createQueue();
     jobs.promote(1000);
-    jobs.process(queueName, options['concurrentJobs'] || 25, eventExecutor);
+    jobs.process(queueName, options['concurrentJobs'] || 100, eventExecutor);
 };
