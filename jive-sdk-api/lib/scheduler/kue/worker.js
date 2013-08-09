@@ -47,7 +47,7 @@ function shouldRun( meta ) {
         return q.resolve(true);
     }
 
-    return jive.context.scheduler.getTasks(eventID).then( function(tasks) {
+    return jive.context.scheduler.searchTasks(eventID).then( function(tasks) {
         var runningJob;
 
         for ( var i = 0; i < tasks.length; i++ ) {

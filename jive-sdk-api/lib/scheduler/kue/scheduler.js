@@ -55,47 +55,53 @@ var removeJob = function( job ) {
     return deferred.promise;
 };
 
-var searchForJobs = function( queueName, eventID ) {
+/**
+ * Return all jobs in the given queue that have one of the given states.
+ * @param queueName - name of the queue
+ * @param types - array of strings containing the job statuses we want (e.g. ['delayed']).
+ * @returns a promise for an array of jobs.
+ */
+var searchJobsByQueueAndTypes = function(queueName, types) {
     var deferred = q.defer();
-    var foundJobs = [];
-    kue.Job.rangeByType(queueName, 'delayed', 0, 100000, 'asc', function (err, delayedJobs) {
-        if ( delayedJobs ) {
-            if ( eventID ) {
-                delayedJobs.forEach( function(job) {
-                    if ( job['data']['eventID'] == eventID ) foundJobs.push(job )
-                });
-            } else {
-                foundJobs = foundJobs.concat( delayedJobs );
+    if (!types) {
+        types = ['delayed','active','inactive'];
+    }
+    if (!types.forEach) {
+        types = [types];
+    }
+    var promises = [];
+    types.forEach(function(type) {
+        var defer = q.defer();
+        promises.push(defer.promise);
+        kue.Job.rangeByType(queueName, type, 0, -1, 'asc', function(err,jobs) {
+            if (err) {
+                defer.reject(err);
             }
-        }
-        kue.Job.rangeByType(queueName, 'active', 0, 100000, 'asc', function (err, activeJobs) {
-            activeJobs = activeJobs || [];
-
-            var promises = [];
-
-            activeJobs.forEach( function(job) {
-                if ( !eventID || eventID == job['data']['eventID'] ) {
-                    var elapsed = ( new Date().getTime() - job.updated_at ) / 1000;
-                    if ( elapsed > 20 && job.data.eventID != 'jive.reaper') {
-                        // jobs shouldn't be inactive for more than 20 seconds
-                        promises.push( removeJob( job ));
-                    } else {
-                        foundJobs.push( job );
-                    }
-                }
-            });
-
-            if ( promises.length > 0 ) {
-                q.all(promises).finally( function() {
-                    deferred.resolve( foundJobs );
-                });
-            } else {
-                deferred.resolve( foundJobs );
+            else {
+                defer.resolve(jobs);
             }
         });
     });
+    q.all(promises).then(function(jobArrays) {
+        deferred.resolve(jobArrays.reduce(function(prev, curr) {
+            return prev.concat(curr);
+        }, []));
+    }, function(err) {
+        deferred.reject(err);
+    });
     return deferred.promise;
 };
+
+var findTasksInSet = function(eventID, tasks) {
+    var found = [];
+    for ( var i = 0; i < tasks.length; i++ ) {
+        var job = tasks[i];
+        if (job.data['eventID'] == eventID) {
+            found.push(job);
+        }
+    }
+    return found;
+}
 
 var setupKue = function(options) {
     //set up kue, optionally with a custom redis location.
@@ -196,6 +202,11 @@ function setupCleanupTasks(_eventHandlerMap) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
+/**
+ * Initialize the scheduler
+ * @param _eventHandlerMap - an object that trasnlates eventIDs into functions to run
+ * @param serviceConfig - configuration options such as the location of the redis server.
+ */
 Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
     var self = this;
     var isWorker = !serviceConfig || !serviceConfig['role'] || serviceConfig['role'] === jive.constants.roles.WORKER;
@@ -325,6 +336,10 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
     return deferred.promise;
 };
 
+/**
+ * Remove the task from the queue.
+ * @param eventID
+ */
 Scheduler.prototype.unschedule = function unschedule(eventID){
     clearInterval(localTasks[eventID]);
 
@@ -341,36 +356,44 @@ Scheduler.prototype.unschedule = function unschedule(eventID){
  */
 Scheduler.prototype.isScheduled = function(eventID) {
     var deferred = q.defer();
-
-    this.getTasks().then( function( tasks ) {
+    this.getTasks().then(function(tasks) {
         var found = false;
-        for ( var i = 0; i < tasks.length; i++ ) {
-            var job = tasks[i];
-            if (job.data['eventID'] == eventID) {
-                found = true;
-                break;
-            }
-        }
-        deferred.resolve( found );
+        if (findTasksInSet(eventID, tasks).length > 0) {
+            found = true;
+        };
+        deferred.resolve(found);
     });
-
     return deferred.promise;
 };
 
 /**
+ * Search only tasks with one of the given statuses for a task with the given eventID.
+ * @param eventID - task to search for
+ * @param statuses - array of strings containing the job statuses we want (e.g. ['delayed']).
+ * @returns {*}
+ */
+Scheduler.prototype.searchTasks = function(eventID, statuses) {
+    var deferred = q.defer();
+    searchJobsByQueueAndTypes(queueFor(eventID), statuses).then(function(tasks) {
+        deferred.resolve(findTasksInSet(eventID, tasks));
+    });
+    return deferred.promise;
+}
+
+/**
  * Returns a promise which resolves with the jobs currently scheduled (recurrent or dormant)
  */
-Scheduler.prototype.getTasks = function getTasks(eventID) {
+Scheduler.prototype.getTasks = function getTasks() {
     var foundJobs = [];
-
-    return q.all( [  searchForJobs(jobQueueName, eventID), searchForJobs(pushQueueName, eventID) ])
-    .then( function( jobs ) {
-        jobs.forEach( function(jobList) {
-            if ( jobList && jobList.length > 0 ) {
-                foundJobs = foundJobs.concat( jobList );
-            }
-        });
-
+    return searchJobsByQueueAndTypes(jobQueueName).then(function(jobs) {
+        if (jobs && jobs.length > 0) {
+            foundJobs = foundJobs.concat( jobs );
+        }
+        return searchJobsByQueueAndTypes(pushQueueName);
+    }).then(function(pushJobs) {
+        if (pushJobs && pushJobs.length > 0) {
+            foundJobs = foundJobs.concat( pushJobs );
+        }
         return foundJobs;
     });
 };
