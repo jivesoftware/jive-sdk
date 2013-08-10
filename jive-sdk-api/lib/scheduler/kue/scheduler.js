@@ -171,30 +171,32 @@ function setupCleanupTasks(_eventHandlerMap) {
         var deferred = q.defer();
 
         jive.logger.info("Running reaper");
-        kue.Job.rangeByState('complete', 0, 2000, 'asc', function (err, jobs) {
-            var promises = [];
-            if ( jobs ) {
-                jobs.forEach( function(job) {
-                    var elapsed = ( new Date().getTime() - job.created_at ) / 1000;
-                    if ( elapsed > 30) {
-                        // if completed more than 5 seconds ago, nuke it
-                        promises.push( removeJob(job) );
-                    }
-                });
-            }
+        kue.Job.rangeByState('complete', 0, -1, 'asc', function (err, jobs) {
+            kue.Job.rangeByState('failed', 0, -1, 'asc', function(failedErr, failedJobs) {
+                jobs = jobs.concat(failedJobs);
+                var promises = [];
+                if ( jobs ) {
+                    jobs.forEach( function(job) {
+                        var elapsed = ( new Date().getTime() - job.created_at ) / 1000;
+                        if ( elapsed > 30) {
+                            // if completed more than 5 seconds ago, nuke it
+                            promises.push( removeJob(job) );
+                        }
+                    });
+                }
 
-            if ( promises.length > 0 ) {
-                q.all(promises).then( function() {
-                    jive.logger.info("Cleaned up", promises.length);
-                }).finally(function() {
+                if ( promises.length > 0 ) {
+                    q.all(promises).then( function() {
+                        jive.logger.info("Cleaned up", promises.length);
+                    }).finally(function() {
+                            deferred.resolve();
+                        });
+                } else {
+                    jive.logger.info("Cleaned up nothing");
                     deferred.resolve();
-                });
-            } else {
-                jive.logger.info("Cleaned up nothing");
-                deferred.resolve();
-            }
+                }
+            });
         });
-
         return deferred;
     };
 }
@@ -204,7 +206,7 @@ function setupCleanupTasks(_eventHandlerMap) {
 
 /**
  * Initialize the scheduler
- * @param _eventHandlerMap - an object that trasnlates eventIDs into functions to run
+ * @param _eventHandlerMap - an object that translates eventIDs into functions to run
  * @param serviceConfig - configuration options such as the location of the redis server.
  */
 Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
