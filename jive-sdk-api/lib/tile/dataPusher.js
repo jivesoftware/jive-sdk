@@ -260,10 +260,7 @@ exports.getPaginated = function(instance, url) {
         }
 
         entity.next = function() {
-            return jive.context.scheduler.schedule(jive.constants.tileEventNames.GET_PAGINATED_RESULTS, {
-                'extstream' : instance,
-                'commentsURL' : entity.links.next
-            } );
+            return exports.getPaginated( instance, entity.links.next );
         };
 
         return response;
