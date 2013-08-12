@@ -55,6 +55,30 @@ var removeJob = function( job ) {
     return deferred.promise;
 };
 
+var cleanUpStuckActiveJobs = function() {
+    var deferred = q.defer();
+    kue.Job.rangeByState('active', 0, 100000, 'asc', function (err, activeJobs) {
+        activeJobs = activeJobs || [];
+        var promises = [];
+        activeJobs.forEach(function(job) {
+            var elapsed = ( new Date().getTime() - job.updated_at ) / 1000;
+            if (elapsed > 20) { // && job.data.eventID != 'jive.reaper'
+                // jobs shouldn't be inactive for more than 20 seconds
+                promises.push(removeJob(job));
+            }
+        });
+
+        if ( promises.length > 0 ) {
+            q.all(promises).finally( function() {
+                deferred.resolve();
+            });
+        } else {
+            deferred.resolve();
+        }
+    });
+    return deferred.promise;
+};
+
 /**
  * Return all jobs in the given queue that have one of the given states.
  * @param queueName - name of the queue
@@ -73,14 +97,24 @@ var searchJobsByQueueAndTypes = function(queueName, types) {
     types.forEach(function(type) {
         var defer = q.defer();
         promises.push(defer.promise);
-        kue.Job.rangeByType(queueName, type, 0, -1, 'asc', function(err,jobs) {
-            if (err) {
-                defer.reject(err);
-            }
-            else {
-                defer.resolve(jobs);
-            }
-        });
+
+        function doSearch() {
+            kue.Job.rangeByType(queueName, type, 0, -1, 'asc', function (err, jobs) {
+                if (err) {
+                    defer.reject(err);
+                }
+                else {
+                    defer.resolve(jobs);
+                }
+            });
+        }
+
+        if (type == 'active') {
+            cleanUpStuckActiveJobs().then(doSearch);
+        }
+        else {
+            doSearch();
+        }
     });
     q.all(promises).then(function(jobArrays) {
         deferred.resolve(jobArrays.reduce(function(prev, curr) {
@@ -169,7 +203,6 @@ function setupCleanupTasks(_eventHandlerMap) {
     // to reap the job result records in redis
     _eventHandlerMap['jive.reaper'] = function() {
         var deferred = q.defer();
-
         jive.logger.info("Running reaper");
         kue.Job.rangeByState('complete', 0, -1, 'asc', function (err, jobs) {
             kue.Job.rangeByState('failed', 0, -1, 'asc', function(failedErr, failedJobs) {
@@ -197,7 +230,7 @@ function setupCleanupTasks(_eventHandlerMap) {
                 }
             });
         });
-        return deferred;
+        return deferred.promise;
     };
 }
 
