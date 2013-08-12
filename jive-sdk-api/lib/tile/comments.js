@@ -85,8 +85,6 @@ exports.fetchCommentsOnActivity = function(activity, opts) {
 
 exports.fetchAllCommentsForExtstream = function(extstream, opts) {
 
-    opts = opts || DEFAULT_OPTS;
-
     var dataURL = extstream['url'];
     var commentsURL = commentsUrlFromDataUrl(dataURL);
 

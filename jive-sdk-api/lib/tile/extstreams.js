@@ -23,6 +23,7 @@ var util = require('util');
 var jive = require('../../api');
 var instances = require('./instances');
 var pusher = require('./dataPusher');
+var comments = require('./comments');
 
 var extstreams = Object.create(instances);
 module.exports = extstreams;
@@ -107,13 +108,11 @@ extstreams.fetchCommentsOnActivity = function(activity, opts) {
 
 /**
  * Get all comments in Jive for ALL activity of the given external stream
+ * Note these operations are performed inline, and not on a separate node
  * @param extstream - an external stream object from the jive-sdk
  * @param opts - JSON describing options for retrieving content from Jive. See above documentation.
  * @returns a promise that resolves to a response. response.entity is the list of comments. See  See https://developers.jivesoftware.com/api/rest/index.html#lists
  */
 extstreams.fetchAllCommentsForExtstream = function(extstream, opts) {
-    return jive.context.scheduler.schedule(jive.constants.tileEventNames.FETCH_ALL_COMMENTS_FOR_EXT_STREAM, {
-        'extstream' : extstream,
-        'opts' : opts || DEFAULT_OPTS
-    } );
+    return comments.fetchAllCommentsForExtstream(extstream, opts || DEFAULT_OPTS);
 };
