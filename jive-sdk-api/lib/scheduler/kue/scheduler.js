@@ -60,7 +60,7 @@ var cleanUpStuckActiveJobs = function(deferred, activeJobs) {
     var promises = [];
     activeJobs.forEach(function(job) {
         var elapsed = ( new Date().getTime() - job.updated_at ) / 1000;
-        if (elapsed > 20) { // && job.data.eventID != 'jive.reaper'
+        if (elapsed > 20 && job.data.eventID != 'jive.reaper' ) {
             // jobs shouldn't be inactive for more than 20 seconds
             promises.push(removeJob(job));
         } else {
