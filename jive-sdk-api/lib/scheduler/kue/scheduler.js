@@ -55,27 +55,23 @@ var removeJob = function( job ) {
     return deferred.promise;
 };
 
-var cleanUpStuckActiveJobs = function() {
-    var deferred = q.defer();
-    kue.Job.rangeByState('active', 0, 100000, 'asc', function (err, activeJobs) {
-        activeJobs = activeJobs || [];
-        var promises = [];
-        activeJobs.forEach(function(job) {
-            var elapsed = ( new Date().getTime() - job.updated_at ) / 1000;
-            if (elapsed > 20) { // && job.data.eventID != 'jive.reaper'
-                // jobs shouldn't be inactive for more than 20 seconds
-                promises.push(removeJob(job));
-            }
-        });
-
-        if ( promises.length > 0 ) {
-            q.all(promises).finally( function() {
-                deferred.resolve();
-            });
+var cleanUpStuckActiveJobs = function(deferred, activeJobs) {
+    var acceptedJobs = [];
+    var promises = [];
+    activeJobs.forEach(function(job) {
+        var elapsed = ( new Date().getTime() - job.updated_at ) / 1000;
+        if (elapsed > 20) { // && job.data.eventID != 'jive.reaper'
+            // jobs shouldn't be inactive for more than 20 seconds
+            promises.push(removeJob(job));
         } else {
-            deferred.resolve();
+            acceptedJobs.push(job);
         }
     });
+
+    q.all(promises).finally( function() {
+        deferred.resolve(acceptedJobs);
+    });
+
     return deferred.promise;
 };
 
@@ -104,17 +100,16 @@ var searchJobsByQueueAndTypes = function(queueName, types) {
                     defer.reject(err);
                 }
                 else {
-                    defer.resolve(jobs);
+                    if ( type == 'active' ) {
+                        cleanUpStuckActiveJobs(deferred, jobs);
+                    } else {
+                        defer.resolve(jobs);
+                    }
                 }
             });
         }
 
-        if (type == 'active') {
-            cleanUpStuckActiveJobs().then(doSearch);
-        }
-        else {
-            doSearch();
-        }
+        doSearch();
     });
     q.all(promises).then(function(jobArrays) {
         deferred.resolve(jobArrays.reduce(function(prev, curr) {
