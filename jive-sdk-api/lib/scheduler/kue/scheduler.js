@@ -55,6 +55,16 @@ var removeJob = function( job ) {
     return deferred.promise;
 };
 
+var failJob = function( job ) {
+    var deferred = q.defer();
+    job.failed(function() {
+        jive.logger.info('job', job.id, job['data']['eventID'], 'expired, removed');
+        deferred.resolve();
+    });
+
+    return deferred.promise;
+};
+
 var cleanUpStuckActiveJobs = function(deferred, activeJobs) {
     var acceptedJobs = [];
     var promises = [];
@@ -62,7 +72,7 @@ var cleanUpStuckActiveJobs = function(deferred, activeJobs) {
         var elapsed = ( new Date().getTime() - job.updated_at ) / 1000;
         if (elapsed > 20 && job.data.eventID != 'jive.reaper' ) {
             // jobs shouldn't be inactive for more than 20 seconds
-            promises.push(removeJob(job));
+            promises.push(failJob(job));
         } else {
             acceptedJobs.push(job);
         }
@@ -269,8 +279,10 @@ Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
         });
     });
 
+    // until https://github.com/LearnBoost/kue/issues/197 is fixed
+    // we CANNOT safely clean up failed or completed jobs!
     // schedule a periodic repear task
-    self.schedule('jive.reaper', {}, 10 * 1000, undefined, false, 300 * 1000 );
+//    self.schedule('jive.reaper', {}, 10 * 1000, undefined, false, 300 * 1000 );
 
     jive.logger.info("Redis Scheduler Initialized for queue");
 };
