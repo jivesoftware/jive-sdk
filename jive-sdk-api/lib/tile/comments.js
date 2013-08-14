@@ -95,7 +95,7 @@ exports.fetchAllCommentsForExtstream = function(extstream, opts) {
         'commentsURL' : commentsURL
     } );
 
-    return promise.getPaginated(extstream, commentsURL).then(function(response) {
+    return promise.then(function(response) {
 
         if (response.entity && response.entity.list) {
             response.entity.list = filterComments(response.entity.list, opts['commentSourceType'], opts['publishedAfter']);
