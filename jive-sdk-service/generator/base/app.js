@@ -36,9 +36,11 @@ var failServer = function(reason) {
 };
 
 var startServer = function () {
-    var server = http.createServer(app).listen( app.get('port') || 8090, function () {
-        console.log("Express server listening on port " + server.address().port);
-    });
+    if ( !jive.service.role || jive.service.role.isHttp() ) {
+        var server = http.createServer(app).listen( app.get('port') || 8090, function () {
+            console.log("Express server listening on port " + server.address().port);
+        });
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
