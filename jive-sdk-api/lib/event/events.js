@@ -163,8 +163,7 @@ exports.baseEvents = [
         'event':jive.constants.tileEventNames.PUSH_COMMENT_TO_JIVE,
         'handler':function(context) {
             var tileInstance = context['tileInstance'];
-            var data = context['data'];
-            var commentURL = context['commentURL'];
+            var commentURL = context['commentsURL'];
             var comment = context['comment'];
             return pusher.pushComment(tileInstance, commentURL, comment);
         },
