@@ -367,7 +367,6 @@ function prepare() {
 
 exports.init = function(target) {
     // init lists
-
     prepare().then( function() {
 
         // default command to help
