@@ -107,14 +107,14 @@ exports.eventHandlers = [
         }
     },
     {
-        'event': jive.constants.globalEvents.NEW_INSTANCE,
+        'event': jive.constants.globalEventNames.NEW_INSTANCE,
         'handler' : function(theInstance){
             jive.logger.info("Caught newInstance event, trying to push now.");
             pushUpdate(theInstance);
         }
     },
     {
-        'event': jive.constants.globalEvents.INSTANCE_UPDATED,
+        'event': jive.constants.globalEventNames.INSTANCE_UPDATED,
         'handler' : function(theInstance){
             jive.logger.info("Caught updateInstance event, trying to push now.");
             pushUpdate(theInstance);
