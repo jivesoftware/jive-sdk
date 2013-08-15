@@ -57,6 +57,28 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
 
+    function setupDefinitionEventListener(handlerInfo, definitionName) {
+        if (!handlerInfo['event']) {
+            throw new Error('Event handler for tile definition "'
+                + definitionName + '" must specify an event name.');
+        }
+        if (!handlerInfo['handler']) {
+            throw new Error('Event handler for tile definition "'
+                + definitionName + '" must specify a function handler.');
+        }
+
+        if (jive.events.globalEvents.indexOf(handlerInfo['event']) != -1) {
+            jive.events.addSystemEventListener(handlerInfo['event'], handlerInfo['handler']);
+        } else {
+            jive.events.addDefinitionEventListener(
+                handlerInfo['event'],
+                definitionName,
+                handlerInfo['handler'],
+                handlerInfo['description'] || 'Unique to definition'
+            );
+        }
+    }
+
     return recursiveDirectoryProcessor( null, definitionName, svcDir, svcDir,
         function(app, definitionName, theFile, theDirectory) {
             var taskPath = theDirectory + '/' + theFile;
@@ -67,6 +89,13 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
 
                 throw new Error('Illegal definition name ' + definitionName + ', collides with a reserved system identifier.' +
                     'Please choose a different definition name.');
+            }
+
+            // event handlers
+            if (target.eventHandlers) {
+                target.eventHandlers.forEach(function (handlerInfo) {
+                    setupDefinitionEventListener(handlerInfo, definitionName);
+                });
             }
 
             // recurrent tasks
@@ -85,62 +114,43 @@ exports.setupDefinitionServices = function( app, definitionName, svcDir ) {
 
                 tasksToAdd.forEach(function(task) {
                     var eventID = task['event'], handler = task['handler'],  interval = task['interval'] || 60 * 1000,
-                        context = task['context'] || {}, timeout = task['timeout'];
-
-                    if ( !handler ) {
-                        throw new Error('Task for tile definition "'
-                            + definitionName + '" must specify a function handler.');
-                    }
+                        context = task['context'] || {}, timeout = task['timeout'], event = task['event'];
 
                     if ( !eventID ) {
                         // if no eventID -- then the event is <tilename>.<interval>
                         eventID = definitionName + ( interval ? '.' + interval : '' );
                     }
 
-                    context['event'] = eventID;
-                    context['tileName'] = definitionName;
+                    if ( !handler ) {
+                        handler = jive.events.getDefinitionEventListenerFor(definitionName, event );
+                        if ( handler && handler['forEach'] ) {
+                            handler = handler[0]; // get only the first one
+                        }
+                    }
 
                     if ( handler ) {
                         target.eventHandlers = target.eventHandlers || [];
 
                         // task came with a handler; mix it into the list of target eventHandlers
                         if ( target.eventHandlers ) {
-                            target.eventHandlers.push( {
+                            setupDefinitionEventListener( {
                                 'event' : eventID,
                                 'handler' : handler
-                            });
+                            }, definitionName );
+                            target.eventHandlers.push( );
                         }
+                    } else {
+                        throw new Error('Task for tile definition "'
+                            + definitionName + '" must specify a function handler.');
                     }
+
+                    context['event'] = eventID;
+                    context['tileName'] = definitionName;
 
                     // only attempt to schedule events after bootstrap is complete
                     jive.events.addLocalEventListener( "serviceBootstrapped", function() {
                         jive.context.scheduler.schedule(eventID, context, interval, undefined, undefined, timeout );
                     });
-                });
-            }
-
-            // event handlers
-            if ( target.eventHandlers ) {
-                target.eventHandlers.forEach( function( handlerInfo ) {
-                    if ( !handlerInfo['event'] ) {
-                        throw new Error('Event handler for tile definition "'
-                            + definitionName + '" must specify an event name.');
-                    }
-                    if ( !handlerInfo['handler'] ) {
-                        throw new Error('Event handler for tile definition "'
-                            + definitionName + '" must specify a function handler.');
-                    }
-
-                    if ( jive.events.globalEvents.indexOf(handlerInfo['event']) != -1 ) {
-                        jive.events.addSystemEventListener(handlerInfo['event'],  handlerInfo['handler']);
-                    }  else {
-                        jive.events.addDefinitionEventListener(
-                            handlerInfo['event'],
-                            definitionName,
-                            handlerInfo['handler'],
-                            handlerInfo['description'] || 'Unique to definition'
-                        );
-                    }
                 });
             }
 
