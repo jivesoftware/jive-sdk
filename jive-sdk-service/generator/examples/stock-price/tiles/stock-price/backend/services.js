@@ -4,19 +4,11 @@ var jive = require('jive-sdk')
     , q    = require('q')
     , http = require('q-io/http');
 
-exports.task = [
-    {
-        'event':'stockPricePushToJive',
-        'interval':60*1000,
-        'handler':doUpdate
-    }
-];
-
-function doUpdate() {
-    jive.tiles.findByDefinitionName('stock-price').then(function(tiles) {
+exports.task = new jive.tasks.build(function() {
+    jive.tiles.findByDefinitionName('{{{TILE_NAME}}}').then(function(tiles) {
         tiles.forEach(pushUpdate);
     });
-}
+}, 60000);
 
 function pushUpdate(tile) {
     console.log('pushing update: '+ tile.name +', '+ tile.id, tile);
@@ -104,7 +96,7 @@ function formatField(fieldName) {
 exports.eventHandlers = [
 
     {
-        'event': 'newInstance',
+        'event': jive.constants.globalEventNames.NEW_INSTANCE,
         'handler' : function(theInstance){
             jive.logger.info("Caught newInstance event, trying to push now.");
             pushUpdate(theInstance);
@@ -112,31 +104,10 @@ exports.eventHandlers = [
     },
 
     {
-        'event': 'updateInstance',
+        'event': jive.constants.globalEventNames.INSTANCE_UPDATED,
         'handler' : function(theInstance){
             jive.logger.info("Caught updateInstance event, trying to push now.");
             pushUpdate(theInstance);
-        }
-    },
-
-    {
-        'event': 'destroyingInstance',
-        'handler' : function(theInstance){
-            // override
-        }
-    },
-
-    {
-        'event': 'destroyedInstance',
-        'handler' : function(theInstance){
-            // override
-        }
-    },
-
-    {
-        'event': 'dataPushed',
-        'handler' : function(theInstance, pushedData, response){
-            // override
         }
     }
 

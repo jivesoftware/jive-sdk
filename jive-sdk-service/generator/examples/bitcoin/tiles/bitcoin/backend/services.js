@@ -46,7 +46,7 @@ function pushUpdate(prices, tile) {
 
 exports.eventHandlers = [
     {
-        'event': jive.constants.globalEvents.NEW_INSTANCE,
+        'event': jive.constants.globalEventNames.NEW_INSTANCE,
         'handler' : function(theInstance){
             jive.logger.info("Caught newInstance event, trying to push now.");
             fetchPrices().then(function(prices) {

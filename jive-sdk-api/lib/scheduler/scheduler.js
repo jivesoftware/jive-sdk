@@ -54,6 +54,7 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
  * @param interval The interval to invoke the callback
  */
 Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
+    var deferred = q.defer();
     var handlers;
     if (context['tileName']) {
         handlers = eventHandlerMap[context['tileName']][eventID];
@@ -63,40 +64,38 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
 
     handlers = handlers || [];
 
+    var next = function() {
+        var promises = [];
+        handlers.forEach( function(handler) {
+            var p = handler(context);
+            if ( p && p['then'] ) {
+                promises.push(p);
+            }
+        });
+
+        q.all( promises).then( function(result ) {
+            result = result['forEach'] && result.length == 1 ? result[0] : result;
+            deferred.resolve(result);
+        });
+    };
+
     if (interval) {
-        var wrapper;
-        if ( delay ) {
-            wrapper = setTimeout( function() {
-                setInterval(function() {
-                    handlers.forEach( function(handler) {
-                        handler(context)
-                    });
-                }, interval);
-            }, delay );
-        } else {
-            wrapper = setInterval(function() {
-                handlers.forEach( function(handler) {
-                    handler(context)
-                });
+        var wrapper = setTimeout( function() {
+            setInterval(function() {
+                next();
             }, interval);
-        }
+        }, delay || 1 );
 
         tasks[eventID] = wrapper;
     }
     else {
-        if ( delay ) {
-            setTimeout( function() {
-                handlers.forEach( function(handler) {
-                    handler(context)
-                });
-            }, delay );
-        } else {
-            handlers.forEach( function(handler) {
-                handler(context)
-            });
-        }
+        setTimeout( function() {
+            next();
+        }, delay || 1);
     }
     jive.logger.debug("Scheduled task: " + eventID, interval);
+
+    return deferred.promise;
 };
 
 Scheduler.prototype.unschedule = function unschedule(eventID){

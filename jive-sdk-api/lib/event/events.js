@@ -49,6 +49,14 @@ exports.addDefinitionEventListener = function( event, definitionName, handler, d
     }
 };
 
+exports.getDefinitionEventListenerFor = function( definitionName, event ) {
+    if ( !exports.eventHandlerMap[definitionName] || !exports.eventHandlerMap[definitionName][event] ) {
+        return null;
+    }
+
+    return exports.eventHandlerMap[definitionName][event];
+};
+
 /**
  * A System-level event listener, like the ones in the baseEvents array below.
  * @param event
