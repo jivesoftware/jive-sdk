@@ -93,7 +93,7 @@ module.exports = function(serviceConfig) {
 
             collection.find(criteria, function(err, items) {
                 if( err || !items || items.length < 1) {
-                    deferred.resolve();
+                    deferred.resolve([]);
                     return;
                 }
                 deferred.resolve(items);
