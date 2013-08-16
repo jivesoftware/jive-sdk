@@ -63,7 +63,6 @@ var findCredentials = function(jiveUrl) {
     return deferred.promise;
 };
 
-//only thing this should do inline is validating credentials
 exports.registration = function( req, res ) {
     var pushUrl = req.body['url'];
     // xxx todo save remoteTileId along with the tile instance (so it can be unregistered, see above)
@@ -75,15 +74,27 @@ exports.registration = function( req, res ) {
     var jiveUrl = req.body['jiveUrl'];
 
     findCredentials(jiveUrl).then( function(credentials) {
-        if ( credentials ) {
+            if ( credentials ) {
             var clientId = credentials['clientId'];
             var secret = credentials['clientSecret'];
             var auth = req.headers['authorization'];
-
-            if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {
-                res.writeHead(403, { 'Content-Type': 'application/json' });
-                res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
-                return;
+            //JiveEXTN auth header = titan
+            if (auth.split(' ')[0] == 'JiveEXTN') {
+                //do signature verification
+                //todo for some reason the following does not work, it generates a signature that doesn't match.
+//                var hmac_signature = require('crypto').createHmac('sha256', secret).update(auth.split(' ')[1].split('&').slice(0,5).join('&')).digest('base64');
+//                if (hmac_signature != checkSignature) {
+//                    res.writeHead(403, { 'Content-Type': 'application/json' });
+//                    res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
+//                    return;
+//                }
+            }
+            else {
+                if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {
+                    res.writeHead(403, { 'Content-Type': 'application/json' });
+                    res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
+                    return;
+                }
             }
 
             schedule(guid, config, name, jiveUrl, pushUrl, code, res);
