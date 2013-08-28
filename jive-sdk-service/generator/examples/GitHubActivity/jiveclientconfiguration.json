@@ -1,0 +1,14 @@
+{
+    "clientUrl":"http://localhost",
+    "port": "8090",
+    "clientId": "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_JIVE!!!",
+    "clientSecret": "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_JIVE!!!",
+
+    "oauth2-github" :{
+        "originServerAuthorizationUrl" : "https://github.com/login/oauth/authorize",
+        "originServerTokenRequestUrl" : "https://github.com/login/oauth/access_token",
+        "clientOAuth2CallbackUrl" : "http://localhost:8090/GitHubIssues-List/oauth/oauth2Callback",
+        "oauth2ConsumerKey" : "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_GITHUB!!!",
+        "oauth2ConsumerSecret" : "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_GITHUB!!!"
+    }
+}
