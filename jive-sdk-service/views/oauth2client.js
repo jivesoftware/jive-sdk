@@ -8,6 +8,7 @@ function OAuth2ServerFlow( options ) {
     var oauth2SuccessCallback = options['oauth2SuccessCallback'];
     var preOauth2DanceCallback = options['preOauth2DanceCallback'];
     var onLoadCallback = options['onLoadCallback'];
+    var jiveOAuth2Dance = options['jiveOAuth2Dance'];
 
     // has defaults
     var authorizeUrl =  options['authorizeUrl'] || serviceHost + '/authorizeUrl';
@@ -16,7 +17,7 @@ function OAuth2ServerFlow( options ) {
     var context = options['context'];
     var extraAuthParams = options['extraAuthParams'];
 
-    var doOAuthDance = function(viewerID, oauth2CallbackUrl) {
+    var doOAuthDance = function(viewerID, oauth2CallbackUrl, jiveTenantID) {
         // do any preparation things necessary
         if ( preOauth2DanceCallback ) {
             preOauth2DanceCallback();
@@ -25,6 +26,10 @@ function OAuth2ServerFlow( options ) {
         //Fetch the jive callback url - eg. http://server//gadgets/jiveOAuth2Callback
         var url = authorizeUrl + "?callback=" + oauth2CallbackUrl
             + "&ts=" + new Date().getTime() + "&viewerID=" + viewerID;
+
+        if ( jiveTenantID && jiveOAuth2Dance ) {
+            url += "&jiveTenantID=" + jiveTenantID;
+        }
 
         // any extra state to inform downstream operations
         if ( context ) {
@@ -84,6 +89,7 @@ function OAuth2ServerFlow( options ) {
                 var viewerID = identifiers['viewer'];   // user ID
                 var ticket = config["ticketID"]; // may or may not be there
                 var oauth2CallbackUrl = jive.tile.getOAuth2CallbackUrl();
+                var jiveTenantID = gadgets.config.get()['jive-opensocial-ext-v1']['jiveTenantID'];
 
                 if ( onLoadCallback ) {
                     onLoadCallback( config, identifiers );
@@ -113,14 +119,14 @@ function OAuth2ServerFlow( options ) {
                             // skip authentication
                             ticket = data.ticketID;
                             if ( !ticket ) {
-                                doOAuthDance(viewerID, oauth2CallbackUrl);
+                                doOAuthDance(viewerID, oauth2CallbackUrl, jiveTenantID);
                             } else {
                                 oauth2SuccessCallback();
                             }
                         } else {
                             // ticket is not ok
                             // proceed with authentication
-                            doOAuthDance(viewerID, oauth2CallbackUrl);
+                            doOAuthDance(viewerID, oauth2CallbackUrl, jiveTenantID);
                         }
                     });
 
@@ -128,7 +134,7 @@ function OAuth2ServerFlow( options ) {
                     // proceed with authentication since
                     // there is no ticket endpoint to check for
                     // origin server access token validity.
-                    doOAuthDance(viewerID, oauth2CallbackUrl);
+                    doOAuthDance(viewerID, oauth2CallbackUrl, jiveTenantID);
                 }
 
             });

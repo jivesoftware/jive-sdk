@@ -1,0 +1,27 @@
+{
+    "sampleData": {
+        "title": "Project Information",
+        "contents": [
+            { "name": "Project Name", "value" : "---"},
+            { "name": "ID", "value": "---" },
+            { "name": "Description", "value": "---" },
+            { "name": "Created_By", "value": "---"  }
+        ],
+        "action" : {
+            "text" : "Basecamp",
+            "url" : "http://www.basecamp.com"
+        }
+    },
+    "config": "/{{{TILE_NAME}}}/configure",
+    "register": "/registration",
+    "displayName" : "BaseCamp-ProjectInfo ({{{TILE_NAME}}})",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "BaseCamp-ProjectInfo",
+    "style": "TABLE",
+    "icons": {
+        "16": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "48": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "128": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif"
+    },
+    "action": "/{{{TILE_NAME}}}/action"
+}

@@ -55,6 +55,12 @@ exports.findByCommunity = function( jiveCommunity ) {
     }, true );
 };
 
+exports.findByTenantID = function( tenantID ) {
+    return exports.find( {
+        'tenantId' : tenantID
+    }, true );
+};
+
 exports.parseJiveCommunity = function( jiveUrl ) {
     var parts = jiveUrl.split('http')[1].split('\/\/')[1].split(':')[0].split('/')[0].split('www.');
     return parts.length > 1 ? parts[1] : parts[0];

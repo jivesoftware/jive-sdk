@@ -21,7 +21,7 @@ exports.save = function( webhook ) {
     return jive.context.persistence.save( "webhook", webhook['url'], webhook );
 };
 
-exports.register = function( jiveCommunity, events, object, webhookCallback ) {
+exports.register = function( jiveCommunity, events, object, webhookCallback, accessToken ) {
     var deferred = q.defer();
 
     jive.community.findByCommunity(jiveCommunity).then( function(community) {
@@ -33,12 +33,19 @@ exports.register = function( jiveCommunity, events, object, webhookCallback ) {
                 "callback": webhookCallback
             };
 
-            var access_token = community['oauth']['access_token'];
+            if ( (!community['oauth'] || !community['oauth']['access_token']) && !accessToken ) {
+                deferred.reject(new Error("Failed to create community webhook. " +
+                    "No access token associated with community, and none provided explicitly."));
+                return;
+            }
+
+            accessToken = accessToken || community['oauth']['access_token'];
+
             var jiveUrl = community['jiveUrl'];
             var webhooksEndpoint = jiveUrl + '/api/core/v3/webhooks';
 
             var headers = {
-                'Authorization' : 'Bearer ' + access_token
+                'Authorization' : 'Bearer ' + accessToken
             };
 
             jive.util.buildRequest(webhooksEndpoint, "POST", webhookRequest, headers).then(

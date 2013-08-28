@@ -1,0 +1,98 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{{host}}}/stylesheets/bootstrap.min.css">
+    <script src="{{{host}}}/javascripts/jquery-1.10.2.js"></script>
+    <!--
+    <script src="{{{host}}}/javascripts/jquery-1.8.3.js"></script>
+    -->
+    <script src="{{{host}}}/javascripts/oauth2client.js"></script>
+    <script src="{{{host}}}/javascripts/bootstrap.min.js"></script>
+    <script src="{{{host}}}/{{{TILE_NAME}}}/javascripts/action.js"></script>
+    <script>
+        $(document).ready( function() {
+            doIt( '{{{host}}}');
+        });
+    </script>
+</head>
+
+
+
+<body>
+<div id="j-card-authentication" class="j-card" style='display: none'>
+    <h2>Expanded Project To Do Information ..</h2>
+
+    <p>
+    <p>The remote system (Basecamp) requires you to grant access before proceeding</p>
+
+    </p>
+    <br><br>
+    <button id="oauth">Grant Access</button>
+    <button id="btn_doneA">Exit</button>
+
+</div>
+
+
+<div id="j-card-action" class="j-card" style='display: none'>
+    <div class="container-fluid" id="todo-panel">
+        <h3><span id="title">Expanded Project To Do Information</span></h3>
+        <p>
+        <h5>Project</h5>
+        <a id="BasecampLinkB" href="https://basecamp.com" target="_blank" >Visiut this project at Basecamp</a>
+        <h5>Description</h5>
+        <span id="descriptionB">Placeholder for Description</span>
+        <h5>To Do List Name</h5>
+        <span id="todoListName">Placeholder for To Do List Name</span>
+        <h5>To Do List Description</h5>
+        <span id="todoListDescription">Placeholder for To Do List Description</span>
+        <h5>To Do Task</h5>
+        <span id="todoNameB">Placeholder for To Do Task</span>
+        </p>
+        <p>
+        <strong>Due On:</strong>&nbsp;&nbsp;
+        <label id="dueOnB">Placeholder for due on date</label><br>
+        <strong>Assigned to:</strong>&nbsp;&nbsp;
+        <label id="assigneeB">Placeholder for name of assignee</label>
+        </p>
+
+
+    </div>
+
+    <div class="container-fluid" id="issue-panel">
+        <!--
+        <div class="container-fluid">
+            <button class="btn btn-primary" id="basecampview">View In Basecamp</button>
+        </div>
+        -->
+        <hr>
+        <div class="container-fluid" id="issue-table" style="display:none">
+            <table class="table table-striped table-condensed table-bordered" style="border: 1px solid">
+                <!--Issues-->
+            </table>
+        </div>
+        <div class="container-fluid">
+            <div class="alert-area" style="display:none">
+                <!-- area for alerts to appear -->
+            </div>
+            <!--
+            <label>Share With</label>
+            <p><small>Leave this blank to share to this place.</small></p>
+            <label>User to target:</label><input type="text" id="people" data-provide="typeahead" style="resize:none">
+            <br>
+            <div class="container-fluid" id="shared-people">
+
+            </div>
+            <br>
+            <label>Subject:</label>
+            <input type="text" id="subject"> <br>
+            -->
+            <p>
+            <label>Comment:</label>
+            <textarea class="span6" cols=50 rows=5 id="message" style="resize:none"></textarea>
+            </p>
+            <button class="btn btn-primary" id="create-discussion">Post comment to Basecamp</button>
+            <button class="btn btn-primary" id="btn_done">Close Window</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
