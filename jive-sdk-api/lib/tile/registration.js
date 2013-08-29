@@ -55,6 +55,11 @@ exports.registration = function(context) {
                             var jiveCommunity = tileInstance['jiveCommunity'];
                             if (jiveCommunity) {
                                 jive.community.findByCommunity(jiveCommunity).then( function( community ) {
+                                    if ( !jiveUrl ) {
+                                        // try to derive jiveURL from push URL
+                                        jiveUrl = pushUrl.split('/api')[0];
+                                    }
+
                                     community = community || {};
                                     community['jiveUrl'] = jiveUrl;
                                     community['jiveCommunity'] = jiveCommunity;

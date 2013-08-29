@@ -39,7 +39,7 @@ function recursiveProcessComments(commentsList, extstream) {
 
     return promise.then(function (response) {
         return commentsList.next().then(function (nextList) {
-            return recursiveProcessComments(nextList);
+            return recursiveProcessComments(nextList, extstream);
         });
     });
 

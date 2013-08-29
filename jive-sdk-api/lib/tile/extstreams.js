@@ -123,6 +123,8 @@ extstreams.fetchAllCommentsForExtstream = function(extstream, opts) {
             return pusher.getPaginated(instance, entity.links.next);
         };
 
-        return entity;
+        return {
+            'entity' : entity
+        };
     });
 };
