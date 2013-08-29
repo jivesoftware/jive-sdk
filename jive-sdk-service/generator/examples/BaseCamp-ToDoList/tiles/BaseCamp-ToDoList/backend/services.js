@@ -124,8 +124,6 @@ function processTileInstance(instance) {
             console.log( "bad query from todo list items query");
         }
     );
-
-    jive.tiles.pushData(instance, dataToPush);
 }
 
 exports.task = new jive.tasks.build(
