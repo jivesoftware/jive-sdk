@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{{host}}}/stylesheets/bootstrap.min.css">
+    <meta http-equiv="Content-Type" value="text/html; charset=utf-8" />
+</head>
+<body>
+    <div class="container-fluid" id="jobs-panel-container">
+        <div class="container-fluid" id="jobs-panel">
+            <h3><span id="jobname"></span> is failing.</h3>
+            <p>
+            <h5>Description</h5>
+            <span id="description"></span>
+            <h5>Build Status</h5>
+            <span id="buildstatus"></span>
+            <h5>Job Status</h5>
+            <span id="jobstatus"></span>
+            <span id="lastpassed">There have been no successful builds.</span>
+            </p>
+        </div>
+        <a href="#" class="btn btn-inverse" id="postdiscussion">Create Discussion</a>
+        <a href="#" class="btn btn-inverse" id="gotojenkins">View in Jenkins</a>
+    </div>
+
+    <div class="container-fluid" id="discussion-panel" style="display:none">
+        <div class="alert-area" style="display:none">
+            <!-- area for alerts to appear -->
+        </div>
+        <label>Share With</label>
+        <p><small>Leave this blank to share to this place.</small></p>
+        <input type="text" id="people" data-provide="typeahead" style="resize:none">
+        <div class="container-fluid" id="shared-people">
+            <!--Shared People-->
+        </div>
+        <label>Subject:</label>
+        <input type="text" id="subject">
+        <label>Message:</label>
+        <textarea class="span6" rows=3 id="message" style="resize:none"></textarea>
+        <br>
+        <button class="btn btn-primary" id="create-discussion">Create Discussion</button>
+    </div>
+</body>
+<script src="{{{host}}}/javascripts/jquery-1.10.1.min.js"></script>
+<script src="{{{host}}}/javascripts/bootstrap.min.js"></script>
+<script src="{{{host}}}/{{{TILE_NAME}}}/action.js"></script>
+</html>

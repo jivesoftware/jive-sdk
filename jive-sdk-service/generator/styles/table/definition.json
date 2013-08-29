@@ -1,0 +1,19 @@
+{
+    "sampleData": {
+        "title": "{{{TILE_NAME}}} {{{TILE_STYLE}}}",
+        "contents": [
+            {
+                "name": "Value",
+                "value": "Initial data"
+            }
+        ]},
+    "displayName" : "{{{TILE_NAME}}}",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "{{{TILE_NAME}}}",
+    "style": "TABLE",
+    "icons": {
+        "16": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "48": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
+        "128": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif"
+    }
+}

@@ -1,4 +1,4 @@
-var jive = require('../../../jive-sdk'),
+var jive = require('../.'),
     assert = require('assert'),
     testUtil = require('../test-util');
 

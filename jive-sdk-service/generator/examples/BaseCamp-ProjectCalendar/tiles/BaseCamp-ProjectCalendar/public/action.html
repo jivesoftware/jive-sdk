@@ -1,0 +1,66 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{{host}}}/stylesheets/bootstrap.min.css">
+    <script src="{{{host}}}/javascripts/jquery-1.8.3.js"></script>
+    <script src="{{{host}}}/javascripts/oauth2client.js"></script>
+    <script src="{{{host}}}/{{{TILE_NAME}}}/javascripts/action.js"></script>
+    <script>
+        $(document).ready( function() {
+            doIt( '{{{host}}}');
+        });
+    </script>
+</head>
+
+
+
+<body>
+<div id="j-card-authentication" class="j-card" style='display: none'>
+    <h2>Expanded Project Event Information ..</h2>
+
+    <p>
+    <p>The remote system (Basecamp) requires you to grant access before proceeding</p>
+
+    </p>
+    <br><br>
+    <button class="btn btn-primary" id="oauth">Grant Access</button>
+    <button class="btn btn-primary" id="btn_doneA">Exit</button>
+
+</div>
+
+
+<div id="j-card-action" class="j-card" style='display: none'>
+    <div class="container-fluid" id="todo-panel">
+        <p>
+        <h3>Expanded Project Event Information ..</h3>
+        <h5>Project</h5>
+        <a id="basecampLinkB" href="https://basecamp.com" target="_blank" >Visit this project at Basecamp</a>
+        <h5>Project Description</h5>
+        <span id="descriptionB">Placeholder for Project Description</span>
+         </p>
+        <p>
+        <h3>Event Information</h3>
+        <label>Title:&nbsp;&nbsp;</label><span id="eventTitleB"><strong>Placeholder for Event Title</strong></span><br>
+        <label>Description:&nbsp;&nbsp;</label><span id="eventDescriptionB">Placeholder for Event Description</span> <br>
+        <label>Date/Time:&nbsp;&nbsp;</label><span id="eventDateTimeB">Placeholder for Event Date/Time</span>
+         </p>
+        <p>
+     </div>
+
+     <div class="container-fluid" id="document-panel">
+        <div class="alert-area" style="display:none">
+            <!-- area for alerts to appear -->
+        </div>
+        <label>Document to Upload:</label><br>
+        <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Title:</label>
+        <input type="text" id="title" size=48>
+        <br>
+        <label>Content:</label>
+        <textarea cols="50" rows=5 id="content" style="resize:none"></textarea>
+        </p>
+        <button class="btn btn-primary" id="btn_upload">Post Document to Basecamp</button>
+        <button class="btn btn-primary" id="btn_done">Close Window</button>
+     </div>
+</div>
+
+</body>
+</html>

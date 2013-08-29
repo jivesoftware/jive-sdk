@@ -1,0 +1,36 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{{host}}}/stylesheets/bootstrap.min.css">
+    <script src="{{{host}}}/javascripts/jquery-1.8.3.js"></script>
+    <script src="{{{host}}}/javascripts/oauth2client.js"></script>
+    <script src="{{{host}}}/{{{TILE_NAME}}}/javascripts/main_oauth2.js"></script>
+    <script>
+        $(document).ready( function() {
+            doIt( '{{{host}}}');
+        });
+    </script>
+</head>
+<body>
+
+<div id="j-card-authentication" class="j-card" style='display: none'>
+    <p>The remote system (Basecamp) requires you to grant access before proceeding.</p>
+    <button class="btn btn-primary" id="oauth">Grant Access</button>
+</div>
+
+<div id="j-card-configuration" class="j-card" style='display: none'>
+    <div class="container-fluid">
+    <h4>Basecamp Project Calendar Tile Configuration</h4>
+
+    <p>
+
+        Project:   <select id="projectList"></select>
+
+    </p>
+
+    <button class="btn btn-primary" id="btn_done">Done</button>
+    </p>
+    </div>
+</div>
+
+</body>
+</html>

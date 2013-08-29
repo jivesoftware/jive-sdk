@@ -1,8 +1,8 @@
 {
   "name": "jive-sdk",
   "description": "Node.js framework for building purposeful places",
-  "version": "0.0.79",
-  "main": "api.js",
+  "version": "0.1.0",
+  "main": "jive-sdk-service/api.js",
   "author": {
     "name": "Jive Software",
     "email": "jivedev@jivesoftware"
@@ -22,7 +22,9 @@
     "fs-extra": "0.6.0",
     "log4js": "0.6.3",
     "xmlhttprequest": "~1.5.0",
-    "jquery": "*"
+    "jquery": "1.8.3",
+    "redis" : "0.8.4",
+    "kue" : "0.6.2"
   },
   "devDependencies": {},
   "optionalDependencies": {},
@@ -59,6 +61,6 @@
     "api"
   ],
   "bin": {
-    "jive-sdk": "bin/jive-sdk.sh"
+    "jive-sdk": "jive-sdk-service/bin/jive-sdk.sh"
   }
 }

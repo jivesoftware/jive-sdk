@@ -1,6 +1,6 @@
 var q = require('q'),
     uuid = require('node-uuid'),
-    jive = require('../../jive-sdk'),
+    jive = require('.'),
     assert = require('assert');
 
 //*************************EXPORTED*****************************

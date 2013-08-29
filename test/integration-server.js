@@ -1,4 +1,4 @@
-var jive = require('../../jive-sdk'),
+var jive = require('.'),
     util = require('util'),
     BaseServer = require('./base-server').BaseServer;
 
@@ -40,7 +40,7 @@ IntegrationServer.prototype.start = function() {
         } )
 
         .then(function() {
-            self.memory = jive.service.persistence();
+            self.memory = jive.context.persistence;
             console.log('Initial memory: %s', JSON.stringify(self.memory.getDb()));
 
         })
@@ -50,8 +50,8 @@ IntegrationServer.prototype.start = function() {
 
 
 
- /*   app.get( '/tiles', jive.routes.tiles );
-    app.get( '/tilesInstall', jive.routes.installTiles );*/
+ /*   app.get( '/tiles', jive.service.routes.tiles );
+    app.get( '/tilesInstall', jive.service.routes.installTiles );*/
 
 }
 

@@ -1,0 +1,26 @@
+{
+    "sampleData" : {
+        "title" : "GitHub Issues for Repository=<>",
+        "contents" : [ {
+            "text" : "Initial text to be replaced"
+        } ],
+        "config" : {
+               "listStyle" : "contentList"
+        },
+        "action" : {
+            "text" : "Action Link",
+            "context" : { "test" : "data" }
+        }
+
+    },
+    "displayName" : "GitHubIssues-List ({{{TILE_NAME}}})",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "GitHubIssues-List",
+    "style" : "LIST",
+    "icons" : {
+        "16": "http://placehold.it/16x16",
+        "48": "http://placehold.it/48x148",
+        "128": "http://png-3.vector.me/files/images/7/3/737157/github_thumb.png"
+    },
+    "action": "/{{{TILE_NAME}}}/action"
+}

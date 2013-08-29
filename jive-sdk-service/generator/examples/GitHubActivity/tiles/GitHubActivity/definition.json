@@ -1,0 +1,12 @@
+{
+    "sampleData" : {},
+    "displayName" : "GitHubActivity ({{{TILE_NAME}}})",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "GitHubActivity",
+    "style" : "ACTIVITY",
+    "icons" : {
+        "16" :  "http://placehold.it/16x16",
+        "48" : "http://placehold.it/48x148",
+        "128" : "http://png-3.vector.me/files/images/7/3/737157/github_thumb.png"
+    }
+}

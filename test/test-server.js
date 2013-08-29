@@ -3,7 +3,7 @@
  */
 var express = require('express'),
     http = require('http'),
-    jive = require('../../jive-sdk'),
+    jive = require('.'),
     uuid = require('node-uuid'),
     FakeApiGateway = require('./fake-api-gateway').FakeApiGateway,
     IntegrationServer = require('./integration-server').IntegrationServer,
