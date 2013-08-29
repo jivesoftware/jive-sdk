@@ -32,7 +32,7 @@ myOauth.getTokenStore = function() {
     return tokenStore;
 };
 
-var oauthUtil = require("jive-sdk/lib/oauthUtil");
+var oauthUtil = require("jive-sdk/jive-sdk-api/lib/util/oauthUtil");
 
 myOauth.refreshToken = function( refreshToken, viewerID ) {
     oauthUtil.refreshTokenFlow( jive.service.options['oauth2'], refreshToken).then( function (response) {

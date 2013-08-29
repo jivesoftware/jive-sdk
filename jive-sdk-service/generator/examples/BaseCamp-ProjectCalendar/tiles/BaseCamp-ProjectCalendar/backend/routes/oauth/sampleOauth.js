@@ -1,10 +1,10 @@
 var util = require('util');
 var jive = require('jive-sdk');
 var url = require('url');
-var oauthUtil = require('jive-sdk/lib/oauthUtil');
+var oauthUtil = require("jive-sdk/jive-sdk-api/lib/util/oauthUtil");
 var mustache = require('mustache');
 
-var sdkInstance = require('jive-sdk/routes/oauth');
+var sdkInstance = require('jive-sdk/jive-sdk-service/routes/oauth');
 
 var myOauth = Object.create(sdkInstance);
 
