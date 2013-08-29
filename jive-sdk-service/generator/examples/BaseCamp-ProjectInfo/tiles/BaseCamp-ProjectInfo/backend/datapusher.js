@@ -98,52 +98,6 @@ exports.task = function() {
                     console.log( "bad Project Info query");
                 }
             );
-/*
-
-            var description = tile.config['description'] ;
-            var project = tile.config['project'];
-
-            var url;
-            url = "https://basecamp.com/" + tile.config['accountID']  + "/projects/" + tile.config['id'] ;
-            if (description.length > 50)
-            {
-                description = description.substring( 0, 46)  ;
-                description += " ..";
-            }
-            if (project.length > 50)
-            {
-                project = project.substring( 0, 46);
-                project += " ..";
-            }
-            var dataToPush = {
-                "data":
-                {
-                    "title": "Basecamp Project Information",
-                    "contents": [
-                        {
-                            "name": "Project Name",
-                            "value" : project
-                        },
-                        {
-                            "name": "ID",
-                            "value": tile.config['id'],
-                            //"url" : url
-                        } ,
-                        {   "name" : "Description",
-                            "value" : description
-                        },
-                        {   "name" : "Created_By",
-                            "value" : "unknown"
-                        }
-                    ],
-                    "action":{
-                        text : "Take a closer look ..." ,
-                        'context' : {name: project, description: tile.config['description'], id:tile.config['id'], url: url}
-                    }
-                }
-            };
- */
-            jive.tiles.pushData( tile, dataToPush );
         } );
     }, 10000);
 };
