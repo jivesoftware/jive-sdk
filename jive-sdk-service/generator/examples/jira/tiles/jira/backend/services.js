@@ -101,7 +101,7 @@ exports.eventHandlers = [
     {
         'event': 'update',
         'handler': function() {
-            jive.tiles.findByDefinitionName('jira').then(function(tiles) {
+            jive.tiles.findByDefinitionName('{{{TILE_NAME}}}').then(function(tiles) {
                 tiles.forEach(pushUpdate);
             });
         }

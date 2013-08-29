@@ -20,7 +20,7 @@ function initialize(config, options, host, jirahost) {
 
     function isAuthenticated(viewer) {
         var object = {
-            'href': host+"/jira/auth?viewer="+viewer,
+            'href': host+"/{{{TILE_NAME}}}/auth?viewer="+viewer,
             'headers' : { 'Content-Type' : ['application/json'] },
             'format':'json',
             'noCache': true,
@@ -48,7 +48,7 @@ function initialize(config, options, host, jirahost) {
 
     function authenticate(viewer, inpuser, inppass) {
         var object = {
-            'href': host+"/jira/auth?viewer="+viewer,
+            'href': host+"/{{{TILE_NAME}}}/auth?viewer="+viewer,
             'headers' : { 'Content-Type' : ['application/json'] },
             'format':'json',
             'noCache': true,
@@ -82,7 +82,7 @@ function initialize(config, options, host, jirahost) {
     function getFilters() {
         console.log("client url:",host);
         var object = {
-            'href': host+"/jira/proxy?url=" + jirahost + "/rest/api/latest/filter/favourite&user="+user+"&pass="+pass,
+            'href': host+"/{{{TILE_NAME}}}/proxy?url=" + jirahost + "/rest/api/latest/filter/favourite&user="+user+"&pass="+pass,
             'format': 'json',
             'noCache': true
         };
