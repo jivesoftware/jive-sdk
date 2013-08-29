@@ -1,0 +1,18 @@
+{
+    "sampleData" : {
+        "title" : "My contacts",
+        "contents" : [ {
+            "name" : "--",
+            "value": "--"
+        } ]
+    },
+    "displayName" : "Podio",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "My Contacts",
+    "style" : "TABLE",
+    "icons" : {
+        "16" : "http://placehold.it/16x16",
+        "48" : "http://placehold.it/48x48",
+        "128" : "http://placehold.it/128x128"
+    }
+}
