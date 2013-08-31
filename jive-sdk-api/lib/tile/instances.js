@@ -82,6 +82,10 @@ exports.findByScope = function (scope) {
     return this.find( { "scope" : scope }, true );
 };
 
+exports.findByGuid = function (guid) {
+    return this.find( { "guid" : guid }, true );
+};
+
 exports.findByURL = function (url) {
     return this.find( { "url" : url }, true );
 };
@@ -101,6 +105,8 @@ exports.remove = function (instanceID) {
 var findCredentials = function(jiveUrl) {
     var deferred = q.defer();
     var conf = jive.context.config;
+
+    // default to global clientID/secret
     var serviceCredentials = {
         'clientId': conf.clientId,
         'clientSecret': conf.clientSecret
@@ -123,7 +129,7 @@ var findCredentials = function(jiveUrl) {
     return deferred.promise;
 };
 
-var doRegister = function(options, pushUrl, config, name, jiveUrl, deferred) {
+var doRegister = function(options, pushUrl, config, name, jiveUrl, guid, deferred) {
     jiveClient.requestAccessToken(options,
         // success
         function (response) {
@@ -142,6 +148,7 @@ var doRegister = function(options, pushUrl, config, name, jiveUrl, deferred) {
             instance['expiresIn'] = accessTokenResponse['expires_in'];
             instance['refreshToken'] = accessTokenResponse['refresh_token'];
             instance['scope'] = scope;
+            instance['guid'] = guid;
             instance['jiveCommunity'] = jiveUrl ?
                 jive.community.parseJiveCommunity(jiveUrl)
               : decodeURIComponent(scope.split(/:/)[1].split('/')[0]).split(/:/)[0];
@@ -157,12 +164,11 @@ var doRegister = function(options, pushUrl, config, name, jiveUrl, deferred) {
     );
 };
 
-exports.register = function (jiveUrl, pushUrl, config, name, code ) {
+exports.register = function (jiveUrl, pushUrl, config, name, code, guid ) {
     var deferred = q.defer();
 
     return findCredentials(jiveUrl).then( function(credentials) {
 
-        // default to global clientID/secret
         var clientId = credentials['clientId'];
         var clientSecret = credentials['clientSecret'];
 
@@ -173,7 +179,7 @@ exports.register = function (jiveUrl, pushUrl, config, name, code ) {
             jiveUrl: jiveUrl
         };
 
-        doRegister(options, pushUrl, config, name, jiveUrl, deferred );
+        doRegister(options, pushUrl, config, name, jiveUrl, guid, deferred );
 
         return deferred.promise;
     });
