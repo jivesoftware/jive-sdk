@@ -24,7 +24,8 @@
     "xmlhttprequest": "~1.5.0",
     "jquery": "1.8.3",
     "redis" : "0.8.4",
-    "kue" : "0.6.2"
+    "kue" : "0.6.2",
+    "archiver" : "*"
   },
   "devDependencies": {},
   "optionalDependencies": {},

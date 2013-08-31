@@ -25,6 +25,7 @@ var bootstrap = require('./bootstrap');
 var definitionConfigurator = require('./definitionSetup');
 var jive = require('../api');
 var log4js = require('log4js');
+var mustache = require('mustache');
 
 var app;
 var rootDir = process.cwd();
@@ -361,4 +362,70 @@ exports.role = {
     'isHttp' : function() {
         return !exports.options['role'] || exports.options['role'] === jive.constants.roles.HTTP_HANDLER;
     }
+};
+
+exports.getExpandedTileDefinitions = function(all) {
+    var conf = exports.options;
+    var host = exports.serviceURL();
+    var processed = [];
+
+    all.forEach( function( tile ) {
+        if ( !tile ) {
+            return;
+        }
+        var name = tile.name;
+        var stringified = JSON.stringify(tile);
+        stringified =  mustache.render(stringified, {
+            host: host,
+            tile_public: host + '/' + name,
+            tile_route: host + '/' + name,
+            clientId: conf.clientId
+        });
+
+        var processedTile = JSON.parse(stringified);
+
+        // defaults
+        if ( !processedTile['published'] ) {
+            processedTile['published'] = "2013-02-28T15:12:16.768-0800";
+        }
+        if ( !processedTile['updated'] ) {
+            processedTile['updated'] = "2013-02-28T15:12:16.768-0800";
+        }
+        if ( processedTile['action'] ) {
+            if ( processedTile['action'].indexOf('http') != 0 ) {
+                // assume its relative to host then
+                processedTile['action'] = host + ( processedTile['action'].indexOf('/') == 0 ? "" : "/" ) + processedTile['action'];
+            }
+        }
+        if ( !processedTile['config'] ) {
+            processedTile['config'] = host + '/' + name + '/configure';
+        } else {
+            if ( processedTile['config'].indexOf('http') != 0 ) {
+                // assume its relative to host then
+                processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];
+            }
+        }
+        if ( !processedTile['register'] ) {
+            processedTile['register'] = host + '/registration';
+        } else {
+            if ( processedTile['register'].indexOf('http') != 0 ) {
+                // assume its relative to host then
+                processedTile['register'] = host + ( processedTile['register'].indexOf('/') == 0 ? "" : "/" ) + processedTile['register'];
+            }
+        }
+        if ( processedTile['unregister'] && processedTile['unregister'].indexOf('http') != 0 ) {
+            // assume its relative to host then
+            processedTile['unregister'] = host + ( processedTile['unregister'].indexOf('/') == 0 ? "" : "/" ) + processedTile['unregister'];
+        }
+        if ( !processedTile['client_id'] ) {
+            processedTile['client_id'] = conf.clientId;
+        }
+        if ( !processedTile['id'] ) {
+            processedTile['id'] = '{{{definition_id}}}';
+        }
+
+        processedTile.description += ' for ' + conf.clientId;
+        processed.push( processedTile );
+    });
+    return processed;
 };

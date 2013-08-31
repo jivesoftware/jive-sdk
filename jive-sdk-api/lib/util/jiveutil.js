@@ -424,13 +424,29 @@ exports.fswrite = function(data, path ) {
     return deferred.promise;
 };
 
+var supportedTemplatableExtensions = [ '.json', '.txt', '.text', '.js', '.sql', '.html' ];
+
+function getExtension(filename) {
+    if ( !filename ) {
+        return;
+    }
+    var i = filename.lastIndexOf('.');
+    return (i < 0) ? '' : filename.substr(i);
+}
+
 exports.fsTemplateCopy = function( source, target, substitutions ) {
-    jive.logger.debug('Copying', source, '->', target );
-    return exports.fsread(source).then( function( data ) {
-        var raw = data.toString();
-        var processed = mustache.render(raw, substitutions || {} );
-        return exports.fswrite(processed, target);
-    });
+    var ext = getExtension(source);
+    if ( !ext || supportedTemplatableExtensions.indexOf( ext.toLowerCase() ) < 0 ) {
+        jive.logger.debug(source + ' is not a supported templatable file type. Doing straight copying', source, '->', target );
+        return exports.fscopy( source, target );
+    } else {
+        jive.logger.debug('Templatized Copying', source, '->', target );
+        return exports.fsread(source).then( function( data ) {
+            var raw = data.toString();
+            var processed = mustache.render(raw, substitutions || {} );
+            return exports.fswrite(processed, target);
+        });
+    }
 };
 
 exports.base64Encode = function( object ) {
@@ -472,4 +488,104 @@ exports.sortObject = function (o) {
         sorted[a[key]] = o[a[key]];
     }
     return sorted;
+};
+
+exports.recursiveDirectoryProcessor = function(currentFsItem, root, targetRoot, force, processor ) {
+
+    var recurseDirectory =  function(directory) {
+        return q.nfcall(fs.readdir, directory).then(function( subItems ) {
+            var promises = [];
+            subItems.forEach( function( subItem ) {
+                promises.push( exports.recursiveDirectoryProcessor( directory + '/' + subItem, root, targetRoot, force, processor ) );
+            });
+
+            return q.all( promises );
+        });
+    };
+
+    return q.nfcall( fs.stat, currentFsItem ).then( function(stat) {
+        var targetPath = targetRoot + '/' +  currentFsItem.substr(root.length + 1, currentFsItem.length );
+
+        if ( stat.isDirectory() ) {
+            if ( root !== currentFsItem ) {
+                return exports.fsexists(targetPath).then( function(exists) {
+                    if ( root == currentFsItem || (exists && !force)) {
+                        return recurseDirectory(currentFsItem);
+                    } else {
+                        return processor( 'dir', currentFsItem, targetPath ).then( function() {
+                            return recurseDirectory(currentFsItem )
+                        });
+                    }
+                });
+            }
+
+            return recurseDirectory(currentFsItem);
+        }
+
+        // must be a file
+        return exports.fsexists(targetPath).then( function(exists) {
+            if ( !exists || force ) {
+                return processor( 'file', currentFsItem, targetPath )
+            } else {
+                return q.fcall(function(){});
+            }
+        });
+    });
+};
+
+var copyFileProcessor = function( type, currentFsItem, targetPath, substitutions ) {
+    return q.fcall( function() {
+        if ( type === 'dir' ) {
+            return exports.fsmkdir( targetPath );
+        }  else {
+            // must be file
+            return exports.fsTemplateCopy( currentFsItem, targetPath, substitutions );
+        }
+    });
+};
+
+exports.recursiveCopy = function(root, target, force, substitutions ) {
+    var substitutionProcessor = function (type, currentFsItem, targetPath ) {
+        return copyFileProcessor(type, currentFsItem, targetPath, substitutions);
+    };
+
+    return exports.recursiveDirectoryProcessor(
+        root,
+        root,
+        target,
+        force,
+        substitutionProcessor
+    );
+};
+
+exports.zipFolder = function( root, targetZip ) {
+    var fs = require('fs');
+
+    var archiver = require('archiver');
+
+    var output = fs.createWriteStream( targetZip );
+    var archive = archiver('zip');
+
+    archive.on('error', function(err) {
+        throw err;
+    });
+
+    archive.pipe(output);
+
+    return exports.recursiveDirectoryProcessor( root, root, '/tmp', false, function( type, currentFsItem, targetPath, substitutions ) {
+        return q.fcall( function() {
+            if ( type ==='file' ) {
+                var target = currentFsItem.substring( currentFsItem.indexOf( '/' ) + 1, currentFsItem.length );
+                jive.logger.debug('Zipping', currentFsItem, 'to', targetZip, ' : ', target );
+                archive.append(fs.createReadStream(currentFsItem), { name: target })
+            }
+        })
+    }).then( function() {
+        archive.finalize(function(err, written) {
+            if (err) {
+                throw err;
+            }
+            jive.logger.info(written + ' total bytes written to extension archive ', targetZip);
+        });
+    });
 };

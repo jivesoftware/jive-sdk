@@ -19,7 +19,8 @@ var express = require('express'),
     service = require('./service'),
     jive = require('../api'),
     consolidate = require('consolidate'),
-    q = require('q');
+    q = require('q'),
+    extension = require('./extension/extension');
 
 var alreadyBootstrapped = false;
 
@@ -93,10 +94,12 @@ var setupExpressApp = function (app, rootDir, config) {
         jive.logger.debug('Global dev framework routes:');
 
         app.get('/tiles', service.routes.dev.tiles);
-        app.get('/tilesInstall', service.routes.dev.installTiles);
+        app.get('/dev/tiles', service.routes.dev.tiles);
+        jive.logger.debug("/dev/tiles");
 
-        jive.logger.debug("/tiles");
-        jive.logger.debug("/tilesInstall");
+        app.get('/tilesInstall', service.routes.dev.installTiles);
+        app.get('/dev/tilesInstall', service.routes.dev.installTiles);
+        jive.logger.debug("/dev/tilesInstall");
 
         p2.resolve();
     });
@@ -158,6 +161,7 @@ exports.start = function( app, options, rootDir, tilesDir ) {
 
     return setupScheduler()
         .then( function() { return setupHttp(app, rootDir, options) })
+        .then( function() { return extension.prepare() })
         .then( function() {
             jive.logger.info("Bootstrap complete.");
             jive.logger.info("Started service in ", service.options.role || 'self-contained', "mode");

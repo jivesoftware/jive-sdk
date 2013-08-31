@@ -50,49 +50,6 @@ function validate(options) {
     return err;
 }
 
-function recursiveDirectoryProcessor(currentFsItem, root, targetRoot, force, processor ) {
-
-    var recurseDirectory =  function(directory) {
-        return q.nfcall(fs.readdir, directory).then(function( subItems ) {
-            var promises = [];
-            subItems.forEach( function( subItem ) {
-                promises.push( recursiveDirectoryProcessor( directory + '/' + subItem, root, targetRoot, force, processor ) );
-            });
-
-            return q.all( promises );
-        });
-    };
-
-    return q.nfcall( fs.stat, currentFsItem ).then( function(stat) {
-        var targetPath = targetRoot + '/' +  currentFsItem.substr(root.length + 1, currentFsItem.length );
-
-        if ( stat.isDirectory() ) {
-            if ( root !== currentFsItem ) {
-                return jive.util.fsexists(targetPath).then( function(exists) {
-                    if ( root == currentFsItem || (exists && !force)) {
-                        return recurseDirectory(currentFsItem);
-                    } else {
-                        return processor( 'dir', currentFsItem, targetPath ).then( function() {
-                            return recurseDirectory(currentFsItem )
-                        });
-                    }
-                });
-            }
-
-            return recurseDirectory(currentFsItem);
-        }
-
-        // must be a file
-        return jive.util.fsexists(targetPath).then( function(exists) {
-            if ( !exists || force ) {
-                return processor( 'file', currentFsItem, targetPath )
-            } else {
-                return q.fcall(function(){});
-            }
-        });
-    });
-}
-
 var conditionalMkdir = function(target, force) {
     return jive.util.fsexists(target).then( function(exists) {
         if ( !exists || force ) {
@@ -104,17 +61,6 @@ var conditionalMkdir = function(target, force) {
     });
 };
 
-function copyFileProcessor( type, currentFsItem, targetPath, substitutions ) {
-    return q.fcall( function() {
-        if ( type === 'dir' ) {
-            return jive.util.fsmkdir( targetPath );
-        }  else {
-            // must be file
-            return jive.util.fsTemplateCopy( currentFsItem, targetPath, substitutions );
-        }
-    });
-}
-
 function processExample(target, example, name, force) {
     console.log('Preparing example ', example, target );
 
@@ -124,33 +70,17 @@ function processExample(target, example, name, force) {
 
     // copy base
     promises.push(
-        recursiveDirectoryProcessor(
-            root + '/base',
-            root + '/base',
-            target,
-            force,
-            function (type, currentFsItem, targetPath) {
-                return copyFileProcessor(type, currentFsItem, targetPath, {
-                    'TILE_NAME': example,
-                    'host': '{{{host}}}'
-                });
-            }
-        )
+        jive.util.recursiveCopy(root + '/base', target, force, {
+            'TILE_NAME': example,
+            'host': '{{{host}}}'
+        } )
     );
 
     promises.push(
-        recursiveDirectoryProcessor(
-            root + '/examples/' + example,
-            root + '/examples/' + example,
-            target,
-            force,
-            function (type, currentFsItem, targetPath) {
-                return copyFileProcessor(type, currentFsItem, targetPath, {
-                    'TILE_NAME': name,
-                    'host': '{{{host}}}'
-                });
-            }
-        )
+        jive.util.recursiveCopy(root + '/examples/' + example, target, force, {
+            'TILE_NAME': name,
+            'host': '{{{host}}}'
+        } )
     );
 
     return q.all(promises).then( function() {
@@ -187,19 +117,9 @@ function processDefinition(target, type, name, style, force) {
 
     var promises = [];
 
-    var substitutionProcessor = function (type, currentFsItem, targetPath) {
-        return copyFileProcessor(type, currentFsItem, targetPath, substitutions);
-    };
-
     // copy base
     promises.push(
-        recursiveDirectoryProcessor(
-            root + '/base',
-            root + '/base',
-            target,
-            force,
-            substitutionProcessor
-        )
+        jive.util.recursiveCopy(root + '/base', target, force, substitutions )
     );
 
     promises.push(
@@ -208,24 +128,15 @@ function processDefinition(target, type, name, style, force) {
 
     // copy definition
     promises.push(
-        recursiveDirectoryProcessor(
-            root + '/definition',
-            root + '/definition',
-            target + '/tiles/' + name,
-            force,
-            copyFileProcessor
-        )
+        jive.util.recursiveCopy(root + '/definition', target + '/tiles/' + name, force )
     );
 
     // copy style
     promises.push(
-        recursiveDirectoryProcessor(
-            root + '/styles' + '/' + style,
+        jive.util.recursiveCopy(
             root + '/styles' + '/' + style,
             target + '/tiles/' + name,
-            force,
-            substitutionProcessor
-        )
+            force, substitutions )
     );
 
     return q.all(promises);
@@ -304,9 +215,6 @@ function doAll( options ) {
         return jive.util.fsTemplateCopy( root + '/base/package.json', target + '/package.json', { 'TILE_NAME': 'jive-examples-all' } )
             .then( function() { return finish(target); });
     });
-}
-
-function doCreate(options) {
 }
 
 function doHelp() {
