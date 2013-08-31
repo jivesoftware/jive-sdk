@@ -16,14 +16,22 @@
 
 var q = require('q');
 var jive = require('../../api');
-//task for a worker
+
 exports.registration = function(context) {
-    var guid = context.guid;
     var config = context.config;
     var name = context.name;
     var jiveUrl = context.jiveUrl;
     var pushUrl = context.pushUrl;
     var code = context.code;
+    var tenantID = context.tenantID;
+    var remoteID = context.remoteID;
+    var guid = context.guid;
+
+    if ( tenantID && remoteID ) {
+        // the guid may be unreliable because it could be based on jiveURL which can change.
+        // create one based on those invariants instead
+        guid = tenantID + '_' + remoteID;
+    }
 
     var registerer = function(scope, instanceLibrary) {
         var deferred = q.defer();
@@ -95,12 +103,9 @@ exports.registration = function(context) {
             stream = found;
         })
     ]).then(function() {
-        if (tile) {
+        if (tile || stream) {
             // register a tile instance
-            return registerer(guid, jive.tiles);
-        } else if (stream) {
-            // register an external stream instance
-            return registerer(guid, jive.extstreams);
+            return registerer(guid, tile ? jive.tiles : jive.extstreams);
         } else {
             // its neither tile nor externalstream, so return error
             var statusObj = {

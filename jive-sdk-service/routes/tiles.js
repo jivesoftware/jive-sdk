@@ -64,16 +64,7 @@ var findCredentials = function(jiveUrl) {
 };
 
 exports.registration = function( req, res ) {
-    var pushUrl = req.body['url'];
-    // xxx todo save remoteTileId along with the tile instance (so it can be unregistered, see above)
-    var remoteTileId = req.body['id'];
-    var guid = req.body['guid'];
-    var config = req.body['config'];
-    var name = req.body['name'];
-    var code = req.body['code'];
-    var jiveUrl = req.body['jiveUrl'];
-
-    findCredentials(jiveUrl).then( function(credentials) {
+    findCredentials(req.body['jiveUrl']).then( function(credentials) {
             if ( credentials ) {
             var clientId = credentials['clientId'];
             var secret = credentials['clientSecret'];
@@ -97,7 +88,28 @@ exports.registration = function( req, res ) {
                 }
             }
 
-            schedule(guid, config, name, jiveUrl, pushUrl, code, res);
+            var context = {
+                'guid'          :   req.body['guid'],
+                'remoteID'      :   req.body['id'],
+                'config'        :   req.body['config'],
+                'name'          :   req.body['name'],
+                'jiveUrl'       :   req.body['jiveUrl'],
+                'tenantID'      :   req.body['tenantID'],
+                'pushUrl'       :   req.body['url'],
+                'code'          :   req.body['code']
+            };
+
+            jive.context.scheduler.schedule(jive.constants.tileEventNames.INSTANCE_REGISTRATION, context).then(
+                function (result) {
+                    res.writeHead(200);
+                    res.end(JSON.stringify(result));
+                },
+                function (result) {
+                    var status = result.status || 500;
+                    res.writeHead(status);
+                    res.end(JSON.stringify(result));
+                }
+            );
         } else {
             // problem!
             res.writeHead(403, { 'Content-Type': 'application/json' });
@@ -105,28 +117,3 @@ exports.registration = function( req, res ) {
         }
     });
 };
-
-function makeContext(guid, config, name, jiveUrl, pushUrl, code) {
-    return {
-        'guid':guid,
-        'config':config,
-        'name':name,
-        'jiveUrl':jiveUrl,
-        'pushUrl':pushUrl,
-        'code':code
-    }
-}
-
-function schedule(guid, config, name, jiveUrl, pushUrl, code, res) {
-    var promise = jive.context.scheduler.schedule(jive.constants.tileEventNames.INSTANCE_REGISTRATION, makeContext(guid, config, name, jiveUrl, pushUrl, code));
-    var success = function (result) {
-        res.writeHead(200);
-        res.end(JSON.stringify(result));
-    };
-    var fail = function (result) {
-        var status = result.status || 500;
-        res.writeHead(status);
-        res.end(JSON.stringify(result));
-    };
-    promise.then(success, fail);
-}
