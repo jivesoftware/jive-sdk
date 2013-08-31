@@ -96,7 +96,7 @@ exports.prepare = function() {
             return jive.util.recursiveCopy( __dirname + "/template", extensionSrcDir, false );
         }).then( function() {
            // zip it
-            return jive.util.zipFolder( extensionSrcDir, 'aron.zip' );
+            return jive.util.zipFolder( extensionSrcDir, 'extension.zip' );
         });
     });
 
