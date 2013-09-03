@@ -572,7 +572,7 @@ exports.zipFolder = function( root, targetZip ) {
 
     archive.pipe(output);
 
-    return exports.recursiveDirectoryProcessor( root, root, '/tmp', false, function( type, currentFsItem, targetPath, substitutions ) {
+    return exports.recursiveDirectoryProcessor( root, root, '/tmp', true, function( type, currentFsItem, targetPath, substitutions ) {
         return q.fcall( function() {
             if ( type ==='file' ) {
                 var target = currentFsItem.substring( currentFsItem.indexOf( '/' ) + 1, currentFsItem.length );
