@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*
  * Copyright 2013 Jive Software
  *
@@ -317,4 +319,4 @@ exports.init = function(target) {
 
 };
 
-//exports.init();
+exports.init();
