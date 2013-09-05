@@ -208,7 +208,7 @@ function setupCleanupTasks(_eventHandlerMap) {
     // to reap the job result records in redis
     _eventHandlerMap['jive.reaper'] = function() {
         var deferred = q.defer();
-        jive.logger.info("Running reaper");
+        jive.logger.debug("Running reaper");
         kue.Job.rangeByState('complete', 0, -1, 'asc', function (err, jobs) {
             kue.Job.rangeByState('failed', 0, -1, 'asc', function(failedErr, failedJobs) {
                 jobs = jobs.concat(failedJobs);
@@ -216,8 +216,8 @@ function setupCleanupTasks(_eventHandlerMap) {
                 if ( jobs ) {
                     jobs.forEach( function(job) {
                         var elapsed = ( new Date().getTime() - job.created_at ) / 1000;
-                        if ( elapsed > 30) {
-                            // if completed more than 5 seconds ago, nuke it
+                        if ( elapsed > (10 * 60) ) {
+                            // if completed more than 10 minutes ago, nuke it
                             promises.push( removeJob(job) );
                         }
                     });
@@ -225,12 +225,12 @@ function setupCleanupTasks(_eventHandlerMap) {
 
                 if ( promises.length > 0 ) {
                     q.all(promises).then( function() {
-                        jive.logger.info("Cleaned up", promises.length);
+                        jive.logger.warn("Reaper task cleaned up", promises.length);
                     }).finally(function() {
                             deferred.resolve();
                         });
                 } else {
-                    jive.logger.info("Cleaned up nothing");
+                    jive.logger.debug("Cleaned up nothing");
                     deferred.resolve();
                 }
             });
@@ -279,10 +279,8 @@ Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
         });
     });
 
-    // until https://github.com/LearnBoost/kue/issues/197 is fixed
-    // we CANNOT safely clean up failed or completed jobs!
     // schedule a periodic repear task
-//    self.schedule('jive.reaper', {}, 10 * 1000, undefined, false, 300 * 1000 );
+    self.schedule('jive.reaper', {}, 10 * 1000, undefined, false, 30 * 1000 );
 
     jive.logger.info("Redis Scheduler Initialized for queue");
 };

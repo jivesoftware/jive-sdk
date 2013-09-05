@@ -76,7 +76,8 @@ function eventExecutor(job, done) {
         var tileName = context['tileName'];
 
         if ( !shouldRun ) {
-            jive.logger.error("Execution aborted: " + JSON.stringify(meta,4 ));
+            jive.logger.debug("Execution aborted: " + JSON.stringify(meta,4 ));
+            done();
             return;
         }
 
