@@ -62,6 +62,6 @@
     "api"
   ],
   "bin": {
-    "jive-sdk": "jive-sdk-service/generator/jive-sdk.js"
+    "jive-sdk": "jive-sdk-service/generator/jive-sdk"
   }
 }
