@@ -1,7 +1,5 @@
 var util = require('util');
 var jive = require('jive-sdk');
-var url = require('url');
-var mustache = require('mustache');
 
 var myOauth = Object.create(jive.routes.oauth);
 module.exports = myOauth;
