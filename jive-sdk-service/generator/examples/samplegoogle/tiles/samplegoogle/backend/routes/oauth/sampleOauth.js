@@ -1,10 +1,7 @@
 var util = require('util');
 var jive = require('jive-sdk');
 
-var sdkInstance = require('jive-sdk/jive-sdk-service/routes/oauth');
-
-var myOauth = Object.create(sdkInstance);
-
+var myOauth = Object.create(jive.routes.oauth);
 module.exports = myOauth;
 
 var tokenStore = jive.service.persistence();

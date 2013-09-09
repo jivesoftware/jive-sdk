@@ -14,6 +14,6 @@
         "q": "0.9.3",
         "multipart-parser" : "0.0.2",
         "q-io":     "1.6.x",
-        "request": "2.16.6"
+        "request": "2.27.0"
     }
 }

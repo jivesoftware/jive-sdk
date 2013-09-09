@@ -346,7 +346,8 @@ exports.serviceURL = function() {
 exports.routes = {
     'tiles' : require('../routes/tiles'),
     'jive' : require('../routes/jive'),
-    'dev' : require('../routes/dev')
+    'dev' : require('../routes/dev'),
+    'oauth' : require('../routes/oauth')
 };
 
 /**
