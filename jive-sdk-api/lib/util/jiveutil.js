@@ -21,6 +21,7 @@ var fs = require('fs-extra');
 var uuid = require('node-uuid');
 var mustache = require('mustache');
 var jive = require('../../api');
+var oauthUtil = require('./oauthUtil');
 
 exports.guid = function() {
     return uuid.v4();
@@ -589,3 +590,5 @@ exports.zipFolder = function( root, targetZip ) {
         });
     });
 };
+
+exports.oauth = oauthUtil;
