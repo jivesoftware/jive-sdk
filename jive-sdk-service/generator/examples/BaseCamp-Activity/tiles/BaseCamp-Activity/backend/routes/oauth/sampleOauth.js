@@ -1,4 +1,3 @@
-var util = require('util');
 var jive = require('jive-sdk');
 
 var myOauth = Object.create(jive.routes.oauth);

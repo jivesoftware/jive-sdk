@@ -1,12 +1,9 @@
-
 var jive = require("jive-sdk");
-var util = require('util');
 
 var SFDC_PREFIX = '/services/data/v27.0';
 
 exports.querySalesforceV27 = querySalesforceV27;
 exports.postSalesforceV27 = postSalesforceV27;
-
 
 function querySalesforceV27(ticketID, myOauth, uri){
 
