@@ -1,0 +1,63 @@
+<!--/*-->
+<!--* Copyright 2013 Jive Software-->
+<!--*-->
+<!--* Licensed under the Apache License, Version 2.0 (the "License");-->
+<!--* you may not use this file except in compliance with the License.-->
+<!--* You may obtain a copy of the License at-->
+<!--*-->
+<!--* http://www.apache.org/licenses/LICENSE-2.0-->
+<!--*-->
+<!--* Unless required by applicable law or agreed to in writing, software-->
+<!--* distributed under the License is distributed on an "AS IS" BASIS,-->
+<!--* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.-->
+<!--* See the License for the specific language governing permissions and-->
+<!--* limitations under the License.-->
+<!--*/-->
+
+<!doctype html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{{host}}}/stylesheets/bootstrap.min.css">
+    <title>Configure New Relic Application List Tile</title>
+</head>
+
+<body>
+
+<div class="container-fluid" id="loading-panel">
+    <div class="row row-fluid" style="text-align: center">
+        <div class="span4" style="margin-top: 50px">
+            <div><strong>Loading...</strong></div>
+            <div class="progress progress-striped active">
+                <div class="bar" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid" id="auth-panel" style="display:none">
+    <h2>New Relic Configuration</h2>
+
+    <p>
+        Establish connection using API key stored on host middleware ...
+    </p>
+
+    <button class="btn btn-success" id="auth-btn">Submit</button>
+
+</div>
+
+<div class="container-fluid" id="filter-panel" style="display:none">
+    <label>Select the applications you want to monitor ... (future use)</label> <br>
+    <div id="myDiv"></div>
+   <p> <button class="btn btn-primary" id="submit">Apply</button> </p>
+</div>
+
+<script src="{{{host}}}/javascripts/jquery-1.8.3.js"></script>
+<script src="{{{host}}}/javascripts/bootstrap.min.js"></script>
+<script src="{{{host}}}/{{{TILE_NAME}}}/javascripts/configuration.js"></script>
+<script>
+    jive.tile.onOpen(function(config, options) {
+        initialize(config, options, "{{{host}}}");
+    });
+</script>
+</body>
+</html>

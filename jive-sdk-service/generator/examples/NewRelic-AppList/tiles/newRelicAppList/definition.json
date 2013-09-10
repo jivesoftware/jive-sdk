@@ -1,0 +1,27 @@
+{
+    "sampleData" : {
+        "title" : "New Relic Application List",
+        "contents" : [ {
+            "text" : "Application Data"
+        } ],
+        "config" : {
+            "listStyle" : "contentList"
+        },
+        "action" : {
+            "text" : "Action Link",
+            "context" : { "test" : "data" }
+        }
+    },
+    "displayName" : "NewRelic-AppList {{{TILE_NAME}}}",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "NewRelic-AppList",
+    "style" : "LIST",
+    "icons" : {
+        "16" : "http://placehold.it/16x16",
+        "48" : "http://placehold.it/48x48",
+        "128" : "http://www.burnsidedigital.com/img/partner-page-logo-new-relic.png"
+    },
+    "action" : "{{{TILE_NAME}}}/action"
+}
+
+
