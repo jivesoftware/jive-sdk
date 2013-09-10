@@ -110,7 +110,7 @@ function initialize(config, options, host) {
     });
 
     $("#create-discussion").click(function() {
-        var table = $("#issue-table").html();
+        var table = '<table border="1"">' + $("#metrics").html() + "</table>";
         var message = $("#message").val();
         var shares = [];
         for (var p in people) {
