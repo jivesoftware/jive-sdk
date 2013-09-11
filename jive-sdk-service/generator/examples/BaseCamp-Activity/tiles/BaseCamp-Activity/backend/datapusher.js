@@ -23,8 +23,10 @@ var sampleOauth = require("./routes/oauth/sampleOauth") ;
 var activities = require('./activities' );
 var jive_to_bc_syncing = require('./jive_to_bc_syncing') ;
 
-exports.task = function() {
-    jive.extstreams.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
+exports.task = new jive.tasks.build(
+    // runnable
+    function() {
+        jive.extstreams.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
 
         if ( instances ) {
             instances.forEach( function( instance ) {
@@ -166,5 +168,7 @@ exports.task = function() {
                 }
             });
         }
-    }, 10000);
-};
+        })
+    },
+    10000
+);

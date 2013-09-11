@@ -24,80 +24,83 @@ var sampleOauth = require("./routes/oauth/sampleOauth") ;
 // we're going to just use the data we received from the config for now as it isn't clear
 // that the project name or description can be changed once the project is created. So ..
 // no reason to query Basecamp for updated data on this tile ...
+exports.task = new jive.tasks.build(
+    // runnable
+    function() {
+        jive.tiles.findByDefinitionName( "{{{TILE_NAME}}}" ).then( function(tiles) {
+            //console.log( "length = ", tiles.length)
+            tiles.forEach( function( tile ) {
+                var config = tile.config;
 
-exports.task = function() {
-    jive.tiles.findByDefinitionName( "{{{TILE_NAME}}}" ).then( function(tiles) {
-        //console.log( "length = ", tiles.length)
-        tiles.forEach( function( tile ) {
-            var config = tile.config;
+                var query = "/projects/" + config['id'] + ".json";
+                var url;
+                url = "https://basecamp.com/" + tile.config['accountID']  + "/projects/" + tile.config['id'] ;
 
-            var query = "/projects/" + config['id'] + ".json";
-            var url;
-            url = "https://basecamp.com/" + tile.config['accountID']  + "/projects/" + tile.config['id'] ;
+                basecamp_Helpers.queryBasecampV1( config['accountID'], config['ticketID'], sampleOauth, query).then(
+                    function(response){
+                        // good return ...
+                        var data = response.entity ;
 
-            basecamp_Helpers.queryBasecampV1( config['accountID'], config['ticketID'], sampleOauth, query).then(
-                function(response){
-                    // good return ...
-                    var data = response.entity ;
+                        var creator="** unknown **";
 
-                     var creator="** unknown **";
+                        if (data['creator'] != undefined)
+                            creator = data['creator']['name'];
 
-                    if (data['creator'] != undefined)
-                        creator = data['creator']['name'];
-
-                    var description = data['description'] ;
-                    var project = data['name'];
+                        var description = data['description'] ;
+                        var project = data['name'];
 
 
-                    if (description.length > 50)
-                    {
-                        description = description.substring( 0, 46)  ;
-                        description += " ..";
-                    }
-                    if (project.length > 50)
-                    {
-                        project = project.substring( 0, 46);
-                        project += " ..";
-                    }
-
-                    var dataToPush = {
-                        "data":
+                        if (description.length > 50)
                         {
-                            "title": "Basecamp Project Information",
-                            "contents": [
-                                {
-                                    "name": "Project Name",
-                                    "value" : project
-                                },
-                                {
-                                    "name": "ID",
-                                    "value": tile.config['id']
-                                    //"url" : url
-                                } ,
-                                {   "name" : "Description",
-                                    "value" : description
-                                },
-                                {   "name" : "Created_By",
-                                    "value" : creator
-                                }
-                            ],
-                            "action":{
-                                text : "Take a closer look ..." ,
-                                'context' : {name: data['name'], description: data['description'], id:tile.config['id'], url: url}
-                            }
+                            description = description.substring( 0, 46)  ;
+                            description += " ..";
                         }
-                    };
+                        if (project.length > 50)
+                        {
+                            project = project.substring( 0, 46);
+                            project += " ..";
+                        }
 
-                    //console.log("Prepared data", JSON.stringify(dataToPush));
+                        var dataToPush = {
+                            "data":
+                            {
+                                "title": "Basecamp Project Information",
+                                "contents": [
+                                    {
+                                        "name": "Project Name",
+                                        "value" : project
+                                    },
+                                    {
+                                        "name": "ID",
+                                        "value": tile.config['id']
+                                        //"url" : url
+                                    } ,
+                                    {   "name" : "Description",
+                                        "value" : description
+                                    },
+                                    {   "name" : "Created_By",
+                                        "value" : creator
+                                    }
+                                ],
+                                "action":{
+                                    text : "Take a closer look ..." ,
+                                    'context' : {name: data['name'], description: data['description'], id:tile.config['id'], url: url}
+                                }
+                            }
+                        };
 
-                    jive.tiles.pushData( tile, dataToPush );
-                },
-                function(response)
-                {
-                    // bad return
-                    console.log( "bad Project Info query");
-                }
-            );
-        } );
-    }, 10000);
-};
+                        //console.log("Prepared data", JSON.stringify(dataToPush));
+
+                        jive.tiles.pushData( tile, dataToPush );
+                    },
+                    function(response)
+                    {
+                        // bad return
+                        console.log( "bad Project Info query");
+                    }
+                );
+            } );
+        });
+    },
+    10000
+);
