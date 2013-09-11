@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "express": "3.1.0",
-        "jive-sdk":"0.0.x",
+        "jive-sdk":"0.1.x",
         "mustache" : "0.7.x",
         "consolidate" : "0.9.x",
         "poplib" : "0.1.x",
