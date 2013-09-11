@@ -64,56 +64,26 @@ var findCredentials = function(jiveUrl) {
 };
 
 exports.registration = function( req, res ) {
-    findCredentials(req.body['jiveUrl']).then( function(credentials) {
-            if ( credentials ) {
-            var clientId = credentials['clientId'];
-            var secret = credentials['clientSecret'];
-            var auth = req.headers['authorization'];
-            //JiveEXTN auth header = titan
-            if (auth.split(' ')[0] == 'JiveEXTN') {
-                //do signature verification
-                //todo for some reason the following does not work, it generates a signature that doesn't match.
-//                var hmac_signature = require('crypto').createHmac('sha256', secret).update(auth.split(' ')[1].split('&').slice(0,5).join('&')).digest('base64');
-//                if (hmac_signature != checkSignature) {
-//                    res.writeHead(403, { 'Content-Type': 'application/json' });
-//                    res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
-//                    return;
-//                }
-            }
-            else {
-                if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {
-                    res.writeHead(403, { 'Content-Type': 'application/json' });
-                    res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
-                    return;
-                }
-            }
+    var context = {
+        'guid'          :   req.body['guid'],
+        'remoteID'      :   req.body['id'],
+        'config'        :   req.body['config'],
+        'name'          :   req.body['name'],
+        'jiveUrl'       :   req.body['jiveUrl'],
+        'tenantID'      :   req.body['tenantID'],
+        'pushUrl'       :   req.body['url'],
+        'code'          :   req.body['code']
+    };
 
-            var context = {
-                'guid'          :   req.body['guid'],
-                'remoteID'      :   req.body['id'],
-                'config'        :   req.body['config'],
-                'name'          :   req.body['name'],
-                'jiveUrl'       :   req.body['jiveUrl'],
-                'tenantID'      :   req.body['tenantID'],
-                'pushUrl'       :   req.body['url'],
-                'code'          :   req.body['code']
-            };
-
-            jive.context.scheduler.schedule(jive.constants.tileEventNames.INSTANCE_REGISTRATION, context).then(
-                function (result) {
-                    res.writeHead(200);
-                    res.end(JSON.stringify(result));
-                },
-                function (result) {
-                    var status = result.status || 500;
-                    res.writeHead(status);
-                    res.end(JSON.stringify(result));
-                }
-            );
-        } else {
-            // problem!
-            res.writeHead(403, { 'Content-Type': 'application/json' });
-            res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.INSTANCE_REGISTRATION, context).then(
+        function (result) {
+            res.writeHead(200);
+            res.end(JSON.stringify(result));
+        },
+        function (result) {
+            var status = result.status || 500;
+            res.writeHead(status);
+            res.end(JSON.stringify(result));
         }
-    });
+    );
 };

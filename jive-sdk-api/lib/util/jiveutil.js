@@ -22,6 +22,7 @@ var uuid = require('node-uuid');
 var mustache = require('mustache');
 var jive = require('../../api');
 var oauthUtil = require('./oauthUtil');
+var crypto = require('crypto');
 
 exports.guid = function() {
     return uuid.v4();
@@ -471,6 +472,36 @@ exports.basicAuthorizationHeaderValid = function( auth, clientId, clientSecret )
         }
     }
     return true;
+};
+
+exports.jiveAuthorizationHeaderValid = function( auth, clientId, clientSecret ) {
+    if ( !auth ) {
+        return true;
+    }
+
+    var authVars = auth.split(' ');
+    var authFlag = authVars[0];
+    if ( authFlag == 'JiveEXTN') {
+        var str = '';
+        var authParams = authVars[1].split('&');
+        var signature;
+        authParams.forEach( function(p) {
+            if (p.indexOf('signature') == 0 ) {
+                signature = p.split("=")[1];
+            } else {
+                if ( str.length > 0 ) {
+                    str += '&';
+                }
+                str += p;
+            }
+        });
+
+        //do signature verification
+        var hmac_signature = crypto.createHmac('SHA256', new Buffer(clientSecret, 'base64')).update(str).digest('base64');
+        return hmac_signature == decodeURIComponent( signature );
+    } else {
+        return true;
+    }
 };
 
 exports.sortObject = function (o) {

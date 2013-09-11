@@ -20,7 +20,8 @@ var express = require('express'),
     jive = require('../api'),
     consolidate = require('consolidate'),
     q = require('q'),
-    extension = require('./extension/extension');
+    extension = require('./extension/extension'),
+    security = require("./security");
 
 var alreadyBootstrapped = false;
 
@@ -62,6 +63,9 @@ var setupExpressApp = function (app, rootDir, config) {
         app.use(express.static(path.join(rootDir, 'public')));
 
         app.set('port', config['port']);
+
+        // attach security middleware
+        app.all( '*', security.checkAuthHeaders );
 
         jive.logger.debug('Global framework routes:');
         app.post('/registration', service.routes.tiles.registration);
