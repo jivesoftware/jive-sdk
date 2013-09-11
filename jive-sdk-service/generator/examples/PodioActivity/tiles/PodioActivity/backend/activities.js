@@ -83,28 +83,61 @@ function getAllActivity(extstreamInstance, converter, activityType) {
         var date = new Date(lastTimePulled);
         var query = "/stream/";
 
+        var config = extstreamInstance['config'];
+        if (config && config['projectID'] != undefined)
+        {
+            var projectID = extstreamInstance['config']['projectID'] ;
+            if (Number(projectID))
+            {
+                // we have a project ID now .. make the query more specific ...
+                query += "item/" + projectID;
+            }
+        }
+
         return querier.doGet(query, extstreamInstance).then(function (response) {
             var activities = response['entity'];
 
             var activityEntries = [];
             var addIt = function (extractedActivity) {
+                console.log( "activity: type=" + extractedActivity.type + " d:'" + extractedActivity.description +
+                "' t: '" + extractedActivity.title + "'" + " " + new Date(extractedActivity['timestamp']).getTime() + " " + date.getTime()) ;
                 if (extractedActivity && new Date(extractedActivity['timestamp']).getTime() > date.getTime()) {
+                    console.log( "activity: post it!") ;
                     activityEntries.push(extractedActivity);
                 }
             };
 
-            activities.forEach(function (object) {
-                var objectActivity = object['activity'];
+
+            if (!Number(projectID))
+            {
+                // processing global stream ...
+                activities.forEach(function (object) {
+                    var objectActivity = object['activity'];
+
+                    if (!objectActivity || objectActivity.length < 1) {
+                        addIt(extractActivity(object, object));
+                    } else {
+                        // its the first time
+                        objectActivity.forEach(function (rawActivityEntry) {
+                            addIt(extractActivity(object, rawActivityEntry));
+                        });
+                    }
+                });
+            }
+            else
+            {
+                // processing specific Project stream ..
+                var objectActivity = activities['activity'];
 
                 if (!objectActivity || objectActivity.length < 1) {
-                    addIt(extractActivity(object, object));
+                    addIt(extractActivity(activities, activities));
                 } else {
                     // its the first time
                     objectActivity.forEach(function (rawActivityEntry) {
-                        addIt(extractActivity(object, rawActivityEntry));
+                        addIt(extractActivity(activities, rawActivityEntry));
                     });
                 }
-            });
+            }
 
             return converter(activityEntries, lastTimePulled, extstreamInstance);
         });

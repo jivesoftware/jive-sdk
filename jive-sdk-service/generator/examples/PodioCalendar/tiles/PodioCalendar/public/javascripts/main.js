@@ -115,7 +115,7 @@ function doIt( host ) {
                     // add in an entry for just the user stream
                     var opt =  "<option value=0";
                     if (config['projectID'] == 0) opt += " selected";
-                    opt += ">non-project User Centric stream </option>";
+                    opt += ">non-project User Centric Calendar</option>";
                     $("#projectList").append(opt);
 
                     $("#j-card-configuration").show();
@@ -165,6 +165,3 @@ function doIt( host ) {
     //debugger;
     OAuth2ServerFlow( options ).launch();
 }
-
-
-

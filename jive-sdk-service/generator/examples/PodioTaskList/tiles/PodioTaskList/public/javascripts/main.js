@@ -1,3 +1,4 @@
+
 var ticketErrorCallback = function() {
     alert('ticketErrorCallback error');
 };
@@ -73,75 +74,75 @@ function doIt( host ) {
             'format' : 'json',
             'authz': 'signed'
         }).execute(function( response ) {
-                var config = onLoadContext['config'] ;
-                if (typeof config === 'string')
-                {
-                    config = JSON.parse(config) ;
-                }
+           var config = onLoadContext['config'] ;
+            if (typeof config === 'string')
+            {
+                config = JSON.parse(config) ;
+            }
 
-                if (response.status == 403)
-                {
-                    // not authenticated .... need to show a different screen and bail ...
-                    $("#j-card-authentication-failed").show();
-                    gadgets.window.adjustHeight();
+            if (response.status == 403)
+            {
+                // not authenticated .... need to show a different screen and bail ...
+                $("#j-card-authentication-failed").show();
+                gadgets.window.adjustHeight();
 
-                    $("#btn_exit").click( function() {
-                        jive.tile.close();
-                    });
+                $("#btn_exit").click( function() {
+                    jive.tile.close();
+                });
+            }
+            else
+            {
+                if ( response.status >= 400 && response.status <= 599 ) {
+                    alert("ERROR!" + JSON.stringify(response.content));
                 }
-                else
-                {
-                    if ( response.status >= 400 && response.status <= 599 ) {
-                        alert("ERROR!" + JSON.stringify(response.content));
-                    }
 
                     //debugger;
-                    var data = response.content.items;          // get to array of projects
+                var data = response.content.items;          // get to array of projects
 
-                    for (var i=0; i<response.content.total; i++)
-                    {
-                        var opt;
+                for (var i=0; i<response.content.total; i++)
+                {
+                    var opt;
 
-                        // assumes that project name comes first .. can improve on this ....
-                        // build up a lis for the drop down that has the item (project) id and name as part of it ...
-                        if (data[i].title == config['project'])
-                            opt = "<option value=" + data[i].item_id + " selected>" + data[i].title+"</option>";
-                        else
-                            opt = "<option value=" + data[i].item_id + ">" + data[i].title+"</option>";
-                        //alert(opt)  ;
-                        $("#projectList").append(opt);
+                    // assumes that project name comes first .. can improve on this ....
+                    // build up a lis for the drop down that has the item (project) id and name as part of it ...
+                    if (data[i].title == config['project'])
+                        opt = "<option value=" + data[i].item_id + " selected>" + data[i].title+"</option>";
+                    else
+                        opt = "<option value=" + data[i].item_id + ">" + data[i].title+"</option>";
+                    //alert(opt)  ;
+                    $("#projectList").append(opt);
+                }
+
+                // add in an entry for just the user stream
+                var opt =  "<option value=0";
+                if (config['projectID'] == 0) opt += " selected";
+                opt += ">non-project User Centric Tasks</option>";
+                $("#projectList").append(opt);
+
+                $("#j-card-configuration").show();
+                gadgets.window.adjustHeight();
+
+                $("#btn_done").click( function() {
+                    var projectName = $("#projectList option:selected").text();
+                    var projectID =  $("#projectList option:selected").val();
+                    var index = $("#projectList").prop("selectedIndex");
+
+                    //debugger;
+                    var toReturn = {
+                        "project" : projectName,
+                        "projectID" : projectID,
+                        "isPodio" : true
+
+                    };
+                    console.log("toreturn", toReturn);
+                    if ( ticketID ) {
+                        toReturn['ticketID'] = ticketID;
                     }
 
-                    // add in an entry for just the user stream
-                    var opt =  "<option value=0";
-                    if (config['projectID'] == 0) opt += " selected";
-                    opt += ">non-project User Centric stream </option>";
-                    $("#projectList").append(opt);
-
-                    $("#j-card-configuration").show();
-                    gadgets.window.adjustHeight();
-
-                    $("#btn_done").click( function() {
-                        var projectName = $("#projectList option:selected").text();
-                        var projectID =  $("#projectList option:selected").val();
-                        var index = $("#projectList").prop("selectedIndex");
-
-                        //debugger;
-                        var toReturn = {
-                            "project" : projectName,
-                            "projectID" : projectID,
-                            "isPodio" : true
-
-                        };
-                        console.log("toreturn", toReturn);
-                        if ( ticketID ) {
-                            toReturn['ticketID'] = ticketID;
-                        }
-
-                        jive.tile.close(toReturn );
-                    });
-                }
-            });
+                    jive.tile.close(toReturn );
+                });
+            }
+         });
     };
 
     var options = {
@@ -165,6 +166,4 @@ function doIt( host ) {
     //debugger;
     OAuth2ServerFlow( options ).launch();
 }
-
-
 

@@ -22,61 +22,72 @@ var sampleOauth = require("./routes/oauth/sampleOauth") ;
 var activities = require('./activities' );
 var jive_to_podio_syncing = require('./jive_to_podio_syncing') ;
 
-exports.task = function() {
+//var lastTime=0;
+exports.task = new jive.tasks.build(
+    // runnable
+    function () {
+        jive.extstreams.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
+            //var now = new Date();
 
-    jive.extstreams.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
-        if ( instances ) {
-            instances.forEach( function( instance ) {
+    //console.log( "+ Podio Activity Stream task ...." + now.getTime() + " elapse=" + (now.getTime() - lastTime) ) ;
+    //        lastTime = now.getTime();
 
-                var config = instance['config'];
-                if ( config && config['posting'] === 'off' ) {
-                    return;
-                }
+            if ( instances ) {
+            //if (0)  {
+                instances.forEach( function( instance ) {
 
-                activities.pullActivity(instance).then( function(data) {
-                    var promise = q.resolve(1);
-                    data.forEach(function (activity) {
-                        delete activity['podioCreatedDate'];
-                        console.log( "{{{TILE_NAME}}} push: ", JSON.stringify(activity));
-                        promise = promise.thenResolve(jive.extstreams.pushActivity(instance, activity));
-                    });
+                    var config = instance['config'];
+                    if ( config && config['posting'] === 'off' ) {
+                        return;
+                    }
 
-                    promise = promise.catch(function(err) {
-                        jive.logger.error('Error pushing activity to Jive', err);
-                    });
-
-                    return promise;
-                }).then( function() {
-
-                    activities.pullComments(instance).then( function(comments) {
-                        //console.log("got " + comments.length + " comment activity record(s) from Basecamp") ;
+                    activities.pullActivity(instance).then( function(data) {
                         var promise = q.resolve(1);
-                        comments.forEach(function (comment) {
-                            delete comment['podioCreatedDate'];
-                            var externalActivityID = comment['externalActivityID'];
-                            delete comment['externalActivityID'];
-
-                            promise = promise.thenResolve(jive.extstreams.commentOnActivityByExternalID(instance,
-                                externalActivityID, comment));
-
+                        data.forEach(function (activity) {
+                            delete activity['podioCreatedDate'];
+                            console.log( "{{{TILE_NAME}}} push: ", JSON.stringify(activity));
+                            promise = promise.thenResolve(jive.extstreams.pushActivity(instance, activity));
                         });
 
                         promise = promise.catch(function(err) {
-                            jive.logger.error('Error pushing comments to Jive', err);
+                            jive.logger.error('Error pushing activity to Jive', err);
                         });
 
                         return promise;
+                    }).then( function() {
 
-                    });
-                }).then ( function() {
-                    jive_to_podio_syncing.jiveCommentsToPodio(instance).then( function(data) {
-                        console.log( "got " + data.length + " comment record(s) from Jive");
-                        if (data.length > 0)
-                            console.log( "got one! (or more") ;
-                        console.log( data );
+                        activities.pullComments(instance).then( function(comments) {
+                            //console.log("got " + comments.length + " comment activity record(s) from Podio") ;
+                            var promise = q.resolve(1);
+                            comments.forEach(function (comment) {
+                                delete comment['podioCreatedDate'];
+                                var externalActivityID = comment['externalActivityID'];
+                                delete comment['externalActivityID'];
+
+                                promise = promise.thenResolve(jive.extstreams.commentOnActivityByExternalID(instance,
+                                    externalActivityID, comment));
+
+                            });
+
+                            promise = promise.catch(function(err) {
+                                jive.logger.error('Error pushing comments to Jive', err);
+                            });
+
+                            return promise;
+
+                        });
+                    }).then ( function() {
+                        jive_to_podio_syncing.jiveCommentsToPodio(instance).then( function(data) {
+                            console.log( "got " + data.length + " comment record(s) from Jive");
+                            if (data.length > 0)
+                                console.log( "got one! (or more") ;
+                            console.log( data );
+                        });
                     });
                 });
-            });
-        }
-    }, 1000);
-};
+            }
+        });
+    }
+
+    // interval, 5000 = 5 secs
+, 10000 );
