@@ -9,8 +9,8 @@
             "url" : "https://jira.jivesoftware.com"
         }
     },
-    "displayName" : "JIRA issues (Jive-JIRA)",
-    "name" : "jira",
+    "displayName" : "JIRA issues {{{TILE_NAME}}}",
+    "name" : "{{{TILE_NAME}}}",
     "description" : "Displays jira issues",
     "style" : "TABLE",
     "icons" : {

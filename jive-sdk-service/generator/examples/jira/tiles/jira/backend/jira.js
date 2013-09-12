@@ -25,6 +25,12 @@ var filterName;
 
 function sortByFunction(sort) {
     return function(issues, callback) {
+        if ( !issues ) {
+            console.log("no issues found");
+            callback({}, filterName);
+            return;
+        }
+
         var groups = {};
         for(var i=0;i<issues.length;i++) {
             var field = sort(issues, i);
