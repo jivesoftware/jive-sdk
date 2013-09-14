@@ -281,7 +281,9 @@ exports.autowire = function(definitionsToAutowire) {
         }
     } else {
         // assume autowiring everything
-        return definitionConfigurator.setupAllDefinitions(app, _dir( '/tiles', '/tiles') );
+        return definitionConfigurator.setupAllDefinitions(app, _dir( '/tiles', '/tiles')).then( function () {
+            return definitionConfigurator.setupAllApps( app, _dir( '/apps', '/apps'));
+        });
     }
 };
 

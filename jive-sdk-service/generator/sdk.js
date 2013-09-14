@@ -83,21 +83,29 @@ function processExample(target, example, name, force) {
         } )
     );
 
-    return q.all(promises).then( function() {
-        var srcRoot = root + '/examples/' + example + '/tiles';
-        var targetRoot = target + '/tiles';
-        var renamePromises = [];
-        var p = q.nfcall(fs.readdir, srcRoot ).then( function(subdirs) {
-            subdirs.forEach( function(subdir) {
-                var src = targetRoot + '/' + subdir;
-                var tar = targetRoot + '/' + name;
-                if ( src !== tar ) {
-                    renamePromises.push( jive.util.fsrename(src, tar, force ) );
-                }
-            });
+    function renameResources(srcRoot, targetRoot) {
+        return jive.util.fsexists(srcRoot).then(function (exists) {
+            if (exists) {
+                return q.all(promises).then(function () {
+                    var renamePromises = [];
+                    var p = q.nfcall(fs.readdir, srcRoot).then(function (subdirs) {
+                        subdirs.forEach(function (subdir) {
+                            var src = targetRoot + '/' + subdir;
+                            var tar = targetRoot + '/' + name;
+                            if (src !== tar) {
+                                renamePromises.push(jive.util.fsrename(src, tar, force));
+                            }
+                        });
+                    });
+                    return q.all(renamePromises);
+                });
+            }
+            return q.resolve([]);
         });
+    }
 
-        return q.all( renamePromises );
+    return renameResources(root + '/examples/' + example + '/tiles', target + '/tiles').then( function() {
+        return renameResources( root + '/examples/' + example + '/apps', target + '/apps');
     });
 }
 
@@ -142,33 +150,53 @@ function processDefinition(target, type, name, style, force) {
     return q.all(promises);
 }
 
+function listDirectory(dirName, dirPath) {
+    console.log('Contents of ' + dirName + ' directory (', dirPath, '):\n' );
+
+    return q.nfcall(fs.readdir, dirPath ).then(function(dirContents){
+        dirContents.forEach(function(item) {
+            console.log(item);
+        });
+    })
+}
+
 function finish(target) {
     var definitionsDir = target + '/tiles';
+    var appsDir = target + '/apps';
+
     var configurationFile =  target + '/jiveclientconfiguration.json';
 
     console.log('\n... Done!\n');
 
-    console.log('Contents of tiles directory (', definitionsDir, '):\n' );
+    // tiles
+    jive.util.fsexists(definitionsDir).then( function(exists) {
+        if ( exists ) {
+            return listDirectory('tiles', definitionsDir);
+        } else {
+            return q.resolve(true);
+        }
+    }).then( function() {
+        return jive.util.fsexists( appsDir ).then( function(exists) {
+            if ( exists ) {
+                return listDirectory('apps', appsDir);
 
-    q.nfcall(fs.readdir, definitionsDir ).then(function(dirContents){
-        dirContents.forEach(function(item) {
-            console.log(item);
+            } else {
+                return q.resolve();
+            }
         });
     }).then( function() {
-
-            console.log("\nThings you should do now, if you haven't done them already.");
-            console.log();
-            console.log('(1) Install dependent modules:');
-            console.log('   npm update ');
-            console.log('(2) Don\'t forget to edit', configurationFile, 'to specify your clientID, ' +
-                'clientSecret, clientUrl, and other important setup options!');
-            console.log();
-            console.log('When done, run your service:');
-            console.log();
-            console.log('   node app.js');
-            console.log();
-
-        });
+        console.log("\nThings you should do now, if you haven't done them already.");
+        console.log();
+        console.log('(1) Install dependent modules:');
+        console.log('   npm update ');
+        console.log('(2) Don\'t forget to edit', configurationFile, 'to specify your clientID, ' +
+            'clientSecret, clientUrl, and other important setup options!');
+        console.log();
+        console.log('When done, run your service:');
+        console.log();
+        console.log('   node app.js');
+        console.log();
+    });
 }
 
 function doStyle( options ) {

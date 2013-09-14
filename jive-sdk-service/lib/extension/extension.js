@@ -99,7 +99,7 @@ function buildTemplates(tilesDir) {
         return templateArray;
     };
 
-    return jive.service.extensions().find().then(function (extension) {
+    var theRest = jive.service.extensions().find().then(function (extension) {
         return jive.util.fsexists(templatesPath.trim()).then(function (exists) {
             if (!exists) {
                 // create it
@@ -129,6 +129,14 @@ function buildTemplates(tilesDir) {
             }
         });
     });
+
+    return jive.util.fsexists(tilesDir).then(function(exists) {
+        if ( !exists ) {
+            return q.resolve();
+        } else {
+            return theRest;
+        }
+    })
 }
 
 function buildDefaultTemplate(extension, existing) {
