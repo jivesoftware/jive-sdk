@@ -451,6 +451,13 @@ exports.fsTemplateCopy = function( source, target, substitutions ) {
     }
 };
 
+exports.fsTemplateRead = function( source, substitutions ) {
+    return exports.fsread(source).then( function( data ) {
+        var raw = data.toString();
+        return mustache.render(raw, substitutions || {} );
+    });
+};
+
 exports.base64Encode = function( object ) {
     return new Buffer( JSON.stringify( object) ).toString('base64');
 };

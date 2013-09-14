@@ -1,7 +1,0 @@
-{
-    "integrationUser": {
-        "systemAdmin": false
-    },
-
-    "tiles": {{{TILE_DEFINITIONS}}}
-}

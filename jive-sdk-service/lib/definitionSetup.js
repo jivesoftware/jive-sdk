@@ -284,43 +284,49 @@ exports.setupDefinitionMetadata = function(definitionPath) {
  * @param definitionDir
  */
 exports.setupOneDefinition = function( app, definitionDir, definitionName  ) {
-    definitionName = definitionName ||
-        (definitionDir.substring( definitionDir.lastIndexOf('/') + 1, definitionDir.length ) ); /// xxx todo this might not always work! use path
-    var definitionPath = definitionDir + '/definition.json';
-    var routesPath = definitionDir + '/backend/routes';
-    var servicesPath = definitionDir + '/backend';
+    return q.nfcall( fs.stat, definitionDir ).then( function( stat ) {
+        if ( stat.isDirectory() ) {
+            definitionName = definitionName ||
+                (definitionDir.substring( definitionDir.lastIndexOf('/') + 1, definitionDir.length ) ); /// xxx todo this might not always work! use path
+            var definitionPath = definitionDir + '/definition.json';
+            var routesPath = definitionDir + '/backend/routes';
+            var servicesPath = definitionDir + '/backend';
 
-    app.use( '/' + definitionName, express.static( definitionDir + '/public'  ) );
+            app.use( '/' + definitionName, express.static( definitionDir + '/public'  ) );
 
-    // setup tile public directory
-    var definitionApp = express();
+            // setup tile public directory
+            var definitionApp = express();
 
-    definitionApp.engine('html', consolidate.mustache);
-    definitionApp.set('view engine', 'html');
-    definitionApp.set('views', definitionDir + '/public');
+            definitionApp.engine('html', consolidate.mustache);
+            definitionApp.set('view engine', 'html');
+            definitionApp.set('views', definitionDir + '/public');
 
-    app.use( definitionApp );
+            app.use( definitionApp );
 
-    // if a definition exists, read it from disk and save it
-    var definitionPromise = exports.setupDefinitionMetadata(definitionPath);
+            // if a definition exists, read it from disk and save it
+            var definitionPromise = exports.setupDefinitionMetadata(definitionPath);
 
-    // wire up service and routes
-    return definitionPromise.then( function() {
-        var promises = [];
+            // wire up service and routes
+            return definitionPromise.then( function() {
+                var promises = [];
 
-        promises.push( fsexists(routesPath).then( function(exists) {
-            if ( exists ) {
-                return exports.setupDefinitionRoutes( definitionApp, definitionName, routesPath );
-            }
-        }));
+                promises.push( fsexists(routesPath).then( function(exists) {
+                    if ( exists ) {
+                        return exports.setupDefinitionRoutes( definitionApp, definitionName, routesPath );
+                    }
+                }));
 
-        promises.push( fsexists(definitionDir).then( function(exists) {
-            if ( exists ) {
-                return exports.setupDefinitionServices( app, definitionName, servicesPath );
-            }
-        }));
+                promises.push( fsexists(definitionDir).then( function(exists) {
+                    if ( exists ) {
+                        return exports.setupDefinitionServices( app, definitionName, servicesPath );
+                    }
+                }));
 
-        return q.all(promises);
+                return q.all(promises);
+            });
+        } else {
+            return q.resolve();
+        }
     });
 };
 

@@ -365,6 +365,10 @@ exports.role = {
     }
 };
 
+exports.extensions = function() {
+    return require('./extension/extension');
+};
+
 exports.getExpandedTileDefinitions = function(all) {
     var conf = exports.options;
     var host = exports.serviceURL();

@@ -165,7 +165,7 @@ exports.start = function( app, options, rootDir, tilesDir ) {
 
     return setupScheduler()
         .then( function() { return setupHttp(app, rootDir, options) })
-        .then( function() { return extension.prepare() })
+        .then( function() { return extension.prepare(tilesDir) })
         .then( function() {
             jive.logger.info("Bootstrap complete.");
             jive.logger.info("Started service in ", service.options.role || 'self-contained', "mode");
