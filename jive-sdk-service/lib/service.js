@@ -30,6 +30,7 @@ var mustache = require('mustache');
 var app;
 var rootDir = process.cwd();
 var tilesDir = rootDir + '/tiles';
+var osAppsDir = rootDir + '/apps';
 
 var _dir = function(theDir, defaultDir ) {
     theDir = theDir || defaultDir;
@@ -321,7 +322,7 @@ exports.autowireDefinitionMetadata = function( definitionMetadataFile ) {
  * Return promise - fail or succeed
  */
 exports.start = function() {
-    return bootstrap.start( app, exports.options, rootDir, tilesDir).then( function() {
+    return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir).then( function() {
         jive.logger.info("Service started in " + app['settings']['env'] + " mode");
     });
 };

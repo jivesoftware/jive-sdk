@@ -314,6 +314,12 @@ exports.fsread = function(path) {
     return deferred.promise;
 };
 
+exports.fsreadJson = function(path) {
+    return exports.fsread( path).then( function(data ) {
+        return JSON.parse( new Buffer(data).toString() );
+    });
+};
+
 exports.fsreaddir = function(path) {
     var deferred = q.defer();
 
@@ -426,7 +432,7 @@ exports.fswrite = function(data, path ) {
     return deferred.promise;
 };
 
-var supportedTemplatableExtensions = [ '.json', '.txt', '.text', '.js', '.sql', '.html' ];
+var supportedTemplatableExtensions = [ '.json', '.txt', '.text', '.js', '.sql', '.html', '.xml' ];
 
 function getExtension(filename) {
     if ( !filename ) {

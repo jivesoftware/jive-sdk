@@ -149,7 +149,7 @@ var setupHttp = function(app, rootDir, options) {
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
  */
-exports.start = function( app, options, rootDir, tilesDir ) {
+exports.start = function( app, options, rootDir, tilesDir, appsDir) {
     if ( alreadyBootstrapped ) {
         return q.fcall( function() {
             jive.logger.warn('Already bootstrapped, skipping.');
@@ -165,7 +165,7 @@ exports.start = function( app, options, rootDir, tilesDir ) {
 
     return setupScheduler()
         .then( function() { return setupHttp(app, rootDir, options) })
-        .then( function() { return extension.prepare(tilesDir) })
+        .then( function() { return extension.prepare(tilesDir, appsDir) })
         .then( function() {
             jive.logger.info("Bootstrap complete.");
             jive.logger.info("Started service in ", service.options.role || 'self-contained', "mode");

@@ -31,7 +31,7 @@ exports.save = function(record) {
     return jive.service.persistence().save('jiveExtension', 'jiveExtension', record);
 };
 
-exports.prepare = function(tilesDir) {
+exports.prepare = function(tilesDir, appsDir) {
     var extensionSrcDir = 'extension_src';
 
     return jive.util.fsexists(extensionSrcDir).then(function( exists ) {
@@ -64,16 +64,21 @@ exports.prepare = function(tilesDir) {
                     return q.all( [ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ] ).then(finalizeRequest);
                 }).then( function(definitions) {
                     return buildTemplates(tilesDir).then( function(templates ) {
-                        var definitionsJson = {
-                            'integrationUser' : {
-                                'systemAdmin' : extensionInfo['jiveServiceSignature'] ? true : false,
-                                'jiveServiceSignature' : extensionInfo['jiveServiceSignature']
-                            },
-                            'tiles' : (definitions && definitions.length > 0) ? definitions : undefined,
-                            'templates' : templates
-                        };
+                        return getApps(appsDir).then( function(apps) {
+                            console.log(JSON.stringify(apps, null, 4));
+                            var definitionsJson = {
+                                'integrationUser' : {
+                                    'systemAdmin' : extensionInfo['jiveServiceSignature'] ? true : false,
+                                    'jiveServiceSignature' : extensionInfo['jiveServiceSignature']
+                                },
+                                'tiles' : (definitions && definitions.length > 0) ? definitions : undefined,
+                                'templates' : templates,
+                                'osapps' : apps
+                            };
 
-                        return jive.util.fswrite( JSON.stringify(definitionsJson, null, 4), extensionSrcDir  + '/definition.json' );
+                            return jive.util.fswrite( JSON.stringify(definitionsJson, null, 4), extensionSrcDir  + '/definition.json' );
+                        });
+
                     });
                 })
         }).then( function() {
@@ -81,6 +86,34 @@ exports.prepare = function(tilesDir) {
             return jive.util.zipFolder( extensionSrcDir, 'extension.zip' );
         });
 };
+
+function getApps(appsRootDir) {
+    var apps = [];
+    return jive.util.fsexists( appsRootDir).then( function(exists) {
+        if ( exists ) {
+            return q.nfcall(fs.readdir, appsRootDir).then(function(dirContents){
+                var proms = [];
+                dirContents.forEach(function(item) {
+                    var definitionDir = appsRootDir + '/' + item + '/definition.json';
+                    proms.push( jive.util.fsreadJson(definitionDir).then(function(app) {
+                        if ( !app['appPath'] ) {
+                            var temp = app['id'];
+                            temp = temp.replace(/[^a-zA-Z 0-9]+/g,'');
+                            app['appPath'] = temp;
+                        }
+
+                        app['url'] = jive.service.serviceURL() + '/osapp/' + item + '/app.xml';
+                        return app;
+                    }) );
+                });
+                return q.all(proms);
+            });
+        } else {
+            return apps;
+        }
+    });
+
+}
 
 function buildTemplates(tilesDir) {
     var templatesPath = tilesDir + '/templates.json';

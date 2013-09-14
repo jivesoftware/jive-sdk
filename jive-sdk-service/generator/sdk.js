@@ -76,9 +76,12 @@ function processExample(target, example, name, force) {
         } )
     );
 
+    var uniqueUUID = jive.util.guid();
+
     promises.push(
         jive.util.recursiveCopy(root + '/examples/' + example, target, force, {
             'TILE_NAME': name,
+            'GENERATED_UUID' : uniqueUUID,
             'host': '{{{host}}}'
         } )
     );
