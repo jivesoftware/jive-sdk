@@ -47,7 +47,7 @@ exports.prepare = function(tilesDir) {
                 "description": extensionInfo['description'] || extensionInfo['uuid'],
                 "minimum_version": extensionInfo['minJiveVersion'] || '0000',
                 "status": "available",
-                "released_on": "2013-03-08T19:11:11.234Z",
+                "released_on": "2013-03-08T19:11:11.234Z", // xxx todo
                 "register_url": jive.service.serviceURL() + "/jive/oauth/register",
                 "service_url": jive.service.serviceURL(),
                 "redirect_url": extensionInfo['redirectURL'] || jive.service.serviceURL()

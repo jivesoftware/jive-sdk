@@ -1,0 +1,5 @@
+{
+    "clientUrl": "http://localhost",
+    "port": "8090",
+    "jiraHost" : "https://jira.jivesoftware.com"
+}
