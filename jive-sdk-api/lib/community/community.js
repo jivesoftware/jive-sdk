@@ -67,6 +67,12 @@ exports.parseJiveCommunity = function( jiveUrl ) {
 };
 
 function validateRegistration(registration) {
+
+    if ( jive.context.config['development'] == true ) {
+        jive.logger.warn("Warning - development mode is on. Accepting extension registration request regardless of source!");
+        return q.resolve(true);
+    }
+
     var validationBlock = JSON.parse( JSON.stringify(registration) );
     var jiveSignature = validationBlock['jiveSignature'];
     var clientSecret = validationBlock['clientSecret'];
