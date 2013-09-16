@@ -46,6 +46,9 @@ exports.prepare = function(tilesDir, appsDir) {
                 "name": extensionInfo['name'] || extensionInfo['uuid'],
                 "description": extensionInfo['description'] || extensionInfo['uuid'],
                 "minimum_version": extensionInfo['minJiveVersion'] || '0000',
+                "icon_16": "extension-16.png",
+                "icon_48": "extension-48.png",
+                "icon_128": "extension-128.png",
                 "status": "available",
                 "released_on": "2013-03-08T19:11:11.234Z", // xxx todo
                 "register_url": jive.service.serviceURL() + "/jive/oauth/register",
