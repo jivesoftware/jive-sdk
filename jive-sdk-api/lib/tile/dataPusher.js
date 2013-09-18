@@ -105,8 +105,8 @@ var handleError = function( instance, response, retryIfFail ) {
                 jive.logger.info('Bad request (400) returned pushing data to jive', response);
                 deferred.reject(response);
             }
-            else if (response.statusCode == 401) {
-                jive.logger.info("Unauthorized (401) returned pushing data to Jive", response);
+            else if (response.statusCode == 401 || response.statusCode == 403) {
+                jive.logger.info("Unauthorized (" + response.statusCode + ") returned pushing data to Jive", response);
 
                 if ( !retryIfFail ) {
                     jive.logger.error('Not executing refresh flow. Failure on second attempt.', response);

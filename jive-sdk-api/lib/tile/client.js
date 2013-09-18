@@ -157,8 +157,22 @@ exports.refreshAccessToken = function (options, successCallback, failureCallback
     };
 
     try {
-        var request = jiveIDEndpointProvider.requestAccessToken(accessTokenRequest);
-        request.then(successCallback, failureCallback);
+        if ( !options.jiveUrl ) {
+            // if not working directly with a jive instance, then use jiveID to broker trust
+            var request = jiveIDEndpointProvider.requestAccessToken(accessTokenRequest);
+            request.then(successCallback, failureCallback);
+        } else {
+            // otherwise we deal directly with jive
+            var tokenRequestEndPoint = options.jiveUrl + JIVE_OAUTH2_TOKEN_REQUEST_PATH;
+            var auth = "Basic " + new Buffer(accessTokenRequest.client_id + ':' + options.client_secret).toString('base64');
+            var headers = {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Authorization": auth
+            };
+
+            jive.util.buildRequest(tokenRequestEndPoint, "POST", accessTokenRequest, headers)
+                .then(successCallback, failureCallback);
+        }
     }
     catch (e) {
         if (failureCallback) {

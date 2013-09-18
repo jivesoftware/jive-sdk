@@ -223,11 +223,10 @@ exports.refreshAccessToken = function (instance) {
         jive.community.findByCommunity( jiveCommunity).then( function(community) {
             if ( community ) {
                 options['client_id'] = community['clientId'];
-                doRefreshAccessToken(options, instance, deferred);
-            } else {
-                // could not find community trust
-                doRefreshAccessToken(options, instance, deferred);
+                options['client_secret'] = community['clientSecret'];
+                options['jiveUrl'] = community['version' ] == 'post-samurai' ? community['jiveUrl'] : undefined;
             }
+            doRefreshAccessToken(options, instance, deferred);
         });
     }
 
