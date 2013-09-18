@@ -34,7 +34,7 @@ Calendars are great for showing important dates that are important to the group.
 	  </tr>
 	  <tr>
 	    <td>start</td>
-	    <td>The date and time that the event starts.</td>
+	    <td>The date and time that the event starts. Format is 'YYYY-MM-DDHH:00:00:000Z</td>
 		<td>Yes</td>
 	  </tr>
 	  <tr>
@@ -84,7 +84,7 @@ Calendars are great for showing important dates that are important to the group.
   </tr>
   <tr>
     <td>style</td>
-    <td>This is the style of the tile. Since this is a table, the value is TABLE</td>
+    <td>This is the style of the tile. Since this is a table, the value is CALENDAR</td>
 	<td>Yes</td>
   </tr>
  <tr>
