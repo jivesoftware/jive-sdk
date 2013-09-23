@@ -54,6 +54,7 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
  * @param interval The interval to invoke the callback
  */
 Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
+    context = context || {};
     var deferred = q.defer();
     var handlers;
     if (context['tileName']) {
@@ -93,7 +94,7 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
             next();
         }, delay || 1);
     }
-    jive.logger.debug("Scheduled task: " + eventID, interval);
+    jive.logger.debug("Scheduled task: " + eventID, interval || "immediate");
 
     return deferred.promise;
 };

@@ -68,19 +68,55 @@ var persistence;
 exports.persistence = function(_persistence) {
 
     if ( _persistence ) {
+        // set persistence
         if ( !_persistence['find']  || !_persistence['remove'] || !_persistence['save'] ) {
             throw 'Unsupported persistence strategy - must implement find, remove, save methods.';
         }
         persistence = _persistence;
+        jive.context['persistence'] = persistence;
     }
 
-    if ( !persistence) {
-        persistence = new jive.persistence.file();
+    // retrieve persistence
+    return {
+        save: function() {
+            return persistence ? persistence.save(
+                arguments.length > 0 ? arguments[0] : undefined,
+                arguments.length > 1 ? arguments[1] : undefined,
+                arguments.length > 2 ? arguments[2] : undefined,
+                arguments.length > 3 ? arguments[3] : undefined,
+                arguments.length > 4 ? arguments[4] : undefined,
+                arguments.length > 5 ? arguments[5] : undefined
+            ) : function() {
+                return q.reject( new Error("persistence not defined") );
+            }
+        },
+
+        find: function() {
+            return persistence ? persistence.find(
+                arguments.length > 0 ? arguments[0] : undefined,
+                arguments.length > 1 ? arguments[1] : undefined,
+                arguments.length > 2 ? arguments[2] : undefined,
+                arguments.length > 3 ? arguments[3] : undefined,
+                arguments.length > 4 ? arguments[4] : undefined,
+                arguments.length > 5 ? arguments[5] : undefined
+            ) : function() {
+                return q.reject( new Error("persistence not defined") );
+            }
+        },
+
+        remove: function() {
+            return persistence ? persistence.remove(
+                arguments.length > 0 ? arguments[0] : undefined,
+                arguments.length > 1 ? arguments[1] : undefined,
+                arguments.length > 2 ? arguments[2] : undefined,
+                arguments.length > 3 ? arguments[3] : undefined,
+                arguments.length > 4 ? arguments[4] : undefined,
+                arguments.length > 5 ? arguments[5] : undefined
+            ) : function() {
+                return q.reject( new Error("persistence not defined") );
+            }
+        }
     }
-
-    jive.context.persistence = persistence;
-
-    return persistence;
 };
 
 var scheduler;
