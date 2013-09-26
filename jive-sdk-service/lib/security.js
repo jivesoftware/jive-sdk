@@ -35,6 +35,8 @@ var findCredentials = function(req) {
     var authorization = req.headers['authorization'];
 
     if ( !jiveUrl && authorization ) {
+        jive.logger.debug("Trying to parse jiveURL from JiveEXTN authorization header...");
+
         // check authorization header
         var authVars = authorization.split(' ');
         if ( authVars[0] == 'JiveEXTN') {
@@ -46,6 +48,8 @@ var findCredentials = function(req) {
                     jiveUrl = decodeURIComponent( p.split("=")[1] );
                 }
             });
+        } else {
+            jive.logger.debug("JiveEXTN authorization header not present, could not find jiveURL that way.");
         }
     }
 
@@ -58,6 +62,9 @@ var findCredentials = function(req) {
             if (community) {
                 credentials['clientId'] = community['clientId'];
                 credentials['clientSecret'] = community['clientSecret'];
+            } else {
+                jive.logger.debug("Could not look up security credentials by community jiveURL " + jiveUrl + " -- using service credentials " +
+                    "from service configuration file (usually jiveclientconfiguration.json).");
             }
             deferred.resolve(credentials);
         });
@@ -75,15 +82,18 @@ exports.checkAuthHeaders = function (req, res,next) {
             var auth = req.headers['authorization'];
 
             if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {
+                jive.logger.debug("Basic auth header found, but failed clientID/secret match.");
                 res.writeHead(403, { 'Content-Type': 'application/json' });
                 res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
             }
 
             if ( !jive.util.jiveAuthorizationHeaderValid(auth, clientId, secret ) ) {
+                jive.logger.debug("JiveEXTN found, but failed clientID/secret match.");
                 res.writeHead(403, { 'Content-Type': 'application/json' });
                 res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
             }
         } else {
+            jive.logger.debug("No security headers found, even though security credentials were required.");
             // problem!
             res.writeHead(403, { 'Content-Type': 'application/json' });
             res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );

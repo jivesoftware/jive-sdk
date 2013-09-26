@@ -98,6 +98,9 @@ function validateRegistration(registration) {
         'X-Jive-MAC' : jiveSignature
     };
 
+    jive.logger.debug("Received registration block: " + JSON.stringify(validationBlock) );
+    jive.logger.debug("Shipping validation request to appsmarket - endpoint: " + jiveSignatureUrl );
+
     return jive.util.buildRequest(jiveSignatureUrl, 'POST', buffer, headers);
 }
 
@@ -108,6 +111,8 @@ exports.register = function( registration ) {
         // success
         function() {
             var registrationToSave = JSON.parse( JSON.stringify(registration) );
+
+            jive.logger.debug("Successful registration request, proceeding.");
 
             var jiveSignature = registration['jiveSignature'];
             var authorizationCode = registration['code'];
@@ -197,6 +202,7 @@ exports.register = function( registration ) {
 
         // error
         function(err) {
+            jive.logger.debug("Unsuccessful registration request: " + err? JSON.stringify(err) : '');
             jive.events.emit("registeredJiveInstanceFailed", err );
             deferred.reject(new Error("Failed jive signature validation: "
                 + JSON.stringify(err)));
