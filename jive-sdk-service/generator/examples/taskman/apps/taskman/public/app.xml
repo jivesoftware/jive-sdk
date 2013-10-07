@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+    <ModulePrefs title="Task Manager Example"
+                 author="Jive Software"
+                 description="Example Task Manager">
+        <Require feature="jquery-1.6"/>
+        <Require feature="osapi"/>
+        <Require feature="opensocial-data"/>
+        <Require feature="jive-core-v3"/>
+        <Require feature="jive-core-v3-resolver"/>
+        <Require feature="actions">
+            <Param name="action-contributions">
+                <![CDATA[
+            <!--
+                Top level create task from the header bar.
+            -->
+            <action id="com.jivesoftware.example.taskman.createModalNav"
+                    path="jive/actions/navmenu"
+                    label="Create Task"
+                    view="createTask"/>
+             <!--
+                Add a configuration option to the project settings page.
+             -->
+            <action id="com.jivesoftware.example.taskman.configproject"
+                  path="jive/settings/places/project"
+                  label="Task Management"
+                  view="config_project" />
+
+            <!--
+                If taskmanagement is enabled from the project settings page (see above)
+                Show a tab on the project page
+            -->
+            <action id="com.jivesoftware.example.taskman.projecttab"
+                  path="jive/tabs/places/project?filter=equals(context.extprops.taskmanagement,true)"
+                  label="Manage Tasks" 
+                  view="taskList"/>
+
+            <!--
+                Add an action to the Actions menu on the project place conditionally
+                based on the setting on the project settings page.
+            -->
+            <action id="com.jivesoftware.example.taskman.createTaskProject"
+                    path="jive/actions/places/project?filter=equals(context.extprops.taskmanagement,true)"
+                    label="Create Task"
+                    view="createTask"/>
+
+            <!--
+                Add a tab to the actions section of the inbox.
+            -->
+            <action id="com.jivesoftware.example.taskman.managePersonalTasks"
+                    path="jive/tabs/actions"
+                    label="Manage My Tasks"
+                    view="taskList"/>
+
+            <!--
+                Add an option on the More dropdown on a user's profile.
+            -->
+            <action id="com.jivesoftware.example.taskman.manageOthersPersonalTasks"
+                    path="jive/tabs/profile"
+                    label="View User's Tasks"
+                    view="taskList"/>
+            ]]>
+
+            </Param>
+        </Require>
+    </ModulePrefs>
+
+    <!--
+        The task list.  When this is viewed via the project tab, it will only show
+        tasks for the current project.  If it is viewed from the quick launch,
+        it will show tasks for all projects.
+    -->
+    <Content type="html" href="tasks.html" />
+    <Content type="html" view="taskList" href="tasks.html" preferred_height="570" preferred_width="650"/>
+
+    <!--
+        Create a task in the current project.
+    -->
+    <Content type="html" view="createTask" href="createTasks.html" preferred_height="570" preferred_width="650"/>
+
+    <!--
+        View or edit an exiting task.
+    -->
+    <Content type="html" view="taskDetail" href="taskDetail.html" preferred_height="570" preferred_width="650"/>
+
+    <!--
+        This is the page that will appear on the project settings
+        page.
+    -->
+    <Content type="html" view="config_project" href="configureProject.html" preferred_height="570" preferred_width="650"/>
+</Module>

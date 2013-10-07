@@ -1,0 +1,74 @@
+<link rel="stylesheet" href="stylesheets/main.css" type="text/css" media="screen" />
+<script type="text/javascript" charset="utf-8">
+var project = undefined,
+        username = undefined;
+
+gadgets.util.registerOnLoadHandler(function() {
+    var updateDisplay = function( ) {
+        var queryString = "";
+        if( project ) {
+            queryString = "?project=" + project;
+        } else if ( username ) {
+            queryString = "?assignee=" + username;
+        }
+
+        var url = "http://localhost:8090/tile-app/tasks" + queryString;
+        var params = {
+            'href': url,
+            'format': 'json',
+            "noCache": true
+        };
+
+        osapi.http.get(params).execute(function (response) {
+            var tasks = response.content.tasks,
+                    task, i;
+            $( "#taskBody" ).empty();
+
+            for( i = 0; i < tasks.length; i++) {
+                task = tasks[i];
+                $( "#taskBody" ).append("<tr>" +
+                        "<td><a class='taskDetail' data-id='" + task.id +"' href='#'>"  + task.name + "</a></td>" +
+                        "<td>" + (task.status ? task.status : "Open") + "</td>" +
+                        "<td>" + (task.project ? task.project : "&nbsp;") + "</td>" +
+                        "<td>" + (task.assignee ? task.assignee : "&nbsp;") + "</td>" +
+                        "</tr>");
+            }
+        });
+    };
+
+    // Register update actions event, that will exectute when the app loads
+    $("#createTask" ).click(function() {
+        gadgets.views.requestNavigateTo("createTask", {project: project});
+    });
+
+    $(".taskList" ).delegate(".taskDetail", "click", function() {
+        gadgets.views.requestNavigateTo("taskDetail", {id: this.getAttribute("data-id")});
+    });
+
+    osapi.jive.core.container.getLaunchContext(function(resp){
+        if(resp) {
+            osapi.jive.corev3.resolveContext(resp, function(result){
+                if( result && result.content ) {
+                    if( result.content.type === "person" ) {
+                        if( result.content.jive ) {
+                            username = result.content.jive.username;
+                        }
+                    } else {
+                        project = result.content.name;
+                    }
+                }
+                updateDisplay();
+
+            });
+        }
+    });
+});
+</script>
+<body>
+    <table class="taskList">
+        <thead><tr><th>Task</th><th>Status</th><th>Project</th><th>Assignee</th></tr></thead>
+        <tbody id="taskBody"></tbody>
+    </table>
+    <button id="createTask" title="Create Task">Create</button>
+</body>
+

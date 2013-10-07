@@ -1,0 +1,75 @@
+<link rel="stylesheet" href="stylesheets/main.css" type="text/css" media="screen" />
+<script type="text/javascript" charset="utf-8">
+    var project=undefined,
+        username=undefined,
+        setProject = function(context) {
+            if( context ) {
+                osapi.jive.corev3.resolveContext(context, function (result) {
+                    if (result && result.content) {
+                        project = result.content.name;
+                    }
+                });
+            }
+        };
+    // When coming to this view from the createTaskProject action, set the current project.
+    gadgets.actions.updateAction({
+        id:"com.jivesoftware.example.taskman.createTaskProject",
+        callback:function(context){
+            if(context && context.jive && context.jive.content && context.jive.content.type == 'osapi.jive.core.Project'){
+                setProject(context);
+            }
+        }
+    });
+
+
+    gadgets.util.registerOnLoadHandler(function() {
+        if( !project ) {
+            project = gadgets.views.getParams().project;
+        }
+
+        if( !username ) {
+            osapi.jive.corev3.people.getViewer().execute(function(resp) {
+                if( resp && resp.jive ) {
+                    username = resp.jive.username;
+                }
+            });
+        }
+
+        var url = "http://localhost:8090/tile-app/tasks";
+        var create = function() {
+            var params = {
+                'href': url,
+                'format': 'json',
+                "noCache": true,
+                "headers": {"content-type": ["application/json"]},
+                "body": {"name": $('#taskName').val(), "status": "Open"}
+            };
+
+            if( project ) {
+                params.body.project = project;
+            }
+
+            if( username ) {
+                params.body.assignee = username;
+            }
+
+            osapi.http.post(params).execute(function (response) {
+                gadgets.views.requestNavigateTo("taskDetail", {id: response.content.id});
+            });
+        };
+
+        $("#createBtn").click(create);
+
+        osapi.jive.core.container.getLaunchContext(function(context){
+            // This is necessary when going to this view from another view.
+            setProject(context);
+        });
+    });
+</script>
+<body>
+	<h1>Create Task <span id="inProject"></span></h1>
+	<input id="taskName">
+    <input type="hidden" id="projectField" name="project" value="" />
+	<button id="createBtn">Create</button>
+</body>
+

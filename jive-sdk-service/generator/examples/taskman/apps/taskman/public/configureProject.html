@@ -1,0 +1,34 @@
+<link rel="stylesheet" href="stylesheets/main.css" type="text/css" media="screen" />
+<script type="text/javascript" charset="utf-8">
+    gadgets.actions.updateAction({
+        id:"com.jivesoftware.example.taskman.configproject",
+        callback:function(context){
+            if(context && context.jive && context.jive.content && context.jive.content.type == 'osapi.jive.core.Project'){
+                osapi.jive.corev3.resolveContext(context, function(result){
+                    result.content.getExtProps().execute(function( props ) {
+                        var enabled = "true" ===  props.content.taskmanagement;
+                        $("#enabled").prop("checked", enabled);
+                    });
+                });
+                $("#submit").click(function() {
+                    osapi.jive.corev3.resolveContext(context, function(result){
+                        if(result.content){
+                            result.content.createExtProps({
+                                "taskmanagement": $("#enabled").is(':checked'),
+                                "project": result.content.name
+                            }).execute(function (resp) {
+                                osapi.jive.core.container.closeApp();
+                            });
+                        }
+                    });
+                });
+            }
+        }
+    });
+</script>
+<body>
+<h1>Config Project</h1>
+<input type="CHECKBOX" id="enabled" name="enabled" /> Task Management Enabled
+
+<button id="submit">Done</button>
+</body>

@@ -1,0 +1,73 @@
+<link rel="stylesheet" href="stylesheets/main.css" type="text/css" media="screen" />
+<script type="text/javascript" charset="utf-8">
+
+gadgets.util.registerOnLoadHandler(function() {
+    var id=gadgets.views.getParams().id;
+
+    var url = "http://localhost:8090/tile-app/tasks/" + id;
+    var params = {
+        'href': url,
+        'format': 'json',
+        "noCache": true
+    };
+
+    osapi.http.get(params).execute(function (response) {
+        var task = response.content;
+        if(task) {
+            $(".taskDetails").show();
+            $("#taskId" ).text(task.id);
+            $("#taskName" ).val(task.name);
+            $("#assignee" ).val(task.assignee);
+            if(task.status) {
+                $("#taskStatus").val(task.status);
+            }
+            if( task.project ) {
+                $("#project").val(task.project);
+            }
+        } else {
+            $(".taskDetails").hide();
+            $("#status").text("ERROR - " + response.error);
+        }
+    });
+
+    $("#done" ).click(function() {
+        if (gadgets.views.getCurrentView().getName().indexOf("embedded") != -1) {
+            osapi.jive.core.container.closeApp();
+        } else {
+            gadgets.views.requestNavigateTo("taskList");
+        }
+    });
+
+    $("#save" ).click(function() {
+        var params = {
+            'href': url,
+            'format': 'json',
+            "noCache": true,
+            "headers": {"content-type": ["application/json"]},
+            "body": {
+                id: $("#taskId").val(),
+                name: $("#taskName" ).val(),
+                status:  $("#taskStatus" ).val(),
+                project: $("#project").val(),
+                assignee: $("#assignee").val()
+            }
+        };
+
+        osapi.http.put(params).execute(function (response) {
+            $("#status").html("saved:" + response.content.id);
+        });
+    });
+});
+</script>
+<body>
+    <div id="status"></div>
+    <table class="taskDetails" style="display:hidden">
+        <tr><td>Id</td><td id="taskId"></td></tr>
+        <tr><td>Name</td><td><input id="taskName" /></td></tr>
+        <tr><td>Status</td><td><input id="taskStatus" value="Open"></td></tr>
+        <tr><td>Project</td><td><input id="project" value=""></td></tr>
+        <tr><td>Assignee</td><td><input id="assignee" value=""></td></tr>
+    </table>
+    <button id="done">Back</button><button id="save">Save</button>
+</body>
+

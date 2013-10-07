@@ -1,0 +1,20 @@
+{
+    "sampleData" : {
+        "title" : "tile-app list",
+        "contents" : [ {
+            "text" : "Task 1"
+        } ],
+        "config" : {
+               "listStyle" : "contentList"
+        }
+    },
+    "displayName" : "tile-app",
+    "name" : "tile-app",
+    "description" : "tile-app",
+    "style" : "LIST",
+    "icons" : {
+        "16" : "http://localhost:8090/tile-app/checkbox_checked.png",
+        "48" : "http://localhost:8090/tile-app/checkbox_checked.png",
+        "128" : "http://localhost:8090/tile-app/checkbox_checked.png"
+    }
+}
