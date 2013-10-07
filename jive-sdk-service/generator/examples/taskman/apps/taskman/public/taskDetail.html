@@ -1,10 +1,11 @@
 <link rel="stylesheet" href="stylesheets/main.css" type="text/css" media="screen" />
+<script src="scripts/shared.js"></script>
 <script type="text/javascript" charset="utf-8">
 
 gadgets.util.registerOnLoadHandler(function() {
     var id=gadgets.views.getParams().id;
 
-    var url = "http://localhost:8090/tile-app/tasks/" + id;
+    var url = baseRESTUrl + "/" + id;
     var params = {
         'href': url,
         'format': 'json',

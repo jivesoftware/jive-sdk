@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="stylesheets/main.css" type="text/css" media="screen" />
+<script src="scripts/shared.js"></script>
 <script type="text/javascript" charset="utf-8">
 var project = undefined,
         username = undefined;
@@ -12,7 +13,7 @@ gadgets.util.registerOnLoadHandler(function() {
             queryString = "?assignee=" + username;
         }
 
-        var url = "http://localhost:8090/tile-app/tasks" + queryString;
+        var url = baseRESTUrl + queryString;
         var params = {
             'href': url,
             'format': 'json',

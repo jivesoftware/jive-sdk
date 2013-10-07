@@ -1,5 +1,5 @@
 {
     "name" : "Task Manager",
-    "appPath" : "taskman",
-    "id":  "5454-5252-1234-5555-23422"
+    "appPath" : "{{{TILE_NAME}}}",
+    "id": "{{{GENERATED_UUID}}}"
 }

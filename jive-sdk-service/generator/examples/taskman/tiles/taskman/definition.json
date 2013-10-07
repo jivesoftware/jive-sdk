@@ -1,6 +1,6 @@
 {
     "sampleData" : {
-        "title" : "tile-app list",
+        "title" : "{{{TILE_NAME}}}",
         "contents" : [ {
             "text" : "Task 1"
         } ],
@@ -8,13 +8,13 @@
                "listStyle" : "contentList"
         }
     },
-    "displayName" : "tile-app",
-    "name" : "tile-app",
-    "description" : "tile-app",
+    "displayName" : "{{{TILE_NAME}}}",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "{{{TILE_NAME}}}",
     "style" : "LIST",
     "icons" : {
-        "16" : "http://localhost:8090/tile-app/checkbox_checked.png",
-        "48" : "http://localhost:8090/tile-app/checkbox_checked.png",
-        "128" : "http://localhost:8090/tile-app/checkbox_checked.png"
+        "16" : "http://{{{host}}}/tile-app/checkbox_checked.png",
+        "48" : "http://{{{host}}}/tile-app/checkbox_checked.png",
+        "128" : "http://{{{host}}}/tile-app/checkbox_checked.png"
     }
 }
