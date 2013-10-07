@@ -99,7 +99,7 @@ function getData(jobswanted, viewswanted, tilecallback) {
     getViewJobs(viewswanted, getJobs);
 }
 
-//because the array jenkins stores is in alphabetical order, we can do binary search
+// because the array jenkins stores is in alphabetical order, we can do binary search
 function binarySearch(string, array, startIndex) {
     if (!startIndex) {
         startIndex = 0;
