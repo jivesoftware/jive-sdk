@@ -2,12 +2,12 @@
 <script src="scripts/shared.js"></script>
 <script type="text/javascript" charset="utf-8">
     gadgets.actions.updateAction({
-        id:"com.jivesoftware.example.taskman.configproject",
+        id:"com.jivesoftware.example.todo.configproject",
         callback:function(context){
             if(context && context.jive && context.jive.content && context.jive.content.type == 'osapi.jive.core.Project'){
                 osapi.jive.corev3.resolveContext(context, function(result){
                     result.content.getExtProps().execute(function( props ) {
-                        var enabled = "true" ===  props.content.taskmanagement;
+                        var enabled = "true" ===  props.content.todo;
                         $("#enabled").prop("checked", enabled);
                     });
                 });
@@ -15,7 +15,7 @@
                     osapi.jive.corev3.resolveContext(context, function(result){
                         if(result.content){
                             result.content.createExtProps({
-                                "taskmanagement": $("#enabled").is(':checked'),
+                                "todo": $("#enabled").is(':checked'),
                                 "project": result.content.name
                             }).execute(function (resp) {
                                 osapi.jive.core.container.closeApp();
@@ -29,7 +29,7 @@
 </script>
 <body>
 <h1>Config Project</h1>
-<input type="CHECKBOX" id="enabled" name="enabled" /> Task Management Enabled
+<input type="CHECKBOX" id="enabled" name="enabled" /> Todo Management Enabled
 
 <button id="submit">Done</button>
 </body>

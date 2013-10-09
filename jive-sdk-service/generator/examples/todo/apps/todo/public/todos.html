@@ -21,29 +21,29 @@ gadgets.util.registerOnLoadHandler(function() {
         };
 
         osapi.http.get(params).execute(function (response) {
-            var tasks = response.content.tasks,
-                    task, i;
-            $( "#taskBody" ).empty();
+            var todos = response.content.todos,
+                    todo, i;
+            $( "#todoBody" ).empty();
 
-            for( i = 0; i < tasks.length; i++) {
-                task = tasks[i];
-                $( "#taskBody" ).append("<tr>" +
-                        "<td><a class='taskDetail' data-id='" + task.id +"' href='#'>"  + task.name + "</a></td>" +
-                        "<td>" + (task.status ? task.status : "Open") + "</td>" +
-                        "<td>" + (task.project ? task.project : "&nbsp;") + "</td>" +
-                        "<td>" + (task.assignee ? task.assignee : "&nbsp;") + "</td>" +
+            for( i = 0; i < todos.length; i++) {
+                todo = todos[i];
+                $( "#todoBody" ).append("<tr>" +
+                        "<td><a class='todoDetail' data-id='" + todo.id +"' href='#'>"  + todo.name + "</a></td>" +
+                        "<td>" + (todo.status ? todo.status : "Open") + "</td>" +
+                        "<td>" + (todo.project ? todo.project : "&nbsp;") + "</td>" +
+                        "<td>" + (todo.assignee ? todo.assignee : "&nbsp;") + "</td>" +
                         "</tr>");
             }
         });
     };
 
     // Register update actions event, that will exectute when the app loads
-    $("#createTask" ).click(function() {
-        gadgets.views.requestNavigateTo("createTask", {project: project});
+    $("#createTodo" ).click(function() {
+        gadgets.views.requestNavigateTo("createTodo", {project: project});
     });
 
-    $(".taskList" ).delegate(".taskDetail", "click", function() {
-        gadgets.views.requestNavigateTo("taskDetail", {id: this.getAttribute("data-id")});
+    $(".todoList" ).delegate(".todoDetail", "click", function() {
+        gadgets.views.requestNavigateTo("todoDetail", {id: this.getAttribute("data-id")});
     });
 
     osapi.jive.core.container.getLaunchContext(function(resp){
@@ -66,10 +66,10 @@ gadgets.util.registerOnLoadHandler(function() {
 });
 </script>
 <body>
-    <table class="taskList">
-        <thead><tr><th>Task</th><th>Status</th><th>Project</th><th>Assignee</th></tr></thead>
-        <tbody id="taskBody"></tbody>
+    <table class="todoList">
+        <thead><tr><th>Todo</th><th>Status</th><th>Project</th><th>Assignee</th></tr></thead>
+        <tbody id="todoBody"></tbody>
     </table>
-    <button id="createTask" title="Create Task">Create</button>
+    <button id="createTodo" title="Create Todo">Create</button>
 </body>
 

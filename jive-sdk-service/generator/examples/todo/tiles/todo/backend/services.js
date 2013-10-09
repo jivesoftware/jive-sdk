@@ -27,7 +27,7 @@ function processTileInstance(instance) {
 
     var dataToPush = {
         data: {
-            "title": "Open Tasks",
+            "title": "Open Todos",
             "contents": [
 
             ],
@@ -45,20 +45,20 @@ function processTileInstance(instance) {
         dataToPush.data.title += " in project " + project;
     }
 
-    db.find("tasks", criteria).then(function( tasks ) {
-        var task, i;
+    db.find("todos", criteria).then(function( todos ) {
+        var todo, i;
 
-        for( i = 0 ; i < tasks.length && i < 10; i++) {
-            task = tasks[i];
-            var taskDesc = {
-                text: task.name,
+        for( i = 0 ; i < todos.length && i < 10; i++) {
+            todo = todos[i];
+            var todoDesc = {
+                text: todo.name,
                 action: {
-                    // Create a url that is a deep link into the the "taskman" app, "taskDetail" view.
-                    "url": "/apps/taskman/taskDetail/" + encodeURIComponent(JSON.stringify({"id": task.id})),
+                    // Create a url that is a deep link into the the "todo" app, "todoDetail" view.
+                    "url": "/apps/todo/todoDetail/" + encodeURIComponent(JSON.stringify({"id": todo.id})),
                     "relativeUrl": "true"
                 }
             };
-            dataToPush.data.contents.push(taskDesc);
+            dataToPush.data.contents.push(todoDesc);
         }
 
         jive.tiles.pushData(instance, dataToPush);
@@ -68,7 +68,7 @@ function processTileInstance(instance) {
 exports.task = new jive.tasks.build(
     // runnable
     function() {
-        jive.tiles.findByDefinitionName( 'tile-app' ).then( function(instances) {
+        jive.tiles.findByDefinitionName( 'todo' ).then( function(instances) {
             if ( instances ) {
                 instances.forEach( function( instance ) {
                     processTileInstance(instance);

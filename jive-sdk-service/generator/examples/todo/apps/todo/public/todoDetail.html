@@ -13,20 +13,20 @@ gadgets.util.registerOnLoadHandler(function() {
     };
 
     osapi.http.get(params).execute(function (response) {
-        var task = response.content;
-        if(task) {
-            $(".taskDetails").show();
-            $("#taskId" ).text(task.id);
-            $("#taskName" ).val(task.name);
-            $("#assignee" ).val(task.assignee);
-            if(task.status) {
-                $("#taskStatus").val(task.status);
+        var todo = response.content;
+        if(todo) {
+            $(".todoDetails").show();
+            $("#todoId" ).text(todo.id);
+            $("#todoName" ).val(todo.name);
+            $("#assignee" ).val(todo.assignee);
+            if(todo.status) {
+                $("#todoStatus").val(todo.status);
             }
-            if( task.project ) {
-                $("#project").val(task.project);
+            if( todo.project ) {
+                $("#project").val(todo.project);
             }
         } else {
-            $(".taskDetails").hide();
+            $(".todoDetails").hide();
             $("#status").text("ERROR - " + response.error);
         }
     });
@@ -35,7 +35,7 @@ gadgets.util.registerOnLoadHandler(function() {
         if (gadgets.views.getCurrentView().getName().indexOf("embedded") != -1) {
             osapi.jive.core.container.closeApp();
         } else {
-            gadgets.views.requestNavigateTo("taskList");
+            gadgets.views.requestNavigateTo("todoList");
         }
     });
 
@@ -46,9 +46,9 @@ gadgets.util.registerOnLoadHandler(function() {
             "noCache": true,
             "headers": {"content-type": ["application/json"]},
             "body": {
-                id: $("#taskId").val(),
-                name: $("#taskName" ).val(),
-                status:  $("#taskStatus" ).val(),
+                id: $("#todoId").val(),
+                name: $("#todoName" ).val(),
+                status:  $("#todoStatus" ).val(),
                 project: $("#project").val(),
                 assignee: $("#assignee").val()
             }
@@ -62,10 +62,10 @@ gadgets.util.registerOnLoadHandler(function() {
 </script>
 <body>
     <div id="status"></div>
-    <table class="taskDetails" style="display:hidden">
-        <tr><td>Id</td><td id="taskId"></td></tr>
-        <tr><td>Name</td><td><input id="taskName" /></td></tr>
-        <tr><td>Status</td><td><input id="taskStatus" value="Open"></td></tr>
+    <table class="todoDetails" style="display:hidden">
+        <tr><td>Id</td><td id="todoId"></td></tr>
+        <tr><td>Name</td><td><input id="todoName" /></td></tr>
+        <tr><td>Status</td><td><input id="todoStatus" value="Open"></td></tr>
         <tr><td>Project</td><td><input id="project" value=""></td></tr>
         <tr><td>Assignee</td><td><input id="assignee" value=""></td></tr>
     </table>

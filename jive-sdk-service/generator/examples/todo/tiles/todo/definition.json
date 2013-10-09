@@ -2,7 +2,7 @@
     "sampleData" : {
         "title" : "{{{TILE_NAME}}}",
         "contents" : [ {
-            "text" : "Task 1"
+            "text" : "Todo 1"
         } ],
         "config" : {
                "listStyle" : "contentList"
@@ -13,8 +13,8 @@
     "description" : "{{{TILE_NAME}}}",
     "style" : "LIST",
     "icons" : {
-        "16" : "http://{{{host}}}/tile-app/checkbox_checked.png",
-        "48" : "http://{{{host}}}/tile-app/checkbox_checked.png",
-        "128" : "http://{{{host}}}/tile-app/checkbox_checked.png"
+        "16" : "http://{{{host}}}/todo/checkbox_checked.png",
+        "48" : "http://{{{host}}}/todo/checkbox_checked.png",
+        "128" : "http://{{{host}}}/todo/checkbox_checked.png"
     }
 }

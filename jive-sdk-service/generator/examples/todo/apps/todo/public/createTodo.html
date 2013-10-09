@@ -12,9 +12,9 @@
                 });
             }
         };
-    // When coming to this view from the createTaskProject action, set the current project.
+    // When coming to this view from the createTodoProject action, set the current project.
     gadgets.actions.updateAction({
-        id:"com.jivesoftware.example.taskman.createTaskProject",
+        id:"com.jivesoftware.example.todo.createTodoProject",
         callback:function(context){
             if(context && context.jive && context.jive.content && context.jive.content.type == 'osapi.jive.core.Project'){
                 setProject(context);
@@ -43,7 +43,7 @@
                 'format': 'json',
                 "noCache": true,
                 "headers": {"content-type": ["application/json"]},
-                "body": {"name": $('#taskName').val(), "status": "Open"}
+                "body": {"name": $('#todoName').val(), "status": "Open"}
             };
 
             if( project ) {
@@ -55,7 +55,7 @@
             }
 
             osapi.http.post(params).execute(function (response) {
-                gadgets.views.requestNavigateTo("taskDetail", {id: response.content.id});
+                gadgets.views.requestNavigateTo("todoDetail", {id: response.content.id});
             });
         };
 
@@ -68,8 +68,8 @@
     });
 </script>
 <body>
-	<h1>Create Task <span id="inProject"></span></h1>
-	<input id="taskName">
+	<h1>Create Todo <span id="inProject"></span></h1>
+	<input id="todoName">
     <input type="hidden" id="projectField" name="project" value="" />
 	<button id="createBtn">Create</button>
 </body>

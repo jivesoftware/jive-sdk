@@ -15,7 +15,7 @@
  */
 
 /**
- * A simple REST service to store and retrieve tasks from a file database.
+ * A simple REST service to store and retrieve todos from a file database.
  *
  * This is not meant for production use and only mean as a service to server
  * the example app.
@@ -24,7 +24,7 @@
 var jive = require('jive-sdk' ),
     db = jive.service.persistence();
 
-var taskHandler = function(req, res) {
+var todoHandler = function(req, res) {
     var project = req.param("project"),
         assignee = req.param("assignee"),
         criteria = undefined;
@@ -41,14 +41,14 @@ var taskHandler = function(req, res) {
 
     }
 
-    db.find("tasks",criteria).then(function( tasks ) {
+    db.find("todos",criteria).then(function( todos ) {
         res.status(200);
         res.set({'Content-Type': 'application/json'});
-        res.send( JSON.stringify({tasks: tasks }, null, 4 ));
+        res.send( JSON.stringify({todos: todos }, null, 4 ));
     });
 };
 
-var taskCreator = function(req, res) {
+var todoCreator = function(req, res) {
     if( !req.body.name ) {
         res.status(400);
         res.send("Expected json body with name");
@@ -61,7 +61,7 @@ var taskCreator = function(req, res) {
         req.body.id = id
     }
 
-    db.save("tasks", id, req.body ).then(function( data ) {
+    db.save("todos", id, req.body ).then(function( data ) {
         res.status(200);
         res.set( {
             'Content-Type': 'application/json',
@@ -71,16 +71,16 @@ var taskCreator = function(req, res) {
     });
 };
 
-var taskDetailHandler = function(req, res) {
+var todoDetailHandler = function(req, res) {
     var id = parseInt(req.param("id"), 10);
-    db.find( "tasks", {id: id} ).then( function ( tasks ) {
+    db.find( "todos", {id: id} ).then( function ( todos ) {
         res.set( {
             'Content-Type': 'application/json',
             'Pragma': 'no-cache'
         });
-        if( tasks.length > 0) {
+        if( todos.length > 0) {
             res.status( 200 );
-            res.send( JSON.stringify( tasks[0], null, 4 ) );
+            res.send( JSON.stringify( todos[0], null, 4 ) );
         } else {
             res.status( 404 );
             res.send("");
@@ -88,23 +88,23 @@ var taskDetailHandler = function(req, res) {
     } );
 };
 
-var taskEditHandler = function(req, res) {
+var todoEditHandler = function(req, res) {
     var id = parseInt(req.param("id"), 10 ),
-        taskStatus = req.param("status"),
+        todoStatus = req.param("status"),
         name = req.param("name");
-    db.find( "tasks", {id: id} ).then( function ( tasks ) {
-        var task;
+    db.find( "todos", {id: id} ).then( function ( todos ) {
+        var todo;
         res.set( {
             'Content-Type': 'application/json',
             'Pragma': 'no-cache'
         });
-        if( tasks.length > 0) {
-            task = tasks[0];
-            task.status = taskStatus;
-            task.name = name;
-            db.save("tasks", task.id, task ).then(function() {
+        if( todos.length > 0) {
+            todo = todos[0];
+            todo.status = todoStatus;
+            todo.name = name;
+            db.save("todos", todo.id, todo ).then(function() {
                 res.status( 200 );
-                res.send( JSON.stringify( task, null, 4 ) );
+                res.send( JSON.stringify( todo, null, 4 ) );
             });
 
         } else {
@@ -115,26 +115,26 @@ var taskEditHandler = function(req, res) {
 };
 
 
-exports.taskHandler = {
-    'path' : 'tasks',
+exports.todoHandler = {
+    'path' : 'todos',
     'verb' : 'get',
-    'route': taskHandler
+    'route': todoHandler
 };
 
-exports.taskDetailHandler = {
-    'path' : "tasks/:id",
+exports.todoDetailHandler = {
+    'path' : "todos/:id",
     'verb' : 'get',
-    'route': taskDetailHandler
+    'route': todoDetailHandler
 };
 
-exports.taskEditHandler = {
-    'path' : "tasks/:id",
+exports.todoEditHandler = {
+    'path' : "todos/:id",
     'verb' : 'put',
-    'route': taskEditHandler
+    'route': todoEditHandler
 };
 
-exports.taskCreator = {
-    'path' : 'tasks',
+exports.todoCreator = {
+    'path' : 'todos',
     'verb' : 'post',
-    'route': taskCreator
+    'route': todoCreator
 };

@@ -1,5 +1,5 @@
 {
-    "name" : "Task Manager",
+    "name" : "TODOs",
     "appPath" : "{{{TILE_NAME}}}",
     "id": "{{{GENERATED_UUID}}}"
 }

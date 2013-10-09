@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+    <ModulePrefs title="Todo Example"
+                 author="Jive Software"
+                 description="Example Todo Manager">
+        <Require feature="jquery-1.6"/>
+        <Require feature="osapi"/>
+        <Require feature="opensocial-data"/>
+        <Require feature="jive-core-v3"/>
+        <Require feature="jive-core-v3-resolver"/>
+        <Require feature="actions">
+            <Param name="action-contributions">
+                <![CDATA[
+            <!--
+                Top level create todo from the header bar.
+            -->
+            <action id="com.jivesoftware.example.todo.createModalNav"
+                    path="jive/actions/navmenu"
+                    label="Create Todo"
+                    view="createTodo"/>
+             <!--
+                Add a configuration option to the project settings page.
+             -->
+            <action id="com.jivesoftware.example.todo.configproject"
+                  path="jive/settings/places/project"
+                  label="Todo Management"
+                  view="config_project" />
+
+            <!--
+                If todo is enabled from the project settings page (see above)
+                Show a tab on the project page
+            -->
+            <action id="com.jivesoftware.example.todo.projecttab"
+                  path="jive/tabs/places/project?filter=equals(context.extprops.todo,true)"
+                  label="Manage Todos"
+                  view="todoList"/>
+
+            <!--
+                Add an action to the Actions menu on the project place conditionally
+                based on the setting on the project settings page.
+            -->
+            <action id="com.jivesoftware.example.todo.createTodoProject"
+                    path="jive/actions/places/project?filter=equals(context.extprops.todo,true)"
+                    label="Create Todo"
+                    view="createTodo"/>
+
+            <!--
+                Add a tab to the actions section of the inbox.
+            -->
+            <action id="com.jivesoftware.example.todo.managePersonalTodos"
+                    path="jive/tabs/actions"
+                    label="Manage My Todos"
+                    view="todoList"/>
+
+            <!--
+                Add an option on the More dropdown on a user's profile.
+            -->
+            <action id="com.jivesoftware.example.todo.manageOthersPersonalTodos"
+                    path="jive/tabs/profile"
+                    label="View User's Todos"
+                    view="todoList"/>
+            ]]>
+
+            </Param>
+        </Require>
+    </ModulePrefs>
+
+    <!--
+        The todo list.  When this is viewed via the project tab, it will only show
+        todos for the current project.  If it is viewed from the quick launch,
+        it will show todos for all projects.
+    -->
+    <Content type="html" href="todos.html" />
+    <Content type="html" view="todoList" href="todos.html" preferred_height="570" preferred_width="650"/>
+
+    <!--
+        Create a todo in the current project.
+    -->
+    <Content type="html" view="createTodo" href="createTodo.html" preferred_height="570" preferred_width="650"/>
+
+    <!--
+        View or edit an exiting todo.
+    -->
+    <Content type="html" view="todoDetail" href="todoDetail.html" preferred_height="570" preferred_width="650"/>
+
+    <!--
+        This is the page that will appear on the project settings
+        page.
+    -->
+    <Content type="html" view="config_project" href="configureProject.html" preferred_height="570" preferred_width="650"/>
+</Module>
