@@ -470,6 +470,18 @@ exports.fsTemplateCopy = function( source, target, substitutions ) {
     }
 };
 
+exports.fsTemplateWrite = function( data, target, substitutions ) {
+    var ext = getExtension(target);
+    if ( !ext || supportedTemplatableExtensions.indexOf( ext.toLowerCase() ) < 0 ) {
+        jive.logger.debug(target + ' is not a supported templatable file type. Doing straight write ->', target );
+        return exports.fswrite( data, target );
+    } else {
+        jive.logger.debug('Templatized write ->', target );
+        var processed = mustache.render(data, substitutions || {} );
+        return exports.fswrite(processed, target);
+    }
+};
+
 exports.fsTemplateRead = function( source, substitutions ) {
     return exports.fsread(source).then( function( data ) {
         var raw = data.toString();

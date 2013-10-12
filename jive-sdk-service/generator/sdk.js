@@ -61,6 +61,26 @@ var conditionalMkdir = function(target, force) {
     });
 };
 
+function mergeRecursive(original, newcommer) {
+
+    for (var p in newcommer) {
+        try {
+            if ( newcommer[p].constructor==Object ) {
+                original[p] = mergeRecursive(original[p], newcommer[p]);
+
+            } else {
+                if ( !original[p] )
+                    original[p] = newcommer[p];
+            }
+
+        } catch(e) {
+            original[p] = newcommer[p];
+
+        }
+    }
+    return original;
+}
+
 function processExample(target, example, name, force) {
     console.log('Preparing example ', example, target );
 
@@ -93,10 +113,11 @@ function processExample(target, example, name, force) {
         });
     };
 
-    return jive.util.recursiveCopy(root + '/base', target, force, {
-        'TILE_NAME': example,
+    var baseSubstitutions = {
+        'TILE_NAME': name,
         'host': '{{{host}}}'
-    }).then( function() {
+    };
+    return jive.util.recursiveCopy(root + '/base', target, force, baseSubstitutions).then( function() {
         var promises = [];
         var sourceRootDir = root + '/examples/' + example;
             return jive.util.fsreaddir(sourceRootDir).then( function(subDirs) {
@@ -107,11 +128,29 @@ function processExample(target, example, name, force) {
                     if ( isDir ) {
                         return processSubRoot( sourceSubRoot, targetSubRoot );
                     } else {
-                        return jive.util.fsexists( sourceSubRoot).then( function(exists) {
+                        return jive.util.fsexists( targetSubRoot ).then( function(exists) {
                             if ( !exists || force === 'true' ) {
-                                return jive.util.fscopy( sourceSubRoot, targetSubRoot );
+                                return jive.util.fsTemplateCopy( sourceSubRoot, targetSubRoot, baseSubstitutions);
                             } else {
-                                return q.resolve();
+                                if ( !force ) {
+                                    // it exists, but force is not specified
+                                    // try to merge if .json object
+                                    var extension = path.extname(sourceSubRoot);
+                                    if ( extension && extension.toLowerCase() === '.json' ) {
+//                                        console.log("Merging", sourceSubRoot, 'and', targetSubRoot);
+                                        return jive.util.fsreadJson( targetSubRoot).then( function(originJson) {
+                                            return jive.util.fsreadJson( sourceSubRoot ).then( function(incomingJson) {
+                                                var merged = mergeRecursive(originJson, incomingJson);
+                                                var mergedTxt = JSON.stringify(merged, null, 4);
+                                                return jive.util.fsTemplateWrite( mergedTxt, targetSubRoot, baseSubstitutions);
+                                            });
+                                        });
+                                    } else {
+                                        return q.resolve();
+                                    }
+                                } else {
+                                    return q.resolve();
+                                }
                             }
                         });
                     }
