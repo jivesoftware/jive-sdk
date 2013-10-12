@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module specificationVersion="1">
-  <ModulePrefs title="Wikipedia {{{TILE_NAME}}}"
+  <ModulePrefs title="Wikipedia"
                description="Inserts links to Wikipedia"
                author="Erskine Williams"
                author_affiliation="Jive Software"

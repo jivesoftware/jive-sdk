@@ -65,51 +65,61 @@ function processExample(target, example, name, force) {
     console.log('Preparing example ', example, target );
 
     var root = __dirname;
-
-    var promises = [];
-
-    // copy base
-    promises.push(
-        jive.util.recursiveCopy(root + '/base', target, force, {
-            'TILE_NAME': example,
-            'host': '{{{host}}}'
-        } )
-    );
-
     var uniqueUUID = jive.util.guid();
 
-    promises.push(
-        jive.util.recursiveCopy(root + '/examples/' + example, target, force, {
-            'TILE_NAME': name,
-            'GENERATED_UUID' : uniqueUUID,
-            'host': '{{{host}}}'
-        } )
-    );
+    var processSubRoot = function( sourceSubRoot, targetSubRoot ){
 
-    function renameResources(srcRoot, targetRoot) {
-        return jive.util.fsexists(srcRoot).then(function (exists) {
-            if (exists) {
-                return q.all(promises).then(function () {
-                    var renamePromises = [];
-                    var p = q.nfcall(fs.readdir, srcRoot).then(function (subdirs) {
-                        subdirs.forEach(function (subdir) {
-                            var src = targetRoot + '/' + subdir;
-                            var tar = targetRoot + '/' + name;
-                            if (src !== tar) {
-                                renamePromises.push(jive.util.fsrename(src, tar, force));
+        return jive.util.fsexists(targetSubRoot).then( function(exists) {
+            return !exists ? jive.util.fsmkdir(targetSubRoot) : q.resolve();
+        }).then( function() {
+            return jive.util.fsreaddir(sourceSubRoot).then( function(subDirs) {
+                var promises = [];
+                if ( subDirs && subDirs['forEach'] ) {
+                    subDirs.forEach(function(subDir) {
+                        var sourceSubRootEntry = sourceSubRoot + '/' + subDir;
+                        var targetSubRootEntry = example === name ?
+                            targetSubRoot + '/' + subDir :
+                            targetSubRoot + '/' + name + '-' + subDir;
+
+                        promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, {
+                            'TILE_NAME': name,
+                            'GENERATED_UUID' : uniqueUUID,
+                            'host': '{{{host}}}'
+                        } ) );
+                    });
+                }
+                return q.all(promises);
+            });
+        });
+    };
+
+    return jive.util.recursiveCopy(root + '/base', target, force, {
+        'TILE_NAME': example,
+        'host': '{{{host}}}'
+    }).then( function() {
+        var promises = [];
+        var sourceRootDir = root + '/examples/' + example;
+            return jive.util.fsreaddir(sourceRootDir).then( function(subDirs) {
+            subDirs.forEach(function(subDir) {
+                var sourceSubRoot = sourceRootDir + '/' + subDir;
+                var targetSubRoot = target + '/' + subDir;
+                promises.push( jive.util.fsisdir(sourceSubRoot).then( function(isDir) {
+                    if ( isDir ) {
+                        return processSubRoot( sourceSubRoot, targetSubRoot );
+                    } else {
+                        return jive.util.fsexists( sourceSubRoot).then( function(exists) {
+                            if ( !exists || force === 'true' ) {
+                                return jive.util.fscopy( sourceSubRoot, targetSubRoot );
+                            } else {
+                                return q.resolve();
                             }
                         });
-                    });
-                    return q.all(renamePromises);
-                });
-            }
-            return q.resolve([]);
+                    }
+                }) );
+            });
+            return q.all(promises);
         });
-    }
-
-    return renameResources(root + '/examples/' + example + '/tiles', target + '/tiles').then( function() {
-        return renameResources( root + '/examples/' + example + '/apps', target + '/apps');
-    });
+    })
 }
 
 function processDefinition(target, type, name, style, force) {

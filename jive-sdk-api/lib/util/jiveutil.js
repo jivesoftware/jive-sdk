@@ -418,6 +418,19 @@ exports.fsrmdir = function(path) {
     return deferred.promise;
 };
 
+exports.fsisdir = function(path) {
+    var deferred = q.defer();
+
+    fs.stat(path, function(err, stats) {
+        if(err){
+            deferred.reject(err);
+        }
+        deferred.resolve( stats.isDirectory() );
+    });
+
+    return deferred.promise;
+};
+
 exports.fswrite = function(data, path ) {
     var deferred = q.defer();
 
