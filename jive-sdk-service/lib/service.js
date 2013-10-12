@@ -23,6 +23,8 @@ var express = require('express');
 var q = require('q');
 var bootstrap = require('./bootstrap');
 var definitionConfigurator = require('./definitionSetup');
+var osAppConfigurator = require('./appSetup');
+var serviceConfigurator = require('./serviceSetup');
 var jive = require('../api');
 var log4js = require('log4js');
 var mustache = require('mustache');
@@ -318,8 +320,12 @@ exports.autowire = function(definitionsToAutowire) {
         }
     } else {
         // assume autowiring everything
-        return definitionConfigurator.setupAllDefinitions(app, _dir( '/tiles', '/tiles')).then( function () {
-            return definitionConfigurator.setupAllApps( app, _dir( '/apps', '/apps'));
+        return definitionConfigurator.setupAllDefinitions(app, _dir( '/tiles', '/tiles'))
+        .then( function () {
+            return osAppConfigurator.setupAllApps( app, _dir( '/apps', '/apps'));
+        })
+        .then( function () {
+            return serviceConfigurator.setupAllServices( app, _dir( '/services', '/services'));
         });
     }
 };

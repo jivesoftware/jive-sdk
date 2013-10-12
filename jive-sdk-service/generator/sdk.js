@@ -215,6 +215,7 @@ function listDirectory(dirName, dirPath) {
 function finish(target) {
     var definitionsDir = target + '/tiles';
     var appsDir = target + '/apps';
+    var servicesDir = target + '/services';
 
     var configurationFile =  target + '/jiveclientconfiguration.json';
 
@@ -231,6 +232,15 @@ function finish(target) {
         return jive.util.fsexists( appsDir ).then( function(exists) {
             if ( exists ) {
                 return listDirectory('apps', appsDir);
+
+            } else {
+                return q.resolve();
+            }
+        });
+    }).then( function() {
+        return jive.util.fsexists( servicesDir ).then( function(exists) {
+            if ( exists ) {
+                return listDirectory('services', servicesDir);
 
             } else {
                 return q.resolve();
