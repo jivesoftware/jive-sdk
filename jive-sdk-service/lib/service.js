@@ -468,7 +468,9 @@ exports.getExpandedTileDefinitions = function(all) {
             processedTile['id'] = '{{{definition_id}}}';
         }
 
-        processedTile.description += ' for ' + conf.clientId;
+        if (conf.clientId) {
+            processedTile.description += ' for ' + conf.clientId;
+        }
         processed.push( processedTile );
     });
     return processed;

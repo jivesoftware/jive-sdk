@@ -145,6 +145,23 @@ var setupHttp = function(app, rootDir, options) {
     return deferred.promise;
 };
 
+var getSDKVersion = function() {
+    var sdkPackagePath = __dirname + '/../../package.json';
+    return jive.util.fsexists( sdkPackagePath ).then( function(exists) {
+        if ( exists ) {
+            return jive.util.fsreadJson( sdkPackagePath ).then( function(packageContents) {
+                if ( packageContents ) {
+                    return packageContents['version'];
+                } else {
+                    return nul;
+                }
+            });
+        } else {
+            return null;
+        }
+    });
+};
+
 /**
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
@@ -166,8 +183,13 @@ exports.start = function( app, options, rootDir, tilesDir, appsDir) {
     return setupScheduler()
         .then( function() { return setupHttp(app, rootDir, options) })
         .then( function() { return extension.prepare(tilesDir, appsDir) })
-        .then( function() {
+        .then( function() { return jive.util.fsexists( __dirname + '/../../package.json') })
+        .then( function() { return getSDKVersion() })
+        .then( function(sdkVersion) {
             jive.logger.info("Bootstrap complete.");
+            if ( sdkVersion ) {
+                jive.logger.info( "Jive SDK version " + sdkVersion );
+            }
             jive.logger.info("Started service in ", service.options.role || 'self-contained', "mode");
             jive.events.emit("serviceBootstrapped");
         });
