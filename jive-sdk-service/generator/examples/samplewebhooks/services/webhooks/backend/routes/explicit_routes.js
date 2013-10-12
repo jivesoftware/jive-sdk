@@ -45,7 +45,7 @@ exports.postWebhooks = {
 
                 toAppend += '<br>\n';
 
-                fs.appendFile('webhooks.log', toAppend, function(err) {
+                require('fs').appendFile('webhooks.log', toAppend, function(err) {
                     console.log(err);
                 });
             });
