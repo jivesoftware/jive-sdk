@@ -164,7 +164,7 @@ function processDefinition(target, type, name, style, force) {
 }
 
 function listDirectory(dirName, dirPath) {
-    console.log('Contents of ' + dirName + ' directory (', dirPath, '):\n' );
+    console.log('\nContents of ' + dirName + ' directory (', dirPath, '):\n' );
 
     return q.nfcall(fs.readdir, dirPath ).then(function(dirContents){
         dirContents.forEach(function(item) {
