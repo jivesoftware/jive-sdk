@@ -442,7 +442,7 @@ exports.getExpandedTileDefinitions = function(all) {
             }
         }
         if ( !processedTile['config'] ) {
-            processedTile['config'] = host + '/' + name + '/configure';
+            processedTile['config'] = host + '/' + processedTile['definitionDirName'] + '/configure';
         } else {
             if ( processedTile['config'].indexOf('http') != 0 ) {
                 // assume its relative to host then

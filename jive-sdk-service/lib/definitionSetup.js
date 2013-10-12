@@ -263,8 +263,10 @@ exports.setupDefinitionMetadata = function(definitionPath) {
     return fsexists(definitionPath).then( function(exists) {
         if ( exists ) {
             return q.nfcall( fs.readFile, definitionPath).then( function(data ) {
+                var definitionDirName = path.basename( path.dirname( definitionPath ) );
                 var definition = JSON.parse(data);
                 definition.id = definition.id === '{{{definition_id}}}' ? null : definition.id;
+                definition['definitionDirName'] = definitionDirName;
                 return definition;
             }).then( function( definition ) {
                 var apiToUse = definition['style'] === 'ACTIVITY' ?  jive.extstreams.definitions : jive.tiles.definitions;

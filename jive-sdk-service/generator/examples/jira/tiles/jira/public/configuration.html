@@ -61,9 +61,11 @@
 <script src="{{{host}}}/javascripts/bootstrap.min.js"></script>
 <script src="{{{host}}}/{{{TILE_NAME}}}/configuration.js"></script>
 <script>
+    {{=<% %>=}}
     jive.tile.onOpen(function(config, options) {
         initialize(config, options, "{{{host}}}", "{{{jira_host}}}");
     });
+    <%={{ }}=%>
 </script>
 </body>
 </html>

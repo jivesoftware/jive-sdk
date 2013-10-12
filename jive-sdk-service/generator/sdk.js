@@ -77,12 +77,12 @@ function processExample(target, example, name, force) {
                 if ( subDirs && subDirs['forEach'] ) {
                     subDirs.forEach(function(subDir) {
                         var sourceSubRootEntry = sourceSubRoot + '/' + subDir;
-                        var targetSubRootEntry = example === name ?
-                            targetSubRoot + '/' + subDir :
-                            targetSubRoot + '/' + name + '-' + subDir;
+                        var tileName = subDirs.length > 1 ? subDir : name;
+                        var targetSubRootEntry =
+                            targetSubRoot + '/' + tileName;
 
                         promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, {
-                            'TILE_NAME': name,
+                            'TILE_NAME': tileName,
                             'GENERATED_UUID' : uniqueUUID,
                             'host': '{{{host}}}'
                         } ) );
