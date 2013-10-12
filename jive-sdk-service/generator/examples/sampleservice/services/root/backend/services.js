@@ -10,7 +10,7 @@ exports.task = new jive.tasks.build(
     1000
 );
 
-exports.onBootstrap = function() {
+exports.onBootstrap = function(app) {
     jive.logger.info("This should have run on service bootstrap!");
 };
 

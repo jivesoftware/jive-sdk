@@ -1,0 +1,13 @@
+{
+    "sampleData" : {},
+    "unregister": "/unregister",
+    "displayName" : "Webhooks Tile Example",
+    "name" : "webhooks",
+    "description" : "Webhooks example tile.",
+    "style" : "ACTIVITY",
+    "icons" : {
+        "16" : "http://ctflyfishing.com/wp-content/uploads/2011/11/set-fishing-hook1.jpg",
+        "48" : "http://ctflyfishing.com/wp-content/uploads/2011/11/set-fishing-hook1.jpg",
+        "128" : "http://ctflyfishing.com/wp-content/uploads/2011/11/set-fishing-hook1.jpg"
+    }
+}

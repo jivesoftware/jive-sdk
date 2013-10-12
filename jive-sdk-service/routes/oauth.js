@@ -35,8 +35,12 @@ function getOAuth2Conf(jiveTenantID, self) {
     if ( jiveTenantID ) {
         jive.community.findByTenantID( jiveTenantID).then( function( community ) {
             if ( community ) {
-
-                var oauth2Conf = JSON.parse( JSON.stringify(self.fetchOAuth2Conf() ) );
+                try{
+                    var oauth2Conf = JSON.parse( JSON.stringify(self.fetchOAuth2Conf() || {} ) );
+                } catch ( e ) {
+                    deferred.reject(e);
+                    return;
+                }
                 oauth2Conf['oauth2ConsumerKey'] = community['clientId'];
                 oauth2Conf['oauth2ConsumerSecret'] = community['clientSecret'];
                 oauth2Conf['originServerAuthorizationUrl'] = community['jiveUrl'] + '/oauth2/authorize';

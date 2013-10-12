@@ -143,6 +143,16 @@ exports.setupServices = function( app, definitionName, svcDir, setupDefinitionEv
                     'Please choose a different definition name.');
             }
 
+
+            // do service bootstrap
+            jive.events.addLocalEventListener( "serviceBootstrapped", function() {
+                // bootstrap
+                if ( target['onBootstrap'] ) {
+                    jive.logger.debug("Bootstrapping " + definitionName + "...");
+                    target['onBootstrap'](app);
+                }
+            });
+
             // event handlers
             if (target.eventHandlers) {
                 target.eventHandlers.forEach(function (handlerInfo) {
@@ -202,15 +212,6 @@ exports.setupServices = function( app, definitionName, svcDir, setupDefinitionEv
                     // only attempt to schedule events after bootstrap is complete
                     jive.events.addLocalEventListener( "serviceBootstrapped", function() {
                         jive.context.scheduler.schedule(eventID, context, interval, undefined, undefined, timeout );
-                    });
-
-                    // do service bootstrap
-                    jive.events.addLocalEventListener( "serviceBootstrapped", function() {
-                        // bootstrap
-                        if ( target['onBootstrap'] ) {
-                            jive.logger.debug("Bootstrapping " + definitionName + "...");
-                            target['onBootstrap']();
-                        }
                     });
                 });
             }
