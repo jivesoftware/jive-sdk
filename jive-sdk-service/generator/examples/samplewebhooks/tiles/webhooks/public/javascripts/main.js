@@ -50,7 +50,7 @@ function doIt( host ) {
         oauth2SuccessCallback : oauth2SuccessCallback,
         preOauth2DanceCallback : preOauth2DanceCallback,
         onLoadCallback : onLoadCallback,
-        authorizeUrl : host + '/{{{TILE_NAME}}}/oauth/authorizeUrl'
+        authorizeUrl : host + '/oauth/authorizeUrl'
     };
 
     $("#btn_done").click( function() {

@@ -1,8 +1,0 @@
-{
-    "clientUrl": "http://localhost",
-    "port": "8090",
-
-    "oauth2-webhooks" :{
-        "clientOAuth2CallbackUrl" : "http://lt-a7-120000.jiveland.com:8090/{{{TILE_NAME}}}/oauth/oauth2Callback"
-    }
-}
