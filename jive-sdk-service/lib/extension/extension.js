@@ -99,7 +99,13 @@ function getApps(appsRootDir) {
                 dirContents.forEach(function(item) {
                     var definitionDir = appsRootDir + '/' + item + '/definition.json';
                     proms.push( jive.util.fsreadJson(definitionDir).then(function(app) {
+                        if ( !app['id'] ) {
+                            // generate an app ID if one is not provided
+                            app['id'] = jive.util.guid();
+                        }
+
                         if ( !app['appPath'] ) {
+                            // generate an app path if one is not provided
                             var temp = app['id'];
                             temp = temp.replace(/[^a-zA-Z 0-9]+/g,'');
                             app['appPath'] = temp;

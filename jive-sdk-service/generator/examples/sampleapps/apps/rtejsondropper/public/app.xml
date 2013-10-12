@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module specificationVersion="1">
+  <ModulePrefs title="RTE JSON Dropper"
+               description="Description of rtejsondropper"
+               author="Aron Racho"
+               author_affiliation="Jive Software"
+               author_email="aron.racho@jivesoftware.com">
+
+    <!-- Commonly used features -->
+    <Require feature="dynamic-height" />
+    <Require feature="jive-core-v3" />
+    <Require feature="jquery-1.6" />
+    <Require feature="osapi"/>
+    <Require feature="settitle"/>
+    <Require feature="views" />
+    <Require feature="setprefs"/>
+    <Require feature="embedded-experiences" />
+
+      <Require feature="actions">
+        <Param name="action-contributions">
+            <![CDATA[
+            <action id="com.jivesoftware.rte.dropper.json"
+                    path="jive/actions/rte"
+                    label="Drop JSON"
+                    view="embedded.json"
+		            icon="images/dropper-16x16.png"/>
+
+            <action id="com.jivesoftware.rte.dropper.html"
+                    path="jive/actions/rte"
+                    label="Drop HTML"
+                    view="embedded.html"
+		            icon="images/dropper-16x16.png"/>
+
+            <action id="com.jivesoftware.rte.dropper.actionMenu"
+		            path="jive/actions/content/*"
+		            label="Drop JSON"
+		            view="embedded.json"
+				    icon="images/dropper-16x16.png"/>
+            ]]>
+        </Param>
+    </Require>
+
+    <Require feature="selection" />
+
+    <!-- Icons: 3 sizes, 16x16, 48x48, 128x128 -->
+    <Link rel="Icon"       href="images/dropper-16x16.png" />
+    <Link rel="MediumIcon" href="images/dropper-48x48.png" />
+    <Link rel="LargeIcon"  href="images/dropper-128x128.png" />
+
+  </ModulePrefs>
+
+  <UserPref name="name" display_name="Your name" datatype="string" default_value="Joe" required="true"/>
+  <UserPref name="color" display_name="Your favorite color" datatype="string" default_value="Blue" required="true"/>
+
+
+<!-- Home view does not work in this app so don't include it
+  <Content type="html" view="home" href="home.html" preferred_height="400" />
+-->
+
+  <Content type="html" view="canvas" href="canvas.html" />
+  <Content type="html" view="embedded, embedded.json" href="drop_json.html" preferred_height="700" preferred_width="600"/>
+  <Content type="html" view="embedded.html" href="drop_html.html" preferred_height="250" preferred_width="600"/>
+
+</Module>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module specificationVersion="1">
+  <ModulePrefs title="Sizing Example"
+               description="Sizing App"
+               author="Aron Racho"
+               authoraffiliation="Jive Software"
+               authoremail="aron.racho@jivesoftware.com">
+
+    <!-- Commonly used features -->
+    <Require feature="dynamic-height" />
+    <Require feature="dynamic-width" />
+    <Require feature="jive-core-v2" />
+    <Require feature="jquery-1.6" />
+    <Require feature="osapi"/>
+    <Require feature="settitle"/>
+    <Require feature="views" />    
+<Require feature="setprefs" />
+    <Require feature="embedded-experiences"/>
+
+    <Require feature="actions">
+        <Param name="action-contributions">
+            <![CDATA[
+            <action id="com.jivesoftware.sizingexample.small.unized"
+                    path="jive/actions/rte"
+                    label="Small With Preference"
+                    view="embedded.smallunsized"
+            />
+            <action id="com.jivesoftware.sizingexample.medium.unsized"
+                    path="jive/actions/rte"
+                    label="Medium With Preference"
+                    view="embedded.mediumunsized"
+            />
+            <action id="com.jivesoftware.sizingexample.big.unized"
+                    path="jive/actions/rte"
+                    label="Big With Preference"
+                    view="embedded.bigunsized"
+            />
+
+
+            <action id="com.jivesoftware.sizingexample.small.sized"
+                    path="jive/actions/rte"
+                    label="Small Natural"
+                    view="embedded.smallsized"
+            />
+            <action id="com.jivesoftware.sizingexample.medium.sized"
+                    path="jive/actions/rte"
+                    label="Medium Natural"
+                    view="embedded.mediumsized"
+            />
+            <action id="com.jivesoftware.sizingexample.big.sized"
+                    path="jive/actions/rte"
+                    label="Big Natural"
+                    view="embedded.bigsized"
+            />
+
+            ]]>
+        </Param>
+    </Require>
+    <Require feature="selection" />
+
+  </ModulePrefs>
+
+  <UserPref name="key" display_name="key" datatype="string" default_value="default_value" required="true"/>
+  <UserPref name="dog" display_name="dog" datatype="string" default_value="fido" required="true"/>
+
+
+  <Content type="html" view="home,canvas" href="hello.html" preferred_height="200" />
+
+  <Content type="html" view="embedded.smallunsized" href="unsized.html"  preferred_height="100"  preferred_width="100"  />
+  <Content type="html" view="embedded.mediumunsized" href="unsized.html"  preferred_height="500"  preferred_width="500"  />
+  <Content type="html" view="embedded.bigunsized" href="unsized.html"  preferred_height="800"  preferred_width="800"  />
+
+  <Content type="html" view="embedded.smallsized" href="small.html" />
+  <Content type="html" view="embedded.mediumsized" href="medium.html" />
+  <Content type="html" view="embedded.bigsized" href="big.html" />
+
+</Module>

@@ -1,0 +1,20 @@
+textarea.selection {
+	width: 95%;
+}
+
+#incoming_selection {
+	height: 20%;
+}
+
+#incoming_embedded_context {
+	height: 20%;
+}
+
+#outgoing_selection, #outgoing_html {
+	height: 40%;
+}
+
+div.container {
+	margin-left: 10px;
+}
+
