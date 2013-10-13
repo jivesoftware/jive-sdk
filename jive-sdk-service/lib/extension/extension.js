@@ -70,9 +70,10 @@ exports.prepare = function(tilesDir, appsDir, cartridgesDir) {
 
 function fillExtensionMetadata(extensionInfo, definitions) {
 
-    var description = extensionInfo['description'] || extensionInfo['uuid'];
-    var name = extensionInfo['name'] || extensionInfo['uuid'];
+    var description = extensionInfo['description'];
+    var name = extensionInfo['name'];
     var type = 'client-app'; // by default
+    var id = extensionInfo['uuid'];
 
     var hasCartridges = definitions['jabCartridges'] && definitions['jabCartridges'].length > 0;
     var hasOsapps = definitions['osapps'] && definitions['osapps'].length > 0;
@@ -87,9 +88,62 @@ function fillExtensionMetadata(extensionInfo, definitions) {
         type = 'jab-cartridges-app';
     }
 
+    if (!name) {
+        // synthesize a reasonable name
+        name = "Add-on containing ";
+        var c = [];
+        if ( hasCartridges ) {
+            c.push('cartridge(s)');
+        }
+        if ( hasOsapps ) {
+            c.push('apps(s)');
+        }
+        if ( hasTiles ) {
+            c.push('tiles(s)');
+        }
+        name += c.join(', ').trim();
+    }
+
+    if (!description) {
+        description = '';
+        // synthesize a reasonable description
+        if ( hasCartridges ) {
+            var c = [];
+            definitions['jabCartridges'].forEach( function(cartridge) {
+                c.push(cartridge['name']);
+            });
+            description += 'Cartridges: [';
+            description += c.join(', ').trim();
+            description += '] ';
+        }
+
+        if ( hasTiles ) {
+            var c = [];
+            definitions['tiles'].forEach( function(tile) {
+                c.push(tile['name']);
+            });
+            description += 'Tiles: [';
+            description += c.join(', ').trim();
+            description += '] ';
+        }
+
+        if ( hasOsapps ) {
+            var c = [];
+            definitions['osapps'].forEach( function(osapp) {
+                c.push(osapp['name']);
+            });
+            description += 'Apps: [';
+            description += c.join(', ').trim();
+            description += '] ';
+        }
+
+        description = description.trim();
+        description = description.substring(0, description.length > 255 ? 255 : description.length );
+    }
+
     return {
         "package_version": extensionInfo['packageVersion'] || '1.0',
-        "id": extensionInfo['uuid'],
+        "id": id,
         "type": type,
         "name": name,
         "description": description,
