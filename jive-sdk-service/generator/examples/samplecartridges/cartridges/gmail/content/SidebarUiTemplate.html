@@ -1,0 +1,34 @@
+﻿<div class="moduleTitle">
+    {{if viewType == "relatedContainers"}}
+        The related discussions tab is not available for this cartridge.
+    {{else viewType == "global"}}
+        Select an email in order to see the entire discussion.
+    {{else viewType == "discussion"}}
+        The selected email has been identified as a Jive discussion. Click <b>View as email</b> to show original message.        
+    {{else viewType == "email"}}
+        {{if convertedDiscussions.length > 0}}
+            {{if convertedDiscussions.length > 1}}
+                The following <b>{{>convertedDiscussions.length}}</b> discussions has been converted from this email on <b>{{>communityName}}</b>:
+            {{else}}
+                The following discussion has been converted from this email on <b>{{>communityName}}</b>:
+            {{/if}}
+
+            {{if activeConnectionBackwardCompatible}}
+                <ul style="padding-top: 10px; padding-left: 20px; list-style-type: square; font-size: 12px;">
+                    {{for convertedDiscussions}}
+                        <li>
+                            <a class="ellipsis" style="width: 240px;" href="{{>#data}}" title="{{>#data}}" target="_blank">{{>#data}}</a>
+                        </li>
+                    {{/for}}
+                </ul>
+
+                <p style="padding-top: 30px; font-size: 11px;">
+                    The server of this community is using an old version of Extended APIs which can't display converted discussions natively on the sidebar.
+                    Please consider upgrading the server.
+                </p>
+            {{/if}}
+        {{else}}
+            There are no converted discsussion for this email on <b>{{>communityName}}</b>.
+        {{/if}}        
+    {{/if}}
+</div>

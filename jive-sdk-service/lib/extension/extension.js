@@ -31,7 +31,7 @@ exports.save = function(record) {
     return jive.service.persistence().save('jiveExtension', 'jiveExtension', record);
 };
 
-exports.prepare = function(tilesDir, appsDir) {
+exports.prepare = function(tilesDir, appsDir, cartridgesDir) {
     var extensionSrcDir = 'extension_src';
 
     return jive.util.fsexists(extensionSrcDir).then(function( exists ) {
@@ -68,18 +68,22 @@ exports.prepare = function(tilesDir, appsDir) {
                 }).then( function(definitions) {
                     return buildTemplates(tilesDir).then( function(templates ) {
                         return getApps(appsDir).then( function(apps) {
-                            console.log(JSON.stringify(apps, null, 4));
-                            var definitionsJson = {
-                                'integrationUser' : {
-                                    'systemAdmin' : extensionInfo['jiveServiceSignature'] ? true : false,
-                                    'jiveServiceSignature' : extensionInfo['jiveServiceSignature']
-                                },
-                                'tiles' : (definitions && definitions.length > 0) ? definitions : undefined,
-                                'templates' : templates,
-                                'osapps' : apps
-                            };
+                            return getCartridges(cartridgesDir, extensionSrcDir).then( function(cartridges) {
+//                                console.log(JSON.stringify(apps, null, 4));
+//                                console.log(JSON.stringify(cartridges, null, 4));
+                                var definitionsJson = {
+                                    'integrationUser' : {
+                                        'systemAdmin' : extensionInfo['jiveServiceSignature'] ? true : false,
+                                        'jiveServiceSignature' : extensionInfo['jiveServiceSignature']
+                                    },
+                                    'tiles' : (definitions && definitions.length > 0) ? definitions : undefined,
+                                    'templates' : templates,
+                                    'osapps' : apps,
+                                    'jabCartridges' : cartridges
+                                };
 
-                            return jive.util.fswrite( JSON.stringify(definitionsJson, null, 4), extensionSrcDir  + '/definition.json' );
+                                return jive.util.fswrite( JSON.stringify(definitionsJson, null, 4), extensionSrcDir  + '/definition.json' );
+                            });
                         });
 
                     });
@@ -121,7 +125,43 @@ function getApps(appsRootDir) {
             return apps;
         }
     });
+}
 
+function getCartridges(cartridgesRootDir, extensionSrcDir) {
+    var cartridges = [];
+    return jive.util.fsexists( cartridgesRootDir).then( function(exists) {
+        if ( exists ) {
+            return q.nfcall(fs.readdir, cartridgesRootDir).then(function(dirContents){
+                var proms = [];
+                dirContents.forEach(function(item) {
+                    var definitionDir = cartridgesRootDir + '/' + item + '/definition.json';
+                    var contentDir = cartridgesRootDir + '/' + item + '/content';
+                    proms.push( jive.util.fsreadJson(definitionDir).then(function(cartridge) {
+                        if ( !cartridge['name'] ) {
+                            // generate an cartidge name if one is not provided
+                            cartridge['name'] = jive.util.guid();
+                        }
+
+                        var zipFileName = cartridge['zipFileName'];
+                        if ( !zipFileName ) {
+                            zipFileName = cartridge['name'];
+                            zipFileName = zipFileName.replace(/[^\S]+/, '');
+                            zipFileName = zipFileName.replace(/[^a-zA-Z0-9]/, '-');
+                            zipFileName += '.zip';
+                        }
+
+                        var zipFile = extensionSrcDir + '/data/' + zipFileName;
+                        return jive.util.zipFolder( contentDir, zipFile).then( function() {
+                                return q.resolve(cartridge);
+                        })
+                    }) );
+                });
+                return q.all(proms);
+            });
+        } else {
+            return cartridges;
+        }
+    });
 }
 
 function buildTemplates(tilesDir) {

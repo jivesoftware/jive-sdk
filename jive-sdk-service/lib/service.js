@@ -33,6 +33,7 @@ var app;
 var rootDir = process.cwd();
 var tilesDir = rootDir + '/tiles';
 var osAppsDir = rootDir + '/apps';
+var cartridgesDir = rootDir + '/cartridges';
 
 var _dir = function(theDir, defaultDir ) {
     theDir = theDir || defaultDir;
@@ -364,7 +365,7 @@ exports.autowireDefinitionMetadata = function( definitionMetadataFile ) {
  * Return promise - fail or succeed
  */
 exports.start = function() {
-    return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir).then( function() {
+    return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir, cartridgesDir).then( function() {
         jive.logger.info("Service started in " + app['settings']['env'] + " mode");
     });
 };

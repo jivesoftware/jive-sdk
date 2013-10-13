@@ -1,0 +1,6 @@
+{
+    "name": "gmail_cartridge",
+    "displayName": "Gmail",
+    "patterns": ["mail.google.com/mail"],
+    "zipFileName":"gmail.zip"
+}

@@ -457,7 +457,7 @@ function getExtension(filename) {
 
 exports.fsTemplateCopy = function( source, target, substitutions ) {
     var ext = getExtension(source);
-    if ( !ext || supportedTemplatableExtensions.indexOf( ext.toLowerCase() ) < 0 ) {
+    if ( !ext || supportedTemplatableExtensions.indexOf( ext.toLowerCase() ) < 0 || !substitutions ) {
         jive.logger.debug(source + ' is not a supported templatable file type. Doing straight copying', source, '->', target );
         return exports.fscopy( source, target );
     } else {

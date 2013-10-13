@@ -87,7 +87,7 @@ function processExample(target, example, name, force) {
     var root = __dirname;
     var uniqueUUID = jive.util.guid();
 
-    var processSubRoot = function( sourceSubRoot, targetSubRoot ){
+    var processSubRoot = function( sourceSubRoot, targetSubRoot, doSubstitutions ){
 
         return jive.util.fsexists(targetSubRoot).then( function(exists) {
             return !exists ? jive.util.fsmkdir(targetSubRoot) : q.resolve();
@@ -101,11 +101,12 @@ function processExample(target, example, name, force) {
                         var targetSubRootEntry =
                             targetSubRoot + '/' + tileName;
 
-                        promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, {
+                        var substitutions = !doSubstitutions ? undefined : {
                             'TILE_NAME': tileName,
                             'GENERATED_UUID' : uniqueUUID,
                             'host': '{{{host}}}'
-                        } ) );
+                        };
+                        promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions ) );
                     });
                 }
                 return q.all(promises);
@@ -117,6 +118,7 @@ function processExample(target, example, name, force) {
         'TILE_NAME': name,
         'host': '{{{host}}}'
     };
+
     return jive.util.recursiveCopy(root + '/base', target, force, baseSubstitutions).then( function() {
         var promises = [];
         var sourceRootDir = root + '/examples/' + example;
@@ -126,7 +128,8 @@ function processExample(target, example, name, force) {
                 var targetSubRoot = target + '/' + subDir;
                 promises.push( jive.util.fsisdir(sourceSubRoot).then( function(isDir) {
                     if ( isDir ) {
-                        return processSubRoot( sourceSubRoot, targetSubRoot );
+                        var doSubstitutions = subDir != 'cartridges';
+                        return processSubRoot( sourceSubRoot, targetSubRoot, doSubstitutions );
                     } else {
                         return jive.util.fsexists( targetSubRoot ).then( function(exists) {
                             if ( !exists || force === 'true' ) {
@@ -216,6 +219,7 @@ function finish(target) {
     var definitionsDir = target + '/tiles';
     var appsDir = target + '/apps';
     var servicesDir = target + '/services';
+    var cartridgesDir = target + '/cartridges';
 
     var configurationFile =  target + '/jiveclientconfiguration.json';
 
@@ -232,6 +236,15 @@ function finish(target) {
         return jive.util.fsexists( appsDir ).then( function(exists) {
             if ( exists ) {
                 return listDirectory('apps', appsDir);
+
+            } else {
+                return q.resolve();
+            }
+        });
+    }).then( function() {
+        return jive.util.fsexists( cartridgesDir ).then( function(exists) {
+            if ( exists ) {
+                return listDirectory('cartridges', cartridgesDir);
 
             } else {
                 return q.resolve();
