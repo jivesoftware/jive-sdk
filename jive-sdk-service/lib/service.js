@@ -34,6 +34,7 @@ var rootDir = process.cwd();
 var tilesDir = rootDir + '/tiles';
 var osAppsDir = rootDir + '/apps';
 var cartridgesDir = rootDir + '/cartridges';
+var storagesDir = rootDir + '/storages';
 
 var _dir = function(theDir, defaultDir ) {
     theDir = theDir || defaultDir;
@@ -327,6 +328,9 @@ exports.autowire = function(definitionsToAutowire) {
         })
         .then( function () {
             return serviceConfigurator.setupAllServices( app, _dir( '/services', '/services'));
+        })
+        .then( function () {
+            return serviceConfigurator.setupAllServices( app, _dir( '/storages', '/storages'));
         });
     }
 };
@@ -365,7 +369,7 @@ exports.autowireDefinitionMetadata = function( definitionMetadataFile ) {
  * Return promise - fail or succeed
  */
 exports.start = function() {
-    return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir, cartridgesDir).then( function() {
+    return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir, cartridgesDir, storagesDir).then( function() {
         jive.logger.info("Service started in " + app['settings']['env'] + " mode");
     });
 };

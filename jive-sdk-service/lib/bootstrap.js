@@ -166,7 +166,7 @@ var getSDKVersion = function() {
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
  */
-exports.start = function( app, options, rootDir, tilesDir, appsDir, cartridgesDir) {
+exports.start = function (app, options, rootDir, tilesDir, appsDir, cartridgesDir, storagesDir) {
     if ( alreadyBootstrapped ) {
         return q.fcall( function() {
             jive.logger.warn('Already bootstrapped, skipping.');
@@ -182,7 +182,7 @@ exports.start = function( app, options, rootDir, tilesDir, appsDir, cartridgesDi
 
     return setupScheduler()
         .then( function() { return setupHttp(app, rootDir, options) })
-        .then( function() { return extension.prepare(tilesDir, appsDir, cartridgesDir) })
+        .then( function() { return extension.prepare(tilesDir, appsDir, cartridgesDir, storagesDir) })
         .then( function() { return jive.util.fsexists( __dirname + '/../../package.json') })
         .then( function() { return getSDKVersion() })
         .then( function(sdkVersion) {

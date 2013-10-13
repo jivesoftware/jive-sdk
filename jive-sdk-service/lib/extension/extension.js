@@ -34,7 +34,7 @@ exports.save = function(record) {
     return jive.service.persistence().save('jiveExtension', 'jiveExtension', record);
 };
 
-exports.prepare = function(tilesDir, appsDir, cartridgesDir) {
+exports.prepare = function (tilesDir, appsDir, cartridgesDir, storagesDir) {
     var extensionSrcDir = 'extension_src';
 
     return jive.util.fsexists(extensionSrcDir).then(function( exists ) {
@@ -50,6 +50,7 @@ exports.prepare = function(tilesDir, appsDir, cartridgesDir) {
                     tilesDir,
                     appsDir,
                     cartridgesDir,
+                    storagesDir,
                     extensionSrcDir,
                     extensionInfo,
                     definitions
@@ -170,32 +171,60 @@ function getTileDefinitions() {
     return q.all([ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ]).then(finalizeRequest);
 }
 
-function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, extensionSrcDir, extensionInfo, definitions) {
+function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, extensionSrcDir, extensionInfo, definitions) {
     return buildTemplates(tilesDir).then(function (templates) {
         return getApps(appsDir).then(function (apps) {
-            return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
+            return getStorages(storagesDir).then(function (storages) {
+                return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
 
-                jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
-                jive.logger.debug("cartridges:\n" + JSON.stringify(cartridges, null, 4));
+                    jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
+                    jive.logger.debug("cartridges:\n" + JSON.stringify(cartridges, null, 4));
 
-                var definitionsJson = {
-                    'integrationUser': {
-                        'systemAdmin': extensionInfo['jiveServiceSignature'] ? true : false,
-                        'jiveServiceSignature': extensionInfo['jiveServiceSignature']
-                    },
-                    'tiles': (definitions && definitions.length > 0) ? definitions : undefined,
-                    'templates': templates,
-                    'osapps': apps,
-                    'jabCartridges': cartridges
-                };
+                    var definitionsJson = {
+                        'integrationUser': {
+                            'systemAdmin': extensionInfo['jiveServiceSignature'] ? true : false,
+                            'jiveServiceSignature': extensionInfo['jiveServiceSignature']
+                        },
+                        'tiles': (definitions && definitions.length > 0) ? definitions : undefined,
+                        'templates': templates,
+                        'osapps': apps,
+                        'storageDefinitions': storages,
+                        'jabCartridges': cartridges
+                    };
 
-                var definitionJsonPath = extensionSrcDir + '/definition.json';
-                return jive.util.fswrite(JSON.stringify(definitionsJson, null, 4), definitionJsonPath).then( function() {
-                    return definitionsJson;
-                })
+                    var definitionJsonPath = extensionSrcDir + '/definition.json';
+                    return jive.util.fswrite(JSON.stringify(definitionsJson, null, 4), definitionJsonPath).then( function() {
+                        return definitionsJson;
+                    })
+                });
             });
         });
 
+    });
+}
+
+function getStorages(storagesDir) {
+    var storages = [];
+    return jive.util.fsexists( storagesDir).then( function(exists) {
+        if ( exists ) {
+            return q.nfcall(fs.readdir, storagesDir).then(function(dirContents){
+                var proms = [];
+                dirContents.forEach(function(item) {
+                    var definitionDir = storagesDir + '/' + item + '/definition.json';
+                    proms.push( jive.util.fsreadJson(definitionDir).then(function(storage){
+                        if ( !storage['name'] ) {
+                            // generate a storage name if one is not provided
+                            storage['name'] = jive.util.guid();
+                        }
+
+                        return storage;
+                    }) );
+                });
+                return q.all(proms);
+            });
+        } else {
+            return storages;
+        }
     });
 }
 

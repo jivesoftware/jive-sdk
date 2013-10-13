@@ -217,6 +217,7 @@ function finish(target) {
     var definitionsDir = target + '/tiles';
     var appsDir = target + '/apps';
     var servicesDir = target + '/services';
+    var storagesDir = target + '/storages';
     var cartridgesDir = target + '/cartridges';
 
     var configurationFile =  target + '/jiveclientconfiguration.json';
@@ -252,6 +253,15 @@ function finish(target) {
         return jive.util.fsexists( servicesDir ).then( function(exists) {
             if ( exists ) {
                 return listDirectory('services', servicesDir);
+
+            } else {
+                return q.resolve();
+            }
+        });
+    }).then( function() {
+        return jive.util.fsexists( storagesDir ).then( function(exists) {
+            if ( exists ) {
+                return listDirectory('storages', storagesDir);
 
             } else {
                 return q.resolve();
