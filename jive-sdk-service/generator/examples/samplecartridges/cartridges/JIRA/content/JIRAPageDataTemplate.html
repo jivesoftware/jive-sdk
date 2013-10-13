@@ -1,0 +1,48 @@
+<div style="display: inline-block; background-color: white; padding: 7px; border: 1px solid gray; box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.18);">
+    <div style="margin-bottom: 10px;">
+        <h3><a href="{{>url}}" target="_blank">[{{>defectId}}] {{>defectTitle}}</a></h3>
+    </div>
+
+    <table style="border: 0px solid #CCC; border-collapse: collapse;">
+        <tr>
+            <td style="text-align: right; vertical-align: top;">
+                <strong>Project:</strong>
+            </td>
+            <td style="padding-left: 10px; min-width: 250px; vertical-align: top;">
+                <a href="{{>projectUrl}}" target="_blank">{{>projectName}}</a>
+            </td>           
+        </tr>
+        <tr>
+            <td style="text-align: right; vertical-align: top;">
+                <strong>Type:</strong>
+            </td>
+            <td style="padding-left: 10px; min-width: 250px; vertical-align: top;">
+                {{>defectType}}
+            </td>           
+        </tr>
+        <tr>
+            <td style="text-align: right; vertical-align: top;">
+                <strong>Status:</strong>
+            </td>
+            <td style="padding-left: 10px; min-width: 250px; vertical-align: top;">
+                {{>status}}
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right; vertical-align: top;">
+                <strong>Priority:</strong>
+            </td>
+            <td style="padding-left: 10px; min-width: 250px; vertical-align: top;">
+                {{>priority}}
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: right; vertical-align: top;">
+                <strong>Resolution:</strong>
+            </td>
+            <td style="padding-left: 10px; min-width: 250px; vertical-align: top;">
+                {{>resolution}}
+            </td>
+        </tr>
+    </table>
+</div>
