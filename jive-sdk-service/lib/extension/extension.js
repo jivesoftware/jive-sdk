@@ -18,6 +18,9 @@ var fs = require('fs'),
     q  = require('q'),
     jive  = require('../../api');
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// public
+
 exports.find = function() {
     return jive.service.persistence().find( 'jiveExtension', { 'id' : 'jiveExtension' } ).then( function( records ) {
         if ( records && records.length > 0 ) {
@@ -35,64 +38,112 @@ exports.prepare = function(tilesDir, appsDir, cartridgesDir) {
     var extensionSrcDir = 'extension_src';
 
     return jive.util.fsexists(extensionSrcDir).then(function( exists ) {
-           if ( !exists ) jive.util.fsmkdir( extensionSrcDir)
-        }).then( function() {
-            return getPersistedExtensionInfo(jive.service.options['extensionInfo'] || {});
-        }).then( function(extensionInfo) {
-            var meta = {
-                "package_version": extensionInfo['packageVersion'] || '1.0',
-                "id": extensionInfo['uuid'],
-                "type": "client-app",
-                "name": extensionInfo['name'] || extensionInfo['uuid'],
-                "description": extensionInfo['description'] || extensionInfo['uuid'],
-                "minimum_version": extensionInfo['minJiveVersion'] || '0000',
-                "icon_16": "extension-16.png",
-                "icon_48": "extension-48.png",
-                "icon_128": "extension-128.png",
-                "status": "available",
-                "released_on": "2013-03-08T19:11:11.234Z", // xxx todo
-                "register_url": jive.service.serviceURL() + "/jive/oauth/register",
-                "service_url": jive.service.serviceURL(),
-                "redirect_url": extensionInfo['redirectURL'] || jive.service.serviceURL()
-            };
-            return jive.util.fswrite( JSON.stringify(meta, null, 4), extensionSrcDir  + '/meta.json' )
-                .then( function() {
-                    return jive.util.recursiveCopy( __dirname + "/template", extensionSrcDir, false );
-                }).then( function() {
-                    var finalizeRequest = function(allDefinitions) {
-                        var toReturn = [];
-                        allDefinitions.forEach( function(batch) { toReturn = toReturn.concat(batch ); });
-                        return q.resolve( jive.service.getExpandedTileDefinitions(toReturn) );
-                    };
-                    return q.all( [ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ] ).then(finalizeRequest);
-                }).then( function(definitions) {
-                    return buildTemplates(tilesDir).then( function(templates ) {
-                        return getApps(appsDir).then( function(apps) {
-                            return getCartridges(cartridgesDir, extensionSrcDir).then( function(cartridges) {
-//                                console.log(JSON.stringify(apps, null, 4));
-//                                console.log(JSON.stringify(cartridges, null, 4));
-                                var definitionsJson = {
-                                    'integrationUser' : {
-                                        'systemAdmin' : extensionInfo['jiveServiceSignature'] ? true : false,
-                                        'jiveServiceSignature' : extensionInfo['jiveServiceSignature']
-                                    },
-                                    'tiles' : (definitions && definitions.length > 0) ? definitions : undefined,
-                                    'templates' : templates,
-                                    'osapps' : apps,
-                                    'jabCartridges' : cartridges
-                                };
-
-                                return jive.util.fswrite( JSON.stringify(definitionsJson, null, 4), extensionSrcDir  + '/definition.json' );
-                            });
-                        });
-
-                    });
-                })
-        }).then( function() {
-            // zip it all
-            return jive.util.zipFolder( extensionSrcDir, 'extension.zip' );
-        });
+        if ( !exists ) jive.util.fsmkdir( extensionSrcDir)
+    }).then( function() {
+        return getPersistedExtensionInfo(jive.service.options['extensionInfo'] || {});
+    }).then( function(extensionInfo) {
+        return jive.util.recursiveCopy( __dirname + "/template", extensionSrcDir, false)
+            .then( function() {
+                return getTileDefinitions();
+            }).then( function(definitions) {
+                return setupExtensionDefinitionJson(
+                    tilesDir,
+                    appsDir,
+                    cartridgesDir,
+                    extensionSrcDir,
+                    extensionInfo,
+                    definitions
+                ).then( function(definitionsJson) {
+                    // persist the extension metadata
+                    var meta = fillExtensionMetadata(extensionInfo, definitionsJson);
+                    return jive.util.fswrite( JSON.stringify(meta, null, 4), extensionSrcDir  + '/meta.json' );
+                });
+            });
+    }).then( function() {
+        // zip it all
+        return jive.util.zipFolder( extensionSrcDir, 'extension.zip' );
+    });
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// private
+
+function fillExtensionMetadata(extensionInfo, definitions) {
+
+    var description = extensionInfo['description'] || extensionInfo['uuid'];
+    var name = extensionInfo['name'] || extensionInfo['uuid'];
+    var type = 'client-app'; // by default
+
+    var hasCartridges = definitions['jabCartridges'] && definitions['jabCartridges'].length > 0;
+    var hasOsapps = definitions['osapps'] && definitions['osapps'].length > 0;
+    var hasTiles = definitions['tiles'] && definitions['tiles'].length > 0;
+    var hasTemplates = definitions['templates'] && definitions['templates'].length > 0;
+
+    if ( hasCartridges && (hasOsapps || hasTiles || hasTemplates ) ) {
+        throw Error("Extension cannot contain Jive Anywhere cartridges and other types.");
+    }
+
+    if ( hasCartridges ) {
+        type = 'jab-cartridges-app';
+    }
+
+    return {
+        "package_version": extensionInfo['packageVersion'] || '1.0',
+        "id": extensionInfo['uuid'],
+        "type": type,
+        "name": name,
+        "description": description,
+        "minimum_version": extensionInfo['minJiveVersion'] || '0000',
+        "icon_16": "extension-16.png",
+        "icon_48": "extension-48.png",
+        "icon_128": "extension-128.png",
+        "status": "available",
+        "released_on": "2013-03-08T19:11:11.234Z", // xxx todo
+        "register_url": jive.service.serviceURL() + "/jive/oauth/register",
+        "service_url": jive.service.serviceURL(),
+        "redirect_url": extensionInfo['redirectURL'] || jive.service.serviceURL()
+    };
+}
+
+function getTileDefinitions() {
+    var finalizeRequest = function (allDefinitions) {
+        var toReturn = [];
+        allDefinitions.forEach(function (batch) {
+            toReturn = toReturn.concat(batch);
+        });
+        return q.resolve(jive.service.getExpandedTileDefinitions(toReturn));
+    };
+    return q.all([ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ]).then(finalizeRequest);
+}
+
+function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, extensionSrcDir, extensionInfo, definitions) {
+    return buildTemplates(tilesDir).then(function (templates) {
+        return getApps(appsDir).then(function (apps) {
+            return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
+
+                jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
+                jive.logger.debug("cartridges:\n" + JSON.stringify(cartridges, null, 4));
+
+                var definitionsJson = {
+                    'integrationUser': {
+                        'systemAdmin': extensionInfo['jiveServiceSignature'] ? true : false,
+                        'jiveServiceSignature': extensionInfo['jiveServiceSignature']
+                    },
+                    'tiles': (definitions && definitions.length > 0) ? definitions : undefined,
+                    'templates': templates,
+                    'osapps': apps,
+                    'jabCartridges': cartridges
+                };
+
+                var definitionJsonPath = extensionSrcDir + '/definition.json';
+                return jive.util.fswrite(JSON.stringify(definitionsJson, null, 4), definitionJsonPath).then( function() {
+                    return definitionsJson;
+                })
+            });
+        });
+
+    });
+}
 
 function getApps(appsRootDir) {
     var apps = [];

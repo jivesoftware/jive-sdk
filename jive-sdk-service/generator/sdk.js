@@ -87,12 +87,11 @@ function processExample(target, example, name, force) {
     var root = __dirname;
     var uniqueUUID = jive.util.guid();
 
-    var processSubRoot = function( sourceSubRoot, targetSubRoot, doSubstitutions ){
-
+    var processSubRootFolder = function( sourceSubRoot, targetSubRoot, doSubstitutions ){
         return jive.util.fsexists(targetSubRoot).then( function(exists) {
             return !exists ? jive.util.fsmkdir(targetSubRoot) : q.resolve();
         }).then( function() {
-            return jive.util.fsreaddir(sourceSubRoot).then( function(subDirs) {
+                return jive.util.fsreaddir(sourceSubRoot).then( function(subDirs) {
                 var promises = [];
                 if ( subDirs && subDirs['forEach'] ) {
                     subDirs.forEach(function(subDir) {
@@ -114,6 +113,29 @@ function processExample(target, example, name, force) {
         });
     };
 
+    var processSubRootFile = function(sourceSubRoot, targetSubRoot, baseSubstitutions, force) {
+        return jive.util.fsexists(targetSubRoot).then(function (exists) {
+            if (!exists || force === 'true') {
+                return jive.util.fsTemplateCopy(sourceSubRoot, targetSubRoot, baseSubstitutions);
+            } else {
+                if (!force) {
+                    // it exists, but force is not specified; try to merge if .json object
+                    var extension = path.extname(sourceSubRoot);
+                    if (extension && extension.toLowerCase() === '.json') {
+                        return jive.util.fsreadJson(targetSubRoot).then(function (originJson) {
+                            return jive.util.fsreadJson(sourceSubRoot).then(function (incomingJson) {
+                                var mergedTxt = JSON.stringify(mergeRecursive(originJson, incomingJson), null, 4);
+                                return jive.util.fsTemplateWrite(mergedTxt, targetSubRoot, baseSubstitutions);
+                            });
+                        });
+                    }
+                }
+
+                return q.resolve();
+            }
+        });
+    };
+
     var baseSubstitutions = {
         'TILE_NAME': name,
         'host': '{{{host}}}'
@@ -128,34 +150,10 @@ function processExample(target, example, name, force) {
                 var targetSubRoot = target + '/' + subDir;
                 promises.push( jive.util.fsisdir(sourceSubRoot).then( function(isDir) {
                     if ( isDir ) {
-                        var doSubstitutions = subDir != 'cartridges';
-                        return processSubRoot( sourceSubRoot, targetSubRoot, doSubstitutions );
+                        var doSubstitutions = subDir != 'cartridges';   // don't do substitutions on cartridges
+                        return processSubRootFolder( sourceSubRoot, targetSubRoot, doSubstitutions );
                     } else {
-                        return jive.util.fsexists( targetSubRoot ).then( function(exists) {
-                            if ( !exists || force === 'true' ) {
-                                return jive.util.fsTemplateCopy( sourceSubRoot, targetSubRoot, baseSubstitutions);
-                            } else {
-                                if ( !force ) {
-                                    // it exists, but force is not specified
-                                    // try to merge if .json object
-                                    var extension = path.extname(sourceSubRoot);
-                                    if ( extension && extension.toLowerCase() === '.json' ) {
-//                                        console.log("Merging", sourceSubRoot, 'and', targetSubRoot);
-                                        return jive.util.fsreadJson( targetSubRoot).then( function(originJson) {
-                                            return jive.util.fsreadJson( sourceSubRoot ).then( function(incomingJson) {
-                                                var merged = mergeRecursive(originJson, incomingJson);
-                                                var mergedTxt = JSON.stringify(merged, null, 4);
-                                                return jive.util.fsTemplateWrite( mergedTxt, targetSubRoot, baseSubstitutions);
-                                            });
-                                        });
-                                    } else {
-                                        return q.resolve();
-                                    }
-                                } else {
-                                    return q.resolve();
-                                }
-                            }
-                        });
+                        return processSubRootFile( sourceSubRoot, targetSubRoot, baseSubstitutions, force );
                     }
                 }) );
             });

@@ -7,7 +7,7 @@ exports.task = new jive.tasks.build(
     },
 
     // interval (optional)
-    1000
+    5000
 );
 
 exports.onBootstrap = function(app) {
