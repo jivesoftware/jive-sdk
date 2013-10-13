@@ -1,0 +1,33 @@
+﻿<div style="display: inline-block; background-color: white; padding: 7px; border: 1px solid gray; box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.18);">
+    <table style="border: 0px solid #CCC; border-collapse: collapse;">
+        <tr>
+            <td style="min-width: 95px; text-align: right; vertical-align: top;">
+                <a href="{{>url}}" target="_blank">
+                    <img src="{{>image}}" alt="Profile image" style="border: 1px solid #D1D1D1; padding: 2px; max-width: 100px; max-height: 100px;" />
+                </a>
+            </td>
+            <td style="padding-left: 10px; vertical-align: top;">
+                <span style="font-size: 16px; font-weight: bold;"><a href="{{>url}}" target="_blank">{{>name}}</a></span><br />
+                {{>title}}<br />
+                <span style="color: Grey;">{{>locality}} | {{>industry}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div style="border-bottom: 1px solid #d7d7d7; margin-top: 5px; margin-bottom: 10px;"></div>
+            </td>
+        </tr>
+        {{for fields}}
+        <tr>
+            <td style="color: #747474; text-align: right; vertical-align: top;">
+                {{>name}}
+            </td>
+            <td style="padding-left: 10px; vertical-align: top;">
+                {{for values}}
+                    {{>#data}}
+                {{/for}}
+            </td>
+        </tr>
+        {{/for}}
+    </table>
+</div>

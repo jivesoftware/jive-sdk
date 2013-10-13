@@ -1,0 +1,6 @@
+{
+    "name": "linked_in_user_popups_cartridge",
+    "displayName": "LinkedIn User Popups",
+    "patterns": ["linkedin.com"],
+    "zipFileName":"linkedinuserpopups.zip"
+}

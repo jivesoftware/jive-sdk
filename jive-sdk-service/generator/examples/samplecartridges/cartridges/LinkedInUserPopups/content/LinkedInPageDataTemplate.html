@@ -1,0 +1,59 @@
+﻿<div style="border-bottom: 1px solid #CCCCCC; margin-bottom: 10px; display: none;">  
+    {{if id}}
+        <div style="padding-bottom: 8px;"><div class="label summary-label">Email</div>
+            <div class="summary">
+                {{>emailAddress}}
+                <a href="{{>profile_url}}" target="_blank" title="View profile"><img src='{{:~getResourceUrl("jive-icon-profile-12x12.png")}}' style="vertical-align: bottom;" /></a>
+            </div>
+        </div>
+
+        {{if title}}
+            <div style="padding-bottom: 8px;"><div class="label summary-label">Title</div>
+                <div class="summary">{{>title}}</div>
+            </div>
+        {{/if}}
+
+        {{if department}}
+            <div style="padding-bottom: 8px;"><div class="label summary-label">Department</div>
+                <div class="summary">{{>department}}</div>
+            </div>
+        {{/if}}
+
+        {{if location}}
+            <div style="padding-bottom: 8px;"><div class="label summary-label">Location</div>
+                <div class="summary">{{>location}}</div>
+            </div>
+        {{/if}}
+
+        {{if status_level_enabled && status_level_exists}}
+            <div style="padding-bottom: 8px;"><div class="label summary-label">Status</div>
+                <div class="summary">
+                    <img src="{{if status_image_location_is_public_url}}{{:status_image_location}}{{else}}{{:~getServerUrl(status_image_identifier)}}{{/if}}"
+                        alt="{{>status_level_name}}" title="{{:status_level_name}}" style="vertical-align: top;" />
+                    {{>status_level_name}} 
+                    <span>({{:status_points}} points)</span>
+                </div>
+            </div>
+        {{/if}}
+
+        {{if current_user_status_line}}
+            <div style="padding-bottom: 8px;"><div class="label summary-label">Status Update</div>
+                <div class="summary">{{>current_user_status_line}}</div>
+            </div>
+        {{/if}}
+    {{else}}
+        <div style="padding-bottom: 8px;"><div class="label summary-label">Jive</div>
+            <div class="summary">
+                {{if isError}}
+                    ({{>message}})
+                {{else}}
+                    (user not found)
+                {{/if}}
+            </div>
+        </div>
+    {{/if}}
+
+    <div style="text-align: right; font-size: 11px; font-weight: bold; margin: -5px 10px 5px;">
+        powered by <img src='{{:~getResourceUrl("logo.png")}}' style="vertical-align: middle;" />
+    </div>    
+</div>
