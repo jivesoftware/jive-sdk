@@ -628,7 +628,7 @@ exports.recursiveCopy = function(root, target, force, substitutions ) {
     );
 };
 
-exports.zipFolder = function( root, targetZip ) {
+exports.zipFolder = function( root, targetZip, flatten ) {
     var fs = require('fs');
 
     var archiver = require('archiver');
@@ -646,7 +646,10 @@ exports.zipFolder = function( root, targetZip ) {
         return q.fcall( function() {
             if ( type ==='file' ) {
                 var target = currentFsItem.substring( currentFsItem.indexOf( '/' ) + 1, currentFsItem.length );
-                jive.logger.debug('Zipping', currentFsItem, 'to', targetZip, ' : ', target );
+                if ( flatten ) {
+                    target =  require('path').basename( target );
+                }
+                jive.logger.info('Zipping', currentFsItem, 'to', targetZip, ' : ', target );
                 archive.append(fs.createReadStream(currentFsItem), { name: target })
             }
         })
