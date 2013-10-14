@@ -59,8 +59,16 @@
                     path="jive/tabs/profile"
                     label="View User's Todos"
                     view="todoList"/>
-            ]]>
 
+            <!--
+                Create a !app for todos
+            -->
+            <action id="com.jivesoftware.example.todo.createTodoInline"
+                    path="jive/actions/rte"
+                    label="Create todo"
+                    view="createTodo"
+                    icon="images/icon16.png"/>
+            ]]>
             </Param>
         </Require>
     </ModulePrefs>
@@ -82,6 +90,7 @@
         View or edit an exiting todo.
     -->
     <Content type="html" view="todoDetail" href="todoDetail.html" preferred_height="570" preferred_width="650"/>
+    <Content type="html" view="embedded.todoDetail" href="todoDetail.html" preferred_height="570" preferred_width="650"/>
 
     <!--
         This is the page that will appear on the project settings
