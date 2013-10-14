@@ -649,7 +649,7 @@ exports.zipFolder = function( root, targetZip, flatten ) {
                 if ( flatten ) {
                     target =  require('path').basename( target );
                 }
-                jive.logger.info('Zipping', currentFsItem, 'to', targetZip, ' : ', target );
+                jive.logger.debug('Zipping', currentFsItem, 'to', targetZip, ' : ', target );
                 archive.append(fs.createReadStream(currentFsItem), { name: target })
             }
         })
