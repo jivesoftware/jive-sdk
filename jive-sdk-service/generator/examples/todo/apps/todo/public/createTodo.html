@@ -80,6 +80,10 @@
             }
 
             osapi.http.post(params).execute(function (response) {
+                if(response.error) {
+                    defaultErrorHandler(response);
+                    return;
+                }
                 if(closeFn) {
                     closeFn(response.content);
                 } else {
@@ -98,6 +102,7 @@
 </script>
 <body>
 <h1>Create Todo <span id="inProject"></span></h1>
+<div id="status"></div>
 <input id="todoName">
 <input type="hidden" id="projectField" name="project" value="" />
 <button id="createBtn">Create</button>

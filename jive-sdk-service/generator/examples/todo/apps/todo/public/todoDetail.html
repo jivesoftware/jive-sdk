@@ -3,9 +3,9 @@
 <script type="text/javascript" charset="utf-8">
 
     gadgets.util.registerOnLoadHandler(function() {
-
+    var url = undefined;
         var loadTodo = function( id ) {
-            var url = baseRESTUrl + "/" + id;
+        url = baseRESTUrl + "/" + id;
             var params = {
                 'href': url,
                 'format': 'json',
@@ -13,6 +13,10 @@
             };
 
             osapi.http.get(params).execute(function (response) {
+                if(response.error) {
+                    defaultErrorHandler(response);
+                    return;
+                }
                 var todo = response.content;
                 if(todo) {
                     $(".todoDetails").show();
@@ -70,7 +74,13 @@
             };
 
             osapi.http.put(params).execute(function (response) {
-                $("#status").html("saved:" + response.content.id);
+                if(response.error) {
+                    defaultErrorHandler(response);
+                    return;
+                }
+                if (response.content) {
+                    $("#status").html("saved:" + response.content.id);
+                }
             });
         });
     });
