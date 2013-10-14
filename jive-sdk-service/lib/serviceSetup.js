@@ -68,7 +68,7 @@ function setupBackendRoutes(app, serviceDir, serviceName, routesPath){
 
     promises.push( fsexists(routesPath).then( function(exists) {
         if ( exists ) {
-            return serviceSetup.setupRoutes( app, serviceName, routesPath, '/service' );
+            return serviceSetup.setupRoutes( app, serviceName, routesPath);
         }
     }));
 }
