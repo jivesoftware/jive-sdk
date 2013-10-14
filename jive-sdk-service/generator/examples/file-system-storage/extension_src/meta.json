@@ -1,0 +1,16 @@
+{
+    "package_version": "1.0",
+    "id": "992b8b0b-9c89-4a1c-ad52-d93088ceac3b",
+    "type": "client-app",
+    "name": "File System Storage",
+    "description": "Saves files on the node.js machine",
+    "minimum_version": "0000",
+    "icon_16": "extension-16.png",
+    "icon_48": "extension-48.png",
+    "icon_128": "extension-128.png",
+    "status": "available",
+    "released_on": "2013-03-08T19:11:11.234Z",
+    "register_url": "http://10.72.110.61:8090/jive/oauth/register",
+    "service_url": "http://10.72.110.61:8090",
+    "redirect_url": "http://10.72.110.61:8090"
+}
