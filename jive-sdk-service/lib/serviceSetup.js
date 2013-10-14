@@ -49,7 +49,7 @@ function setupPublicRoutes(serviceDir, app) {
         if (stat.isDirectory()) {
             jive.logger.debug("Setting up service at " + serviceDir);
             var serviceName = path.basename(serviceDir);
-            app.use('/service/' + serviceName, express.static(serviceDir + '/public'));
+            app.use(serviceName, express.static(serviceDir + '/public'));
             return q.resolve(serviceName);
         } else {
             return q.resolve();
