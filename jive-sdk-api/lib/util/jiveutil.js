@@ -253,7 +253,7 @@ var fsSimpleRename = function( source, target ) {
         }
     });
 
-    return deferred;
+    return deferred.promise;
 };
 
 exports.fsrename = function(source, target, force) {
