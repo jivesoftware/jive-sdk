@@ -44,12 +44,13 @@ function fsexists(path) {
     return deferred.promise;
 }
 
-function setupPublicRoutes(serviceDir, app) {
+function setupPublicRoutes(serviceDir, app, pathPrefix) {
     return q.nfcall(fs.stat, serviceDir).then(function (stat) {
         if (stat.isDirectory()) {
             jive.logger.debug("Setting up service at " + serviceDir);
             var serviceName = path.basename(serviceDir);
-            app.use(serviceName, express.static(serviceDir + '/public'));
+            var servicePath = ( pathPrefix ? (pathPrefix + '/') : '') + serviceName;
+            app.use(servicePath, express.static(serviceDir + '/public'));
             return q.resolve(serviceName);
         } else {
             return q.resolve();
@@ -63,45 +64,55 @@ serviceSetup.setupServiceRoutes = function(app, serviceName, routesPath){
     return serviceSetup.setupRoutes( app, serviceName, routesPath );
 };
 
-function setupBackendRoutes(app, serviceDir, serviceName, routesPath){
+function setupBackendRoutes(app, pathPrefix, serviceName, routesPath){
     var promises = [];
 
     promises.push( fsexists(routesPath).then( function(exists) {
         if ( exists ) {
-            return serviceSetup.setupRoutes( app, serviceName, routesPath);
+            return serviceSetup.setupRoutes( app, serviceName, routesPath, pathPrefix);
         }
     }));
 }
 
 serviceSetup.setupOneService = function( app, serviceDir ) {
-    return setupPublicRoutes(serviceDir, app).then( function(serviceName) {
-        if (!serviceName)  {
-            return q.resolve();
+    var definitionJsonPath = serviceDir + '/definition.json';
+    jive.util.fsexists( definitionJsonPath).then( function(exists) {
+        if ( exists ) {
+            return jive.util.fsreadJson(definitionJsonPath);
+        } else {
+            return {}
         }
-
-        // setup services public directory
-        var servicesApp = express();
-
-        servicesApp.engine('html', consolidate.mustache);
-        servicesApp.set('view engine', 'html');
-        servicesApp.set('views', serviceDir + '/public');
-        app.use( servicesApp );
-
-        var routesPath = serviceDir + '/backend/routes';
-        var servicesPath = serviceDir + '/backend';
-
-        var promises = [];
-
-        promises.push( fsexists(serviceDir).then( function(exists) {
-            if ( exists ) {
-                return setupBackendRoutes( servicesApp, serviceDir, serviceName, routesPath );
+    }).then( function( definitionJson ) {
+            var pathPrefix = definitionJson['pathPrefix'];
+            return setupPublicRoutes(serviceDir, app, pathPrefix ).then( function(serviceName) {
+            if (!serviceName)  {
+                return q.resolve();
             }
-        }));
 
-        promises.push( serviceSetup.setupServiceServices(app, serviceName, servicesPath ) );
+            // setup services public directory
+            var servicesApp = express();
 
-        return q.all(promises);
-    })
+            servicesApp.engine('html', consolidate.mustache);
+            servicesApp.set('view engine', 'html');
+            servicesApp.set('views', serviceDir + '/public');
+            app.use( servicesApp );
+
+            var routesPath = serviceDir + '/backend/routes';
+            var servicesPath = serviceDir + '/backend';
+
+            var promises = [];
+
+            promises.push( fsexists(serviceDir).then( function(exists) {
+                if ( exists ) {
+                    return setupBackendRoutes( servicesApp, pathPrefix, serviceName, routesPath );
+                }
+            }));
+
+            promises.push( serviceSetup.setupServiceServices(app, serviceName, servicesPath ) );
+
+            return q.all(promises);
+        })
+    });
 };
 
 serviceSetup.setupAllServices = function( app, servicesRootDir ) {
