@@ -264,6 +264,7 @@ function getApps(appsRootDir, extensionInfo) {
     });
 }
 
+
 function getCartridges(cartridgesRootDir, extensionSrcDir) {
     var cartridges = [];
     return jive.util.fsexists( cartridgesRootDir).then( function(exists) {
@@ -276,7 +277,7 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
                     proms.push( jive.util.fsreadJson(definitionDir).then(function(cartridge) {
                         if ( !cartridge['name'] ) {
                             // generate an cartidge name if one is not provided
-                            cartridge['name'] = jive.util.guid();
+                            cartridge['name'] = jive.util.guid(item);
                         }
 
                         var zipFileName = cartridge['zipFileName'];
