@@ -2,3 +2,11 @@ node_modules/
 .idea/
 *.iml
 DS_Store
+
+jive-sdk-service/generator/examples/file-system-storage/db/community.json
+
+jive-sdk-service/generator/examples/file-system-storage/db/jiveExtension.json
+
+jive-sdk-service/generator/examples/file-system-storage/db/places.json
+
+jive-sdk-service/generator/examples/file-system-storage/extension.zip
