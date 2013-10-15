@@ -103,6 +103,28 @@ module.exports = function(serviceConfig) {
         },
 
         /**
+         * Retrieve a piece of data from a named collection whose key is the one provided.
+         * @param collectionID
+         * @param key
+         */
+        findByID: function( collectionID, key ) {
+            var deferred = q.defer();
+
+            var collection = getCollection(collectionID);
+            var criteria = { 'id': key };
+
+            collection.find(criteria, function(err, items) {
+                if( err || !items || items.length < 1) {
+                    deferred.resolve([]);
+                    return;
+                }
+                deferred.resolve(items);
+            });
+
+            return deferred.promise;
+        },
+
+        /**
          * Remove a piece of data from a name collection, based to the provided key, return promise
          * containing removed items when done.f
          * @param collectionID

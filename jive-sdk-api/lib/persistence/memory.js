@@ -127,6 +127,18 @@ module.exports = function() {
             });
         },
 
+        /**
+         * Retrieve a piece of data from a named collection whose key is the one provided.
+         * @param collectionID
+         * @param key
+         */
+        findByID: function( collectionID, key ) {
+            return q.fcall( function() {
+                var collection = getCollection(collectionID );
+                return collection[key];
+            });
+        },
+
         /******************TEST TOOLS. NOT IMPLEMENTED BY OTHER PERSISTENCE CLASSES*******************************/
 
         /**
