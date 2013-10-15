@@ -93,7 +93,7 @@ var createDefaultMethods = function( methods, message ) {
 
 // defaults - must be overridden
 exports.context = {
-    'persistence' :  createDefaultMethods( [ 'find', 'save', 'remove'], 'Undefined persistence'),
+    'persistence' :  createDefaultMethods( [ 'find', 'save', 'remove', 'findByID'], 'Undefined persistence'),
     'scheduler' : createDefaultMethods( [ 'init', 'schedule', 'unschedule', 'isScheduled', 'getTasks', 'shutdown'],
         'Undefined scheduler'),
     'config' : {}
