@@ -14,7 +14,7 @@ exports.registerPlace = function (req, res) {
 
     // We create a new folder for the created group.
     // Since this is a sample code we don't handle the case of 2 groups with the same name.
-    var containerPath = jive.service.options.rootFolder + req.body.container.name;
+    var containerPath = jive.service.options.rootFolder + "/" + req.body.container.name;
     jive.util.fsexists(containerPath)
         .then(function (exists) {
             if (!exists) {
@@ -64,10 +64,9 @@ exports.uploadFile = function (req, res) {
     logger.info("Upload file...");
     var containerGuid = req.query['container'];
     var fileGuid = jive.util.guid();
-    var versionGuid = jive.util.guid();
     var fileObj = JSON.parse(req.body.metadata);
     var fileDirectory;
-    var fileVersionPath;
+
     jive.context.persistence.findByID("places", containerGuid)
         .then(function (container) {
             if (container) {
@@ -111,7 +110,7 @@ exports.uploadVersion = function (req, res) {
     var versionObj = JSON.parse(req.body.metadata);
     jive.context.persistence.findByID("files", fileGuid)
         .then(function (fileObj) {
-            return handleFileVersion(fileGuid,fileObj,versionObj,req.files.file);
+            return handleFileVersion(fileGuid, fileObj, versionObj, req.files.file);
         })
         .then(function (responseData) {
             res.send(responseData, 200);
@@ -123,28 +122,109 @@ exports.uploadVersion = function (req, res) {
         });
 };
 
+exports.downloadVersion = function (req, res) {
+    var versionGuid = req.query.version;
+    logger.info("Download version... " + versionGuid);
+
+    jive.context.persistence.findByID("fileVersions", versionGuid)
+        .then(function (versionObj) {
+           res.sendfile(versionObj.fileVersionPath);
+        })
+        .catch(function (err) {
+            logger.error(err);
+            res.writeHead(500);
+            res.end();
+        });
+};
 
 exports.deleteContainer = function (req, res) {
     var containerGuid = req.query.container;
     logger.info("Delete container... container id:" + containerGuid);
-    // TODO: implement
+    jive.context.persistence.findByID("places", containerGuid)
+        .then(function (placeObj) {
+            if (placeObj) {
+                logger.info("Deleting place from persistence...")
+                var deletes = [];
+                deletes.push(q.fcall(function () {
+                    return jive.context.persistence.remove("places", containerGuid);
+                }));
 
-    res.writeHead(200);
-    res.end();
+                deletes.push(q.fcall(function () {
+                    logger.info("Deleting binary files from disk")
+                    return jive.util.fsrmdir(placeObj.containerPath);
+                }));
+
+                return q.all(deletes);
+            }
+            else {
+                logger.warn("There was no place in the DB with the id " + containerGuid);
+                return q.fcall(function () {
+                });
+            }
+        })
+        .then(function () {
+            res.writeHead(200);
+            res.end();
+        })
+        .catch(function (err) {
+            logger.error(err);
+            res.writeHead(500);
+            res.end();
+        });
 }
+
 exports.deleteFile = function (req, res) {
     var fileGuid = req.query.file;
-    logger.info("Delete file... file id:" + fileGuid);
-    // TODO: implement
 
-    res.writeHead(200);
-    res.end();
+    logger.info("Delete file... file id:" + fileGuid);
+    jive.context.persistence.findByID("files", fileGuid)
+        .then(function (fileObj) {
+            if (fileObj) {
+                logger.info("Deleting file version from persistence...")
+                var deletes = [];
+                for (var versionGuid in fileObj.versionsList) {
+                    deletes.push(q.fcall(function () {
+                        return jive.context.persistence.remove("fileVersions", versionGuid);
+                    }));
+                }
+                deletes.push(q.fcall(function () {
+                    return jive.context.persistence.remove("files", fileGuid);
+                }));
+
+                deletes.push(q.fcall(function () {
+                    logger.info("Deleting binary files from disk")
+                    return jive.util.fsrmdir(fileObj.fileDirectoryPath);
+                }));
+
+                return q.all(deletes);
+            }
+            else {
+                logger.warn("There was no file in the DB with the id " + fileGuid);
+                return q.fcall(function () {
+                });
+            }
+        })
+        .then(function () {
+            res.writeHead(200);
+            res.end();
+        })
+        .catch(function (err) {
+            logger.error(err);
+            res.writeHead(500);
+            res.end();
+        });
 }
 
 function handleFileVersion(fileGuid, fileObj, versionObj, tempFile) {
     var versionGuid = jive.util.guid();
-    fileObj.latestFileVersion = fileObj.latestFileVersion ? fileObj.latestFileVersion + 1 : 1;
-    var fileVersionPath = fileObj.fileDirectoryPath + "/" + fileObj.latestFileVersion + ".bin";
+    if (fileObj.versionsList) {
+        fileObj.versionsList.push(versionGuid);
+    }
+    else {
+        fileObj.versionsList = [versionGuid];
+    }
+    var fileExt = tempFile.name.split('.').pop();
+    var fileVersionPath = fileObj.fileDirectoryPath + "/version" + fileObj.versionsList.length + "." + fileExt;
     return jive.util.fsrename(tempFile.path, fileVersionPath)
         .then(function () {
             logger.info("File version binary was saved to: " + fileVersionPath);

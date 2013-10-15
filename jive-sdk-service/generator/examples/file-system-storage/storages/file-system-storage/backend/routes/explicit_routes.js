@@ -18,6 +18,10 @@ exports.uploadVersion = {
     'verb':'post',
     'route': service.uploadVersion
 };
+exports.download = {
+    'verb':'get',
+    'route': service.downloadVersion
+};
 exports.place = {
     'verb':'delete',
     'route': service.deleteContainer
