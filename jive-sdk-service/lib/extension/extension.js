@@ -173,8 +173,8 @@ function getTileDefinitions() {
 
 function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, extensionSrcDir, extensionInfo, definitions) {
     return buildTemplates(tilesDir).then(function (templates) {
-        return getApps(appsDir).then(function (apps) {
-            return getStorages(storagesDir).then(function (storages) {
+        return getApps(appsDir, extensionInfo).then(function (apps) {
+            return getStorages(storagesDir, extensionInfo).then(function (storages) {
                 return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
 
                     jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
@@ -203,7 +203,7 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
     });
 }
 
-function getStorages(storagesDir) {
+function getStorages(storagesDir, extensionInfo) {
     var storages = [];
     return jive.util.fsexists( storagesDir).then( function(exists) {
         if ( exists ) {
@@ -214,7 +214,7 @@ function getStorages(storagesDir) {
                     proms.push( jive.util.fsreadJson(definitionDir).then(function(storage){
                         if ( !storage['name'] ) {
                             // generate a storage name if one is not provided
-                            storage['name'] = jive.util.guid();
+                            storage['name'] = jive.util.guid(extensionInfo['uuid']);
                         }
 
                         return storage;
@@ -228,7 +228,7 @@ function getStorages(storagesDir) {
     });
 }
 
-function getApps(appsRootDir) {
+function getApps(appsRootDir, extensionInfo) {
     var apps = [];
     return jive.util.fsexists( appsRootDir).then( function(exists) {
         if ( exists ) {
@@ -237,9 +237,12 @@ function getApps(appsRootDir) {
                 dirContents.forEach(function(item) {
                     var definitionDir = appsRootDir + '/' + item + '/definition.json';
                     proms.push( jive.util.fsreadJson(definitionDir).then(function(app) {
+                        if ( !app['name'] ) {
+                            app['name'] = item;
+                        }
+
                         if ( !app['id'] ) {
-                            // generate an app ID if one is not provided
-                            app['id'] = jive.util.guid();
+                            app['id'] = jive.util.guid(app['name'] + extensionInfo['uuid']);
                         }
 
                         if ( !app['appPath'] ) {

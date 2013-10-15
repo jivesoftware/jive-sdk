@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module specificationVersion="1">
+  <ModulePrefs title="Jive Clone Document Utility"
+               description="App to provide Document Cloning Action"
+               author="Jez Martin"
+               author_affiliation="Jive"
+               author_email="jez@jivesoftware.com">
+        <Link rel="Icon" href="group-icon.png"/>
+        <Require feature="dynamic-height"/>
+        <Require feature="jive-core-v2" />
+        <Require feature="jive-core-v3"/>
+        <Require feature="jquery-1.4.2"/>
+        <Require feature="minimessage"/>
+        <Require feature="osapi"/>
+        <Require feature="views"/>
+        
+<!--Adding Action declaration -->        
+        <Require feature="actions">  
+    		<Param name="action-contributions">  
+       			<![CDATA[ 
+            	<action id="com.jivesoftware.education.copyDoc" path="jive/actions/content/document" label="Copy Document" 
+           		 view="embedded" icon="Icon" />  
+       			]]>  
+			</Param>  
+		</Require> 
+		
+         <!-- Icons: 3 sizes, 16x16, 48x48, 128x128 -->
+    <Link rel="Icon"       href="images/edit-copy16.png" />
+    <Link rel="MediumIcon" href="images/edit-copy48.png" />
+    <Link rel="LargeIcon"  href="images/edit-copy128.png" />
+    
+    <Link rel="Screenshot1" href="images/screenshot1.png" />
+     
+  </ModulePrefs>
+  <Content view="embedded" type="html" href="home.html" preferred_width="800"/>
+  <Content view="canvas" type="html" href="canvas.html"/>
+  
+</Module>
