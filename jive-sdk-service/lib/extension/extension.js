@@ -57,7 +57,9 @@ exports.prepare = function (tilesDir, appsDir, cartridgesDir, storagesDir) {
                 ).then( function(definitionsJson) {
                     // persist the extension metadata
                     var meta = fillExtensionMetadata(extensionInfo, definitionsJson);
-                    return jive.util.fswrite( JSON.stringify(meta, null, 4), extensionSrcDir  + '/meta.json' );
+                        var stringifiedMeta = JSON.stringify(meta, null, 4);
+                        jive.logger.debug("Extension meta: \n" + stringifiedMeta);
+                        return jive.util.fswrite( stringifiedMeta, extensionSrcDir  + '/meta.json' );
                 });
             });
     }).then( function() {
@@ -193,7 +195,8 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
                     };
 
                     var definitionJsonPath = extensionSrcDir + '/definition.json';
-                    return jive.util.fswrite(JSON.stringify(definitionsJson, null, 4), definitionJsonPath).then( function() {
+                    var stringifiedDefinitionJson = JSON.stringify(definitionsJson, null, 4);
+                    return jive.util.fswrite(stringifiedDefinitionJson, definitionJsonPath).then( function() {
                         return definitionsJson;
                     })
                 });
