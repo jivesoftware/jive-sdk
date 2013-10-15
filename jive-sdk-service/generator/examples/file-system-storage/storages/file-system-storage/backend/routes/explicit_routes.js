@@ -14,7 +14,17 @@ exports.upload = {
     'verb':'post',
     'route': service.uploadFile
 };
+exports.uploadVersion = {
+    'verb':'post',
+    'route': service.uploadVersion
+};
 exports.place = {
     'verb':'delete',
     'route': service.deleteContainer
 };
+
+exports.file = {
+    'verb':'delete',
+    'route': service.deleteFile
+};
+
