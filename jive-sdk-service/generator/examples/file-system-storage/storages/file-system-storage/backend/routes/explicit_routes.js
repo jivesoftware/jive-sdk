@@ -27,8 +27,4 @@ exports.place = {
     'route': service.deleteContainer
 };
 
-exports.file = {
-    'verb':'delete',
-    'route': service.deleteFile
-};
 

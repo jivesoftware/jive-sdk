@@ -14,9 +14,6 @@
  *    limitations under the License.
  */
 
-var jive = require("jive-sdk");
+var service = require('../../storage_service.js');
 
-exports.route = function(req, res){
-    var conf = jive.service.options;
-    res.render('hello.html', { name: jive.util.guid() });
-};
+exports.route = service.deleteFile;
