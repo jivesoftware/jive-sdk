@@ -8,7 +8,7 @@ gadgets.util.registerOnLoadHandler(function() {
     var updateDisplay = function( ) {
         var queryString = "";
         if( project ) {
-            queryString = "?project=" + project;
+            queryString = "?project=" + encodeURIComponent(project);
         } else if ( username ) {
             queryString = "?assignee=" + username;
         }
@@ -21,6 +21,10 @@ gadgets.util.registerOnLoadHandler(function() {
         };
 
         osapi.http.get(params).execute(function (response) {
+            if(response.error) {
+                defaultErrorHandler(response);
+                return;
+            }
             var todos = response.content.todos,
                     todo, i;
             $( "#todoBody" ).empty();
@@ -66,6 +70,7 @@ gadgets.util.registerOnLoadHandler(function() {
 });
 </script>
 <body>
+    <div id="status"></div>
     <table class="todoList">
         <thead><tr><th>Todo</th><th>Status</th><th>Project</th><th>Assignee</th></tr></thead>
         <tbody id="todoBody"></tbody>

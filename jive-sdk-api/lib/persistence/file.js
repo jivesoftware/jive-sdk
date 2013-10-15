@@ -224,6 +224,17 @@ module.exports = function(serviceConfig) {
             return deferred.promise;
         },
 
+        findByID: function( collectionID, key ) {
+            var deferred = q.defer();
+
+            getCacheEntry(collectionID, function(collection) {
+                var data = collection[key];
+                deferred.resolve( data );
+            });
+
+            return deferred.promise;
+        },
+
         find : function( collectionID, keyValues ) {
 
             var deferred = q.defer();

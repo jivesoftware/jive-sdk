@@ -2,16 +2,17 @@
 <script src="scripts/shared.js"></script>
 <script type="text/javascript" charset="utf-8">
     var project=undefined,
-        username=undefined,
-        setProject = function(context) {
-            if( context ) {
-                osapi.jive.corev3.resolveContext(context, function (result) {
-                    if (result && result.content) {
-                        project = result.content.name;
-                    }
-                });
-            }
-        };
+            username=undefined,
+            closeFn=undefined;
+    setProject = function(context) {
+        if( context ) {
+            osapi.jive.corev3.resolveContext(context, function (result) {
+                if (result && result.content) {
+                    project = result.content.name;
+                }
+            });
+        }
+    };
     // When coming to this view from the createTodoProject action, set the current project.
     gadgets.actions.updateAction({
         id:"com.jivesoftware.example.todo.createTodoProject",
@@ -19,6 +20,30 @@
             if(context && context.jive && context.jive.content && context.jive.content.type == 'osapi.jive.core.Project'){
                 setProject(context);
             }
+        }
+    });
+
+    // When coming to this view from the !app action, change the close
+    gadgets.actions.updateAction({
+        id:"com.jivesoftware.example.todo.createTodoInline",
+        callback:function(context){
+            closeFn = function(content) {
+                osapi.jive.core.container.closeApp({
+                    data:{
+                        display: {
+                            type:"text",
+                            label: content.name
+                        },
+                        target: {
+                            type: "embed",
+                            view: "embedded.todoDetail",
+                            context: {
+                                id: content.id
+                            }
+                        }
+                    }
+                });
+            };
         }
     });
 
@@ -55,7 +80,15 @@
             }
 
             osapi.http.post(params).execute(function (response) {
-                gadgets.views.requestNavigateTo("todoDetail", {id: response.content.id});
+                if(response.error) {
+                    defaultErrorHandler(response);
+                    return;
+                }
+                if(closeFn) {
+                    closeFn(response.content);
+                } else {
+                    gadgets.views.requestNavigateTo("todoDetail", {id: response.content.id});
+                }
             });
         };
 
@@ -68,9 +101,10 @@
     });
 </script>
 <body>
-	<h1>Create Todo <span id="inProject"></span></h1>
-	<input id="todoName">
-    <input type="hidden" id="projectField" name="project" value="" />
-	<button id="createBtn">Create</button>
+<h1>Create Todo <span id="inProject"></span></h1>
+<div id="status"></div>
+<input id="todoName">
+<input type="hidden" id="projectField" name="project" value="" />
+<button id="createBtn">Create</button>
 </body>
 

@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<link rel="stylesheet" href="stylesheets/main.css" type="text/css" media="screen" />
+<script type="text/javascript" charset="utf-8" src="javascripts/main.js"></script>
+<html>
+<h2>Document Copy Utility</h2>
+<body>
+<div class="container" id="choose_place">
+	<p>Select target Social Group for Copy to live in</p>
+	<button id="chooser">Choose Group</button>
+	
+</div>
+<div class="container" id="createDoc-form">
+                <form class="container" onsubmit="return false;" method="post" class="app-form" action="#">
+                    
+                    Enter New Title:   <input type="text" id="title-box" name="title" /><br/>
+                   
+                    
+                    <p class="app-form-buttons">
+                        <button id="create-doc">Create Copy</button>
+                    </p>
+                </form>
+            </div>
+
+<div id="show-doc" ></div>
+            
+<div id="successdiv">
+	<div id="show-success"></div><br/>
+	<button id="closer">Close</button>
+</div>
+</body>
+</html>

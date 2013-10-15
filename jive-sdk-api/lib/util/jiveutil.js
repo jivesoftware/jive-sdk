@@ -24,8 +24,51 @@ var jive = require('../../api');
 var oauthUtil = require('./oauthUtil');
 var crypto = require('crypto');
 
-exports.guid = function() {
-    return uuid.v4();
+var hex_high_10 = { // set the highest bit and clear the next highest
+    '0': '8',
+    '1': '9',
+    '2': 'a',
+    '3': 'b',
+    '4': '8',
+    '5': '9',
+    '6': 'a',
+    '7': 'b',
+    '8': '8',
+    '9': '9',
+    'a': 'a',
+    'b': 'b',
+    'c': '8',
+    'd': '9',
+    'e': 'a',
+    'f': 'b'
+};
+
+exports.guid = function(src) {
+    if (!src) {
+        return uuid.v4();
+    } else {
+        var sum = crypto.createHash('sha1');
+
+        // namespace in raw form. FIXME using ns:URL for now, what should it be?
+        sum.update(new Buffer('a6e4EZ2tEdGAtADAT9QwyA==', 'base64'));
+
+        // add HTTP path
+        sum.update(src);
+
+        // get sha1 hash in hex form
+        var u = sum.digest('hex');
+
+        // format as UUID (add dashes, version bits and reserved bits)
+        u =
+            u.substr(0, 8) + '-' + // time_low
+                u.substr(8, 4) + '-' + // time_mid
+                '5' + // time_hi_and_version high 4 bits (version)
+                u.substr(13, 3) + '-' + // time_hi_and_version low 4 bits (time high)
+                hex_high_10[u.substr(16, 1)] + u.substr(17, 1) + // cloc_seq_hi_and_reserved
+                u.substr(18, 2) + '-' + // clock_seq_low
+                u.substr(20, 12); // node
+        return u;
+    }
 };
 
 var jsonResponseCallbackWrapper = function (response, body, successCallback, errCallback) {
@@ -253,7 +296,7 @@ var fsSimpleRename = function( source, target ) {
         }
     });
 
-    return deferred;
+    return deferred.promise;
 };
 
 exports.fsrename = function(source, target, force) {
@@ -628,7 +671,7 @@ exports.recursiveCopy = function(root, target, force, substitutions ) {
     );
 };
 
-exports.zipFolder = function( root, targetZip ) {
+exports.zipFolder = function( root, targetZip, flatten ) {
     var fs = require('fs');
 
     var archiver = require('archiver');
@@ -646,6 +689,9 @@ exports.zipFolder = function( root, targetZip ) {
         return q.fcall( function() {
             if ( type ==='file' ) {
                 var target = currentFsItem.substring( currentFsItem.indexOf( '/' ) + 1, currentFsItem.length );
+                if ( flatten ) {
+                    target =  require('path').basename( target );
+                }
                 jive.logger.debug('Zipping', currentFsItem, 'to', targetZip, ' : ', target );
                 archive.append(fs.createReadStream(currentFsItem), { name: target })
             }

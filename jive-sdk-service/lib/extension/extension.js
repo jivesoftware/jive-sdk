@@ -173,8 +173,8 @@ function getTileDefinitions() {
 
 function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, extensionSrcDir, extensionInfo, definitions) {
     return buildTemplates(tilesDir).then(function (templates) {
-        return getApps(appsDir).then(function (apps) {
-            return getStorages(storagesDir).then(function (storages) {
+        return getApps(appsDir, extensionInfo).then(function (apps) {
+            return getStorages(storagesDir, extensionInfo).then(function (storages) {
                 return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
 
                     jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
@@ -203,7 +203,7 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
     });
 }
 
-function getStorages(storagesDir) {
+function getStorages(storagesDir, extensionInfo) {
     var storages = [];
     return jive.util.fsexists( storagesDir).then( function(exists) {
         if ( exists ) {
@@ -214,7 +214,7 @@ function getStorages(storagesDir) {
                     proms.push( jive.util.fsreadJson(definitionDir).then(function(storage){
                         if ( !storage['name'] ) {
                             // generate a storage name if one is not provided
-                            storage['name'] = jive.util.guid();
+                            storage['name'] = jive.util.guid(extensionInfo['uuid']);
                         }
 
                         return storage;
@@ -228,7 +228,7 @@ function getStorages(storagesDir) {
     });
 }
 
-function getApps(appsRootDir) {
+function getApps(appsRootDir, extensionInfo) {
     var apps = [];
     return jive.util.fsexists( appsRootDir).then( function(exists) {
         if ( exists ) {
@@ -237,9 +237,12 @@ function getApps(appsRootDir) {
                 dirContents.forEach(function(item) {
                     var definitionDir = appsRootDir + '/' + item + '/definition.json';
                     proms.push( jive.util.fsreadJson(definitionDir).then(function(app) {
+                        if ( !app['name'] ) {
+                            app['name'] = item;
+                        }
+
                         if ( !app['id'] ) {
-                            // generate an app ID if one is not provided
-                            app['id'] = jive.util.guid();
+                            app['id'] = jive.util.guid(app['name'] + extensionInfo['uuid']);
                         }
 
                         if ( !app['appPath'] ) {
@@ -261,6 +264,7 @@ function getApps(appsRootDir) {
     });
 }
 
+
 function getCartridges(cartridgesRootDir, extensionSrcDir) {
     var cartridges = [];
     return jive.util.fsexists( cartridgesRootDir).then( function(exists) {
@@ -273,7 +277,7 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
                     proms.push( jive.util.fsreadJson(definitionDir).then(function(cartridge) {
                         if ( !cartridge['name'] ) {
                             // generate an cartidge name if one is not provided
-                            cartridge['name'] = jive.util.guid();
+                            cartridge['name'] = jive.util.guid(item);
                         }
 
                         var zipFileName = cartridge['zipFileName'];
@@ -285,7 +289,7 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
                         }
 
                         var zipFile = extensionSrcDir + '/data/' + zipFileName;
-                        return jive.util.zipFolder( contentDir, zipFile).then( function() {
+                        return jive.util.zipFolder( contentDir, zipFile, true).then( function() {
                                 return q.resolve(cartridge);
                         })
                     }) );
@@ -315,42 +319,40 @@ function buildTemplates(tilesDir) {
         return templateArray;
     };
 
-    var theRest = jive.service.extensions().find().then(function (extension) {
-        return jive.util.fsexists(templatesPath.trim()).then(function (exists) {
-            if (!exists) {
-                // create it
-                return buildDefaultTemplate(extension).then( function(defaultTemplate) {
-                    var templates = {};
-                    templates['default'] = defaultTemplate;
-                    return jive.util.fswrite(JSON.stringify(templates, null, 4), tilesDir + '/templates.json').then( function () {
-                        return toTemplateArray(templates);
-                    })
-                });
-            } else {
-                // make sure there is a default template
-                return jive.util.fsread(templatesPath).then( function(data) {
-                    var templates = JSON.parse( new Buffer(data).toString() );
-                    jive.logger.debug(templates);
-                    if ( !templates['default'] ) {
+    return jive.util.fsexists(tilesDir).then(function(exists) {
+        if ( !exists ) {
+            return q.resolve([]);
+        } else {
+            return jive.service.extensions().find().then(function (extension) {
+                return jive.util.fsexists(templatesPath.trim()).then(function (exists) {
+                    if (!exists) {
+                        // create it
                         return buildDefaultTemplate(extension).then( function(defaultTemplate) {
+                            var templates = {};
                             templates['default'] = defaultTemplate;
-                            return jive.util.fswrite(JSON.stringify(templates, null, 4), tilesDir + '/templates.json').then( function() {
+                            return jive.util.fswrite(JSON.stringify(templates, null, 4), tilesDir + '/templates.json').then( function () {
                                 return toTemplateArray(templates);
                             })
                         });
                     } else {
-                        return toTemplateArray(templates);
+                        // make sure there is a default template
+                        return jive.util.fsread(templatesPath).then( function(data) {
+                            var templates = JSON.parse( new Buffer(data).toString() );
+                            jive.logger.debug(templates);
+                            if ( !templates['default'] ) {
+                                return buildDefaultTemplate(extension).then( function(defaultTemplate) {
+                                    templates['default'] = defaultTemplate;
+                                    return jive.util.fswrite(JSON.stringify(templates, null, 4), tilesDir + '/templates.json').then( function() {
+                                        return toTemplateArray(templates);
+                                    })
+                                });
+                            } else {
+                                return toTemplateArray(templates);
+                            }
+                        });
                     }
                 });
-            }
-        });
-    });
-
-    return jive.util.fsexists(tilesDir).then(function(exists) {
-        if ( !exists ) {
-            return q.resolve();
-        } else {
-            return theRest;
+            });
         }
     })
 }

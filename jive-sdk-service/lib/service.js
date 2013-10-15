@@ -73,8 +73,8 @@ exports.persistence = function(_persistence) {
 
     if ( _persistence ) {
         // set persistence
-        if ( !_persistence['find']  || !_persistence['remove'] || !_persistence['save'] ) {
-            throw 'Unsupported persistence strategy - must implement find, remove, save methods.';
+        if ( !_persistence['find'] || !_persistence['findByID'] || !_persistence['remove'] || !_persistence['save'] ) {
+            throw 'Unsupported persistence strategy - must implement find, findByID, remove, save methods.';
         }
         persistence = _persistence;
         jive.context['persistence'] = persistence;
@@ -96,6 +96,19 @@ exports.persistence = function(_persistence) {
         },
 
         find: function() {
+            return persistence ? persistence.find(
+                arguments.length > 0 ? arguments[0] : undefined,
+                arguments.length > 1 ? arguments[1] : undefined,
+                arguments.length > 2 ? arguments[2] : undefined,
+                arguments.length > 3 ? arguments[3] : undefined,
+                arguments.length > 4 ? arguments[4] : undefined,
+                arguments.length > 5 ? arguments[5] : undefined
+            ) : function() {
+                return q.reject( new Error("persistence not defined") );
+            }
+        },
+
+        findByID: function() {
             return persistence ? persistence.find(
                 arguments.length > 0 ? arguments[0] : undefined,
                 arguments.length > 1 ? arguments[1] : undefined,
