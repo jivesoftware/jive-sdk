@@ -132,6 +132,12 @@ exports.persistence = function(_persistence) {
             ) : function() {
                 return q.reject( new Error("persistence not defined") );
             }
+        },
+
+        close: function() {
+            return persistence ? persistence.close() :  function() {
+                return q.reject( new Error("persistence not defined") );
+            }
         }
     }
 };

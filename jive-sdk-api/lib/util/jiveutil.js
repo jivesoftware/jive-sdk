@@ -697,12 +697,15 @@ exports.zipFolder = function( root, targetZip, flatten ) {
             }
         })
     }).then( function() {
-        archive.finalize(function(err, written) {
-            if (err) {
-                throw err;
-            }
-            jive.logger.info(written + ' total bytes written to extension archive ', targetZip);
-        });
+            var deferred = q.defer();
+            archive.finalize(function (err, written) {
+                if (err) {
+                    throw err;
+                }
+                jive.logger.info(written + ' total bytes written to extension archive ', targetZip);
+                deferred.resolve();
+            });
+            return deferred.promise;
     });
 };
 

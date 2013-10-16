@@ -161,6 +161,10 @@ module.exports = function() {
 
         getDb: function() {
             return db;
+        },
+
+        close: function() {
+            return q();
         }
     };
 

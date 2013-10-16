@@ -144,6 +144,10 @@ module.exports = function(serviceConfig) {
             });
 
             return deferred.promise;
+        },
+
+        close: function() {
+            return q();
         }
 
     };

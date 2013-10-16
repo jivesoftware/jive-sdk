@@ -26,7 +26,7 @@ var _ = require("underscore");
 
 var argv = require('optimist').argv;
 
-var validCommands = ['create','help','list'];
+var validCommands = ['create','help','list', 'createExtension'];
 var groups = ['tiles', "apps", 'services', 'storages', 'cartridges'];
 
 var styles = [];
@@ -368,6 +368,7 @@ function doHelp() {
 
 function execute(options) {
     var cmd = options['cmd'];
+    options.target = options.target || process.cwd();
 
     if ( cmd === 'help' ) {
         doHelp();
@@ -413,6 +414,26 @@ function execute(options) {
             printGroup(options.subject);
         }
     }
+
+    if ( cmd === 'createExtension' ) {
+        doCreateExtension( options );
+    }
+}
+
+function doCreateExtension( options ) {
+    jive.service.init({use: function() {}}).then(function() {
+        var extension = require("../lib/extension/extension.js");
+
+        extension.prepare(options.target + "/tiles", options.target + "/apps", options.target + "/cartridges", options.target + "/storages").then(function(){
+            var persistence = jive.service.persistence();
+
+            persistence.close().then(function() {
+                process.nextTick(function() {
+                    process.exit(0);
+                });
+            })
+        });
+    });
 }
 
 function prepare() {

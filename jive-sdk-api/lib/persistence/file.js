@@ -36,6 +36,7 @@ module.exports = function(serviceConfig) {
     var cacheSize = 0;
     var dirtyCount = 0;
     var dirtyCollectionIDs = {};
+    var intervalId;
     var path = serviceConfig && serviceConfig['dataDirPath'] ? serviceConfig['dataDirPath'] : "db";
 
     jive.logger.debug("File persistence dir at '" + path + "'");
@@ -45,10 +46,10 @@ module.exports = function(serviceConfig) {
         if(err){
             fs.mkdir(path, function(err){
                 if(err) throw err;
-                setInterval(flushDirty, 15000);
+                intervalId = setInterval(flushDirty, 15000);
             });
         } else if(stat.isDirectory()){
-            setInterval(flushDirty, 15000);
+            intervalId = setInterval(flushDirty, 15000);
         } else {
             throw "Persistence startup failed: " + path + " is not a directory!";
         }
@@ -84,11 +85,16 @@ module.exports = function(serviceConfig) {
     }
 
     function flushDirty() {
+        var deferreds = [];
         var dirty = Object.keys(dirtyCollectionIDs);
         for (var i = 0; i < dirty.length; i++) {
             var collectionID = dirty[i];
             var entry = cache[collectionID];
-            writeToFS(entry);
+            var deferred = q.defer();
+            deferreds.push(deferred.promise);
+            writeToFS(entry, function() {
+                deferred.resolve();
+            });
             delete dirtyCollectionIDs[collectionID];
         }
         var shrink = [];
@@ -104,6 +110,7 @@ module.exports = function(serviceConfig) {
         if (shrink.length) {
             jive.logger.info('Discarded ' + shrink.length + ' data file(s): [' + (shrink.join(', ')) + ']' )
         }
+        return q.allResolved(deferreds);
     }
 
     function getCacheEntry(collectionID, callback) {
@@ -268,6 +275,13 @@ module.exports = function(serviceConfig) {
             });
 
             return deferred.promise;
+        },
+
+        close : function() {
+            if(intervalId) {
+                clearInterval(intervalId);
+            }
+            return flushDirty();
         }
 
     };
