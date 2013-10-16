@@ -18,6 +18,7 @@ var fs = require('fs-extra');
 var q = require('q');
 var path = require('path');
 var jive = require('../api');
+var _ = require("underscore");
 
 /**
  * jive-sdk create -type
@@ -25,10 +26,14 @@ var jive = require('../api');
 
 var argv = require('optimist').argv;
 
-var validCommands = ['create','help'];
+var validCommands = ['create','help','list'];
+var groups = ['tiles', "apps", 'services', 'storages', 'cartridges'];
 
 var styles = [];
 var examples = [];
+var groupedExamples = {};
+_.each(groups, function(group) { groupedExamples[group] = [] });
+
 
 function validate(options) {
     var err = [];
@@ -43,6 +48,14 @@ function validate(options) {
                 err.push('Invalid item ' + options['subject'] + ', must be one of ' + styles.concat(examples) + ", or 'all'.");
             } else {
                 err.push('You must create one of ' + styles.concat(examples) + ", or 'all'.");
+            }
+        }
+    }
+
+    if ( options.cmd === 'list' ) {
+        if( options.subject ) {
+            if(groups.indexOf( options.subject ) == -1) {
+                err.push('Invalid list type ' + options.subject + ', must be one of ' + groups + ", empty, or 'all'");
             }
         }
     }
@@ -332,12 +345,20 @@ function doHelp() {
     console.log('Usage: jive-sdk [cmd] [item] [--options ...]\n');
     console.log('where cmd include:');
     console.log('   help');
-    console.log('   create\n');
+    console.log('   create');
+    console.log('   list\n');
 
-    console.log('where item include:');
+    console.log('where item for create include:');
     examples.concat(styles).forEach( function(item) {
         console.log('   ' + item );
     });
+
+    console.log('');
+    console.log('where item for list include:');
+    _.each(groups, function(group) {
+        console.log('   ' + group);
+    });
+
 
     console.log();
     console.log('where options include:');
@@ -370,6 +391,28 @@ function execute(options) {
             return;
         }
     }
+
+    if ( cmd === 'list' ) {
+        if( !options.subject ) {
+            options.subject = 'all';
+        }
+        var printGroup = function( group ) {
+            console.log(group + ":");
+            _.each(groupedExamples[group], function( example ) {
+                console.log("    " + example);
+            });
+        };
+
+        if( options.subject === 'all' ) {
+            _.each(groupedExamples, function( exampleArray, group ) {
+                printGroup(group);
+                console.log("");
+            });
+
+        } else {
+            printGroup(options.subject);
+        }
+    }
 }
 
 function prepare() {
@@ -379,7 +422,21 @@ function prepare() {
         styles = styles.concat( items );
     }).then( function() {
             return jive.util.fsreaddir( root + '/examples').then(function(items) {
+                var deferreds = [];
                 examples = examples.concat( items );
+                _.each(items, function( item ) {
+                    _.each(groups, function( group ) {
+                        var deferred = q.defer();
+                        deferreds.push(deferred);
+                        jive.util.fsexists( root + '/examples/' + item + "/" + group).then(function(exists) {
+                            if(exists) {
+                                groupedExamples[group].push(item);
+                            }
+                            deferred.resolve();
+                        });
+                    });
+                });
+                return q.allResolved(deferreds);
             } );
         });
 }
