@@ -40,13 +40,13 @@ exports.buildAuthorizeUrlResponseMap = function (oauth2Conf, callback, context, 
         stateToEncode = util._extend(stateToEncode, context);
     }
 
-    var url  = oauth2Conf['originServerAuthorizationUrl'] + "?" +
-        "state="            + jive.util.base64Encode(JSON.stringify(stateToEncode)) +
-        "&redirect_uri="    + oauth2Conf['clientOAuth2CallbackUrl'] +
-        "&client_id="       + oauth2Conf['oauth2ConsumerKey'] +
-        "&response_type="   + "code";
+    var url = oauth2Conf['originServerAuthorizationUrl'] + "?" +
+        "state=" + jive.util.base64Encode(JSON.stringify(stateToEncode)) +
+        "&redirect_uri=" + oauth2Conf['clientOAuth2CallbackUrl'] +
+        "&client_id=" + oauth2Conf['oauth2ConsumerKey'] +
+        "&response_type=" + "code";
 
-    if ( extraAuthParams ) {
+    if (extraAuthParams) {
         var extraAuthStr = '';
         for (var key in extraAuthParams) {
             if (extraAuthParams.hasOwnProperty(key)) {
@@ -58,37 +58,37 @@ exports.buildAuthorizeUrlResponseMap = function (oauth2Conf, callback, context, 
     }
 
     return {
-        'url' : url
+        'url': url
     };
 };
 
-exports.buildOauth2CallbackObject = function(oauth2Conf, code, extraParams ) {
+exports.buildOauth2CallbackObject = function (oauth2Conf, code, extraParams) {
 
     var postObject = {
-        'grant_type'        : 'authorization_code',
-        'redirect_uri'      : oauth2Conf['clientOAuth2CallbackUrl'],
-        'client_id'         : oauth2Conf['oauth2ConsumerKey'],
-        'client_secret'     : oauth2Conf['oauth2ConsumerSecret'],
-        'code'              : code
+        'grant_type': 'authorization_code',
+        'redirect_uri': oauth2Conf['clientOAuth2CallbackUrl'],
+        'client_id': oauth2Conf['oauth2ConsumerKey'],
+        'client_secret': oauth2Conf['oauth2ConsumerSecret'],
+        'code': code
     };
 
-    if ( extraParams ) {
+    if (extraParams) {
         postObject = util._extend(postObject, extraParams);
     }
 
     return postObject;
 };
 
-exports.refreshTokenFlow = function(oauth2Conf, refreshToken) {
+exports.refreshTokenFlow = function (oauth2Conf, refreshToken) {
     var postObject = {
-        'grant_type'        : 'refresh_token',
-        'refresh_token'     : refreshToken,
-        'client_id'         : oauth2Conf['oauth2ConsumerKey'],
-        'client_secret'     : oauth2Conf['oauth2ConsumerSecret']
+        'grant_type': 'refresh_token',
+        'refresh_token': refreshToken,
+        'client_id': oauth2Conf['oauth2ConsumerKey'],
+        'client_secret': oauth2Conf['oauth2ConsumerSecret']
     };
 
     var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
 
-    return jive.util.buildRequest( oauth2Conf['originServerTokenRequestUrl'], 'POST', postObject, headers);
+    return jive.util.buildRequest(oauth2Conf['originServerTokenRequestUrl'], 'POST', postObject, headers);
 };
 

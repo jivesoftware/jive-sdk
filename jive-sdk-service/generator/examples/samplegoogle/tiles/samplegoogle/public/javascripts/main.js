@@ -1,4 +1,3 @@
-
 var ticketErrorCallback = function() {
     alert('ticketErrorCallback error');
 };
@@ -82,7 +81,7 @@ function doIt( host ) {
         oauth2SuccessCallback : oauth2SuccessCallback,
         preOauth2DanceCallback : preOauth2DanceCallback,
         onLoadCallback : onLoadCallback,
-        authorizeUrl : host + '/{{{TILE_NAME}}}/oauth/authorizeUrl',
+        authorizeUrl : host + '/{{{TILE_NAME_BASE}}}/oauth/authorizeUrl',
         extraAuthParams: {
             scope: encodeURIComponent('https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile')
         }

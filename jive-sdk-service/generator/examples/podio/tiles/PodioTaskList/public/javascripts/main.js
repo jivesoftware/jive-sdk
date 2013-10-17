@@ -1,4 +1,3 @@
-
 var ticketErrorCallback = function() {
     alert('ticketErrorCallback error');
 };
@@ -54,8 +53,8 @@ function doIt( host ) {
                 oauth2SuccessCallback : oauth2SuccessCallback,
                 preOauth2DanceCallback : preOauth2DanceCallback,
                 onLoadCallback : onLoadCallback,
-                authorizeUrl : host + '/{{{TILE_NAME}}}/oauth/authorizeUrl',
-                ticketURL: '/oauth/isAuthenticated',
+                authorizeUrl : host + '/{{{TILE_NAME_BASE}}}/oauth/authorizeUrl',
+                ticketURL: '/{{{TILE_NAME_BASE}}}/oauth/isAuthenticated',
                 extraAuthParams: {
                 }
             };
@@ -67,7 +66,7 @@ function doIt( host ) {
 
         // success on authentication .. now get the project info for this user ...
         osapi.http.get({
-            'href' : host + '/oauth/getProjectInfo?' +
+            'href' : host + '/{{{TILE_NAME_BASE}}}/oauth/getProjectInfo?' +
                 'id=' + ticketID +
                 "&ts=" + new Date().getTime() +
                 "&ticketID=" + ticketID,
@@ -153,8 +152,8 @@ function doIt( host ) {
         oauth2SuccessCallback : oauth2SuccessCallback,
         preOauth2DanceCallback : preOauth2DanceCallback,
         onLoadCallback : onLoadCallback,
-        authorizeUrl : host + '/{{{TILE_NAME}}}/oauth/authorizeUrl',
-        ticketURL: '/oauth/isAuthenticated',
+        authorizeUrl : host + '/{{{TILE_NAME_BASE}}}/oauth/authorizeUrl',
+        ticketURL: '/{{{TILE_NAME_BASE}}}/oauth/isAuthenticated',
         extraAuthParams: {
         }
     };
