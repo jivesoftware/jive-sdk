@@ -1,21 +1,22 @@
 var jive = require('jive-sdk');
 var fs = require('fs');
 var q = require('q');
-
-
 var logger = require('log4js').getLogger('storage-service');
 
 exports.registerPlace = function (req, res) {
     logger.info("Registering place...");
 
-    // TODO: generate AccessToken.
-    //{ "jiveUrl": req.body.jiveUrl, "containerId": req.body.container.id }
-    var cotainerGuid = jive.util.guid();
-
+    var registerReq = req.body;
     // We create a new folder for the created group.
     // Since this is a sample code we don't handle the case of 2 groups with the same name.
-    var containerPath = jive.service.options.rootFolder + "/" + req.body.container.name;
-    jive.util.fsexists(containerPath)
+    var containerPath = jive.service.options.rootFolder + "/" + registerReq.container.name;
+    var cotainerGuid = jive.util.guid();
+
+    jive.util.oauth.requestAccessToken(registerReq.jiveUrl, registerReq.oauthCode)
+        .then(function (oauthResponse) {
+            registerReq.oauth = oauthResponse.entity;
+            return jive.util.fsexists(containerPath);
+        })
         .then(function (exists) {
             if (!exists) {
                 return jive.util.fsmkdir(containerPath);
@@ -27,7 +28,7 @@ exports.registerPlace = function (req, res) {
         .then(function () {
             logger.info("Directory for group " + req.body.container.name + " was created in: " + containerPath);
             req.body.containerPath = containerPath;
-            return jive.context.persistence.save("places", cotainerGuid, req.body);
+            return jive.context.persistence.save("places", cotainerGuid, registerReq);
         })
         .then(function () {
             var responseBody =
@@ -53,7 +54,6 @@ exports.registerPlace = function (req, res) {
             res.send(responseBody, 200);
         })
         .catch(function (err) {
-
             logger.error(err);
             res.writeHead(500);
             res.end();
@@ -128,7 +128,7 @@ exports.downloadVersion = function (req, res) {
 
     jive.context.persistence.findByID("fileVersions", versionGuid)
         .then(function (versionObj) {
-           res.sendfile(versionObj.fileVersionPath);
+            res.sendfile(versionObj.fileVersionPath);
         })
         .catch(function (err) {
             logger.error(err);
@@ -215,6 +215,40 @@ exports.deleteFile = function (req, res) {
         });
 }
 
+// This iterates over all folders and look for files that are not uploaded to jive and push them.
+exports.task = new jive.tasks.build(
+    // runnable
+    function () {
+        jive.context.persistence.find("places")
+            .then(function (places) {
+                places.forEach(function (place) {
+                    var uploadFilePath = place.containerPath + "/uploads";
+                    jive.util.fsexists(uploadFilePath).then(function (exists) {
+                        if (exists) {
+                            return jive.util.fsreaddir(uploadFilePath);
+                        }
+                    })
+                        .then(function (items) {
+                            items.forEach(function (item) {
+                                var path = uploadFilePath + '/' + item;
+                                if (item.indexOf('.DS_Store') != 0) {
+                                    jive.util.fsisdir(path)
+                                        .then(function (isDir) {
+                                            if (!isDir) {
+                                                pushFileToJive(path, item, place);
+                                            }
+                                        });
+                                }
+                            });
+                        });
+                });
+            });
+    },
+
+    // interval (optional)
+    5000
+);
+
 function handleFileVersion(fileGuid, fileObj, versionObj, tempFile) {
     var versionGuid = jive.util.guid();
     if (fileObj.versionsList) {
@@ -281,16 +315,53 @@ function handleFileVersion(fileGuid, fileObj, versionObj, tempFile) {
         });
 };
 
-//exports.task = new jive.tasks.build(
-//    // runnable
-//    function () {
-//        jive.logger.info("A task ran!");
-//    },
-//
-//    // interval (optional)
-//    5000
-//);
-//
+function pushFileToJive(filePath, filename, place) {
+    logger.info("Pushing file " + filePath);
+    var fileGuid = jive.util.guid();
+    var fileObj = {
+        fileDirectoryPath: place.containerPath + "/" + filename
+    };
+    var versionObj = {
+        fileName: filename,
+        contentType: 'TBD'
+    };
+    var pushFileUrl = place.jiveUrl + place.containerApiSuffix + "files";
+    var tempFile;
+    jive.util.fsGetSize(filePath)
+        .then(function (size) {
+            tempFile = {
+                name: filename,
+                path: filePath,
+                size: size
+            };
+            return jive.util.fsexists(fileObj.fileDirectoryPath);
+        })
+        .then(function (exists) {
+            if (!exists) {
+                return jive.util.fsmkdir(fileObj.fileDirectoryPath);
+            } else {
+                return q.fcall(function () {
+                });
+            }
+        })
+        .then(function () {
+            return handleFileVersion(fileGuid, fileObj, versionObj, tempFile);
+        })
+        .then(function (reqPayload) {
+            var headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + place.oauth.access_token
+            };
+            return jive.util.buildRequest(pushFileUrl, "POST", reqPayload, headers);
+        })
+        .then(function () {
+            logger.info("done pushing file.")
+        })
+        .catch(function (err) {
+            logger.error(err);
+        });
+};
+
 //exports.onBootstrap = function (app) {
-//    jive.logger.info("This should have run on service bootstrap!");
+//    logger.info("This should have run on service bootstrap!");
 //};
