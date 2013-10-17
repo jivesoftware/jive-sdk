@@ -95,8 +95,9 @@ function mergeRecursive(original, newcommer) {
 }
 
 function processExample(target, example, name, force) {
-    console.log('Preparing example ', example, target );
+    console.log('Preparing example ', name, target );
 
+    var customName = name !== example;
     var root = __dirname;
     var uniqueUUID = jive.util.guid();
 
@@ -109,7 +110,13 @@ function processExample(target, example, name, force) {
                 if ( subDirs && subDirs['forEach'] ) {
                     subDirs.forEach(function(subDir) {
                         var sourceSubRootEntry = sourceSubRoot + '/' + subDir;
-                        var tileName = subDirs.length > 1 ? subDir : name;
+                        var tileName;
+                        if ( customName ) {
+                            tileName = subDirs.length > 1 ? name + '_' + subDir : name;
+                        } else {
+                            tileName = subDir;
+                        }
+
                         var targetSubRootEntry =
                             targetSubRoot + '/' + tileName;
 

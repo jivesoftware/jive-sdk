@@ -187,5 +187,30 @@ definitionSetup.setupAllDefinitions = function( app, definitionsRootDir ) {
         } else {
             return q.resolve();
         }
-    })
+    }).then( function () {
+        // make sure that all definitions in the db actually still exist
+        var remove = function(libraryToUse) {
+            return libraryToUse.findAll().then( function (allDefinitions) {
+                var proms = [];
+                allDefinitions.forEach(function (tile) {
+                    var definitionDir = tile['definitionDirName'];
+                    if ( definitionDir ) {
+                        proms.push(
+                            jive.util.fsexists( definitionsRootDir + '/' + definitionDir).then( function(exists) {
+                                return !exists ? libraryToUse.remove( tile['id']) : q.resolve();
+                            })
+                        );
+                    }
+                    return q.resolve();
+                });
+
+                return q.all(proms);
+            });
+        };
+
+        return remove( jive.tiles.definitions).then( function() {
+           return remove( jive.extstreams.definitions );
+        });
+    });
+
 };

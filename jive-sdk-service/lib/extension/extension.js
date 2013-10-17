@@ -71,6 +71,10 @@ exports.prepare = function (tilesDir, appsDir, cartridgesDir, storagesDir) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // private
 
+function limit(str, chars) {
+    return str.substring(0, str.length > chars ? chars : str.length );
+}
+
 function fillExtensionMetadata(extensionInfo, definitions) {
 
     var description = extensionInfo['description'];
@@ -141,7 +145,7 @@ function fillExtensionMetadata(extensionInfo, definitions) {
         }
 
         description = description.trim();
-        description = description.substring(0, description.length > 255 ? 255 : description.length );
+        description = limit(description, 255);
     }
 
     return {
@@ -174,7 +178,7 @@ function getTileDefinitions() {
 }
 
 function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, extensionSrcDir, extensionInfo, definitions) {
-    return buildTemplates(tilesDir).then(function (templates) {
+    return getTemplates(tilesDir).then(function (templates) {
         return getApps(appsDir, extensionInfo).then(function (apps) {
             return getStorages(storagesDir, extensionInfo).then(function (storages) {
                 return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
@@ -305,10 +309,14 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
     });
 }
 
-function buildTemplates(tilesDir) {
+function getTemplates(tilesDir) {
     var templatesPath = tilesDir + '/templates.json';
 
-    var toTemplateArray = function(templates) {
+    var toTemplateArray = function(allDefinitions, templates) {
+        if ( !allDefinitions || allDefinitions.length < 1) {
+            return null;
+        }
+
         if ( !templates ) {
             return null;
         }
@@ -316,51 +324,64 @@ function buildTemplates(tilesDir) {
         var templateArray = [];
         for (var key in templates) {
             if (templates.hasOwnProperty(key)) {
-                templateArray.push(templates[key]);
+                var template = templates[key];
+                var templateTiles = template['tiles'];
+                var filteredTiles = [];
+                if ( templateTiles ) {
+                    templateTiles.forEach( function(tileName) {
+                        if ( allDefinitions.indexOf(tileName) > -1 ) {
+                            filteredTiles.push(tileName);
+                        }
+                    });
+                }
+                template['tiles'] = filteredTiles;
+                templateArray.push(template);
             }
         }
         return templateArray;
     };
 
-    return jive.util.fsexists(tilesDir).then(function(exists) {
-        if ( !exists ) {
-            return q.resolve([]);
-        } else {
-            return jive.service.extensions().find().then(function (extension) {
-                return jive.util.fsexists(templatesPath.trim()).then(function (exists) {
-                    if (!exists) {
-                        // create it
-                        return buildDefaultTemplate(extension).then( function(defaultTemplate) {
-                            var templates = {};
-                            templates['default'] = defaultTemplate;
-                            return jive.util.fswrite(JSON.stringify(templates, null, 4), tilesDir + '/templates.json').then( function () {
-                                return toTemplateArray(templates);
-                            })
-                        });
-                    } else {
-                        // make sure there is a default template
-                        return jive.util.fsread(templatesPath).then( function(data) {
-                            var templates = JSON.parse( new Buffer(data).toString() );
-                            jive.logger.debug(templates);
-                            if ( !templates['default'] ) {
-                                return buildDefaultTemplate(extension).then( function(defaultTemplate) {
-                                    templates['default'] = defaultTemplate;
-                                    return jive.util.fswrite(JSON.stringify(templates, null, 4), tilesDir + '/templates.json').then( function() {
-                                        return toTemplateArray(templates);
-                                    })
-                                });
-                            } else {
-                                return toTemplateArray(templates);
-                            }
-                        });
-                    }
+    return getAllDefinitions().then( function(allDefinitions) {
+        return jive.util.fsexists(tilesDir).then(function(exists) {
+            if ( !exists ) {
+                return q.resolve([]);
+            } else {
+                return jive.service.extensions().find().then(function (extension) {
+                    return jive.util.fsexists(templatesPath.trim()).then(function (exists) {
+                        if (!exists) {
+                            // create it
+                            return buildDefaultTemplate(allDefinitions, extension).then( function(defaultTemplate) {
+                                var templates = {};
+                                templates['default'] = defaultTemplate;
+                                return jive.util.fswrite(JSON.stringify(templates, null, 4), tilesDir + '/templates.json').then( function () {
+                                    return toTemplateArray(allDefinitions, templates);
+                                })
+                            });
+                        } else {
+                            // make sure there is a default template
+                            return jive.util.fsread(templatesPath).then( function(data) {
+                                var templates = JSON.parse( new Buffer(data).toString() );
+                                jive.logger.debug(templates);
+                                if ( !templates['default'] ) {
+                                    return buildDefaultTemplate(allDefinitions, extension).then( function(defaultTemplate) {
+                                        templates['default'] = defaultTemplate;
+                                        return jive.util.fswrite(JSON.stringify(templates, null, 4), tilesDir + '/templates.json').then( function() {
+                                            return toTemplateArray(allDefinitions, templates);
+                                        })
+                                    });
+                                } else {
+                                    return toTemplateArray(allDefinitions, templates);
+                                }
+                            });
+                        }
+                    });
                 });
-            });
-        }
-    })
+            }
+        })
+    });
 }
 
-function buildDefaultTemplate(extension, existing) {
+function getAllDefinitions() {
     return q.all([ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ]).then(
         function (allDefinitions) {
             var tiles = [];
@@ -370,20 +391,40 @@ function buildDefaultTemplate(extension, existing) {
                 });
             });
 
-            existing = existing || {};
-            var extensionName = extension['name'] || extension['uuid'];
-            var extensionDescription = extension['description'] || extensionName;
+        return tiles;
+    });
+}
 
-            var defaultTemplate = {
-                "name": "defaultTemplate",
-                "displayName": extensionName,
-                "description": extensionDescription,
-                "tiles": tiles
-            };
+function buildDefaultTemplate(allDefinitions, extension) {
+    var extensionName = extension['name'];
+    var extensionDescription = extension['description'];
 
-            return defaultTemplate;
+    if ( !extensionName ) {
+        if ( allDefinitions ) {
+            var c = [];
+            extensionName = '';
+            extensionName += 'Contains: [';
+            extensionName += allDefinitions.join(', ').trim();
+            extensionName += '] ';
+
+            extensionName = limit(extensionName, 127);
+        } else {
+            extensionName = extension['uuid'];
         }
-    );
+    }
+
+    if ( !extensionDescription ) {
+        extensionDescription = 'Extension UUID ' + extension['uuid'] + ' ' + extensionName;
+    }
+
+    var defaultTemplate = {
+        "name": "defaultTemplate",
+        "displayName": extensionName,
+        "description": extensionDescription,
+        "tiles": allDefinitions
+    };
+
+    return q.resolve( defaultTemplate );
 }
 
 function getPersistedExtensionInfo(config) {

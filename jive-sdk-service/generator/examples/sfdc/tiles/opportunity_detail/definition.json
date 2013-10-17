@@ -37,9 +37,9 @@
             "listStyle": "contentList"
         }
     },
-    "displayName": "Tile {{{TILE_NAME}}}",
+    "displayName": "Detail for an SFDC Opportunity",
     "name": "{{{TILE_NAME}}}",
-    "description": "{{{TILE_NAME}}}",
+    "description": "Opportunity Detail",
     "style": "LIST",
     "icons": {
         "16": "http://i.cdn.turner.com/cnn/.e/img/3.0/global/header/hdr-main.gif",
