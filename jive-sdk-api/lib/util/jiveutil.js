@@ -706,16 +706,13 @@ exports.zipFolder = function (root, targetZip, flatten) {
             }
         })
     }).then(function () {
-        var deferred = q.defer();
-        archive.finalize(function (err, written) {
-            if (err) {
-                throw err;
-            }
-            jive.logger.info(written + ' total bytes written to extension archive ', targetZip);
-            deferred.resolve();
+            archive.finalize(function (err, written) {
+                if (err) {
+                    throw err;
+                }
+                jive.logger.info(written + ' total bytes written to extension archive ', targetZip);
+            });
         });
-        return deferred.promise;
-    });
 };
 
 exports.oauth = oauthUtil;

@@ -1,0 +1,20 @@
+{
+    "displayName": "File System Storage",
+    "description": "Saves files on the node.js machine",
+    "registerPlace": "%serviceURL%/fsstorage/register",
+    "userMappingOptions": [
+        "EMAIL"
+    ],
+    "supportedResourceNames": [
+        "uploadFile",
+        "downloadFile"
+    ],
+    "prefixUrl": "%serviceURL%",
+    "resolveResources": "%serviceURL%/resolveResources",
+    "icons": {
+        "16": "extension-16.png",
+        "48": "extension-48.png",
+        "128": "extension-128.png"
+    },
+    "healthCheckURL": "%serviceURL%/fsstorage/isAlive"
+}

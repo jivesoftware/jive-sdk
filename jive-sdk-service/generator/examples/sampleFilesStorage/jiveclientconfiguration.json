@@ -1,0 +1,9 @@
+{
+    "clientUrl": "http://localhost",
+    "port": "8090",
+    "rootFolder" : "JiveStorage",
+    "extensionInfo": {
+        "name": "File System Storage",
+        "description": "Saves files on the node.js machine"
+    }
+}
