@@ -43,7 +43,7 @@ var hex_high_10 = { // set the highest bit and clear the next highest
     'f': 'b'
 };
 
-exports.guid = function(src) {
+exports.guid = function (src) {
     if (!src) {
         return uuid.v4();
     } else {
@@ -78,19 +78,19 @@ var jsonResponseCallbackWrapper = function (response, body, successCallback, err
     var isErrorCode = !( statusCode >= 200 && statusCode <= 299 );
 
     var resp = {
-        'statusCode' : statusCode,
-        'headers' : responseHeaders
+        'statusCode': statusCode,
+        'headers': responseHeaders
     };
 
-    if ( body && body.length > 0 ) {
+    if (body && body.length > 0) {
         try {
             resp['entity'] = JSON.parse(body);
-        } catch( e ) {
-           resp['entity'] = {status: statusCode, body: body }
+        } catch (e) {
+            resp['entity'] = {status: statusCode, body: body }
         }
     }
 
-    if ( isErrorCode && errCallback) {
+    if (isErrorCode && errCallback) {
         jive.logger.debug("err:", resp);
         errCallback(resp);
     } else if (successCallback) {
@@ -100,7 +100,7 @@ var jsonResponseCallbackWrapper = function (response, body, successCallback, err
 
 };
 
-var requestMaker = function (method, serverInfo, path, headers, body, secure, requestOptions ) {
+var requestMaker = function (method, serverInfo, path, headers, body, secure, requestOptions) {
 
     if (typeof body === 'undefined' || body === null) {
         body = '';
@@ -115,9 +115,9 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
         headers: headers || {}
     };
 
-    if ( requestOptions  ) {
-        for ( var key in requestOptions ) {
-            if ( requestOptions.hasOwnProperty(key) ) {
+    if (requestOptions) {
+        for (var key in requestOptions) {
+            if (requestOptions.hasOwnProperty(key)) {
                 options[key] = requestOptions[key];
             }
         }
@@ -144,26 +144,26 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
         postBodyStr = '';
         var contentType = headers['Content-Type'];
 
-        if ( contentType === 'application/json') {
-            if ( typeof body === 'object' ) {
+        if (contentType === 'application/json') {
+            if (typeof body === 'object') {
                 postBodyStr = JSON.stringify(body);
-            } else if (typeof body === 'string' ) {
+            } else if (typeof body === 'string') {
                 postBodyStr = body;
             } else {
                 throw "Illegal type of post body; only object or string is permitted.";
             }
         } else if (contentType === 'application/x-www-form-urlencoded') {
             var postObject;
-            if ( typeof body === 'string' ) {
+            if (typeof body === 'string') {
                 try {
-                    postObject = JSON.parse( body );
+                    postObject = JSON.parse(body);
                 } catch (e) {
                     postBodyStr = body;
                 }
             } else if (typeof body === 'object') {
                 postObject = body;
             }
-            else  {
+            else {
                 throw "Illegal type of post body; only object or string is permitted.";
             }
 
@@ -187,12 +187,12 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
         execute: function (successCallback, errCallback) {
             var request = require('request');
             var url = ( secure ? 'https' : 'http') + '://' +
-                      options['host'] +
-                     ( options['port'] ? ':' + options['port'] : ( secure ? (':' + 443) : '' ) ) +
-                      options['path']
-                      ;
+                    options['host'] +
+                    ( options['port'] ? ':' + options['port'] : ( secure ? (':' + 443) : '' ) ) +
+                    options['path']
+                ;
             options['url'] = url;
-            if ( postBodyStr ) {
+            if (postBodyStr) {
                 options['body'] = postBodyStr;
             }
 
@@ -203,12 +203,12 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
             request(options, function (error, response, body) {
                 if (error) {
                     console.log("Error making request: %s", JSON.stringify(error));
-                    console.log("response body: ", response ? (response.statusCode || "no status code"):"no response", body || "no body");
+                    console.log("response body: ", response ? (response.statusCode || "no status code") : "no response", body || "no body");
                     console.log("Options: %s", JSON.stringify(options));
                     errCallback(error);
                 }
                 else {
-                    jsonResponseCallbackWrapper(response, body, successCallback, errCallback );
+                    jsonResponseCallbackWrapper(response, body, successCallback, errCallback);
                 }
             });
         }
@@ -225,7 +225,7 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
  * @param requestOptions leave null or empty [] if no additional request optinos
  * @return {*}
  */
-exports.buildRequest = function(url, method, postBody, headers, requestOptions ) {
+exports.buildRequest = function (url, method, postBody, headers, requestOptions) {
     var urlParts = URL.parse(url, true);
     var path = urlParts.path;
     var host = urlParts.hostname;
@@ -240,16 +240,16 @@ exports.buildRequest = function(url, method, postBody, headers, requestOptions )
         path,
         headers || {},
         postBody,
-        protocol && protocol.indexOf( 'https' ) == 0,
+        protocol && protocol.indexOf('https') == 0,
         requestOptions || {}
     ).execute(
         // success
-        function(response) {
+        function (response) {
             deferred.resolve(response);
         },
 
         // failure
-        function(response) {
+        function (response) {
             deferred.reject(response);
         }
     );
@@ -257,21 +257,39 @@ exports.buildRequest = function(url, method, postBody, headers, requestOptions )
     return deferred.promise;
 };
 
+/**
+ * Gets the file size in bytes.
+ * @param filename - the path to the file.
+ * @returns a promise with the file size / error.
+ */
+exports.fsGetSize = function (filename) {
+    var deferred = q.defer();
+    fs.stat(filename, function (err, stats) {
+        if (err) {
+            deferred.reject(err);
+        }
+        else {
+            deferred.resolve(stats.size);
+        }
+    });
+    return deferred.promise;
+};
+
 exports.fsexists = function (path) {
     var deferred = q.defer();
     var method = fs.exists ? fs.exists : require('path').exists;
-    method( path, function(exists ) {
+    method(path, function (exists) {
         deferred.resolve(exists);
     });
 
     return deferred.promise;
 };
 
-exports.fscopy = function(source, target) {
-    jive.logger.debug('Copying',source,'to',target);
+exports.fscopy = function (source, target) {
+    jive.logger.debug('Copying', source, 'to', target);
     var deferred = q.defer();
 
-    fs.copy(source, target, function(err){
+    fs.copy(source, target, function (err) {
         if (err) {
             deferred.reject(err);
         }
@@ -284,10 +302,10 @@ exports.fscopy = function(source, target) {
 };
 
 
-var fsSimpleRename = function( source, target ) {
+var fsSimpleRename = function (source, target) {
     var deferred = q.defer();
 
-    fs.rename(source, target, function(err){
+    fs.rename(source, target, function (err) {
         if (err) {
             deferred.reject(err);
         }
@@ -299,44 +317,32 @@ var fsSimpleRename = function( source, target ) {
     return deferred.promise;
 };
 
-exports.fsrename = function(source, target, force) {
-    jive.logger.debug('Renaming',source,'to',target);
-    if ( !force ) {
+exports.fsrename = function (source, target, force) {
+    jive.logger.debug('Renaming', source, 'to', target);
+    if (!force) {
         return fsSimpleRename(source, target);
     }
 
-    var deferred = q.defer();
-    exports.fsexists( target ).then( function(exists) {
-        if ( exists ) {
-            if ( force ) {
-                // delete
-                return exports.fsrmdir(target).then( function() {
-                    // do rename
-                    jive.logger.debug('Renaing',source,'->',target);
-                    return fsSimpleRename(source, target);
-                }, function(){
-                    jive.logger.debug(target,'could not be removed');
-                    deferred.reject();
-                });
-            } else {
-                // skipping since exists already
-                jive.logger.debug(target,'already exists, skipping');
-                deferred.resolve();
-            }
+    return exports.fsexists(target).then(function (exists) {
+        if (exists) {
+            // delete
+            return exports.fsrmdir(target).then(function () {
+                // do rename
+                jive.logger.debug('Renaming', source, '->', target);
+                return fsSimpleRename(source, target);
+            });
         } else {
             // do rename
             return fsSimpleRename(source, target);
         }
     });
-
-    return deferred.promise;
 };
 
-exports.fsmkdir = function(path) {
-    jive.logger.debug('Creating directory',path);
+exports.fsmkdir = function (path) {
+    jive.logger.debug('Creating directory', path);
     var deferred = q.defer();
 
-    fs.mkdirs( path, function(err) {
+    fs.mkdirs(path, function (err) {
         if (err) {
             deferred.reject(err);
         }
@@ -348,7 +354,7 @@ exports.fsmkdir = function(path) {
     return deferred.promise;
 };
 
-exports.fsread = function(path) {
+exports.fsread = function (path) {
     var deferred = q.defer();
     fs.readFile(path, function (err, data) {
         deferred.resolve(data);
@@ -357,16 +363,16 @@ exports.fsread = function(path) {
     return deferred.promise;
 };
 
-exports.fsreadJson = function(path) {
-    return exports.fsread( path).then( function(data ) {
-        return JSON.parse( new Buffer(data).toString() );
+exports.fsreadJson = function (path) {
+    return exports.fsread(path).then(function (data) {
+        return JSON.parse(new Buffer(data).toString());
     });
 };
 
-exports.fsreaddir = function(path) {
+exports.fsreaddir = function (path) {
     var deferred = q.defer();
 
-    fs.readdir( path, function(err, items) {
+    fs.readdir(path, function (err, items) {
         deferred.resolve(items);
         return items;
     });
@@ -374,29 +380,29 @@ exports.fsreaddir = function(path) {
     return deferred.promise;
 };
 
-var removeRecursive = function(path,cb){
-    fs.stat(path, function(err, stats) {
-        if(err){
-            cb(err,stats);
+var removeRecursive = function (path, cb) {
+    fs.stat(path, function (err, stats) {
+        if (err) {
+            cb(err, stats);
             return;
         }
-        if(stats.isFile()){
-            fs.unlink(path, function(err) {
-                if(err) {
-                    cb(err,null);
-                }else{
-                    cb(null,true);
+        if (stats.isFile()) {
+            fs.unlink(path, function (err) {
+                if (err) {
+                    cb(err, null);
+                } else {
+                    cb(null, true);
                 }
                 return;
             });
-        }else if(stats.isDirectory()){
+        } else if (stats.isDirectory()) {
             // A folder may contain files
             // We need to delete the files first
             // When all are deleted we could delete the
             // dir itself
-            fs.readdir(path, function(err, files) {
-                if(err){
-                    cb(err,null);
+            fs.readdir(path, function (err, files) {
+                if (err) {
+                    cb(err, null);
                     return;
                 }
                 var f_length = files.length;
@@ -405,36 +411,36 @@ var removeRecursive = function(path,cb){
                 // Check and keep track of deleted files
                 // Delete the folder itself when the files are deleted
 
-                var checkStatus = function(){
+                var checkStatus = function () {
                     // We check the status
                     // and count till we r done
-                    if(f_length===f_delete_index){
-                        fs.rmdir(path, function(err) {
-                            if(err){
-                                cb(err,null);
-                            }else{
-                                cb(null,true);
+                    if (f_length === f_delete_index) {
+                        fs.rmdir(path, function (err) {
+                            if (err) {
+                                cb(err, null);
+                            } else {
+                                cb(null, true);
                             }
                         });
                         return true;
                     }
                     return false;
                 };
-                if(!checkStatus()){
-                    for(var i=0;i<f_length;i++){
+                if (!checkStatus()) {
+                    for (var i = 0; i < f_length; i++) {
                         // Create a local scope for filePath
                         // Not really needed, but just good practice
                         // (as strings arn't passed by reference)
-                        (function(){
+                        (function () {
                             var filePath = path + '/' + files[i];
                             // Add a named function as callback
                             // just to enlighten debugging
-                            removeRecursive(filePath,function removeRecursiveCB(err,status){
-                                if(!err){
-                                    f_delete_index ++;
+                            removeRecursive(filePath, function removeRecursiveCB(err, status) {
+                                if (!err) {
+                                    f_delete_index++;
                                     checkStatus();
-                                }else{
-                                    cb(err,null);
+                                } else {
+                                    cb(err, null);
                                     return;
                                 }
                             });
@@ -447,11 +453,11 @@ var removeRecursive = function(path,cb){
     });
 };
 
-exports.fsrmdir = function(path) {
+exports.fsrmdir = function (path) {
     var deferred = q.defer();
 
-    removeRecursive( path, function(err, stats) {
-        if ( err ) {
+    removeRecursive(path, function (err, stats) {
+        if (err) {
             deferred.reject(err);
         } else {
             deferred.resolve();
@@ -461,23 +467,25 @@ exports.fsrmdir = function(path) {
     return deferred.promise;
 };
 
-exports.fsisdir = function(path) {
+exports.fsisdir = function (path) {
     var deferred = q.defer();
 
-    fs.stat(path, function(err, stats) {
-        if(err){
+    fs.stat(path, function (err, stats) {
+        if (err) {
             deferred.reject(err);
         }
-        deferred.resolve( stats.isDirectory() );
+        else {
+            deferred.resolve(stats.isDirectory());
+        }
     });
 
     return deferred.promise;
 };
 
-exports.fswrite = function(data, path ) {
+exports.fswrite = function (data, path) {
     var deferred = q.defer();
 
-    fs.writeFile(path, data, function(err) {
+    fs.writeFile(path, data, function (err) {
         if (err) {
             deferred.reject(err);
         }
@@ -491,86 +499,86 @@ exports.fswrite = function(data, path ) {
 var supportedTemplatableExtensions = [ '.json', '.txt', '.text', '.js', '.sql', '.html', '.xml' ];
 
 function getExtension(filename) {
-    if ( !filename ) {
+    if (!filename) {
         return;
     }
     var i = filename.lastIndexOf('.');
     return (i < 0) ? '' : filename.substr(i);
 }
 
-exports.fsTemplateCopy = function( source, target, substitutions ) {
+exports.fsTemplateCopy = function (source, target, substitutions) {
     var ext = getExtension(source);
-    if ( !ext || supportedTemplatableExtensions.indexOf( ext.toLowerCase() ) < 0 || !substitutions ) {
-        jive.logger.debug(source + ' is not a supported templatable file type. Doing straight copying', source, '->', target );
-        return exports.fscopy( source, target );
+    if (!ext || supportedTemplatableExtensions.indexOf(ext.toLowerCase()) < 0 || !substitutions) {
+        jive.logger.debug(source + ' is not a supported templatable file type. Doing straight copying', source, '->', target);
+        return exports.fscopy(source, target);
     } else {
-        jive.logger.debug('Templatized Copying', source, '->', target );
-        return exports.fsread(source).then( function( data ) {
+        jive.logger.debug('Templatized Copying', source, '->', target);
+        return exports.fsread(source).then(function (data) {
             var raw = data.toString();
-            var processed = mustache.render(raw, substitutions || {} );
+            var processed = mustache.render(raw, substitutions || {});
             return exports.fswrite(processed, target);
         });
     }
 };
 
-exports.fsTemplateWrite = function( data, target, substitutions ) {
+exports.fsTemplateWrite = function (data, target, substitutions) {
     var ext = getExtension(target);
-    if ( !ext || supportedTemplatableExtensions.indexOf( ext.toLowerCase() ) < 0 ) {
-        jive.logger.debug(target + ' is not a supported templatable file type. Doing straight write ->', target );
-        return exports.fswrite( data, target );
+    if (!ext || supportedTemplatableExtensions.indexOf(ext.toLowerCase()) < 0) {
+        jive.logger.debug(target + ' is not a supported templatable file type. Doing straight write ->', target);
+        return exports.fswrite(data, target);
     } else {
-        jive.logger.debug('Templatized write ->', target );
-        var processed = mustache.render(data, substitutions || {} );
+        jive.logger.debug('Templatized write ->', target);
+        var processed = mustache.render(data, substitutions || {});
         return exports.fswrite(processed, target);
     }
 };
 
-exports.fsTemplateRead = function( source, substitutions ) {
-    return exports.fsread(source).then( function( data ) {
+exports.fsTemplateRead = function (source, substitutions) {
+    return exports.fsread(source).then(function (data) {
         var raw = data.toString();
-        return mustache.render(raw, substitutions || {} );
+        return mustache.render(raw, substitutions || {});
     });
 };
 
-exports.base64Encode = function( object ) {
-    return new Buffer( JSON.stringify( object) ).toString('base64');
+exports.base64Encode = function (object) {
+    return new Buffer(JSON.stringify(object)).toString('base64');
 };
 
-exports.base64Decode = function( str ) {
+exports.base64Decode = function (str) {
     return new Buffer(str, 'base64').toString('ascii');
 };
 
-exports.basicAuthorizationHeaderValid = function( auth, clientId, clientSecret ) {
-    if (auth && auth.indexOf('Basic ') == 0 ) {
+exports.basicAuthorizationHeaderValid = function (auth, clientId, clientSecret) {
+    if (auth && auth.indexOf('Basic ') == 0) {
         var authParts = auth.split('Basic ');
         var p = new Buffer(authParts[1], 'base64').toString();
         var pParts = p.split(':');
         var authClientId = pParts[0];
         var authSecret = pParts[1];
 
-        if ( authClientId !== clientId || authSecret !== clientSecret ) {
+        if (authClientId !== clientId || authSecret !== clientSecret) {
             return false;
         }
     }
     return true;
 };
 
-exports.jiveAuthorizationHeaderValid = function( auth, clientId, clientSecret ) {
-    if ( !auth ) {
+exports.jiveAuthorizationHeaderValid = function (auth, clientId, clientSecret) {
+    if (!auth) {
         return true;
     }
 
     var authVars = auth.split(' ');
     var authFlag = authVars[0];
-    if ( authFlag == 'JiveEXTN') {
+    if (authFlag == 'JiveEXTN') {
         var str = '';
         var authParams = authVars[1].split('&');
         var signature;
-        authParams.forEach( function(p) {
-            if (p.indexOf('signature') == 0 ) {
+        authParams.forEach(function (p) {
+            if (p.indexOf('signature') == 0) {
                 signature = p.split("=")[1];
             } else {
-                if ( str.length > 0 ) {
+                if (str.length > 0) {
                     str += '&';
                 }
                 str += p;
@@ -579,7 +587,7 @@ exports.jiveAuthorizationHeaderValid = function( auth, clientId, clientSecret ) 
 
         //do signature verification
         var hmac_signature = crypto.createHmac('SHA256', new Buffer(clientSecret, 'base64')).update(str).digest('base64');
-        return hmac_signature == decodeURIComponent( signature );
+        return hmac_signature == decodeURIComponent(signature);
     } else {
         return true;
     }
@@ -603,30 +611,30 @@ exports.sortObject = function (o) {
     return sorted;
 };
 
-exports.recursiveDirectoryProcessor = function(currentFsItem, root, targetRoot, force, processor ) {
+exports.recursiveDirectoryProcessor = function (currentFsItem, root, targetRoot, force, processor) {
 
-    var recurseDirectory =  function(directory) {
-        return q.nfcall(fs.readdir, directory).then(function( subItems ) {
+    var recurseDirectory = function (directory) {
+        return q.nfcall(fs.readdir, directory).then(function (subItems) {
             var promises = [];
-            subItems.forEach( function( subItem ) {
-                promises.push( exports.recursiveDirectoryProcessor( directory + '/' + subItem, root, targetRoot, force, processor ) );
+            subItems.forEach(function (subItem) {
+                promises.push(exports.recursiveDirectoryProcessor(directory + '/' + subItem, root, targetRoot, force, processor));
             });
 
-            return q.all( promises );
+            return q.all(promises);
         });
     };
 
-    return q.nfcall( fs.stat, currentFsItem ).then( function(stat) {
-        var targetPath = targetRoot + '/' +  currentFsItem.substr(root.length + 1, currentFsItem.length );
+    return q.nfcall(fs.stat, currentFsItem).then(function (stat) {
+        var targetPath = targetRoot + '/' + currentFsItem.substr(root.length + 1, currentFsItem.length);
 
-        if ( stat.isDirectory() ) {
-            if ( root !== currentFsItem ) {
-                return exports.fsexists(targetPath).then( function(exists) {
-                    if ( root == currentFsItem || (exists && !force)) {
+        if (stat.isDirectory()) {
+            if (root !== currentFsItem) {
+                return exports.fsexists(targetPath).then(function (exists) {
+                    if (root == currentFsItem || (exists && !force)) {
                         return recurseDirectory(currentFsItem);
                     } else {
-                        return processor( 'dir', currentFsItem, targetPath ).then( function() {
-                            return recurseDirectory(currentFsItem )
+                        return processor('dir', currentFsItem, targetPath).then(function () {
+                            return recurseDirectory(currentFsItem)
                         });
                     }
                 });
@@ -636,29 +644,30 @@ exports.recursiveDirectoryProcessor = function(currentFsItem, root, targetRoot, 
         }
 
         // must be a file
-        return exports.fsexists(targetPath).then( function(exists) {
-            if ( !exists || force ) {
-                return processor( 'file', currentFsItem, targetPath )
+        return exports.fsexists(targetPath).then(function (exists) {
+            if (!exists || force) {
+                return processor('file', currentFsItem, targetPath)
             } else {
-                return q.fcall(function(){});
+                return q.fcall(function () {
+                });
             }
         });
     });
 };
 
-var copyFileProcessor = function( type, currentFsItem, targetPath, substitutions ) {
-    return q.fcall( function() {
-        if ( type === 'dir' ) {
-            return exports.fsmkdir( targetPath );
-        }  else {
+var copyFileProcessor = function (type, currentFsItem, targetPath, substitutions) {
+    return q.fcall(function () {
+        if (type === 'dir') {
+            return exports.fsmkdir(targetPath);
+        } else {
             // must be file
-            return exports.fsTemplateCopy( currentFsItem, targetPath, substitutions );
+            return exports.fsTemplateCopy(currentFsItem, targetPath, substitutions);
         }
     });
 };
 
-exports.recursiveCopy = function(root, target, force, substitutions ) {
-    var substitutionProcessor = function (type, currentFsItem, targetPath ) {
+exports.recursiveCopy = function (root, target, force, substitutions) {
+    var substitutionProcessor = function (type, currentFsItem, targetPath) {
         return copyFileProcessor(type, currentFsItem, targetPath, substitutions);
     };
 
@@ -671,41 +680,41 @@ exports.recursiveCopy = function(root, target, force, substitutions ) {
     );
 };
 
-exports.zipFolder = function( root, targetZip, flatten ) {
+exports.zipFolder = function (root, targetZip, flatten) {
     var fs = require('fs');
 
     var archiver = require('archiver');
 
-    var output = fs.createWriteStream( targetZip );
+    var output = fs.createWriteStream(targetZip);
     var archive = archiver('zip');
 
-    archive.on('error', function(err) {
+    archive.on('error', function (err) {
         throw err;
     });
 
     archive.pipe(output);
 
-    return exports.recursiveDirectoryProcessor( root, root, '/tmp', true, function( type, currentFsItem, targetPath, substitutions ) {
-        return q.fcall( function() {
-            if ( type ==='file' ) {
-                var target = currentFsItem.substring( currentFsItem.indexOf( '/' ) + 1, currentFsItem.length );
-                if ( flatten ) {
-                    target =  require('path').basename( target );
+    return exports.recursiveDirectoryProcessor(root, root, '/tmp', true,function (type, currentFsItem, targetPath, substitutions) {
+        return q.fcall(function () {
+            if (type === 'file') {
+                var target = currentFsItem.substring(currentFsItem.indexOf('/') + 1, currentFsItem.length);
+                if (flatten) {
+                    target = require('path').basename(target);
                 }
-                jive.logger.debug('Zipping', currentFsItem, 'to', targetZip, ' : ', target );
+                jive.logger.debug('Zipping', currentFsItem, 'to', targetZip, ' : ', target);
                 archive.append(fs.createReadStream(currentFsItem), { name: target })
             }
         })
-    }).then( function() {
-            var deferred = q.defer();
-            archive.finalize(function (err, written) {
-                if (err) {
-                    throw err;
-                }
-                jive.logger.info(written + ' total bytes written to extension archive ', targetZip);
-                deferred.resolve();
-            });
-            return deferred.promise;
+    }).then(function () {
+        var deferred = q.defer();
+        archive.finalize(function (err, written) {
+            if (err) {
+                throw err;
+            }
+            jive.logger.info(written + ' total bytes written to extension archive ', targetZip);
+            deferred.resolve();
+        });
+        return deferred.promise;
     });
 };
 
