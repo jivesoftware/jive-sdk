@@ -10,10 +10,11 @@ var tokenStore = jive.service.persistence();
 // like storing access token for the viewer
 
 myOauth.fetchOAuth2Conf = function() {
-    var oauthConf = jive.service.options['oauth2-sfdc'];
+    var oauthConf = jive.service.options['oauth2-sfdc'] || {};
+        oauthConf = JSON.parse( JSON.stringify( oauthConf ) );
     var clientOAuth2CallbackUrl = oauthConf[ 'clientOAuth2CallbackUrl' ];
-    oauthConf[ 'clientOAuth2CallbackUrl' ] =
-        clientOAuth2CallbackUrl || jive.service.serviceURL() + '/{{{TILE_NAME}}}/oauth/oauth2Callback';
+        oauthConf[ 'clientOAuth2CallbackUrl' ] =
+        clientOAuth2CallbackUrl || jive.service.serviceURL() + '/{{{TILE_NAME_BASE}}}/oauth/oauth2Callback';
     return oauthConf;
 };
 

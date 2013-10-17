@@ -121,6 +121,7 @@ function processExample(target, example, name, force) {
                             targetSubRoot + '/' + tileName;
 
                         var substitutions = !doSubstitutions ? undefined : {
+                            'TILE_NAME_BASE' : name,
                             'TILE_NAME': tileName,
                             'GENERATED_UUID' : uniqueUUID,
                             'host': '{{{host}}}'
@@ -157,7 +158,7 @@ function processExample(target, example, name, force) {
     };
 
     var baseSubstitutions = {
-        'TILE_NAME': name,
+        'TILE_NAME_BASE': name,
         'host': '{{{host}}}'
     };
 

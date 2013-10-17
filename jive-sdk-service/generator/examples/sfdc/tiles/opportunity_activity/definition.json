@@ -5,8 +5,8 @@
     "description" : "Opportunity activity.",
     "style" : "ACTIVITY",
     "icons" : {
-        "16" : "http://farm6.staticflickr.com/5106/5678094118_a78e6ff4e7.jpg",
-        "48" : "http://farm6.staticflickr.com/5106/5678094118_a78e6ff4e7.jpg",
-        "128" : "http://farm6.staticflickr.com/5106/5678094118_a78e6ff4e7.jpg"
+        "16": "{{{host}}}/{{{TILE_NAME}}}/images/salesforce.png",
+        "48": "{{{host}}}/{{{TILE_NAME}}}/images/salesforce.png",
+        "128": "{{{host}}}/{{{TILE_NAME}}}/images/salesforce.png"
     }
 }
