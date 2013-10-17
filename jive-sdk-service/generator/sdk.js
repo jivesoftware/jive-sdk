@@ -224,12 +224,14 @@ function processDefinition(target, type, name, style, force) {
     return q.all(promises);
 }
 
-function listDirectory(dirName, dirPath) {
+function listDirectory(dirName, dirPath, excludes) {
     console.log('\nContents of ' + dirName + ' directory (', dirPath, '):\n' );
 
     return q.nfcall(fs.readdir, dirPath ).then(function(dirContents){
         dirContents.forEach(function(item) {
-            console.log(item);
+            if ( !excludes || excludes.indexOf(item) < 0 ) {
+                console.log(item);
+            }
         });
     })
 }
@@ -248,7 +250,7 @@ function finish(target) {
     // tiles
     jive.util.fsexists(definitionsDir).then( function(exists) {
         if ( exists ) {
-            return listDirectory('tiles', definitionsDir);
+            return listDirectory('tiles', definitionsDir, ['templates.json'] );
         } else {
             return q.resolve(true);
         }
