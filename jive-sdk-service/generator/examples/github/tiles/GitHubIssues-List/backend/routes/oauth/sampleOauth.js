@@ -10,7 +10,12 @@ var tokenStore = jive.service.persistence();
 // like storing access token for the viewer
 
 myOauth.fetchOAuth2Conf = function() {
-    return jive.service.options['oauth2-github'];
+    var oauthConf = jive.service.options['oauth2-github'] || {};
+    oauthConf = JSON.parse( JSON.stringify( oauthConf ) );
+    var clientOAuth2CallbackUrl = oauthConf[ 'clientOAuth2CallbackUrl' ];
+    oauthConf[ 'clientOAuth2CallbackUrl' ] =
+        clientOAuth2CallbackUrl || jive.service.serviceURL() + '/{{{TILE_NAME_BASE}}}/oauth/oauth2Callback';
+    return oauthConf;
 };
 
 myOauth.oauth2SuccessCallback = function( state, originServerAccessTokenResponse, callback ) {

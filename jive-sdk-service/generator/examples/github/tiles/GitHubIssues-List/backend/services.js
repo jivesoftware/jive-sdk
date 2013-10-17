@@ -22,30 +22,24 @@ var colorMap = {
     'green':'http://cdn1.iconfinder.com/data/icons/function_icon_set/circle_green.png',
     'red':'http://cdn1.iconfinder.com/data/icons/function_icon_set/circle_red.png',
     'disabled':'http://cdn1.iconfinder.com/data/icons/function_icon_set/warning_48.png'
-}
+};
+
 function processTileInstance(instance) {
     jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id);
 
     var config = tile.config;
 
     github.getData( org, repo, types, config.ticketID, function(data) {
-
-        //console.log("got data:", data)
         callback(data)
     });
-
-    //jive.tiles.pushData(instance, dataToPush);
 }
+
 function prepareData(tile, data, callback) {
-
     var config = tile.config;
-
-    console.log("PREPARE DATA: ticketID=" + config.ticketID)
-
+    jive.logger.info("PREPARE DATA: ticketID=" + config.ticketID)
 
     // use path for repository: organization / repository
     var repository = config["organization"];        // for now, this holds the full name ...
-
 
     // to check .. can we pass an object to the action so that we have a cleaner interface ?
     var fields = Object.keys(data).map(function(field) {
@@ -60,7 +54,6 @@ function prepareData(tile, data, callback) {
         }
     });
 
-
     var preparedData = {
         title : "Repository: '" + repository +"'" ,
         contents : fields,
@@ -69,27 +62,22 @@ function prepareData(tile, data, callback) {
             'url': 'https://www.github.com'
         }
     };
-    console.log("Prepared data", JSON.stringify(preparedData));
 
+    jive.logger.info("Prepared data", JSON.stringify(preparedData));
 
     callback(preparedData);
 }
-function pushUpdate(tile) {
-    //console.log('pushing update: '+ tile.name +', '+ tile.id, tile);
 
+function pushUpdate(tile) {
     var config = tile.config;
     console.log('pushing update: '+ tile.name +','+ config.organization + ", " + tile.jiveCommunity);
 
-    //console.log( 'pushing update DISABLED!');
-    //return;
     github.getData(tile.config.organization, tile.config.repository, "", tile.config.ticketID, function(data) {
-// console.log('got data', data);
         prepareData(tile, data, function(prepared) {
             jive.tiles.pushData(tile, { data: prepared });
         });
     });
 }
-
 
 exports.task = new jive.tasks.build(
     // runnable
@@ -111,5 +99,19 @@ exports.eventHandlers = [
             jive.logger.info("Caught activityUpdateInstance event, trying to push now.");
             pushUpdate(theInstance);
         }
+    },
+    {
+        'event': jive.constants.globalEventNames.NEW_INSTANCE,
+        'handler' : function(theInstance){
+            jive.logger.info("Caught activityUpdateInstance event, trying to push now.");
+            pushUpdate(theInstance);
+        }
+    },
+    {
+        'event': jive.constants.globalEventNames.INSTANCE_UPDATED,
+        'handler' : function(theInstance){
+            jive.logger.info("Caught activityUpdateInstance event, trying to push now.");
+            pushUpdate(theInstance);
+        }
     }
-]
+];

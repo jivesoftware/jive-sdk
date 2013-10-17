@@ -6,7 +6,6 @@ var request = require("request") ;
 exports.queryGitHubV3 = queryGitHubV3;
 exports.postGitHubV3 = postGitHubV3;
 
-
 function queryGitHubV3(ticketID, myOauth, uri){
 
     var tokenStore = myOauth.getTokenStore();
@@ -41,7 +40,7 @@ function queryGitHubV3(ticketID, myOauth, uri){
             return err;
         }
     );
-};
+}
 
 function postGitHubV3(ticketID, myOauth, uri, data){
 
@@ -78,4 +77,4 @@ function postGitHubV3(ticketID, myOauth, uri, data){
             jive.logger.error('Error posting to GitHub', err);
         }
     );
-};
+}

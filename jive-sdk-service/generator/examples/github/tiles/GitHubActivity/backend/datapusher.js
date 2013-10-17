@@ -18,44 +18,48 @@ var count = 0;
 
 var jive = require("jive-sdk");
 
-exports.task = function() {
-    jive.extstreams.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
-        if ( instances ) {
-            instances.forEach( function( instance ) {
+exports.task = new jive.tasks.build(
+    // runnable
+    function() {
+        jive.extstreams.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
+            if ( instances ) {
+                instances.forEach( function( instance ) {
 
-                var config = instance['config'];
-                if ( config && config['posting'] === 'off' ) {
-                    return;
-                }
-
-                jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
-
-                count++;
-
-                var dataToPush = {
-                    "activity":
-                    {
-                        "action":{
-                            "name":"posted",
-                            "description":"Activity " + count
-                        },
-                        "actor":{
-                            "name":"Actor Name",
-                            "email":"actor@email.com"
-                        },
-                        "object":{
-                            "type":"website",
-                            "url":"http://www.google.com",
-                            "image":"http://placehold.it/102x102",
-                            "title":"Activity " + count,
-                            "description":"Activity " + count
-                        },
-                        "externalID": '' + new Date().getTime()
+                    var config = instance['config'];
+                    if ( config && config['posting'] === 'off' ) {
+                        return;
                     }
-                };
-                //if (count < 3)
-                  //jive.extstreams.pushActivity(instance, dataToPush);
-            });
-        }
-    });
-};
+
+                    jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
+
+                    count++;
+
+                    var dataToPush = {
+                        "activity":
+                        {
+                            "action":{
+                                "name":"posted",
+                                "description":"Activity " + count
+                            },
+                            "actor":{
+                                "name":"Actor Name",
+                                "email":"actor@email.com"
+                            },
+                            "object":{
+                                "type":"website",
+                                "url":"http://www.google.com",
+                                "image":"http://placehold.it/102x102",
+                                "title":"Activity " + count,
+                                "description":"Activity " + count
+                            },
+                            "externalID": '' + new Date().getTime()
+                        }
+                    };
+                });
+            }
+        });
+    },
+
+    // interval (optional)
+    10000
+);

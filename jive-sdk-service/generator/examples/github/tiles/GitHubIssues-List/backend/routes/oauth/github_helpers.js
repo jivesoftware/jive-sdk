@@ -6,15 +6,12 @@ var request = require("request") ;
 exports.queryGitHubV3 = queryGitHubV3;
 exports.postGitHubV3 = postGitHubV3;
 
-
 function queryGitHubV3(ticketID, myOauth, uri){
-
     var tokenStore = myOauth.getTokenStore();
 
     return tokenStore.find('tokens', {'ticket': ticketID }).then( function(found) {
         if ( found[0] != undefined ) {
             var accessToken = found[0]['accessToken'];
-            //var host = found[0]['accessToken']['instance_url'];
 
             var headers = {
                 'User-Agent': 'Purposeful Places'
@@ -41,22 +38,19 @@ function queryGitHubV3(ticketID, myOauth, uri){
             return err;
         }
     );
-};
+}
 
 function postGitHubV3(ticketID, myOauth, uri, data){
-
     var tokenStore = myOauth.getTokenStore();
 
     return tokenStore.find('tokens', {'ticket': ticketID }).then( function(found) {
         if ( found ) {
             var accessToken = found[0]['accessToken'];
-            //var host = found[0]['accessToken']['instance_url'];
 
             var headers = {
                 'User-Agent': 'Purposeful Places'  ,
                 'Content-Type': 'application/json'
             };
-
 
             return jive.util.buildRequest(
                 // special case - set port to 0 to tell underlying SDK not to default to port 443
@@ -78,4 +72,4 @@ function postGitHubV3(ticketID, myOauth, uri, data){
             jive.logger.error('Error posting to GitHub', err);
         }
     );
-};
+}

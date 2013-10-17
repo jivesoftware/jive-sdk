@@ -13,8 +13,8 @@
         };
 
         // prepopulate the sequence input dialog
-        $("#organization").val( json["organization"])
-        $("#repository").val( json["repository"])
+        $("#organization").val( json["organization"]);
+        $("#repository").val( json["repository"]);
 
         $("#btn_submit").click( function() {
             config["organization"] = $("#organization").val();
