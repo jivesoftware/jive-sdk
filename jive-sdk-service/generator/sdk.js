@@ -441,11 +441,14 @@ function prepare() {
 
     return jive.util.fsreaddir( root + '/styles').then(function(items) {
         styles = styles.concat( items );
+        _.each(styles, function( item ) {
+            groupedExamples['tiles'].push(item);
+        });
     }).then( function() {
             return jive.util.fsreaddir( root + '/examples').then(function(items) {
                 var deferreds = [];
                 examples = examples.concat( items );
-                _.each(items, function( item ) {
+                _.each(examples, function( item ) {
                     _.each(groups, function( group ) {
                         var deferred = q.defer();
                         deferreds.push(deferred);
