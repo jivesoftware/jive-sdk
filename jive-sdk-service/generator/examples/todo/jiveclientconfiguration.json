@@ -1,0 +1,5 @@
+{
+    "extensionInfo" : {
+        "name": "Todo app",
+        "description": "An app for managing todos.  This example shows many different ways extensions can integrate with Jive."}
+}
