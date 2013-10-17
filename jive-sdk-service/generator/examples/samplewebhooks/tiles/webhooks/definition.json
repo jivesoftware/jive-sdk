@@ -1,10 +1,17 @@
 {
-    "sampleData" : {},
-    "unregister": "/unregister",
-    "displayName" : "Webhooks Tile Example",
-    "name" : "webhooks",
-    "description" : "Webhooks example tile.",
-    "style" : "ACTIVITY",
+    "sampleData" : {
+        "title" : "Watch this place!",
+        "contents" : [ {
+            "text" : "--"
+        } ],
+        "config" : {
+               "listStyle" : "contentList"
+        }
+    },
+    "displayName" : "Watch this place!",
+    "name" : "Webhooks",
+    "description" : "Watch a place with a webhook.",
+    "style" : "LIST",
     "icons" : {
         "16" : "http://ctflyfishing.com/wp-content/uploads/2011/11/set-fishing-hook1.jpg",
         "48" : "http://ctflyfishing.com/wp-content/uploads/2011/11/set-fishing-hook1.jpg",

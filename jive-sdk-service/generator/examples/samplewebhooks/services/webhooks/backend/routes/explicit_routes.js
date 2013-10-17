@@ -40,6 +40,10 @@ exports.postWebhooks = {
                     toAppend += " @ <b>" + activity['activity']['provider']['url'] + "</b>"
                 }
 
+                if ( activity['activity'] && activity['activity']['object'] && activity['activity']['object']['summary'] ) {
+                    toAppend += "<br>\n<div style='background-color:white;margin:4px;'>" + activity['activity']['object']['summary'] + "</div>"
+                }
+
                 toAppend += '<br>\n';
 
                 fs.appendFile('webhooks.log', toAppend, function(err) {

@@ -1,68 +1,21 @@
+/*
+ * Copyright 2013 Jive Software
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 
 var jive = require("jive-sdk");
-
-function processTileInstance(instance) {
-    jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
-
-    var count = new Date().getTime();
-
-    var dataToPush = {
-        "activity":
-        {
-            "action":{
-                "name":"posted",
-                "description":"Activity " + count
-            },
-            "actor":{
-                "name":"Actor Name",
-                "email":"actor@email.com"
-            },
-            "object":{
-                "type":"website",
-                "url":"http://www.google.com",
-                "image":"http://placehold.it/102x102",
-                "title":"Activity " + count,
-                "description":"Activity " + count
-            },
-            "jive" : {
-                "app" : {
-                    "appUUID" : "42e91771-bc0e-49a2-aeca-bbba9ac31eeb",
-                    "view" : "canvas",
-                    "context" : {
-                        "randomValue": count
-                    }
-                }
-            },
-            "externalID": '' + count
-        }
-    };
-
-    jive.extstreams.pushActivity(instance, dataToPush).then( function()  {
-        console.log("pushed activity");
-
-//        jive.extstreams.setExternalProps( instance, {
-//            "foo":"bar"
-//        }).then( function (p) {
-//            console.log(p);
-//        });
-    });
-}
-
-exports.task = new jive.tasks.build(
-    // runnable
-    function() {
-        return jive.extstreams.findByDefinitionName( 'webhooks' ).then( function(instances) {
-            if ( instances ) {
-                instances.forEach( function( instance ) {
-                    processTileInstance(instance);
-                });
-            }
-        });
-    },
-
-    // interval (optional)
-    60 * 1000
-);
+var q = require('q');
 
 exports.eventHandlers = [
 
@@ -104,8 +57,6 @@ exports.eventHandlers = [
                         doWebhook( accessToken );
                     });
                 }
-
-
             });
 
         }
