@@ -40,12 +40,12 @@ exports.registerPlace = function (req, res) {
                 'resources': [
                     {
                         'name': 'self',
-                        'url': '/file-system-storage/place?container=' + cotainerGuid,
+                        'url': '/fsstorage/place?container=' + cotainerGuid,
                         'verbs': ['GET', 'PUT', 'DELETE']
                     },
                     {
                         'name': 'uploadFile',
-                        'url': '/file-system-storage/upload?container=' + cotainerGuid,
+                        'url': '/fsstorage/upload?container=' + cotainerGuid,
                         'verbs': ['POST']
                     }
                 ]
@@ -277,17 +277,17 @@ function handleFileVersion(fileGuid, fileObj, versionObj, tempFile) {
                 'resources': [
                     {
                         'name': 'self',
-                        'url': '/file-system-storage/version?version=' + versionGuid,
+                        'url': '/fsstorage/version?version=' + versionGuid,
                         'verbs': ['GET', 'PUT', 'DELETE'] // PUT method is not implemented in this example
                     },
                     {
                         'name': 'downloadVersion',
-                        'url': '/file-system-storage/download?version=' + versionGuid,
+                        'url': '/fsstorage/download?version=' + versionGuid,
                         'verbs': ['GET']
                     },
                     {
                         'name': 'fileParent',
-                        'url': '/file-system-storage/file?file=' + fileGuid,
+                        'url': '/fsstorage/file?file=' + fileGuid,
                         'verbs': ['GET']
                     }
                 ]};
@@ -298,12 +298,12 @@ function handleFileVersion(fileGuid, fileObj, versionObj, tempFile) {
                 'resources': [
                     {
                         'name': 'self',
-                        'url': '/file-system-storage/file?file=' + fileGuid,
+                        'url': '/fsstorage/file?file=' + fileGuid,
                         'verbs': ['GET', 'PUT', 'DELETE']
                     },
                     {
                         'name': 'uploadVersion',
-                        'url': '/file-system-storage/uploadVersion?file=' + fileGuid,
+                        'url': '/fsstorage/uploadVersion?file=' + fileGuid,
                         'verbs': ['POST']
                     }
                 ]

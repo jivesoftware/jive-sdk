@@ -1,7 +1,7 @@
 {
     "displayName": "File System Storage",
     "description": "Saves files on the node.js machine",
-    "registerPlace": "%serviceURL%/file-system-storage/register",
+    "registerPlace": "%serviceURL%/fsstorage/register",
     "userMappingOptions": [
         "EMAIL"
     ],
@@ -16,5 +16,5 @@
         "48": "extension-48.png",
         "128": "extension-128.png"
     },
-    "healthCheckURL": "%serviceURL%/file-system-storage/isAlive"
+    "healthCheckURL": "%serviceURL%/fsstorage/isAlive"
 }

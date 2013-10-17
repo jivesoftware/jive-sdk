@@ -1,33 +1,40 @@
 var service = require('../storage_service.js');
 exports.isAlive = {
-    'verb' : 'post',
-    'route': function(req,res) {
+    'path': '/fsstorage/isAlive',
+    'verb': 'post',
+    'route': function (req, res) {
         res.writeHead(200);
         res.end("Alive!");
     }
 };
 exports.register = {
-    'verb':'post',
+    'path': '/fsstorage/register',
+    'verb': 'post',
     'route': service.registerPlace
 };
 exports.upload = {
-    'verb':'post',
+    'path': '/fsstorage/upload',
+    'verb': 'post',
     'route': service.uploadFile
 };
 exports.uploadVersion = {
-    'verb':'post',
+    'path': '/fsstorage/uploadVersion',
+    'verb': 'post',
     'route': service.uploadVersion
 };
 exports.download = {
-    'verb':'get',
+    'path': '/fsstorage/download',
+    'verb': 'get',
     'route': service.downloadVersion
 };
 exports.place = {
-    'verb':'delete',
+    'path': '/fsstorage/place',
+    'verb': 'delete',
     'route': service.deleteContainer
 };
 exports.file = {
-    'verb':'delete',
+    'path': '/fsstorage/file',
+    'verb': 'delete',
     'route': service.deleteFile
 };
 

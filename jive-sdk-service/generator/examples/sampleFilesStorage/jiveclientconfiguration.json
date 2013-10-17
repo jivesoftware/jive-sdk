@@ -1,8 +1,7 @@
 {
-    "clientUrl": "http://10.61.9.74",
+    "clientUrl": "http://localhost",
     "port": "8090",
-    "rootFolder" : "/Users/shali3/JiveStorage",
-    "dataDirPath": "/Users/shali3/JiveStorage",
+    "rootFolder" : "JiveStorage",
     "extensionInfo": {
         "name": "File System Storage",
         "description": "Saves files on the node.js machine"
