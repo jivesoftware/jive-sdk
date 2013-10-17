@@ -1,16 +1,12 @@
-
-
 var jive = require("jive-sdk");
 var url = require('url');
 var util = require('util');
 var sampleOauth = require('./routes/oauth/sampleOauth');
 var sfdc_helpers = require('./sfdc_helpers');
 
-
 exports.pullOpportunity = pullOpportunity;
 
 function pullOpportunity(tileInstance){
-
     var opportunityID = tileInstance.config.opportunityID;
     var uri = util.format("/sobjects/Opportunity/%s", opportunityID);
     var ticketID = tileInstance.config.ticketID;
@@ -21,12 +17,10 @@ function pullOpportunity(tileInstance){
     }).catch(function(err){
         jive.logger.error('Error querying salesforce', err);
     });
-
-};
-
+}
 
 function convertToListTileData(opportunity) {
-    var dataToPush = {
+    return {
         data: {
             "title": opportunity['Name'],
             "contents": [
@@ -62,7 +56,7 @@ function convertToListTileData(opportunity) {
                     "linkDescription": "Close Date"
                 },
                 {
-                    "text": new Date().toString().slice(0,40)
+                    "text": new Date().toString().slice(0, 40)
                 }
             ],
             "config": {
@@ -70,6 +64,4 @@ function convertToListTileData(opportunity) {
             }
         }
     };
-
-    return dataToPush;
 }

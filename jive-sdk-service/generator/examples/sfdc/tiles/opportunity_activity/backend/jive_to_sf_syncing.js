@@ -16,14 +16,12 @@ function jiveCommentsToSalesforce(extstream) {
         };
         return jive.extstreams.fetchAllCommentsForExtstream(extstream, opts);
     }).then(function (response) {
-            var allCommentsProcessed = false;
-            var commentsList = response.entity;
-            return recursiveProcessComments(commentsList, extstream);
-        });
+        var commentsList = response.entity;
+        return recursiveProcessComments(commentsList, extstream);
+    });
 }
 
 function recursiveProcessComments(commentsList, extstream) {
-
     var promise = q.resolve(null);
 
     commentsList.list.forEach(function (comment) {
@@ -31,7 +29,6 @@ function recursiveProcessComments(commentsList, extstream) {
             return pushCommentToSalesforce(comment, extstream);
         });
     });
-
 
     if (!commentsList.next || !commentsList.links.next || commentsList.links.next.indexOf('startIndex') < 0) {
         return promise.thenResolve(commentsList);
@@ -42,11 +39,9 @@ function recursiveProcessComments(commentsList, extstream) {
             return recursiveProcessComments(nextList);
         });
     });
-
-};
+}
 
 function pushCommentToSalesforce(jiveComment, extstream) {
-
     if (jiveComment.hasOwnProperty('externalID') && jiveComment['externalID'] != null) {
         jive.logger.error('Error! Attempted to push an external comment present in Jive back into salesforce!');
         return null;
@@ -59,13 +54,10 @@ function pushCommentToSalesforce(jiveComment, extstream) {
     var publishedTime = new Date(jiveComment.published).getTime();
 
     return sfdc_helpers.postSalesforceV27(ticketID, sampleOauth, uri, null).then(function (response) {
-        console.log('Pushed comment to Salesforce');
+        jive.logger.info('Pushed comment to Salesforce');
         return opportunities.updateLastTimePulled(extstream, publishedTime, "jivecomment").then(function () {
             var id = response && response.entity && response.entity.id;
-            if (id) {
-                return opportunities.recordSyncFromJive(extstream, id);
-            }
-            return null;
+            return id ? opportunities.recordSyncFromJive(extstream, id) : null;
         });
     });
 }
