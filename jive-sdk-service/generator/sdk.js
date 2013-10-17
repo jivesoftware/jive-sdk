@@ -431,19 +431,23 @@ function execute(options) {
 }
 
 function doCreateExtension( options ) {
-    jive.service.init({use: function() {}}).then(function() {
-        var extension = require("../lib/extension/extension.js");
+    jive.service.init({use: function() {}})
+        .then(function() {
+            return jive.service.autowire();
+        } )
+        .then(function() {
+            var extension = require("../lib/extension/extension.js");
 
-        extension.prepare(options.target + "/tiles", options.target + "/apps", options.target + "/cartridges", options.target + "/storages").then(function(){
-            var persistence = jive.service.persistence();
+            extension.prepare(options.target + "/tiles", options.target + "/apps", options.target + "/cartridges", options.target + "/storages").then(function(){
+                var persistence = jive.service.persistence();
 
-            persistence.close().then(function() {
-                process.nextTick(function() {
-                    process.exit(0);
-                });
-            })
+                persistence.close().then(function() {
+                    process.nextTick(function() {
+                        process.exit(0);
+                    });
+                })
+            });
         });
-    });
 }
 
 function prepare() {
