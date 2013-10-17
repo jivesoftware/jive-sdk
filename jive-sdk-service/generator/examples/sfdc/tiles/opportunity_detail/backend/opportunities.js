@@ -4,9 +4,10 @@ var util = require('util');
 var sampleOauth = require('./routes/oauth/sampleOauth');
 var sfdc_helpers = require('./sfdc_helpers');
 
-exports.pullOpportunity = pullOpportunity;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Public
 
-function pullOpportunity(tileInstance){
+exports.pullOpportunity = function(tileInstance){
     var opportunityID = tileInstance.config.opportunityID;
     var uri = util.format("/sobjects/Opportunity/%s", opportunityID);
     var ticketID = tileInstance.config.ticketID;
@@ -17,7 +18,10 @@ function pullOpportunity(tileInstance){
     }).catch(function(err){
         jive.logger.error('Error querying salesforce', err);
     });
-}
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Private
 
 function convertToListTileData(opportunity) {
     return {

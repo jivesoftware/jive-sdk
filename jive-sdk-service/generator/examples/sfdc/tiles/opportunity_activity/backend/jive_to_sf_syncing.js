@@ -4,9 +4,10 @@ var jive = require('jive-sdk'),
     sfdc_helpers = require('./sfdc_helpers'),
     q = require('q');
 
-exports.jiveCommentsToSalesforce = jiveCommentsToSalesforce;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Public
 
-function jiveCommentsToSalesforce(extstream) {
+exports.jiveCommentsToSalesforce = function (extstream) {
     return opportunities.getLastTimePulled(extstream, "jivecomment").then(function (lastTimePulled) {
         var opts = {
             "fieldList": ["content", "externalID", "rootExternalID", "published" ], // list of fields to be returned on Jive entity
@@ -19,7 +20,10 @@ function jiveCommentsToSalesforce(extstream) {
         var commentsList = response.entity;
         return recursiveProcessComments(commentsList, extstream);
     });
-}
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Private
 
 function recursiveProcessComments(commentsList, extstream) {
     var promise = q.resolve(null);

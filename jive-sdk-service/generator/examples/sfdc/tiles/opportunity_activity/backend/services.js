@@ -4,51 +4,61 @@ var opportunities = require('./opportunities'),
     q = require('q');
 var sampleOauth = require('./routes/oauth/sampleOauth');
 
+function processTileInstance(instance) {
+
+    //
+    // 1. pull activity from SFDC and push to Jive
+    //
+    opportunities.pullActivity(instance).then(function (data) {
+        var promise = q.resolve(1);
+        data.forEach(function (activity) {
+            delete activity['sfdcCreatedDate'];
+            promise = promise.thenResolve(jive.extstreams.pushActivity(instance, activity));
+        });
+
+        promise = promise.catch(function (err) {
+            jive.logger.error('Error pushing activity to Jive', err);
+        });
+
+        return promise;
+
+    //
+    // 2. pull comments from SFDC and push to Jive
+    //
+    }).then(function () {
+        opportunities.pullComments(instance).then(function (comments) {
+            var promise = q.resolve(1);
+            comments.forEach(function (comment) {
+                delete comment['sfdcCreatedDate'];
+                var externalActivityID = comment['externalActivityID'];
+                delete comment['externalActivityID'];
+
+                promise = promise.thenResolve(jive.extstreams.commentOnActivityByExternalID(instance,
+                    externalActivityID, comment));
+            });
+
+            promise = promise.catch(function (err) {
+                jive.logger.error('Error pushing comments to Jive', err);
+            });
+
+            return promise;
+        });
+
+    //
+    // 3. pull comments from Jive and push to SFDC
+    //
+    }).then(function () {
+        return jive_to_sf_syncing.jiveCommentsToSalesforce(instance);
+    });
+}
+
 exports.task = new jive.tasks.build(
     // runnable
     function () {
         jive.extstreams.findByDefinitionName('{{{TILE_NAME}}}').then(function (instances) {
             if (instances) {
                 instances.forEach(function (instance) {
-
-                    opportunities.pullActivity(instance).then(function (data) {
-                        var promise = q.resolve(1);
-                        data.forEach(function (activity) {
-                            delete activity['sfdcCreatedDate'];
-                            promise = promise.thenResolve(jive.extstreams.pushActivity(instance, activity));
-                        });
-
-                        promise = promise.catch(function(err) {
-                            jive.logger.error('Error pushing activity to Jive', err);
-                        });
-
-                        return promise;
-
-                    }).then(function () {
-                            opportunities.pullComments(instance).then(function (comments) {
-                                var promise = q.resolve(1);
-                                comments.forEach(function (comment) {
-                                    delete comment['sfdcCreatedDate'];
-                                    var externalActivityID = comment['externalActivityID'];
-                                    delete comment['externalActivityID'];
-
-                                    promise = promise.thenResolve(jive.extstreams.commentOnActivityByExternalID(instance,
-                                        externalActivityID, comment));
-
-                                });
-
-                                promise = promise.catch(function(err) {
-                                    jive.logger.error('Error pushing comments to Jive', err);
-                                });
-
-                                return promise;
-                            });
-
-                        }).then(function() {
-                            return jive_to_sf_syncing.jiveCommentsToSalesforce(instance);
-                        });
-
-
+                    processTileInstance(instance);
                 });
             }
         });
