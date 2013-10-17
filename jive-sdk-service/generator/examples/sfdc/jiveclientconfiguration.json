@@ -1,10 +1,10 @@
 {
     "clientUrl": "http://localhost",
     "port": "8090",
-    "oauth2-sfdc": {
-        "originServerAuthorizationUrl": "https://login.salesforce.com/services/oauth2/authorize",
-        "originServerTokenRequestUrl": "https://login.salesforce.com/services/oauth2/token",
-        "oauth2ConsumerKey": "3MVG9A2kN3Bn17hsYGSrn0NhYFS36J6_fATL_GKZJA3PInmoykqMLhcaG1QcNk6IkEhceI7YayhMBAcK0MOoV",
-        "oauth2ConsumerSecret": "8135882665892287236"
+    "oauth2-sfdc" :{
+        "originServerAuthorizationUrl" : "https://login.salesforce.com/services/oauth2/authorize",
+        "originServerTokenRequestUrl" : "https://login.salesforce.com/services/oauth2/token",
+        "oauth2ConsumerKey" : "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_SFDC!!!",
+        "oauth2ConsumerSecret" : "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_SFDC!!!"
     }
 }
