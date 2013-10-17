@@ -173,27 +173,6 @@ exports.deleteContainer = function (req, res) {
         });
 }
 
-exports.renameFile = function (req, res) {
-//    var fileGuid = req.query.file;
-//
-//    logger.info("Rename file... file id:" + fileGuid);
-//    jive.context.persistence.findByID("files", fileGuid)
-//        .then(function (fileObj) {
-//            if (fileObj) {
-//               if (fileObj.version.)
-//            }
-//        })
-//        .then(function () {
-//            res.writeHead(200);
-//            res.end();
-//        })
-//        .catch(function (err) {
-//            logger.error(err);
-//            res.writeHead(500);
-//            res.end();
-//        });
-}
-
 exports.deleteFile = function (req, res) {
     var fileGuid = req.query.file;
 
@@ -265,7 +244,7 @@ function handleFileVersion(fileGuid, fileObj, versionObj, tempFile) {
                     {
                         'name': 'self',
                         'url': '/file-system-storage/version?version=' + versionGuid,
-                        'verbs': ['GET', 'PUT', 'DELETE']
+                        'verbs': ['GET', 'PUT', 'DELETE'] // PUT method is not implemented in this example
                     },
                     {
                         'name': 'downloadVersion',
