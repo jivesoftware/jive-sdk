@@ -45,7 +45,7 @@ function processTileInstance(instance) {
     return store.find('exampleStore', {
         'key':'count'
     }).then(function(found) {
-        found = found.length > 0 ? found[0].count : parseInt(instance.config.startSequence, 10);
+        found = found.length > 0 ? found[0].count : 0;
 
         store.save('exampleStore', 'count', {
             'key':'count',
@@ -79,7 +79,7 @@ var pushData = function() {
 exports.task = [
     {
         'event' : 'pushDataTileInstance',
-        'interval' : 10000
+        'interval' : 30000
     }
 ];
 
@@ -92,5 +92,11 @@ exports.eventHandlers = [
     {
         'event' : 'newInstance',
         'handler' : processTileInstance
+    },
+
+    {
+        'event' :'updateInstance',
+        'handler' : pushData
+
     }
 ];
