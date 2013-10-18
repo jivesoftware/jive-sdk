@@ -30,13 +30,17 @@ function getFormattedData(id, description) {
             },
             "object": {
                 "type": "website",
+                // Create a url based on the tile name and canvas view of the app.  This makes the link go into an app:
                 "url": "/apps/{{{TILE_NAME_BASE}}}_{{{GENERATED_UUID}}}/todoDetail/"  + encodeURIComponent(JSON.stringify({"id": id})),
                 "image": jive.context.config.clientUrl + ":" +  jive.context.config.port + "/checkbox_checked.png",
                 "title": description,
                 "description": description
             },
             "properties": {
-                "relativeUrl": "true"
+                // This allows the group context to be exposed to the app:
+                "relativeUrl": "true",
+                // This makes the title like to the url above.
+                "showGoToItemAsTitle" :"true"
             },
             "externalID": '' + id + "-" + (new Date())
         }
