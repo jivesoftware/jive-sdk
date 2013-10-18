@@ -666,7 +666,11 @@ var copyFileProcessor = function (type, currentFsItem, targetPath, substitutions
     });
 };
 
-exports.recursiveCopy = function (root, target, force, substitutions) {
+exports.recursiveCopy = function (root, target, force, substitutions, file) {
+    if( file ) {
+        return copyFileProcessor("file", root, target, substitutions);
+    }
+
     var substitutionProcessor = function (type, currentFsItem, targetPath) {
         return copyFileProcessor(type, currentFsItem, targetPath, substitutions);
     };

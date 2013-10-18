@@ -111,7 +111,7 @@ function processExample(target, example, name, force) {
                     subDirs.forEach(function(subDir) {
                         var sourceSubRootEntry = sourceSubRoot + '/' + subDir;
                         var tileName;
-                        if ( customName ) {
+                        if ( customName && sourceSubRoot.indexOf("public") === -1 ) {
                             tileName = subDirs.length > 1 ? name + '_' + subDir : name;
                         } else {
                             tileName = subDir;
@@ -126,7 +126,13 @@ function processExample(target, example, name, force) {
                             'GENERATED_UUID' : uniqueUUID,
                             'host': '{{{host}}}'
                         };
-                        promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions ) );
+                        promises.push(jive.util.fsisdir(sourceSubRootEntry).then( function(isDir) {
+                            if(isDir) {
+                                promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions ) );
+                            } else {
+                                promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions, true ) );
+                            }
+                        }));
                     });
                 }
                 return q.all(promises);

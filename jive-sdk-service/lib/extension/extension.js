@@ -16,7 +16,8 @@
 
 var fs = require('fs'),
     q  = require('q'),
-    jive  = require('../../api');
+    jive  = require('../../api'),
+    _ = require("underscore");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // public
@@ -148,7 +149,7 @@ function fillExtensionMetadata(extensionInfo, definitions) {
         description = limit(description, 255);
     }
 
-    return {
+    return _.defaults({
         "package_version": extensionInfo['packageVersion'] || '1.0',
         "id": id,
         "type": type,
@@ -163,7 +164,7 @@ function fillExtensionMetadata(extensionInfo, definitions) {
         "register_url": jive.service.serviceURL() + "/jive/oauth/register",
         "service_url": jive.service.serviceURL(),
         "redirect_url": extensionInfo['redirectURL'] || jive.service.serviceURL()
-    };
+    }, jive.service.options['extensionInfo']);
 }
 
 function getTileDefinitions() {
