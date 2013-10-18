@@ -105,38 +105,47 @@ function processExample(target, example, name, force) {
         return jive.util.fsexists(targetSubRoot).then( function(exists) {
             return !exists ? jive.util.fsmkdir(targetSubRoot) : q.resolve();
         }).then( function() {
+            if ( sourceSubRoot.indexOf("public") > -1 ) {
+                return jive.util.recursiveCopy(sourceSubRoot, targetSubRoot, force, !doSubstitutions ? undefined : {
+                    'TILE_NAME_BASE' : name,
+                    'TILE_NAME': name,
+                    'GENERATED_UUID' : uniqueUUID,
+                    'host': '{{{host}}}'
+                } );
+            } else {
                 return jive.util.fsreaddir(sourceSubRoot).then( function(subDirs) {
-                var promises = [];
-                if ( subDirs && subDirs['forEach'] ) {
-                    subDirs.forEach(function(subDir) {
-                        var sourceSubRootEntry = sourceSubRoot + '/' + subDir;
-                        var tileName;
-                        if ( customName && sourceSubRoot.indexOf("public") === -1 ) {
-                            tileName = subDirs.length > 1 ? name + '_' + subDir : name;
-                        } else {
-                            tileName = subDir;
-                        }
-
-                        var targetSubRootEntry =
-                            targetSubRoot + '/' + tileName;
-
-                        var substitutions = !doSubstitutions ? undefined : {
-                            'TILE_NAME_BASE' : name,
-                            'TILE_NAME': tileName,
-                            'GENERATED_UUID' : uniqueUUID,
-                            'host': '{{{host}}}'
-                        };
-                        promises.push(jive.util.fsisdir(sourceSubRootEntry).then( function(isDir) {
-                            if(isDir) {
-                                promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions ) );
+                    var promises = [];
+                    if ( subDirs && subDirs['forEach'] ) {
+                        subDirs.forEach(function(subDir) {
+                            var sourceSubRootEntry = sourceSubRoot + '/' + subDir;
+                            var tileName;
+                            if ( customName ) {
+                                tileName = subDirs.length > 1 ? name + '_' + subDir : name;
                             } else {
-                                promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions, true ) );
+                                tileName = subDir;
                             }
-                        }));
-                    });
-                }
-                return q.all(promises);
-            });
+
+                            var targetSubRootEntry =
+                                targetSubRoot + '/' + tileName;
+
+                            var substitutions = !doSubstitutions ? undefined : {
+                                'TILE_NAME_BASE' : name,
+                                'TILE_NAME': tileName,
+                                'GENERATED_UUID' : uniqueUUID,
+                                'host': '{{{host}}}'
+                            };
+                            promises.push(jive.util.fsisdir(sourceSubRootEntry).then( function(isDir) {
+                                if(isDir) {
+                                    promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions ) );
+                                } else {
+                                    promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions, true ) );
+                                }
+                            }));
+                        });
+                    }
+                    return q.all(promises);
+                });
+            }
         });
     };
 
