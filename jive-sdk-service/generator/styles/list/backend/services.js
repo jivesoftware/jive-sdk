@@ -27,7 +27,7 @@ function processTileInstance(instance) {
                 "contents": [
                     {
                         "text": "Current count: " + count,
-                        "icon": "http://farm4.staticflickr.com/3136/5870956230_2d272d31fd_z.jpg",
+                        "icon": "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
                         "linkDescription": "Current counter."
                     }
                 ],
