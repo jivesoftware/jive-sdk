@@ -667,21 +667,23 @@ var copyFileProcessor = function (type, currentFsItem, targetPath, substitutions
 };
 
 exports.recursiveCopy = function (root, target, force, substitutions, file) {
-    if( file ) {
-        return copyFileProcessor("file", root, target, substitutions);
-    }
+    return exports.fsisdir(root).then( function(isDir) {
+        if( !isDir ) {
+            return copyFileProcessor("file", root, target, substitutions);
+        }
 
-    var substitutionProcessor = function (type, currentFsItem, targetPath) {
-        return copyFileProcessor(type, currentFsItem, targetPath, substitutions);
-    };
+        var substitutionProcessor = function (type, currentFsItem, targetPath) {
+            return copyFileProcessor(type, currentFsItem, targetPath, substitutions);
+        };
 
-    return exports.recursiveDirectoryProcessor(
-        root,
-        root,
-        target,
-        force,
-        substitutionProcessor
-    );
+        return exports.recursiveDirectoryProcessor(
+            root,
+            root,
+            target,
+            force,
+            substitutionProcessor
+        );
+    });
 };
 
 exports.zipFolder = function (root, targetZip, flatten) {

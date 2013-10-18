@@ -43,7 +43,7 @@ exports.prepare = function (tilesDir, appsDir, cartridgesDir, storagesDir) {
     }).then( function() {
         return getPersistedExtensionInfo(jive.service.options['extensionInfo'] || {});
     }).then( function(extensionInfo) {
-        return jive.util.recursiveCopy( __dirname + "/template", extensionSrcDir, false)
+        return jive.util.recursiveCopy( __dirname + "/template", extensionSrcDir)
             .then( function() {
                 return getTileDefinitions();
             }).then( function(definitions) {

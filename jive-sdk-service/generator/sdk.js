@@ -134,13 +134,9 @@ function processExample(target, example, name, force) {
                                 'GENERATED_UUID' : uniqueUUID,
                                 'host': '{{{host}}}'
                             };
-                            promises.push(jive.util.fsisdir(sourceSubRootEntry).then( function(isDir) {
-                                if(isDir) {
-                                    promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions ) );
-                                } else {
-                                    promises.push( jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions, true ) );
-                                }
-                            }));
+                            promises.push(
+                               jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions )
+                            );
                         });
                     }
                     return q.all(promises);
@@ -225,7 +221,7 @@ function processDefinition(target, type, name, style, force) {
 
     // copy definition
     promises.push(
-        jive.util.recursiveCopy(root + '/definition', target + '/tiles/' + name, force )
+        jive.util.recursiveCopy(root + '/definition', target + '/tiles/' + name,    force )
     );
 
     // copy style
