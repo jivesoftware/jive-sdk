@@ -1,0 +1,12 @@
+{
+    "sampleData" : {},
+    "displayName" : "{{{TILE_NAME}}} Activity",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "{{{TILE_NAME}}} Activity Pusher",
+    "style" : "ACTIVITY",
+    "icons" : {
+        "16" : "{{{host}}}/checkbox_checked.png",
+        "48" : "{{{host}}}/checkbox_checked.png",
+        "128" : "{{{host}}}/checkbox_checked.png"
+    }
+}

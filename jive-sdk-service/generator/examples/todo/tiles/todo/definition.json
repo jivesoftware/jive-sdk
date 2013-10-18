@@ -13,8 +13,8 @@
     "description" : "{{{TILE_NAME}}}",
     "style" : "LIST",
     "icons" : {
-        "16" : "http://{{{host}}}/todo/checkbox_checked.png",
-        "48" : "http://{{{host}}}/todo/checkbox_checked.png",
-        "128" : "http://{{{host}}}/todo/checkbox_checked.png"
+        "16" : "{{{host}}}/checkbox_checked.png",
+        "48" : "{{{host}}}//checkbox_checked.png",
+        "128" : "{{{host}}}/checkbox_checked.png"
     }
 }

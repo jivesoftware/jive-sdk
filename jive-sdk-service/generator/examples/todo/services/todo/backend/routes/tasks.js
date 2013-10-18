@@ -22,6 +22,7 @@
  */
 
 var jive = require('jive-sdk' ),
+    activity = require('../../../../tiles/todoActivity/backend/datapusher'),
     db = jive.service.persistence();
 
 var todoHandler = function(req, res) {
@@ -67,6 +68,7 @@ var todoCreator = function(req, res) {
             'Content-Type': 'application/json',
             'Pragma': 'no-cache'
         });
+        activity.update(data, "Created todo '" + req.body.name + "'");
         res.send( data );
     });
 };
@@ -91,7 +93,8 @@ var todoDetailHandler = function(req, res) {
 var todoEditHandler = function(req, res) {
     var id = parseInt(req.param("id"), 10 ),
         todoStatus = req.param("status"),
-        name = req.param("name");
+        name = req.param("name"),
+        project = req.param("project");
     db.find( "todos", {id: id} ).then( function ( todos ) {
         var todo;
         res.set( {
@@ -102,7 +105,9 @@ var todoEditHandler = function(req, res) {
             todo = todos[0];
             todo.status = todoStatus;
             todo.name = name;
+            todo.project = project;
             db.save("todos", todo.id, todo ).then(function() {
+                activity.update(todo, "Edited todo '" + todo.name + "'  status ='" + todo.status + "'");
                 res.status( 200 );
                 res.send( JSON.stringify( todo, null, 4 ) );
             });
