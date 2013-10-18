@@ -27,10 +27,10 @@ function processTileInstance(instance) {
                 "title": "Simple Gallery",
                 "contents": [
                     {
-                        "image": "{{{host}}}/{{{TILE_NAME}}}/IMG_" + (count % maxImages) + ".jpg",
+                        "image": jive.context.config.clientUrl + ":" +  jive.context.config.port + "/{{{TILE_NAME}}}/IMG_" + (count % maxImages) + ".jpg",
                         "title": "sample image " + (count % maxImages)
                     }, {
-                        "image": "{{{host}}}/{{{TILE_NAME}}}/IMG_" + ((count + 1) % maxImages) + ".jpg",
+                        "image": jive.context.config.clientUrl + ":" +  jive.context.config.port + "/{{{TILE_NAME}}}/IMG_" + ((count + 1) % maxImages) + ".jpg",
                         "title": "sample image " + ((count + 1) % maxImages)
                     }
                 ],
