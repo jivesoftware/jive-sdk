@@ -26,9 +26,9 @@ exports = module.exports = new events.EventEmitter();
 exports.eventHandlerMap = {};
 
 /**
- * Definition event listeners are events contributed by user tiles.
+ * Definition event listeners are user contributed events.
  * @param event - the event id
- * @param definitionName - the name of the tile
+ * @param definitionName - the name of the listener
  * @param handler - the function to call
  * @param description
  */
@@ -43,7 +43,7 @@ exports.addDefinitionEventListener = function( event, definitionName, handler, d
         exports.eventHandlerMap[definitionName][event] = [];
     }
 
-    // duplicate tile definition event listeners aren't permitted
+    // duplicate definition event listeners aren't permitted
     if ( exports.eventHandlerMap[definitionName][event].indexOf(handler) == - 1 ) {
         exports.eventHandlerMap[definitionName][event].push( handler );
     }

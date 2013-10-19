@@ -109,7 +109,9 @@ function OAuth2ServerFlow( options ) {
                         'noCache': true
                     }).execute( function( response ) {
                         if ( response.status >= 400 && response.status <= 599 ) {
-                            ticketErrorCallback(response);
+                            if (ticketErrorCallback) {
+                                ticketErrorCallback(response);
+                            }
                             return;
                         }
 
