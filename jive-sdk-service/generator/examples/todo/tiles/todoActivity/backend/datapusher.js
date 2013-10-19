@@ -64,6 +64,10 @@ exports.update = function( obj, description ) {
                     return;
                 }
 
+                if (config.clientid && config.clientid !== obj.clientid ) {
+                    return;
+                }
+
 
                 jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
 

@@ -68,7 +68,11 @@
                 'format': 'json',
                 "noCache": true,
                 "headers": {"content-type": ["application/json"]},
-                "body": {"name": $('#todoName').val(), "status": "Open"}
+                "body": {
+                    "name": $('#todoName').val(),
+                    "status": "Open",
+                    "clientid": clientid
+                }
             };
 
             if( project ) {

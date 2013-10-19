@@ -6,11 +6,11 @@ var project = undefined,
 
 gadgets.util.registerOnLoadHandler(function() {
     var updateDisplay = function( ) {
-        var queryString = "";
+        var queryString = "?clientid=" + clientid ;
         if( project ) {
-            queryString = "?project=" + encodeURIComponent(project);
+            queryString += "&project=" + encodeURIComponent(project);
         } else if ( username ) {
-            queryString = "?assignee=" + username;
+            queryString += "&assignee=" + username;
         }
 
         var url = baseRESTUrl + queryString;
@@ -65,6 +65,8 @@ gadgets.util.registerOnLoadHandler(function() {
                 updateDisplay();
 
             });
+        } else {
+            updateDisplay();
         }
     });
 });

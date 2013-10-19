@@ -1,4 +1,4 @@
-var host, app, baseRESTUrl;
+var host, app, baseRESTUrl, clientid;
 
 if( !host ) {
     var appXMLUrl = gadgets.util.getUrlParameters()['url'];
@@ -14,3 +14,9 @@ if( !host ) {
 var defaultErrorHandler = function(response) {
     $("#status").html("ERROR:" + response.error.message + "(" + response.error.code + ")");
 }
+
+osapi.jive.corev3.systemExtProps.get({}).execute(function (resp) {
+    if( resp && resp.content ) {
+        clientid = resp.content.clientid;
+    }
+});

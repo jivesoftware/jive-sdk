@@ -44,6 +44,10 @@ function processTileInstance(instance) {
         criteria.project = project;
         dataToPush.data.title += " in project " + project;
     }
+    var clientid = instance.config.clientid;
+    if(clientid) {
+        criteria.clientid = clientid;
+    }
 
     db.find("todos", criteria).then(function( todos ) {
         var todo, i;

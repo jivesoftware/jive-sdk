@@ -28,18 +28,18 @@ var jive = require('jive-sdk' ),
 var todoHandler = function(req, res) {
     var project = req.param("project"),
         assignee = req.param("assignee"),
-        criteria = undefined;
+        clientid = req.param("clientid"),
+        criteria = {};
 
+    if(clientid) {
+        criteria.clientid = clientid;
+    }
     if(project) {
-        criteria = {"project": project};
+        criteria.project =  project;
     }
 
     if( assignee ) {
-        if( !criteria ) {
-            criteria = {};
-        }
         criteria.assignee = assignee;
-
     }
 
     db.find("todos",criteria).then(function( todos ) {
