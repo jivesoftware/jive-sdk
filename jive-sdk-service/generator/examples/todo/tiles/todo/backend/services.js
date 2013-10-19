@@ -69,18 +69,27 @@ function processTileInstance(instance) {
     });
 }
 
-exports.task = new jive.tasks.build(
-    // runnable
-    function() {
-        jive.tiles.findByDefinitionName( 'todo' ).then( function(instances) {
-            if ( instances ) {
-                instances.forEach( function( instance ) {
-                    processTileInstance(instance);
-                });
-            }
-        });
+
+var tileUpdate = function() {
+    jive.tiles.findByDefinitionName('todo').then(function (instances) {
+        if (instances) {
+            instances.forEach(function (instance) {
+                processTileInstance(instance);
+            });
+        }
+    });
+};
+
+exports.eventHandlers = [
+    {
+        'event' : jive.constants.globalEventNames.INSTANCE_UPDATED,
+        'handler' : processTileInstance
     },
 
-    // interval (optional)
-    5000
-);
+    {
+        'event' : jive.constants.globalEventNames.NEW_INSTANCE,
+        'handler' : processTileInstance
+    }
+];
+
+jive.events.addListener('todoUpdate', tileUpdate);

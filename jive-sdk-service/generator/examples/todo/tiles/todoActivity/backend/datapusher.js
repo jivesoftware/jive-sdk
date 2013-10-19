@@ -76,3 +76,5 @@ exports.update = function( obj, description ) {
         }
     });
 };
+
+jive.events.addListener('todoUpdate', exports.update);
