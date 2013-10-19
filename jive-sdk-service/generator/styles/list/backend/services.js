@@ -17,9 +17,14 @@
 var jive = require("jive-sdk");
 var q = require('q');
 
+/**
+ * Handles actually pushing data to the tile instance
+ * @param instance
+ */
 function processTileInstance(instance) {
     jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id);
 
+    // creates a data update structure
     function getFormattedData(count) {
         return {
             data: {
@@ -45,23 +50,23 @@ function processTileInstance(instance) {
     }
 
     var store = jive.service.persistence();
-    return store.find('exampleStore', {
-        'key':'count'
-    }).then(function(found) {
+    return store.find('exampleStore', { 'key': 'count' } ).then(function(found) {
         found = found.length > 0 ? found[0].count : parseInt(instance.config.startSequence, 10);
 
         store.save('exampleStore', 'count', {
             'key':'count',
-            'count':found+1
+            'count':found + 1
         }).then(function() {
             return jive.tiles.pushData(instance, getFormattedData(found));
         });
     }, function(err) {
-        //some error
         jive.logger.debug('Error encountered, push failed', err);
     });
 }
 
+/**
+ * Iterates through the tile instances registered in the service, and pushes an update to it
+ */
 var pushData = function() {
     var deferred = q.defer();
     jive.tiles.findByDefinitionName('{{{TILE_NAME}}}').then(function(instances) {
@@ -79,6 +84,9 @@ var pushData = function() {
     return deferred.promise;
 };
 
+/**
+ * Schedules the tile update task to automatically fire every 10 seconds
+ */
 exports.task = [
     {
         'interval' : 10000,
@@ -86,14 +94,22 @@ exports.task = [
     }
 ];
 
+/**
+ * Defines event handlers for the tile life cycle events
+ */
 exports.eventHandlers = [
+
+    // process tile instance whenever a new one is registered with the service
     {
         'event' : jive.constants.globalEventNames.NEW_INSTANCE,
         'handler' : processTileInstance
     },
 
+    // process tile instance whenever an existing tile instance is updated
     {
         'event' : jive.constants.globalEventNames.INSTANCE_UPDATED,
         'handler' : processTileInstance
     }
 ];
+
+

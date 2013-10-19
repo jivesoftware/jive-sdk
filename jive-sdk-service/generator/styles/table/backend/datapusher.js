@@ -17,7 +17,11 @@
 var jive = require("jive-sdk");
 var q = require('q');
 
-function processTileInstance(instance) {
+/**
+ * Handles actually pushing data to the tile instance
+ * @param instance
+ */
+var processTileInstance = function(instance) {
     var dataToPush = {
         "data": {
             "title": "Account Details",
@@ -31,8 +35,11 @@ function processTileInstance(instance) {
     };
 
     jive.tiles.pushData(instance, dataToPush);
-}
+};
 
+/**
+ * Iterates through the tile instances registered in the service, and pushes an update to it
+ */
 var pushData = function() {
     var deferred = q.defer();
     jive.tiles.findByDefinitionName('{{{TILE_NAME}}}').then(function(instances) {
@@ -50,6 +57,9 @@ var pushData = function() {
     return deferred.promise;
 };
 
+/**
+ * Schedules the tile update task to automatically fire every 10 seconds
+ */
 exports.task = [
     {
         'interval' : 10000,
@@ -57,14 +67,22 @@ exports.task = [
     }
 ];
 
+/**
+ * Defines event handlers for the tile life cycle events
+ */
 exports.eventHandlers = [
+
+    // process tile instance whenever a new one is registered with the service
     {
         'event' : jive.constants.globalEventNames.NEW_INSTANCE,
         'handler' : processTileInstance
     },
 
+    // process tile instance whenever an existing tile instance is updated
     {
         'event' : jive.constants.globalEventNames.INSTANCE_UPDATED,
         'handler' : processTileInstance
     }
 ];
+
+

@@ -11,6 +11,13 @@ var metadataStore = jive.service.persistence();
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Public
 
+/**
+ * Pulls chatter activity from SFDC since the last time it was pulled, for the opportunity encoded in the
+ * passed in external stream instance object. The 'ticketID' in the instance object is used to
+ * look up the SFDC access token that will be used to query SFDC for the activity.
+ * @param extstreamInstance
+ * @return array of activity objects
+ */
 exports.pullActivity = function(extstreamInstance) {
 
     return exports.getLastTimePulled(extstreamInstance, 'activity').then(function (lastTimePulled) {
@@ -35,6 +42,13 @@ exports.pullActivity = function(extstreamInstance) {
     });
 };
 
+/**
+ * Pulls chatter comments from SFDC since the last time it was pulled, for the opportunity encoded in the
+ * passed in external stream instance object. he 'ticketID' in the instance object is used to
+ * look up the SFDC access token that will be used to query SFDC for the activity.
+ * @param extstreamInstance
+ * @return array of comment objects
+ */
 exports.pullComments = function(extstreamInstance) {
     return exports.getLastTimePulled(extstreamInstance, 'comment').then(function (lastTimePulled) {
         var opportunityID = extstreamInstance.config.opportunityID;
@@ -55,17 +69,15 @@ exports.pullComments = function(extstreamInstance) {
     });
 };
 
-exports.getMetadataByInstance = function(instance) {
-    return metadataStore.find(metadataCollection, {'instanceID': instance['id']}).then(function (results) {
-        if (results.length <= 0) {
-            return null;
-        }
-        return results[0];
-    });
-};
-
+/**
+ * Returns the timestamp of the last time the tile instance was pulled, for a particular pull type (eg. comment, activity)
+ * from SFDC, allowing us to avoid unnecessarily query SFDC for records spanning all time.
+ * @param instance
+ * @param type
+ * @return long timestamp
+ */
 exports.getLastTimePulled = function(instance, type) {
-    return exports.getMetadataByInstance(instance).then(function (metadata) {
+    return getMetadataByInstance(instance).then(function (metadata) {
         var lastTimePulled = metadata && metadata.lastTimePulled && metadata.lastTimePulled[type];
         if (!lastTimePulled) {
             lastTimePulled = 1; //start date as 1 ms after the epoch, so that instance pulls all existing data for an opportunity
@@ -75,8 +87,15 @@ exports.getLastTimePulled = function(instance, type) {
     });
 };
 
+/**
+ * Updates the pull timestamp for the instance and pull type (activity, comment)
+ * @param instance
+ * @param lastTimePulled
+ * @param type
+ * @return instance pull metadata record (JSON)
+ */
 exports.updateLastTimePulled = function(instance, lastTimePulled, type) {
-    return exports.getMetadataByInstance(instance).then(function (metadata) {
+    return getMetadataByInstance(instance).then(function (metadata) {
         var changed = false;
         if (!metadata) {
             metadata = { "instanceID": instance['id'] };
@@ -102,7 +121,7 @@ exports.updateLastTimePulled = function(instance, lastTimePulled, type) {
 };
 
 exports.recordSyncFromJive = function(instance, sfCommentID) {
-    return exports.getMetadataByInstance(instance).then(function (metadata) {
+    return getMetadataByInstance(instance).then(function (metadata) {
         if (!metadata) {
             metadata = {"instanceID": instance['id'], "syncs": []};
         }
@@ -240,8 +259,21 @@ function getDateString(time) {
     return new Date(time).toISOString().replace(/Z$/, '+0000');
 }
 
+function getMetadataByInstance(instance) {
+    return metadataStore.find(metadataCollection, {'instanceID': instance['id']}).then(function (results) {
+        if (results.length <= 0) {
+            return null;
+        }
+        return results[0];
+    });
+}
+
 function wasSynced(instance, sfCommentID) {
-    return exports.getMetadataByInstance(instance).then(function (metadata) {
+    return getMetadataByInstance(instance).then(function (metadata) {
         return metadata && metadata.syncs && metadata.syncs.indexOf(sfCommentID) >= 0;
     });
 }
+
+
+
+
