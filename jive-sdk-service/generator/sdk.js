@@ -266,7 +266,7 @@ function finish(target) {
     // tiles
     jive.util.fsexists(definitionsDir).then( function(exists) {
         if ( exists ) {
-            return listDirectory('tiles', definitionsDir, ['templates.json'] );
+            return listDirectory('tiles', definitionsDir, ['templates.json', 'package.json'] );
         } else {
             return q.resolve(true);
         }

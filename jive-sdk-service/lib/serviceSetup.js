@@ -113,6 +113,9 @@ serviceSetup.setupOneService = function( app, serviceDir ) {
 
             return q.all(promises);
         })
+    }).catch( function(e) {
+        jive.logger.error("Failed to setup service at " + serviceDir + "; " + e);
+        process.exit(-1);
     });
 };
 

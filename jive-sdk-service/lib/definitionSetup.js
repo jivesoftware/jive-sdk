@@ -161,6 +161,9 @@ definitionSetup.setupOneDefinition = function( app, definitionDir, definitionNam
         } else {
             return q.resolve();
         }
+    }).catch( function(e) {
+        jive.logger.error("Failed to setup tile at " + definitionName + "; " + e);
+        process.exit(-1);
     });
 };
 
