@@ -28,7 +28,3 @@ myOauth.oauth2SuccessCallback = function( state, originServerAccessTokenResponse
         callback({'ticket': state['viewerID'] });
     });
 };
-
-myOauth.getTokenStore = function() {
-    return tokenStore;
-};
