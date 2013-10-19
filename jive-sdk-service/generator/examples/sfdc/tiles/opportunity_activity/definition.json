@@ -3,6 +3,7 @@
     "displayName" : "Activity for an SFDC Opportunity",
     "name" : "{{{TILE_NAME}}}",
     "description" : "Opportunity activity.",
+    "config" : "/{{{TILE_NAME_BASE}}}/configure",
     "style" : "ACTIVITY",
     "icons" : {
         "16": "{{{host}}}/{{{TILE_NAME}}}/images/salesforce.png",

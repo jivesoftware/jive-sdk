@@ -80,7 +80,7 @@ definitionSetup.setupDefinitionServices = function( app, definitionName, svcDir 
         }
     }
 
-    return definitionSetup.setupServices(app, definitionName, svcDir, setupDefinitionEventListener, 'tileName');
+    return definitionSetup.setupServices(app, definitionName, svcDir, setupDefinitionEventListener);
 };
 
 /**

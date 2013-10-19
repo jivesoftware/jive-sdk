@@ -40,6 +40,7 @@
     "displayName": "Detail for an SFDC Opportunity",
     "name": "{{{TILE_NAME}}}",
     "description": "Opportunity Detail",
+    "config" : "/{{{TILE_NAME_BASE}}}/configure",
     "style": "LIST",
     "icons": {
         "16": "{{{host}}}/{{{TILE_NAME}}}/images/salesforce.png",

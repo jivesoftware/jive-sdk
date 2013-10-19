@@ -57,8 +57,8 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
     context = context || {};
     var deferred = q.defer();
     var handlers;
-    if (context['tileName']) {
-        handlers = eventHandlerMap[context['tileName']][eventID];
+    if (context['eventListener']) {
+        handlers = eventHandlerMap[context['eventListener']][eventID];
     } else {
         handlers = eventHandlerMap[eventID];
     }

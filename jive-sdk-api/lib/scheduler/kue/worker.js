@@ -73,7 +73,7 @@ function eventExecutor(job, done) {
 
         var context = meta['context'];
         var eventID = meta['eventID'];
-        var tileName = context['tileName'];
+        var eventListener = context['eventListener'];
 
         if ( !shouldRun ) {
             jive.logger.debug("Execution aborted: " + JSON.stringify(meta,4 ));
@@ -96,8 +96,8 @@ function eventExecutor(job, done) {
         }, 1000);
 
         var handlers;
-        if (tileName) {
-            var tileEventHandlers = eventHandlers[tileName];
+        if (eventListener) {
+            var tileEventHandlers = eventHandlers[eventListener];
             if ( !tileEventHandlers ) {
                 done();
                 return;

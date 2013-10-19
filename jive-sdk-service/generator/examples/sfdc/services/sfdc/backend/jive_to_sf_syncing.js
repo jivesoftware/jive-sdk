@@ -1,6 +1,5 @@
 var jive = require('jive-sdk'),
     opportunities = require('./opportunities'),
-    sampleOauth = require('./routes/oauth/sampleOauth'),
     sfdc_helpers = require('./sfdc_helpers'),
     q = require('q');
 
@@ -57,7 +56,7 @@ function pushCommentToSalesforce(jiveComment, extstream) {
     var uri = '/chatter/feed-items/' + sfActivityID + '/comments?text=' + encodeURIComponent(extractPlainText(text));
     var publishedTime = new Date(jiveComment.published).getTime();
 
-    return sfdc_helpers.postSalesforceV27(ticketID, sampleOauth, uri, null).then(function (response) {
+    return sfdc_helpers.postSalesforceV27(ticketID, uri, null).then(function (response) {
         jive.logger.info('Pushed comment to Salesforce');
         return opportunities.updateLastTimePulled(extstream, publishedTime, "jivecomment").then(function () {
             var id = response && response.entity && response.entity.id;

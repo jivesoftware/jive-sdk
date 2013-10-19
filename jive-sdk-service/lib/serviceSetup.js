@@ -49,7 +49,8 @@ function setupPublicRoutes(serviceDir, app, pathPrefix) {
         if (stat.isDirectory()) {
             jive.logger.debug("Setting up service at " + serviceDir);
             var serviceName = path.basename(serviceDir);
-            var servicePath = ( pathPrefix ? (pathPrefix + '/') : '') + serviceName;
+            var servicePath = ( pathPrefix ? (pathPrefix + '/') : '/') + serviceName;
+            jive.logger.debug("Service public path: " + servicePath + " - " + serviceDir + '/public' );
             app.use(servicePath, express.static(serviceDir + '/public'));
             return q.resolve(serviceName);
         } else {
@@ -164,5 +165,5 @@ serviceSetup.setupServiceServices = function( app, definitionName, svcDir ) {
         }
     }
 
-    return serviceSetup.setupServices(app, definitionName, svcDir, setupDefinitionEventListener, 'tileName');
+    return serviceSetup.setupServices(app, definitionName, svcDir, setupDefinitionEventListener);
 };

@@ -1,7 +1,5 @@
 var url = require('url');
 var jive = require('jive-sdk');
-
-var sampleOauth = require('./sampleOauth');
 var sfdc_helpers = require('../../sfdc_helpers');
 
 exports.handleSfdcQuery = function (req, res) {
@@ -12,12 +10,12 @@ exports.handleSfdcQuery = function (req, res) {
     var ticketID = queryPart["ticketID"];
     var uri = "/query?q=" + encodeURIComponent(query);
 
-    sfdc_helpers.querySalesforceV27(ticketID, sampleOauth, uri).then(function (response) {
+    sfdc_helpers.querySalesforceV27(ticketID, uri).then(function (response) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(response['entity']));
     }).catch(function (err) {
-            res.writeHead(502, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(err));
-        });
+        res.writeHead(502, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(err));
+    });
 
 };

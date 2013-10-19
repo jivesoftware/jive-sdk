@@ -207,7 +207,7 @@ exports.setupServices = function( app, definitionName, svcDir, setupDefinitionEv
                     }
 
                     context['event'] = eventID;
-                    context[definitionIdentifier] = definitionName;
+                    context['eventListener'] = definitionName;
 
                     // only attempt to schedule events after bootstrap is complete
                     jive.events.addLocalEventListener( "serviceBootstrapped", function() {

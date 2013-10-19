@@ -98,6 +98,8 @@ function processExample(target, example, name, force) {
     console.log('Preparing example ', name, target );
 
     var customName = name !== example;
+    var tilePrefix = customName ? name  + '_' : '';
+
     var root = __dirname;
     var uniqueUUID = jive.util.guid();
 
@@ -107,6 +109,7 @@ function processExample(target, example, name, force) {
         }).then( function() {
             if ( sourceSubRoot.indexOf("public") > -1 ) {
                 return jive.util.recursiveCopy(sourceSubRoot, targetSubRoot, force, !doSubstitutions ? undefined : {
+                    'TILE_PREFIX': tilePrefix,
                     'TILE_NAME_BASE' : name,
                     'TILE_NAME': name,
                     'GENERATED_UUID' : uniqueUUID,
@@ -129,6 +132,7 @@ function processExample(target, example, name, force) {
                                 targetSubRoot + '/' + tileName;
 
                             var substitutions = !doSubstitutions ? undefined : {
+                                'TILE_PREFIX': tilePrefix,
                                 'TILE_NAME_BASE' : name,
                                 'TILE_NAME': tileName,
                                 'GENERATED_UUID' : uniqueUUID,
@@ -169,6 +173,7 @@ function processExample(target, example, name, force) {
     };
 
     var baseSubstitutions = {
+        'TILE_PREFIX': tilePrefix,
         'TILE_NAME_BASE': name,
         'host': '{{{host}}}'
     };

@@ -5,9 +5,9 @@ var SFDC_PREFIX = '/services/data/v27.0';
 exports.querySalesforceV27 = querySalesforceV27;
 exports.postSalesforceV27 = postSalesforceV27;
 
-function querySalesforceV27(ticketID, myOauth, uri){
+function querySalesforceV27(ticketID, uri){
 
-    var tokenStore = myOauth.getTokenStore();
+    var tokenStore = jive.service.persistence();
 
     return tokenStore.find('tokens', {'ticket': ticketID }).then( function(found) {
         if ( found ) {
@@ -33,11 +33,11 @@ function querySalesforceV27(ticketID, myOauth, uri){
             jive.logger.error('Error querying salesforce', err);
         }
     );
-};
+}
 
-function postSalesforceV27(ticketID, myOauth, uri, data){
+function postSalesforceV27(ticketID, uri, data){
 
-    var tokenStore = myOauth.getTokenStore();
+    var tokenStore = jive.service.persistence();
 
     return tokenStore.find('tokens', {'ticket': ticketID }).then( function(found) {
         if ( found ) {
