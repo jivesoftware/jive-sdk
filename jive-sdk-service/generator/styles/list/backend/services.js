@@ -81,19 +81,19 @@ var pushData = function() {
 
 exports.task = [
     {
-        'event' : 'pushDataTileInstance',
-        'interval' : 10000
+        'interval' : 10000,
+        'handler' : pushData
     }
 ];
 
 exports.eventHandlers = [
     {
-        'event' : 'pushDataTileInstance',
-        'handler' : pushData
+        'event' : jive.constants.globalEventNames.NEW_INSTANCE,
+        'handler' : processTileInstance
     },
 
     {
-        'event' : 'newInstance',
+        'event' : jive.constants.globalEventNames.INSTANCE_UPDATED,
         'handler' : processTileInstance
     }
 ];

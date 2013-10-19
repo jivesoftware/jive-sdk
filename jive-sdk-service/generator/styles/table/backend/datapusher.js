@@ -15,24 +15,56 @@
  */
 
 var jive = require("jive-sdk");
+var q = require('q');
 
-exports.task = function() {
-    jive.tiles.findByDefinitionName( "{{{TILE__NAME}}}" ).then( function(instances) {
-        instances.forEach( function( instance ) {
-            var dataToPush = {
-                "data":
+function processTileInstance(instance) {
+    var dataToPush = {
+        "data": {
+            "title": "Account Details",
+            "contents": [
                 {
-                    "title": "Account Details",
-                    "contents": [
-                        {
-                            "name": "Value",
-                            "value": "Updated " + new Date().getTime()
-                        }
-                    ]
+                    "name": "Value",
+                    "value": "Updated " + new Date().getTime()
                 }
-            };
+            ]
+        }
+    };
 
-            jive.tiles.pushData( instance, dataToPush );
-        } );
+    jive.tiles.pushData(instance, dataToPush);
+}
+
+var pushData = function() {
+    var deferred = q.defer();
+    jive.tiles.findByDefinitionName('{{{TILE_NAME}}}').then(function(instances) {
+        if (instances) {
+            q.all(instances.map(processTileInstance)).then(function() {
+                deferred.resolve(); //success
+            }, function() {
+                deferred.reject(); //failure
+            });
+        } else {
+            jive.logger.debug("No jive instances to push to");
+            deferred.resolve();
+        }
     });
+    return deferred.promise;
 };
+
+exports.task = [
+    {
+        'interval' : 10000,
+        'handler' : pushData
+    }
+];
+
+exports.eventHandlers = [
+    {
+        'event' : jive.constants.globalEventNames.NEW_INSTANCE,
+        'handler' : processTileInstance
+    },
+
+    {
+        'event' : jive.constants.globalEventNames.INSTANCE_UPDATED,
+        'handler' : processTileInstance
+    }
+];

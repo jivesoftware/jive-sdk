@@ -2,17 +2,21 @@ var opportunities = require('./opportunities');
 var jive = require('jive-sdk');
 var sampleOauth = require('./routes/oauth/sampleOauth');
 
+function processTileInstance(instance) {
+    opportunities.pullOpportunity(instance).then(function (data) {
+        jive.tiles.pushData(instance, data);
+    }).catch(function (err) {
+        jive.logger.error('Error pushing salesforce data to Jive', err);
+    });
+}
+
 exports.task = new jive.tasks.build(
     // runnable
     function() {
         jive.tiles.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
             if ( instances ) {
                 instances.forEach( function( instance ) {
-                    opportunities.pullOpportunity(instance).then(function(data) {
-                        jive.tiles.pushData(instance, data);
-                    }).catch(function(err) {
-                        jive.logger.error('Error pushing salesforce data to Jive', err);
-                    });
+                    processTileInstance(instance);
                 });
             }
         });
@@ -21,6 +25,18 @@ exports.task = new jive.tasks.build(
     // interval (optional)
     10000
 );
+
+exports.eventHandlers = [
+    {
+        'event' : jive.constants.globalEventNames.INSTANCE_UPDATED,
+        'handler' : processTileInstance
+    },
+
+    {
+        'event' : jive.constants.globalEventNames.NEW_INSTANCE,
+        'handler' : processTileInstance
+    }
+];
 
 exports.onBootstrap = function(app) {
     var oauthConfig = sampleOauth.fetchOAuth2Conf();
