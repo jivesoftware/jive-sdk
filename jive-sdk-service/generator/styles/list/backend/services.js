@@ -40,9 +40,9 @@ function processTileInstance(instance) {
                     "listStyle": "contentList"
                 },
                 "action": {
-                    "text": "Add a Todo",
+                    "text": "Share State",
                     "context": {
-                        "mode": "add"
+                        "count": count
                     }
                 }
             }
