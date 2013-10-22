@@ -505,5 +505,3 @@ exports.getExpandedTileDefinitions = function(all) {
     });
     return processed;
 };
-
-exports.security = security;
