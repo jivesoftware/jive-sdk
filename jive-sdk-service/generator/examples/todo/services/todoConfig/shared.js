@@ -36,10 +36,10 @@ exports.getClientIDForJiveURL = function(jiveUrl) {
 
 exports.getClientIDForRequest = function(req) {
     var jiveUrl = exports.getJiveURL(req);
-    return getClientIDForJiveURL(jiveUrl);
+    return exports.getClientIDForJiveURL(jiveUrl);
 };
 
 exports.getClientIDForInstanceConfig = function(instance) {
     var jiveUrl = instance.url.substring(0, instance.url.indexOf("/", 8));
-    return getClientIDForJiveURL(jiveUrl);
+    return exports.getClientIDForJiveURL(jiveUrl);
 };
