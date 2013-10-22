@@ -74,7 +74,7 @@ jive.service.init() must at minimum be called with an app, as the framework will
 prepare the express app.
 
 A second argument (omitted above) can be provided, which can be either (1) the JSON for the options
-required to start the service (clientId, clientSecret, clientUrl), or the location of a JSON
+required to start the service (clientUrl, port), or the location of a JSON
 file containing those setup options.
 
 If no 2nd argument is provided, then the system will try to locate a command line parameter to
@@ -94,13 +94,16 @@ discover definition JSON, routes, tasks, and event handlers that are placed ther
 The .autowire() assumes the following directory structure exists:
 [app root]/tiles
             /tile1
-                /routes (optional)
-                    /config
-                    get.js
-                /services (optional)
-                    datapusher.js
-                    lifecycle.js
+                /public (optional)
+                    configuration.html (optional)
+                /backend (optional)
+                    *.js
+                    /routes (optional)
+                        /config (optional)
+                            get.js (optional)
                 definition.json (optional)
+
+Note: The optional items above are recommended.
 
 Regarding the /routes directory:
 --------------------------------
@@ -121,11 +124,12 @@ based on the directory path. For example:
 
             ..
             /samplelist
-                /routes
-                    /config
-                    get.js
+                /backend
+                    /routes
+                        /config
+                            get.js
 
-Assuming that /samplelist/routes/config/get.js contains the following:
+Assuming that /samplelist/backend/routes/config/get.js contains the following:
 
             exports.route = function(req, res) { ..  };
 
@@ -173,10 +177,10 @@ The following path will be autowired:
 
 As with the autowire by verb file example above, you should reference these routes in your definition.json.
 
-Regarding the services directory:
+Regarding the backend directory:
 --------------------------------
 Though the system will search for .js files anywhere under the tile directory, it is good practice to put your
-services related items in a specific services directory.
+services related items in a specific backend directory.
 
 The system will try to discover any event handlers and tasks exported in .js files.
 
@@ -202,7 +206,7 @@ whenever an instance of samplelist is destroyed.
 If you have a file that exports a .task property, the system will call jive.definitions.addTasks( .. ) on that
 object, which can be either a task object (see jive-sdk/lib/task.js) or a function.
 
-If in /samplelist/services/datapusher.js this existed:
+If in /samplelist/backend/datapusher.js this existed:
 
      exports.task = function() { .. }
              - or -
@@ -218,13 +222,13 @@ will call either jive.tile.definitions or jive.extstreams.definitions .save(), b
 in this json structure. If style is "ACTIVITY", jive.extstreams.definitions.save() will be called; otherwise
 its assumed to be a tile, and jive.tiles.definitions.save() will be called.
 
-When the /tiles or /tilesInstall development endpoints are called, it will return all the tiles and external stream definitions
+When the /tiles development endpoints are called, it will return all the tiles and external stream definitions
 defined in your system through the aforementioned .save() command. The tile definitions output via this
 endpoint is in the format expected by the jivelinks API.
 
-(1) If "configure" or "registration" attributes are not specified, the value will be interpreted as
-     [clientUrl]/[tile name]/configure and [clientUrl]/[tile name]/register respectively. Please make sure these endpoints
-     are available either through manual configuration, or route autowiring (see above).
+(1) If the "configure" attribute is not specified, the value will be interpreted as
+     [clientUrl]/[tile name]/configure. Please make sure this endpoint
+     is available either through manual configuration, or route autowiring (see above).
 (2) If "registration" attribute is not specified, the value will be interpreted as
      http[your service url]/registration (this is the shared, framework provided registration endpoint).
 (3) Any paths containing {{{host}}} will have that value substituted with the value of clientUrl from your
@@ -238,8 +242,8 @@ Step 3. START SERVICE
    endpoints such as:
         /registration
         /tiles (dev mode only)
-        /tilesInstall (dev mode only)
-- Validates service setup options, making sure that require attributes such as clientId, clientSecret, and
+
+- Validates service setup options, making sure that require attributes such as
 clientUrl are present
 - If there are any problems, the failure callback on the .then() of this promise gets executed, and the
   service process exits with an error. Otherwise the http server starts when the success callback is executed.
@@ -249,13 +253,5 @@ At this point, the service should be ready to serve purposeful places integratio
 In development mode, you can inspect what tiles are active on the service by invoking:
 
     GET /tiles
-
-If a Jive instance's username/password is admin/admin, you may install your integration tiles on that Jive instance
-by calling the following development endpoint:
-
-    GET /tilesInstall?jiveHost=[jivehost]&jivePort=[jivePort]&context=[extra context]
-
-If jivePort is not present, its assumed to be 80; and context is entirely optional, if you don't have a
-jiveUrl with an extra context such as /sbs (eg. http://mysite.jiveon.com/sbs).
 
 */
