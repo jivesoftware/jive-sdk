@@ -109,6 +109,7 @@ var todoEditHandler = function(req, res) {
     var id = parseInt(req.param("id"), 10 ),
         todoStatus = req.param("status"),
         name = req.param("name"),
+        assignee = req.param("assignee"),
         project = req.param("project");
     db.find( "todos", {id: id} ).then( function ( todos ) {
         var todo;
@@ -120,6 +121,7 @@ var todoEditHandler = function(req, res) {
             todo = todos[0];
             todo.status = todoStatus;
             todo.name = name;
+            todo.assignee = assignee;
             todo.project = project;
             db.save("todos", todo.id, todo ).then(function() {
                 update(todo, "Edited todo '" + todo.name + "'  status ='" + todo.status + "'");
