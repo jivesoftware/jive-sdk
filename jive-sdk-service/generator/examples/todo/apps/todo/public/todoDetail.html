@@ -10,7 +10,7 @@
                 'href': url,
                 'authz': "signed",
                 'format': 'json',
-                "noCache": true
+                "noCache": DEV_MODE
             };
 
             osapi.http.get(params).execute(function (response) {
@@ -64,7 +64,7 @@
                 'href': url,
                 'authz': "signed",
                 'format': 'json',
-                "noCache": true,
+                "noCache": DEV_MODE,
                 "headers": {"content-type": ["application/json"]},
                 "body": {
                     id: $("#todoId").val(),

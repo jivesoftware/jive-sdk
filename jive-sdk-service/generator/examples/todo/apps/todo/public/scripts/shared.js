@@ -1,5 +1,7 @@
 var host, app, baseRESTUrl;
 
+var DEV_MODE = false;  // Only enable this during development.  It will significantly effect performance.
+
 if( !host ) {
     var appXMLUrl = gadgets.util.getUrlParameters()['url'];
     if( appXMLUrl ) {

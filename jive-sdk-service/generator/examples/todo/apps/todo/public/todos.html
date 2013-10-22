@@ -18,7 +18,7 @@ gadgets.util.registerOnLoadHandler(function() {
             'href': url,
             'authz': "signed",
             'format': 'json',
-            "noCache": true
+            "noCache": DEV_MODE
         };
 
         osapi.http.get(params).execute(function (response) {

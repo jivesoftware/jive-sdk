@@ -5,7 +5,7 @@
             username=undefined,
             closeFn=undefined;
     setDefaults = function(context) {
-        if( context ) {
+        if( context && context.jive && context.jive.content && context.jive.content.type && context.jive.content.type !== "") {
             osapi.jive.corev3.resolveContext(context, function (result) {
                 if (result && result.content) {
                     if(result.content.type === 'person') {
@@ -77,7 +77,7 @@
                 'href': url,
                 'authz': "signed",
                 'format': 'json',
-                "noCache": true,
+                "noCache": DEV_MODE,
                 "headers": {"content-type": ["application/json"]},
                 "body": {
                     "name": $('#todoName').val(),
