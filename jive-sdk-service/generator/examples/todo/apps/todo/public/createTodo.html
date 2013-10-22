@@ -23,6 +23,16 @@
         }
     });
 
+    // When coming to this view from the top level create, set the current project.
+    gadgets.actions.updateAction({
+        id:"com.jivesoftware.example.todo.createModalNav",
+        callback:function(context){
+            if(context && context.jive && context.jive.content && context.jive.content.type == 'osapi.jive.core.Project'){
+                setProject(context);
+            }
+        }
+    });
+
     // When coming to this view from the !app action, change the close
     gadgets.actions.updateAction({
         id:"com.jivesoftware.example.todo.createTodoInline",
