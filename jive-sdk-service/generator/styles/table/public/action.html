@@ -1,0 +1,62 @@
+<!--/*-->
+<!--* Copyright 2013 Jive Software-->
+<!--*-->
+<!--*    Licensed under the Apache License, Version 2.0 (the "License");-->
+<!--*    you may not use this file except in compliance with the License.-->
+<!--*    You may obtain a copy of the License at-->
+<!--*-->
+<!--*       http://www.apache.org/licenses/LICENSE-2.0-->
+<!--*-->
+<!--*    Unless required by applicable law or agreed to in writing, software-->
+<!--*    distributed under the License is distributed on an "AS IS" BASIS,-->
+<!--*    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.-->
+<!--*    See the License for the specific language governing permissions and-->
+<!--*    limitations under the License.-->
+<!--*/-->
+
+<!doctype html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{{host}}}/stylesheets/bootstrap.min.css">
+    <meta http-equiv="Content-Type" value="text/html; charset=utf-8" />
+    <title>Table Action</title>
+</head>
+
+<body>
+
+<div class="container-fluid" id="issue-panel">
+    <hr>
+    <div class="container-fluid">
+        <div class="alert-area" style="display:none">
+            <!-- area for alerts to appear -->
+        </div>
+        <table>
+            <tr>
+                <td colspan="2">
+                    <label>Share Current Data</label>
+                </td>
+            </tr>
+            <tr>
+                <td><label>Subject:</label></td>
+                <td><input type="text" id="subject"></td>
+            </tr>
+            <tr>
+                <td><label>Message:</label></td>
+                <td><textarea class="span6" rows=3 id="message" style="resize:none"></textarea></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button class="btn btn-primary" id="create-discussion">Create Discussion</button>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+</div>
+
+<script src="{{{host}}}/javascripts/jQuery-1.10.2.js"></script>
+<script src="{{{host}}}/javascripts/jquery.base64.min.js"></script>
+<script src="{{{host}}}/javascripts/bootstrap.min.js"></script>
+<script src="{{{host}}}/{{{TILE_NAME}}}/javascripts/action.js"></script>
+</body>
+</html>

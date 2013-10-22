@@ -22,15 +22,22 @@ var q = require('q');
  * @param instance
  */
 var processTileInstance = function(instance) {
+    var date = new Date();
     var dataToPush = {
         "data": {
             "title": "Account Details",
             "contents": [
                 {
                     "name": "Value",
-                    "value": "Updated " + new Date().getTime()
+                    "value": "Updated " + date.getTime()
                 }
-            ]
+            ],
+            action: {
+                text: 'Share',
+                'context':{
+                    date:date
+                }
+            }
         }
     };
 
