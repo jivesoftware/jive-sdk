@@ -65,13 +65,13 @@
         var create = function() {
             var params = {
                 'href': url,
+                'authz': "signed",
                 'format': 'json',
                 "noCache": true,
                 "headers": {"content-type": ["application/json"]},
                 "body": {
                     "name": $('#todoName').val(),
-                    "status": "Open",
-                    "clientid": clientid
+                    "status": "Open"
                 }
             };
 

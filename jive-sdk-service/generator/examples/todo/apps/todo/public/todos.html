@@ -6,7 +6,7 @@ var project = undefined,
 
 gadgets.util.registerOnLoadHandler(function() {
     var updateDisplay = function( ) {
-        var queryString = "?clientid=" + clientid ;
+        var queryString = "?source=app";
         if( project ) {
             queryString += "&project=" + encodeURIComponent(project);
         } else if ( username ) {
@@ -16,6 +16,7 @@ gadgets.util.registerOnLoadHandler(function() {
         var url = baseRESTUrl + queryString;
         var params = {
             'href': url,
+            'authz': "signed",
             'format': 'json',
             "noCache": true
         };

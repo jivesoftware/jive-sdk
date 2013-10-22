@@ -22,57 +22,69 @@
  */
 
 var jive = require('jive-sdk'),
-    db = jive.service.persistence();
+    db = jive.service.persistence(),
+    shared = require("../../../services/todoConfig/shared.js");
+
 
 var update = function( todo, description ) {
     jive.events.emit("todoUpdate", todo, description);
 };
 
 var todoHandler = function(req, res) {
-    var project = req.param("project"),
-        assignee = req.param("assignee"),
-        clientid = req.param("clientid"),
-        criteria = {};
+    shared.getClientIDForRequest(req).then(function(clientid) {
+        var project = req.param("project"),
+            assignee = req.param("assignee"),
+            criteria = {};
 
-    if(clientid) {
-        criteria.clientid = clientid;
-    }
-    if(project) {
-        criteria.project =  project;
-    }
+        if(clientid) {
+            criteria.clientid = clientid;
+        }
+        if(project) {
+            criteria.project =  project;
+        }
 
-    if( assignee ) {
-        criteria.assignee = assignee;
-    }
+        if( assignee ) {
+            criteria.assignee = assignee;
+        }
 
-    db.find("todos",criteria).then(function( todos ) {
-        res.status(200);
-        res.set({'Content-Type': 'application/json'});
-        res.send( JSON.stringify({todos: todos }, null, 4 ));
+        db.find("todos",criteria).then(function( todos ) {
+            res.status(200);
+            res.set({'Content-Type': 'application/json'});
+            res.send( JSON.stringify({todos: todos }, null, 4 ));
+        });
     });
 };
 
 var todoCreator = function(req, res) {
-    if( !req.body.name ) {
-        res.status(400);
-        res.send("Expected json body with name");
-        return;
-    }
+    shared.getClientIDForRequest(req).then(function(clientid) {
+        if( !req.body.name ) {
+            res.status(400);
+            res.send("Expected json body with name");
+            return;
+        }
+        var todo = {};
+        for(var key in req.body){
+            todo[key] = req.body[key];
+        }
 
-    var id = req.body.id;
-    if (!id) {
-        id =(new Date()).getTime();
-        req.body.id = id
-    }
+        todo.clientid = clientid;
 
-    db.save("todos", id, req.body ).then(function( data ) {
-        res.status(200);
-        res.set( {
-            'Content-Type': 'application/json',
-            'Pragma': 'no-cache'
+        var id = todo.id;
+        if (!id) {
+            id =(new Date()).getTime();
+            todo.id = id
+        }
+
+
+        db.save("todos", id, todo ).then(function( data ) {
+            res.status(200);
+            res.set( {
+                'Content-Type': 'application/json',
+                'Pragma': 'no-cache'
+            });
+            update(data, "Created todo '" + todo.name + "'");
+            res.send( data );
         });
-        update(data, "Created todo '" + req.body.name + "'");
-        res.send( data );
     });
 };
 

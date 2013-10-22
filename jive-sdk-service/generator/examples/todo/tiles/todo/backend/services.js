@@ -19,53 +19,55 @@
  */
 
 var jive = require("jive-sdk" ),
-    db = jive.service.persistence();
+    db = jive.service.persistence(),
+    shared = require("../../../services/todoConfig/shared.js");
 
 
 function processTileInstance(instance) {
     jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id);
+    shared.getClientIDForInstanceConfig(instance).then(function(clientid) {
 
-    var dataToPush = {
-        data: {
-            "title": "Open Todos",
-            "contents": [
+        var dataToPush = {
+            data: {
+                "title": "Open Todos",
+                "contents": [
 
-            ],
-            "config": {
-                "listStyle": "contentList"
-            }
-        }
-    };
-
-    var criteria = {status: "Open"};
-
-    var project = instance.config.project;  // Project can be specified in the configuration.html
-    if(project) {
-        criteria.project = project;
-        dataToPush.data.title += " in project " + project;
-    }
-    var clientid = instance.config.clientid;
-    if(clientid) {
-        criteria.clientid = clientid;
-    }
-
-    db.find("todos", criteria).then(function( todos ) {
-        var todo, i;
-
-        for( i = 0 ; i < todos.length && i < 10; i++) {
-            todo = todos[i];
-            var todoDesc = {
-                text: todo.name,
-                action: {
-                    // Create a url that is a deep link into the the "todo" app, "todoDetail" view.
-                    "url": "/apps/{{{TILE_NAME}}}_{{{GENERATED_UUID}}}/todoDetail/" + encodeURIComponent(JSON.stringify({"id": todo.id})),
-                    "relativeUrl": "true"
+                ],
+                "config": {
+                    "listStyle": "contentList"
                 }
-            };
-            dataToPush.data.contents.push(todoDesc);
+            }
+        };
+
+        var criteria = {status: "Open"};
+
+        var project = instance.config.project;  // Project can be specified in the configuration.html
+        if(project) {
+            criteria.project = project;
+            dataToPush.data.title += " in project " + project;
+        }
+        if(clientid) {
+            criteria.clientid = clientid;
         }
 
-        jive.tiles.pushData(instance, dataToPush);
+        db.find("todos", criteria).then(function( todos ) {
+            var todo, i;
+
+            for( i = 0 ; i < todos.length && i < 10; i++) {
+                todo = todos[i];
+                var todoDesc = {
+                    text: todo.name,
+                    action: {
+                        // Create a url that is a deep link into the the "todo" app, "todoDetail" view.
+                        "url": "/apps/{{{TILE_NAME}}}_{{{GENERATED_UUID}}}/todoDetail/" + encodeURIComponent(JSON.stringify({"id": todo.id})),
+                        "relativeUrl": "true"
+                    }
+                };
+                dataToPush.data.contents.push(todoDesc);
+            }
+
+            jive.tiles.pushData(instance, dataToPush);
+        });
     });
 }
 

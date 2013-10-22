@@ -14,7 +14,8 @@
  *    limitations under the License.
  */
 
-var jive = require("jive-sdk");
+var jive = require("jive-sdk"),
+    shared = require("../../../services/todoConfig/shared.js");
 
 
 function getFormattedData(id, description) {
@@ -55,23 +56,25 @@ exports.update = function( obj, description ) {
     jive.extstreams.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
         if ( instances ) {
             instances.forEach( function( instance ) {
-                var config = instance['config'] || {};
-                if ( config.posting === 'off' ) {
-                    return;
-                }
+                shared.getClientIDForInstanceConfig(instance).then(function(clientid) {
+                    var config = instance['config'] || {};
+                    if ( config.posting === 'off' ) {
+                        return;
+                    }
 
-                if( config.project && config.project !== obj.project ) {
-                    return;
-                }
+                    if( config.project && config.project !== obj.project ) {
+                        return;
+                    }
 
-                if (config.clientid && config.clientid !== obj.clientid ) {
-                    return;
-                }
+                    if (clientid !== obj.clientid ) {
+                        return;
+                    }
 
 
-                jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
+                    jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
 
-                jive.extstreams.pushActivity(instance, getFormattedData(obj.id, description));
+                    jive.extstreams.pushActivity(instance, getFormattedData(obj.id, description));
+                });
             });
         }
     });
