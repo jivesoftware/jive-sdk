@@ -109,7 +109,7 @@ exports.persistence = function(_persistence) {
         },
 
         findByID: function() {
-            return persistence ? persistence.find(
+            return persistence ? persistence.findByID(
                 arguments.length > 0 ? arguments[0] : undefined,
                 arguments.length > 1 ? arguments[1] : undefined,
                 arguments.length > 2 ? arguments[2] : undefined,
@@ -505,3 +505,5 @@ exports.getExpandedTileDefinitions = function(all) {
     });
     return processed;
 };
+
+exports.security = security;
