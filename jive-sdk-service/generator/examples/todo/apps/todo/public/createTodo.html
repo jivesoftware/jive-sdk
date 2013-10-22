@@ -4,11 +4,15 @@
     var project=undefined,
             username=undefined,
             closeFn=undefined;
-    setProject = function(context) {
+    setDefaults = function(context) {
         if( context ) {
             osapi.jive.corev3.resolveContext(context, function (result) {
                 if (result && result.content) {
-                    project = result.content.name;
+                    if(result.content.type === 'person') {
+                        username = result.content.jive && result.content.jive.username;
+                    } else if (result.content.type === 'project') {
+                        project = result.content.name;
+                    }
                 }
             });
         }
@@ -17,9 +21,7 @@
     gadgets.actions.updateAction({
         id:"com.jivesoftware.example.todo.createTodoProject",
         callback:function(context){
-            if(context && context.jive && context.jive.content && context.jive.content.type == 'osapi.jive.core.Project'){
-                setProject(context);
-            }
+            setDefaults(context);
         }
     });
 
@@ -27,9 +29,7 @@
     gadgets.actions.updateAction({
         id:"com.jivesoftware.example.todo.createModalNav",
         callback:function(context){
-            if(context && context.jive && context.jive.content && context.jive.content.type == 'osapi.jive.core.Project'){
-                setProject(context);
-            }
+            setDefaults(context);
         }
     });
 
@@ -110,7 +110,7 @@
 
         osapi.jive.core.container.getLaunchContext(function(context){
             // This is necessary when going to this view from another view.
-            setProject(context);
+            setDefaults(context);
         });
     });
 </script>
