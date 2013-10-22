@@ -20,7 +20,7 @@
 
 var jive = require("jive-sdk" ),
     db = jive.service.persistence(),
-    shared = require("../../../services/todoConfig/shared.js");
+    shared = require("../../../services/{{{TILE_PREFIX}}}todoConfig/shared.js");
 
 
 function processTileInstance(instance) {

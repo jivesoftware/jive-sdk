@@ -10,7 +10,7 @@ var host, setHost = function( newHost ) {
         if ( typeof config === "string" ) {
             config = JSON.parse(config);
         }
-        var url = host + "/todoConfig/config";
+        var url = host + "/{{{TILE_PREFIX}}}todoConfig/config";
 
         var getParams = {
             'href': url,

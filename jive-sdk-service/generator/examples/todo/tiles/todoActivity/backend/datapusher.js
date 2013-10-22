@@ -15,7 +15,7 @@
  */
 
 var jive = require("jive-sdk"),
-    shared = require("../../../services/todoConfig/shared.js");
+    shared = require("../../../services/{{{TILE_PREFIX}}}todoConfig/shared.js");
 
 
 function getFormattedData(id, description) {
