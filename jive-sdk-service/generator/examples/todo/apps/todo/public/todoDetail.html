@@ -51,13 +51,15 @@
                     });
         }
 
-        $("#done" ).click(function() {
+        var done = function() {
             if (gadgets.views.getCurrentView().getName().indexOf("embedded") != -1) {
                 osapi.jive.core.container.closeApp();
             } else {
                 gadgets.views.requestNavigateTo("todoList");
             }
-        });
+        };
+
+        $("#done" ).click(done);
 
         $("#save" ).click(function() {
             var params = {
@@ -81,7 +83,7 @@
                     return;
                 }
                 if (response.content) {
-                    $("#status").html("saved:" + response.content.id);
+                    done();
                 }
             });
         });
