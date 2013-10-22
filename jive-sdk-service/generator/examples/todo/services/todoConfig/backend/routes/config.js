@@ -23,7 +23,7 @@
 
 var jive = require('jive-sdk'),
     db = jive.service.persistence(),
-    shared = require("../../../services/todoConfig/shared.js");
+    shared = require("../../shared.js");
 
 var update = function( todo, description ) {
     jive.events.emit("todoUpdate", todo, description);
