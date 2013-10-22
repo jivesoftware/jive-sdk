@@ -59,7 +59,7 @@ function processTileInstance(instance) {
                     text: todo.name,
                     action: {
                         // Create a url that is a deep link into the the "todo" app, "todoDetail" view.
-                        "url": "/apps/{{{TILE_NAME}}}_{{{GENERATED_UUID}}}/todoDetail/" + encodeURIComponent(JSON.stringify({"id": todo.id})),
+                        "url": "/apps/{{{TILE_BASE_NAME}}}_{{{GENERATED_UUID}}}/todoDetail/" + encodeURIComponent(JSON.stringify({"id": todo.id})),
                         "relativeUrl": "true"
                     }
                 };
