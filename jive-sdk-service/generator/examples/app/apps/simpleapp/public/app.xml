@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module specificationVersion="1">
-  <ModulePrefs title="simpleapp"
-               description="Description of simpleapp"
+  <ModulePrefs title="{{{TILE_PREFIX}}}simpleapp"
+               description="Description of {{{TILE_PREFIX}}}simpleapp"
                author="Aron Racho"
                author_affiliation="Jive"
                author_email="aron.racho@jivesoftware.com">
