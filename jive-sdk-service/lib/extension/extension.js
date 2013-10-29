@@ -66,11 +66,20 @@ exports.prepare = function (tilesDir, appsDir, cartridgesDir, storagesDir) {
     }).then( function() {
         // zip it all
         return jive.util.zipFolder( extensionSrcDir, 'extension.zip' );
+    }).catch( function(e) {
+        var error = new Error(e);
+        var stack = error.stack;
+        jive.logger.error( stack );
+        throw error;
     });
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // private
+
+function isValid(file ) {
+    return !(file.indexOf('.') == 0)
+}
 
 function limit(str, chars) {
     return str.substring(0, str.length > chars ? chars : str.length );
@@ -218,15 +227,17 @@ function getStorages(storagesDir, extensionInfo) {
             return q.nfcall(fs.readdir, storagesDir).then(function(dirContents){
                 var proms = [];
                 dirContents.forEach(function(item) {
-                    var definitionDir = storagesDir + '/' + item + '/definition.json';
-                    proms.push( jive.util.fsreadJson(definitionDir).then(function(storage){
-                        if ( !storage['name'] ) {
-                            // generate a storage name if one is not provided
-                            storage['name'] = jive.util.guid(extensionInfo['uuid']);
-                        }
+                    if ( isValid(item) ) {
+                        var definitionDir = storagesDir + '/' + item + '/definition.json';
+                        proms.push( jive.util.fsreadJson(definitionDir).then(function(storage){
+                            if ( !storage['name'] ) {
+                                // generate a storage name if one is not provided
+                                storage['name'] = jive.util.guid(extensionInfo['uuid']);
+                            }
 
-                        return storage;
-                    }) );
+                            return storage;
+                        }) );
+                    }
                 });
                 return q.all(proms);
             });
@@ -243,26 +254,28 @@ function getApps(appsRootDir, extensionInfo) {
             return q.nfcall(fs.readdir, appsRootDir).then(function(dirContents){
                 var proms = [];
                 dirContents.forEach(function(item) {
-                    var definitionDir = appsRootDir + '/' + item + '/definition.json';
-                    proms.push( jive.util.fsreadJson(definitionDir).then(function(app) {
-                        if ( !app['name'] ) {
-                            app['name'] = item;
-                        }
+                    if ( isValid(item) ) {
+                        var definitionDir = appsRootDir + '/' + item + '/definition.json';
+                        proms.push( jive.util.fsreadJson(definitionDir).then(function(app) {
+                            if ( !app['name'] ) {
+                                app['name'] = item;
+                            }
 
-                        if ( !app['id'] ) {
-                            app['id'] = jive.util.guid(app['name'] + extensionInfo['uuid']);
-                        }
+                            if ( !app['id'] ) {
+                                app['id'] = jive.util.guid(app['name'] + extensionInfo['uuid']);
+                            }
 
-                        if ( !app['appPath'] ) {
-                            // generate an app path if one is not provided
-                            var temp = app['id'];
-                            temp = temp.replace(/[^a-zA-Z 0-9]+/g,'');
-                            app['appPath'] = temp;
-                        }
+                            if ( !app['appPath'] ) {
+                                // generate an app path if one is not provided
+                                var temp = app['id'];
+                                temp = temp.replace(/[^a-zA-Z 0-9]+/g,'');
+                                app['appPath'] = temp;
+                            }
 
-                        app['url'] = jive.service.serviceURL() + '/osapp/' + item + '/app.xml';
-                        return app;
-                    }) );
+                            app['url'] = jive.service.serviceURL() + '/osapp/' + item + '/app.xml';
+                            return app;
+                        }) );
+                    }
                 });
                 return q.all(proms);
             });
@@ -280,27 +293,29 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
             return q.nfcall(fs.readdir, cartridgesRootDir).then(function(dirContents){
                 var proms = [];
                 dirContents.forEach(function(item) {
-                    var definitionDir = cartridgesRootDir + '/' + item + '/definition.json';
-                    var contentDir = cartridgesRootDir + '/' + item + '/content';
-                    proms.push( jive.util.fsreadJson(definitionDir).then(function(cartridge) {
-                        if ( !cartridge['name'] ) {
-                            // generate an cartidge name if one is not provided
-                            cartridge['name'] = jive.util.guid(item);
-                        }
+                    if ( isValid(item) ) {
+                        var definitionDir = cartridgesRootDir + '/' + item + '/definition.json';
+                        var contentDir = cartridgesRootDir + '/' + item + '/content';
+                        proms.push( jive.util.fsreadJson(definitionDir).then(function(cartridge) {
+                            if ( !cartridge['name'] ) {
+                                // generate an cartidge name if one is not provided
+                                cartridge['name'] = jive.util.guid(item);
+                            }
 
-                        var zipFileName = cartridge['zipFileName'];
-                        if ( !zipFileName ) {
-                            zipFileName = cartridge['name'];
-                            zipFileName = zipFileName.replace(/[^\S]+/, '');
-                            zipFileName = zipFileName.replace(/[^a-zA-Z0-9]/, '-');
-                            zipFileName += '.zip';
-                        }
+                            var zipFileName = cartridge['zipFileName'];
+                            if ( !zipFileName ) {
+                                zipFileName = cartridge['name'];
+                                zipFileName = zipFileName.replace(/[^\S]+/, '');
+                                zipFileName = zipFileName.replace(/[^a-zA-Z0-9]/, '-');
+                                zipFileName += '.zip';
+                            }
 
-                        var zipFile = extensionSrcDir + '/data/' + zipFileName;
-                        return jive.util.zipFolder( contentDir, zipFile, true).then( function() {
+                            var zipFile = extensionSrcDir + '/data/' + zipFileName;
+                            return jive.util.zipFolder( contentDir, zipFile, true).then( function() {
                                 return q.resolve(cartridge);
-                        })
-                    }) );
+                            })
+                        }) );
+                    }
                 });
                 return q.all(proms);
             });
