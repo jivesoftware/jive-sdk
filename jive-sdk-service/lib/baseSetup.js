@@ -131,7 +131,7 @@ exports.setupServices = function( app, definitionName, svcDir, setupDefinitionEv
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
 
-    return exports.recursiveDirectoryProcessor( null, definitionName, svcDir, svcDir,
+    return exports.recursiveDirectoryProcessor( app, definitionName, svcDir, svcDir,
         function(app, definitionName, theFile, theDirectory) {
             var taskPath = theDirectory + '/' + theFile;
             var target = require(taskPath);
