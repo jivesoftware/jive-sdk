@@ -76,7 +76,6 @@ exports.community = require('./lib/community/community');
 // For managing service webhooks
 exports.webhooks = require('./lib/webhook/webhooks');
 
-// DEPRECATED
 // For creating tasks
 exports.tasks = require('./lib/task/tasks');
 

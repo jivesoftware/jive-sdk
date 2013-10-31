@@ -27,9 +27,14 @@ var task = function( _runnable, _interval ) {
     };
 };
 
-/**
- * DEPRECATED
- */
 exports.build = function(handler, interval) {
     return new task( handler, interval );
+};
+
+exports.schedule = function( task, scheduler ) {
+    var eventID = jive.util.guid();
+    var context = { 'eventListener' : '__jive_system_tasks' };
+    var interval = task['interval'];
+    jive.events.addDefinitionEventListener( eventID, '__jive_system_tasks', task['handler']);
+    scheduler.schedule(eventID, context);
 };
