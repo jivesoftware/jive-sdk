@@ -258,7 +258,14 @@ module.exports = function(serviceConfig) {
                         if ( findKeys ) {
                             for ( var i in findKeys ) {
                                 var findKey = findKeys[i];
-                                if ( entryToInspect[ findKey ] !== keyValues[ findKey ] ) {
+                                var keyParts = findKey.split('.');
+                                var entryObj = entryToInspect;
+                                for ( var k = 0; k < keyParts.length; k++ ) {
+                                    var keyPart = keyParts[k];
+                                    entryObj = entryObj[keyPart];
+                                }
+
+                                if ( entryObj !== keyValues[ findKey ] ) {
                                     match = false;
                                     break;
                                 }
