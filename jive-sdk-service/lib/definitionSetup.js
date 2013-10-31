@@ -58,29 +58,7 @@ definitionSetup.setupDefinitionServices = function( app, definitionName, svcDir 
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
 
-    function setupDefinitionEventListener(handlerInfo, definitionName) {
-        if (!handlerInfo['event']) {
-            throw new Error('Event handler for tile definition "'
-                + definitionName + '" must specify an event name.');
-        }
-        if (!handlerInfo['handler']) {
-            throw new Error('Event handler for tile definition "'
-                + definitionName + '" must specify a function handler.');
-        }
-
-        if (jive.events.globalEvents.indexOf(handlerInfo['event']) != -1) {
-            jive.events.addSystemEventListener(handlerInfo['event'], handlerInfo['handler']);
-        } else {
-            jive.events.addDefinitionEventListener(
-                handlerInfo['event'],
-                definitionName,
-                handlerInfo['handler'],
-                handlerInfo['description'] || 'Unique to definition'
-            );
-        }
-    }
-
-    return definitionSetup.setupServices(app, definitionName, svcDir, setupDefinitionEventListener);
+    return definitionSetup.setupServices(app, definitionName, svcDir);
 };
 
 /**

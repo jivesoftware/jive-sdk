@@ -126,7 +126,7 @@ module.exports = function(serviceConfig) {
 
         /**
          * Remove a piece of data from a name collection, based to the provided key, return promise
-         * containing removed items when done.f
+         * containing removed items when done.
          * @param collectionID
          * @param key
          */

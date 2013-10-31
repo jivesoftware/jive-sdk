@@ -65,7 +65,7 @@ exports.recursiveDirectoryProcessor = function(app, definitionName, currentFsIte
 /**
  *
  */
-exports.setupRoutes = function(app, definitionName, routesPath, prefix){
+exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
 
     var processCandidateRoutes = function(app, definitionName, theFile, theDirectory, root ) {
         var fileName = theFile.substring(0, theFile.length - 3);
@@ -125,11 +125,36 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix){
     return exports.recursiveDirectoryProcessor( app, definitionName, routesPath, routesPath, processCandidateRoutes );
 };
 
+
+function defaultSetupDefinitionEventListener(handlerInfo, definitionName) {
+    if (!handlerInfo['event']) {
+        throw new Error('Event handler "'
+            + definitionName + '" must specify an event name.');
+    }
+    if (!handlerInfo['handler']) {
+        throw new Error('Event handler "'
+            + definitionName + '" must specify a function handler.');
+    }
+
+    if (jive.events.globalEvents.indexOf(handlerInfo['event']) != -1) {
+        jive.events.addSystemEventListener(handlerInfo['event'], handlerInfo['handler']);
+    } else {
+        jive.events.addDefinitionEventListener(
+            handlerInfo['event'],
+            definitionName,
+            handlerInfo['handler'],
+            handlerInfo['description'] || 'Unique to definition'
+        );
+    }
+}
+
 /**
  */
-exports.setupServices = function( app, definitionName, svcDir, setupDefinitionEventListener, definitionIdentifier ) {
+exports.setupServices = function( app, definitionName, svcDir, setupDefinitionEventListener ) {
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
+
+    setupDefinitionEventListener = setupDefinitionEventListener || defaultSetupDefinitionEventListener;
 
     return exports.recursiveDirectoryProcessor( app, definitionName, svcDir, svcDir,
         function(app, definitionName, theFile, theDirectory) {

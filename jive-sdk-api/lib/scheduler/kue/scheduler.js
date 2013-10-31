@@ -248,6 +248,8 @@ function setupCleanupTasks(_eventHandlerMap) {
  * @param serviceConfig - configuration options such as the location of the redis server.
  */
 Scheduler.prototype.init = function init( _eventHandlerMap, serviceConfig ) {
+    eventHandlerMap = _eventHandlerMap || jive.events.eventHandlerMap;
+
     var self = this;
     var isWorker = !serviceConfig || !serviceConfig['role'] || serviceConfig['role'] === jive.constants.roles.WORKER;
     var isPusher = !serviceConfig || !serviceConfig['role'] || serviceConfig['role'] === jive.constants.roles.PUSHER;

@@ -27,7 +27,7 @@ var tasks = {};
 var eventHandlerMap = {};
 
 Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
-    eventHandlerMap = _eventHandlerMap;
+    eventHandlerMap = _eventHandlerMap || jive.events.eventHandlerMap;
 
     // setup listeners
     jive.events.globalEvents.forEach( function(event) {

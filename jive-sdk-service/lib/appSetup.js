@@ -20,24 +20,42 @@ var fs = require('fs'),
     service = require('./service');
 
 var express = require('express');
+var baseSetup = require('./baseSetup');
+var appSetup = Object.create(baseSetup);
+module.exports = appSetup;
 
 function isValidFile(file ) {
     return !(file.indexOf('.') == 0)
 }
 
-exports.setupOneApp = function( app, osAppDir, osAppID ) {
-    return q.nfcall( fs.stat, osAppDir ).then( function( stat ) {
-        if ( stat.isDirectory() ) {
+function setupAppPublicRoutes(osAppDir, app, osAppID) {
+    return q.nfcall(fs.stat, osAppDir).then(function (stat) {
+        if (stat.isDirectory()) {
             jive.logger.debug("Setting up osapp at " + osAppDir);
-            app.use( '/osapp/' + osAppID, express.static( osAppDir + '/public' ) );
+            app.use('/osapp/' + osAppID, express.static(osAppDir + '/public'));
             return q.resolve();
         } else {
             return q.resolve();
         }
     });
+}
+
+appSetup.setupOneApp = function( app, osAppDir, osAppID ) {
+    var svcDir = osAppDir + '/backend';
+    var routesPath = osAppDir + '/backend/routes';
+
+    return setupAppPublicRoutes(osAppDir, app, osAppID).then( function() {
+        return jive.util.fsexists(svcDir).then( function(exists) {
+            return !exists ? q.resolve() : appSetup.setupServices(app, 'app.' + osAppID, svcDir);
+        }).then( function() {
+            return jive.util.fsexists(routesPath);
+        }).then( function(exists) {
+            return !exists ? q.resolve() : appSetup.setupRoutes(app, osAppID, routesPath);
+        })
+    });
 };
 
-exports.setupAllApps = function( app, appsRootDir ) {
+appSetup.setupAllApps = function( app, appsRootDir ) {
     return jive.util.fsexists( appsRootDir).then( function(exists) {
         if ( exists ) {
             return q.nfcall(fs.readdir, appsRootDir).then(function(dirContents){
@@ -47,7 +65,7 @@ exports.setupAllApps = function( app, appsRootDir ) {
                         return;
                     }
                     var dirPath = appsRootDir + '/' + item ;
-                    proms.push(exports.setupOneApp(app, dirPath, item));
+                    proms.push(appSetup.setupOneApp(app, dirPath, item));
                 });
 
                 return q.all(proms);
