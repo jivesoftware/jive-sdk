@@ -36,5 +36,5 @@ exports.schedule = function( task, scheduler ) {
     var context = { 'eventListener' : '__jive_system_tasks' };
     var interval = task['interval'];
     jive.events.addDefinitionEventListener( eventID, '__jive_system_tasks', task['handler']);
-    scheduler.schedule(eventID, context);
+    scheduler.schedule(eventID, context, interval);
 };
