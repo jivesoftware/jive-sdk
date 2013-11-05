@@ -81,7 +81,7 @@ function prepareData(tile, data, callback, filterName) {
     var contents = [{ name: config.sort, value: "Number of Issues"}].concat(fields);
 
     var preparedData = {
-        title: 'JIRA Issues for Filter '+filterName,
+        title: 'JIRA: '+filterName,
         contents: contents,
         action: {
             text: 'Take Action',

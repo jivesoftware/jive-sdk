@@ -38,16 +38,26 @@
         <div class="alert-area" style="display:none">
             <!-- area for alerts to appear -->
         </div>
-        <label>Share With</label>
-        <p><small>Leave this blank to share to this place.</small></p>
-        <input type="text" id="people" data-provide="typeahead" style="resize:none">
-        <div class="container-fluid" id="shared-people">
-            <!--Shared People-->
+
+        <div>
+            <label>Share With</label>
+            <p><small>Leave this blank to share to this place.</small></p>
+            <input type="text" id="people" data-provide="typeahead" style="resize:none; width: 400px">
+            <div class="container-fluid" id="shared-people">
+                <!--Shared People-->
+            </div>
         </div>
-        <label>Subject:</label>
-        <input type="text" id="subject">
-        <label>Message:</label>
-        <textarea class="span6" rows=3 id="message" style="resize:none"></textarea>
+
+        <div>
+            <label>Subject:</label><br>
+            <input type="text" id="subject" style="resize:none; width: 400px">
+        </div>
+
+        <div>
+            <label>Message:</label><br>
+            <textarea class="span6" cols=60 rows=3 id="message" style="resize:none; width: 400px"></textarea>
+        </div>
+
         <br>
         <button class="btn btn-primary" id="create-discussion">Create Discussion</button>
     </div>

@@ -44,17 +44,17 @@
     <button class="btn btn-primary" id="auth-btn">Continue</button>
 </div>
 
-<div class="container-fluid" id="filter-panel" style="display:none">
-    <label>Select a filter for which you want updates.</label>
-    <input type="text" id="filter" data-provide="typeahead"/><br/>
+<div class="container-fluid" id="filter-panel" style="display:none; margin: 5px">
+    <label>Select a filter for which you want updates.</label><br>
+    <input type="text" id="filter" data-provide="typeahead"/><br/><br>
     <label>Group by:</label>
+    <br>
     <input type="radio" name="sort" value="Severity">Severity<br>
     <input type="radio" name="sort" value="Type">Type<br>
     <input type="radio" name="sort" value="Status">Status<br>
     <input type="radio" name="sort" value="Assignee">Assignee<br>
-    <button class="btn btn-success" id="submit">Apply</button>
+    <button class="btn btn-success" id="submit" style="margin-top: 15px">Apply</button>
 </div>
-
 
 <script src="{{{host}}}/javascripts/jQuery-1.10.2.js"></script>
 <script src="{{{host}}}/javascripts/jquery.base64.min.js"></script>
