@@ -9,7 +9,7 @@ function initialize(config, options, host, jirahost) {
     isAuthenticated(viewerID);
 
     if (config.filter) {
-        $('#filter').val(config.filter);
+        $('#filter').val(config.filterName);
     }
     if (config.sort) {
         if (config.sort == "Severity") $('#filter-panel').find('input[name=sort]')[0].checked = true;
@@ -25,9 +25,8 @@ function initialize(config, options, host, jirahost) {
             'format':'json',
             'noCache': true,
             'authz':'signed'
-        }
+        };
         osapi.http.get(object).execute(function(response) {
-            console.log("response",response);
             if (response.content.found) {
                 console.log("already authenticated!");
                 $("#loading-panel").hide();
@@ -54,11 +53,12 @@ function initialize(config, options, host, jirahost) {
             'noCache': true,
             'authz':'signed',
             'body':{
-            'viewer':viewer,
+                'viewer':viewer,
                 'user':inpuser,
                 'pass':inppass
             }
-        }
+        };
+
         osapi.http.post(object).execute(function(response) {
             console.log("response",response);
             $("#loading-panel").hide();
@@ -88,14 +88,11 @@ function initialize(config, options, host, jirahost) {
         };
 
         var callback = function(response) {
-            console.log("response:",response.content);
             var filters = [];
             response = response.content;
             for (var i=0;i<response.length;i++) {
                 filters.push(response[i].name);
             }
-
-            console.log("filters:",filters);
 
             $("#filter").typeahead({
                 source:filters,
@@ -114,6 +111,28 @@ function initialize(config, options, host, jirahost) {
         osapi.http.get(object).execute(callback);
     }
 
+    function getFilterID(filterName, callback) {
+        var object = {
+            'href': host+"/{{{TILE_NAME}}}/proxy?url=" + jirahost + "/rest/api/latest/filter/favourite&user="+user+"&pass="+pass,
+            'format': 'json',
+            'noCache': true
+        };
+
+        var filterResponseCallback = function(response) {
+            response = response.content;
+            for (var i=0;i<response.length;i++) {
+                if ( response[i].name === filterName ) {
+                    callback( response[i].id);
+                    return;
+                }
+            }
+            callback();
+        };
+
+        osapi.http.get(object).execute(filterResponseCallback);
+    }
+
+
     gadgets.window.adjustHeight();
 
     $("#auth-btn").click(function() {
@@ -123,12 +142,16 @@ function initialize(config, options, host, jirahost) {
     });
 
     $('#submit').click(function() {
-        var newConfig = {
-            'filter':filter,
-            'viewer':viewerID,
-            'sort':$("#filter-panel").find('input:radio[name="sort"]:checked').val()
-        };
-        jive.tile.close(newConfig, {});
+        var filterName = $("#filter").val();
+        getFilterID(filterName, function(filterID) {
+            var newConfig = {
+                'filterName' : filterName,
+                'filter':filterID,
+                'viewer':viewerID,
+                'sort':$("#filter-panel").find('input:radio[name="sort"]:checked').val()
+            };
+            jive.tile.close(newConfig, {});
+        });
+
     });
-};
-//jive.tile.onOpen(initialize)
+}
