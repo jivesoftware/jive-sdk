@@ -136,12 +136,14 @@ function defaultSetupDefinitionEventListener(handlerInfo, definitionName) {
             + definitionName + '" must specify a function handler.');
     }
 
+    var eventListener = handlerInfo['eventListener'] || definitionName;
+
     if (jive.events.globalEvents.indexOf(handlerInfo['event']) != -1) {
         jive.events.addSystemEventListener(handlerInfo['event'], handlerInfo['handler']);
     } else {
         jive.events.addDefinitionEventListener(
             handlerInfo['event'],
-            definitionName,
+            eventListener,
             handlerInfo['handler'],
             handlerInfo['description'] || 'Unique to definition'
         );

@@ -24,15 +24,14 @@ exports.route = function(req, res) {
     authStore.find('auth', {
         'viewer':viewer
     }).then(function(found) {
-        if (found.length > 0) {
-            res.send({
-                'found':true,
-                'user':found[0].user,
-                'pass':found[0].pass
-            }, 200);
-        }
-        else {
-            res.send({'found':false}, 200);
-        }
-    });
+            if (found.length > 0) {
+                res.send({
+                    'found':true,
+                    'user':found[0].user,
+                    'pass':found[0].pass
+                }, 200);
+            } else {
+                res.send({'found':false}, 200);
+            }
+        });
 };

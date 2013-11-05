@@ -17,7 +17,9 @@
 //jive.tile.onOpen(initialize);
 
 function initialize(config, options, host, jirahost) {
-    config = JSON.parse(JSON.parse(config));
+    if ( typeof config !== 'object') {
+        config = JSON.parse(JSON.parse(config));
+    }
     console.log("config:", config);
     console.log("options:", options);
     console.log("host:", host);

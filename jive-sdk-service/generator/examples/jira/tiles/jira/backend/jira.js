@@ -26,7 +26,7 @@ var filterName;
 function sortByFunction(sort) {
     return function(issues, callback) {
         if ( !issues ) {
-            console.log("no issues found");
+            jive.logger.debug("no issues found");
             callback({}, filterName);
             return;
         }
@@ -37,13 +37,9 @@ function sortByFunction(sort) {
             if (field) {
                 if (groups[(field)]) {
                     groups[(field)] += 1;
-                }
-                else {
+                } else {
                     groups[(field)] = 1;
                 }
-            }
-            else {
-                console.log((field)+"field not found: ", JSON.stringify(issues[i].fields));
             }
         }
         callback(groups, filterName);
@@ -55,20 +51,22 @@ exports.getData = function(filter, user, pass, sort, callback) {
         'user':user,
         'pass':pass
     };
+
     request({
-            'uri':baseurl+"filter/"+filter,
+            'uri':baseurl+ "filter/" +filter,
             'auth':auth
         }, function (error, response, body) {
             if (error || response.statusCode < 200 || response.statusCode >= 300) {
                 if (response) {
-                    console.log("error getting filter at url:",baseurl+"filter/"+filter,"error",error,response.statusCode,"body",body);
+                    jive.logger.error("error getting filter at url:" + baseurl + "filter/"+filter
+                        + "; error " + error,response.statusCode
+                        + "; body " + body);
+                } else {
+                    jive.logger.error("error getting filter at url: " + baseurl + "filter/" + filter
+                        + "; error " + error
+                        + "; body " +body);
                 }
-                else {
-                    console.log("error getting filter at url:",baseurl+"filter/"+filter,"error",error,"body",body);
-                }
-            }
-            else {
-                //console.log(body);
+            } else {
                 body = JSON.parse(body);
                 filterName = body.name;
                 var searchURL = body.searchUrl;
@@ -78,20 +76,18 @@ exports.getData = function(filter, user, pass, sort, callback) {
                 }, function(err, res, body) {
                     if (error || response.statusCode < 200 || response.statusCode >= 300) {
                         if (response) {
-                            console.log("error getting filter:", error, response.statusCode, body);
+                            jive.logger.error("error getting filter: " +  error + " " +  response.statusCode + " " + body);
+                        } else {
+                            jive.logger.error("error getting filter: " + error + " " +  body);
                         }
-                        else {
-                            console.log("error getting filter:", error, body);
-                        }
-                    }
-                    else {
+                    } else {
                         processData(body, sort, callback);
                     }
                 });
             }
         }
     );
-}
+};
 
 function processData(body, sort, callback) {
     var issues = JSON.parse(body).issues;
@@ -99,50 +95,25 @@ function processData(body, sort, callback) {
     if (sort == "Severity") {
         sortfn = function (issues, i) {
             var field = issues[i].fields.customfield_10361;
-            if (field) {
-                return field[0].value;
-            }
-            else {
-                return field;
-            }
-        }
-//                            sortBySeverity(issues, callback);
-    }
-    else if (sort == "Type") {
+            return field ? field[0].value : field;
+        };
+    } else if (sort == "Type") {
         sortfn = function (issues, i) {
             var field = issues[i].fields.issuetype;
-            if (field) {
-                return field.name;
-            }
-            else {
-                return field;
-            }
-        }
-//                            sortByType(issues, callback);
-    }
-    else if (sort == "Assignee") {
-        console.log("assignee sorted");
+            return field ? field.name : field;
+        };
+    } else if (sort == "Assignee") {
+        jive.logger.debug("assignee sorted");
         sortfn = function (issues, i) {
             var field = issues[i].fields.assignee;
-            if (field) {
-                return field.displayName;
-            }
-            else {
-                return field;
-            }
-        }
-    }
-    else {
+            return field ? field.displayName : field;
+        };
+    } else {
         sortfn = function (issues, i) {
             var field = issues[i].fields.status;
-            if (field) {
-                return field.name;
-            }
-            else {
-                return field;
-            }
-        }
-//                            sortByStatus(issues, callback);
+            return field ? field.name : field;
+        };
     }
+
     sortByFunction(sortfn)(issues, callback);
 }

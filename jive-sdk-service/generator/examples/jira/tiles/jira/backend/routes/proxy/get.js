@@ -19,7 +19,7 @@ var util = require('util');
 var request = require('request');
 
 exports.route = function(req, res) {
-    console.log("query:"+JSON.stringify(req.query));
+    jive.logger.debug("query:" + JSON.stringify(req.query) );
     request({
         'uri':req.query.url,
         'auth': {
@@ -28,11 +28,11 @@ exports.route = function(req, res) {
         }
     }, function(err, resp, body) {
         if (err) {
-            console.log("error proxying request:", req.query.url, JSON.stringify(err));
-            console.log(body);
+            jive.logger.error("error proxying request:" + req.query.url + JSON.stringify(err));
+            jive.logger.error(body);
         }
         else {
-            console.log("returning",body);
+            jive.logger.debug("returning" + body);
             res.send(body,200);
         }
     });

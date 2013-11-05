@@ -26,10 +26,10 @@ exports.route = function(req, res) {
         user:body.user,
         pass:body.pass
     }).then(function(response) {
-        res.send({
-            "written":true,
-            "user":response.user,
-            "pass":response.pass
-        }, 200);
-    });
+            res.send({
+                "written":true,
+                "user":response.user,
+                "pass":response.pass
+            }, 200);
+        });
 };

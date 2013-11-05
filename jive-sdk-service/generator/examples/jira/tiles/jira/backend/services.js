@@ -16,11 +16,13 @@
 
 /*jshint laxcomma:true */
 
-var jive = require('jive-sdk')
-    , q    = require('q')
-    , http = require('q-io/http')
-    , jira = require('./jira.js');
+var jive = require('jive-sdk'),
+    q    = require('q'),
+    http = require('q-io/http'),
+    jira = require('./jira.js');
 
+
+// query JIRA every 10 seconds
 exports.task = [
     {
         'event':'update',
@@ -29,7 +31,7 @@ exports.task = [
 ];
 
 function pushUpdate(tile) {
-    console.log('pushing update: '+ tile.name +', '+ tile.id, tile);
+    jive.logger.info('pushing update: '+ tile.name +', '+ tile.id, tile);
     var filter   = tile.config.filter;
     var sort = tile.config.sort;
     var viewer = tile.config.viewer;
@@ -45,16 +47,15 @@ function pushUpdate(tile) {
                         jive.tiles.pushData(tile, { data: prepared });
                     }, filterName);
                 });
-            }
-            else {
-                console.log("could not find auth creds");
+            } else {
+                jive.logger.warn("could not find auth creds");
             }
         });
 }
 
 function fetchData(filter, user, pass, sort, callback) {
     jira.getData(filter, user, pass, sort, function(data, filterName) {
-        console.log("got data:", data);
+        jive.logger.debug("got data: " + data);
         callback(data, filterName)
     });
 }
@@ -92,7 +93,7 @@ function prepareData(tile, data, callback, filterName) {
         }
     };
 
-    console.log("Prepared data", preparedData);
+    jive.logger.debug("Prepared data: " +  JSON.stringify(preparedData, null, 4 ));
 
     callback(preparedData);
 }

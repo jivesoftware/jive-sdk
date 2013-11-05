@@ -28,33 +28,33 @@ exports.eventHandlerMap = {};
 /**
  * Definition event listeners are user contributed events.
  * @param event - the event id
- * @param definitionName - the name of the listener
+ * @param eventListener - the name of the listener
  * @param handler - the function to call
  * @param description
  */
-exports.addDefinitionEventListener = function( event, definitionName, handler, description ) {
-    jive.logger.debug("Registered event for", definitionName,": '" + event + "' ", description ||'' );
+exports.addDefinitionEventListener = function( event, eventListener, handler, description ) {
+    jive.logger.debug("Registered event for", eventListener,": '" + event + "' ", description ||'' );
 
-    if ( !exports.eventHandlerMap[definitionName] ) {
-        exports.eventHandlerMap[definitionName] = {};
+    if ( !exports.eventHandlerMap[eventListener] ) {
+        exports.eventHandlerMap[eventListener] = {};
     }
 
-    if (!exports.eventHandlerMap[definitionName][event]) {
-        exports.eventHandlerMap[definitionName][event] = [];
+    if (!exports.eventHandlerMap[eventListener][event]) {
+        exports.eventHandlerMap[eventListener][event] = [];
     }
 
     // duplicate definition event listeners aren't permitted
-    if ( exports.eventHandlerMap[definitionName][event].indexOf(handler) == - 1 ) {
-        exports.eventHandlerMap[definitionName][event].push( handler );
+    if ( exports.eventHandlerMap[eventListener][event].indexOf(handler) == - 1 ) {
+        exports.eventHandlerMap[eventListener][event].push( handler );
     }
 };
 
-exports.getDefinitionEventListenerFor = function( definitionName, event ) {
-    if ( !exports.eventHandlerMap[definitionName] || !exports.eventHandlerMap[definitionName][event] ) {
+exports.getDefinitionEventListenerFor = function( eventListener, event ) {
+    if ( !exports.eventHandlerMap[eventListener] || !exports.eventHandlerMap[eventListener][event] ) {
         return null;
     }
 
-    return exports.eventHandlerMap[definitionName][event];
+    return exports.eventHandlerMap[eventListener][event];
 };
 
 /**
