@@ -31,7 +31,7 @@ exports.task = [
 ];
 
 function pushUpdate(tile) {
-    jive.logger.info('pushing update: '+ tile.name +', '+ tile.id, tile);
+    jive.logger.info('pushing update: '+ tile.name +', '+ tile.id );
     var filter   = tile.config.filter;
     var sort = tile.config.sort;
     var viewer = tile.config.viewer;
@@ -39,18 +39,18 @@ function pushUpdate(tile) {
     authStore.find('auth', {
         'viewer':viewer
     }).then(function(found) {
-            if (found.length > 0) {
-                var user = found[0].user;
-                var pass = found[0].pass;
-                fetchData(filter, user, pass, sort, function(data, filterName) {
-                    prepareData(tile, data, function(prepared) {
-                        jive.tiles.pushData(tile, { data: prepared });
-                    }, filterName);
-                });
-            } else {
-                jive.logger.warn("could not find auth creds");
-            }
-        });
+        if (found.length > 0) {
+            var user = found[0].user;
+            var pass = found[0].pass;
+            fetchData(filter, user, pass, sort, function(data, filterName) {
+                prepareData(tile, data, function(prepared) {
+                    jive.tiles.pushData(tile, { data: prepared });
+                }, filterName);
+            });
+        } else {
+            jive.logger.warn("could not find auth creds");
+        }
+    });
 }
 
 function fetchData(filter, user, pass, sort, callback) {

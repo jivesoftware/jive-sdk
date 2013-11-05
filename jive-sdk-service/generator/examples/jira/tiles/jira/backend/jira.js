@@ -21,9 +21,7 @@ var jive = require('jive-sdk');
 
 var baseurl = jive.service.options['jiraHost'] + "/rest/api/latest/";
 
-var filterName;
-
-function sortByFunction(sort) {
+function sortByFunction(filterName, sort) {
     return function(issues, callback) {
         if ( !issues ) {
             jive.logger.debug("no issues found");
@@ -68,7 +66,7 @@ exports.getData = function(filter, user, pass, sort, callback) {
                 }
             } else {
                 body = JSON.parse(body);
-                filterName = body.name;
+                var filterName = body.name;
                 var searchURL = body.searchUrl;
                 request({
                     'uri':searchURL,
@@ -81,7 +79,7 @@ exports.getData = function(filter, user, pass, sort, callback) {
                             jive.logger.error("error getting filter: " + error + " " +  body);
                         }
                     } else {
-                        processData(body, sort, callback);
+                        processData(filterName, body, sort, callback);
                     }
                 });
             }
@@ -89,7 +87,7 @@ exports.getData = function(filter, user, pass, sort, callback) {
     );
 };
 
-function processData(body, sort, callback) {
+function processData(filterName, body, sort, callback) {
     var issues = JSON.parse(body).issues;
     var sortfn;
     if (sort == "Severity") {
@@ -115,5 +113,5 @@ function processData(body, sort, callback) {
         };
     }
 
-    sortByFunction(sortfn)(issues, callback);
+    sortByFunction(filterName, sortfn)(issues, callback);
 }
