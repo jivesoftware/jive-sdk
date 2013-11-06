@@ -28,6 +28,7 @@ var serviceConfigurator = require('./serviceSetup');
 var jive = require('../api');
 var log4js = require('log4js');
 var mustache = require('mustache');
+var url = require('url');
 
 var app;
 var rootDir = process.cwd();
@@ -400,9 +401,9 @@ exports.start = function() {
 exports.serviceURL = function() {
     var conf = jive.service.options;
     var url = conf['clientUrl'];
-
+    var urlPort = url.parse(url)['port'];
     var port = conf['port'];
-    if ( port && port != 443 && port != 80 ) {
+    if ( !urlPort && port && port != 443 && port != 80 ) {
         url += ':' + port;
     }
 
