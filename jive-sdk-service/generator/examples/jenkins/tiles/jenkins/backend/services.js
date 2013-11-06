@@ -31,7 +31,7 @@ exports.task = new jive.tasks.build(function() {
     jive.tiles.findByDefinitionName('jenkins').then(function(tiles) {
         tiles.forEach(pushUpdate);
     });
-}, 10000);
+}, 60000);
 
 function pushUpdate(tile) {
     console.log('pushing update: '+ tile.name +', '+ tile.id, tile);
