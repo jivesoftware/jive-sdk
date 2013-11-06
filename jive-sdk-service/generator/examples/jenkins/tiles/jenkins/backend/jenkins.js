@@ -79,7 +79,11 @@ function getData(jobswanted, viewswanted, tilecallback) {
         });
     }
 
-    getViewJobs(viewswanted, getJobs);
+    if ( viewswanted.length > 0 ) {
+        getViewJobs(viewswanted, getJobs);
+    } else {
+        getJobs();
+    }
 }
 
 // because the array jenkins stores is in alphabetical order, we can do binary search

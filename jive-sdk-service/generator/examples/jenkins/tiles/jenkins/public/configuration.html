@@ -20,6 +20,9 @@
     <link rel="stylesheet" type="text/css" href="{{{host}}}/stylesheets/bootstrap.min.css">
     <meta http-equiv="Content-Type" value="text/html; charset=utf-8" />
     <title>Configure Jenkins tile</title>
+    <script>
+        host = "{{{host}}}";
+    </script>
 </head>
 
 <body style="padding-bottom: 40px">
@@ -64,9 +67,6 @@
 
 <script src="{{{host}}}/javascripts/jQuery-1.10.2.js"></script>
 <script src="{{{host}}}/javascripts/bootstrap.min.js"></script>
-<script>
-    host = "{{{host}}}";
-</script>
 <script src="{{{host}}}/{{{TILE_NAME}}}/configuration.js"></script>
 </body>
 </html>

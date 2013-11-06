@@ -24,7 +24,7 @@ exports.route = function(req, res) {
 
 exports.jenkinsProxy = {
     'verb' : 'get',
-    'path' : '/jobs',
+    'path' : '/proxy',
     'route': function(req,res) {
 
         var urlParts = require('url').parse(req.url, true).query;

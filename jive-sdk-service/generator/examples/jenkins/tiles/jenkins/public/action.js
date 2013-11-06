@@ -156,7 +156,7 @@ function getJobInfo(url) {
 
 function getJenkinsInfo(url, callback) {
     osapi.http.get({
-        'href':host + '/jobs?proxiedUrl=' + encodeURIComponent(url),
+        'href':host + '/proxy?proxiedUrl=' + encodeURIComponent(url),
         'format':'json'
     }).execute(callback);
 }
