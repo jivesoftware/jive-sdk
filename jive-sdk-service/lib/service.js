@@ -400,11 +400,14 @@ exports.start = function() {
  */
 exports.serviceURL = function() {
     var conf = jive.service.options;
+    var clientUrlExcludesPort = conf['clientUrlExcludesPort'];
     var clientUrl = conf['clientUrl'];
-    var urlPort = url.parse(clientUrl)['port'];
     var port = conf['port'];
-    if ( !urlPort && port && port != 443 && port != 80 ) {
-        clientUrl += ':' + port;
+    if ( !clientUrlExcludesPort && port && port != 443 && port != 80 ) {
+        var urlParts = url.parse(clientUrl);
+        urlParts['port'] = port;
+        urlParts['host'] = null;
+        clientUrl = url.format(urlParts);
     }
 
     return clientUrl;
