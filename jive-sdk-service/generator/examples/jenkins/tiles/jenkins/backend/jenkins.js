@@ -16,6 +16,7 @@
 
 https = require('https');
 url = require('url');
+jive = require('jive-sdk');
 
 var Jenkins = function() {
     this.getData = getData;
@@ -23,29 +24,11 @@ var Jenkins = function() {
 };
 
 function request(urlstr, callback) {
-    var options = url.parse(urlstr);
+    var options = {};
     options.rejectUnauthorized = false;
-    options.agent = new https.Agent(options);
 
-    https.get(options, function(res) {
-        var data = '';
-        res.on('data', function(chunk) {
-            data += chunk.toString();
-        });
-        res.on('end', function() {
-            var json= null;
-            try {
-               json = JSON.parse(data);
-            }
-            catch(err) {
-                console.log("Unable to parse JSON. Data received: "+data);
-            }
-            if (json) {
-                callback(json);
-            }
-        });
-    }).on('error', function(e) {
-            console.log(e);
+    jive.util.buildRequest( urlstr, "GET", null, null, options).then( function(response) {
+        callback( response.entity);
     });
 }
 

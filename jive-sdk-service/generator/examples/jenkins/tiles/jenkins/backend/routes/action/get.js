@@ -19,6 +19,25 @@ var util = require('util');
 
 exports.route = function(req, res) {
     var conf = jive.service.options;
-//    console.log("req", util.inspect(req));
     res.render('action.html', { host: conf.clientUrl + ':' + conf.port });
+};
+
+exports.jenkinsProxy = {
+    'verb' : 'get',
+    'path' : '/jobs',
+    'route': function(req,res) {
+
+        var urlParts = require('url').parse(req.url, true).query;
+        var urlToProxy = urlParts['proxiedUrl'];
+
+        var options = {
+            rejectUnauthorized: false
+        };
+
+        jive.util.buildRequest( urlToProxy + 'api/json', 'GET', null, null, options).then( function(response) {
+            res.writeHead(200);
+            res.end( JSON.stringify(response.entity, null, 4));
+        });
+
+    }
 };

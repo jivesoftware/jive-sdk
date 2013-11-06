@@ -66,7 +66,7 @@ jive.tile.onOpen(function(config, options) {
 
     function getJobs() {
         osapi.http.get({
-            'href' : 'https://jenkins.jiveland.com/api/json',
+            'href' : host + '/jobs',
             'format' : 'json'
         }).execute(function(response){
             if ( response.status >= 400 && response.status <= 599 ) {
@@ -122,9 +122,11 @@ jive.tile.onOpen(function(config, options) {
 
             $("#loading-panel").fadeOut();
             $("#jobs-panel").show();
-        });
-    };
 
-    gadgets.window.adjustHeight();
+            gadgets.window.adjustHeight();
+
+        });
+    }
+
     getJobs();
 });

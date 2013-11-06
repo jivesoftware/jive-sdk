@@ -75,9 +75,9 @@ function initialize(config, options) {
                 var obj = {
                     "content": {
                         "type": "text/html",
-                        "text": '<p>' + $("#message").val() + '</p><br>' + $("#jobs-panel").html()
+                        "text": '<p>' + $("#message").val() + '</p>' + $("#jobs-panel").html()
                     },
-                    "subject": $("#subject").val(),
+                    "subject": $("#subject").val() || ' Jenkins build report',
                     "visibility": visibility,
                     "users": shares
                 };
@@ -102,6 +102,7 @@ function initialize(config, options) {
     $("#gotojenkins").click(function() {
         window.parent.open(config.url);
     });
+
     $("#postdiscussion").click(function() {
         $("#jobs-panel-container").fadeOut(400, function() {
             $("#discussion-panel").slideDown(400, function() {
@@ -114,10 +115,29 @@ function initialize(config, options) {
 function getJobInfo(url) {
     function job(response) {
         console.log("response", response);
-        console.log("job description: ", response.content.description);
-        $("#description").html(response.content.description);
-        $("#buildstatus").html(response.content.healthReport[1].description.split(':')[1]);
-        $("#jobstatus").html(response.content.healthReport[0].description.split(':')[1]);
+
+        var description = response.content.description;
+        if ( description ) {
+            console.log("job description: ", description);
+            $("#description").html(description);
+        } else {
+            $("#description-container").hide();
+        }
+
+        var buildStatus = response.content.healthReport[1].description.split(':')[1];
+        if ( buildStatus ) {
+            $("#buildstatus").html(buildStatus);
+        } else {
+            $("#build-container").hide();
+        }
+
+        var jobStatus = response.content.healthReport[0].description.split(':')[1];
+        if ( jobStatus ) {
+            $("#jobstatus").html(jobStatus);
+        } else {
+            $("#job-container").hide();
+        }
+
         var lastpass = response.content.lastSuccessfulBuild;
         if (lastpass) {
             function build(response) {
@@ -130,13 +150,13 @@ function getJobInfo(url) {
             getJenkinsInfo(lastpass.url, build);
         }
         gadgets.window.adjustHeight();
-    };
+    }
     getJenkinsInfo(url, job);
 }
 
 function getJenkinsInfo(url, callback) {
     osapi.http.get({
-        'href':url+"api/json/",
+        'href':host + '/jobs?proxiedUrl=' + encodeURIComponent(url),
         'format':'json'
     }).execute(callback);
 }

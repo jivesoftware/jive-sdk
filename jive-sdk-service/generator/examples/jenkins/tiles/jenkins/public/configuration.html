@@ -40,12 +40,12 @@
 <div class="container-fluid" id="jobs-panel" style="display:none">
     <div class="row-fluid">
         <div class="span6">
-            <label for="typeahead-views">Views You're Interested In</label>
-            <input class="span12" type="text" data-provide="typeahead" id="typeahead-views">
+            <label for="typeahead-views">Views You're Interested In</label><br>
+            <input class="span12" style="width: 400px" type="text" data-provide="typeahead" id="typeahead-views">
         </div>
         <div class="span6">
-            <label for="typeahead-jobs">Jobs You're Interested In</label>
-            <input class="span12" type="text" data-provide="typeahead" id="typeahead-jobs">
+            <label for="typeahead-jobs">Jobs You're Interested In</label><br>
+            <input class="span12" style="width: 400px"  type="text" data-provide="typeahead" id="typeahead-jobs">
         </div>
     </div>
 
@@ -55,7 +55,7 @@
         <!--Added Jobs and Views-->
     </div>
 
-    <div class="navbar navbar-fixed-bottom">
+    <div>
         <form>
             <button id="submit-button" type="submit" class="btn">Submit</button>
         </form>
@@ -64,6 +64,9 @@
 
 <script src="{{{host}}}/javascripts/jQuery-1.10.2.js"></script>
 <script src="{{{host}}}/javascripts/bootstrap.min.js"></script>
+<script>
+    host = "{{{host}}}";
+</script>
 <script src="{{{host}}}/{{{TILE_NAME}}}/configuration.js"></script>
 </body>
 </html>

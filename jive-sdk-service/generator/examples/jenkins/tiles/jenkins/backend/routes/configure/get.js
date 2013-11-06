@@ -20,3 +20,20 @@ exports.route = function(req, res) {
     var conf = jive.service.options;
     res.render('configuration.html', { host: conf.clientUrl + ':' + conf.port });
 };
+
+exports.jobs = {
+    'verb' : 'get',
+    'path' : '/jobs',
+    'route': function(req,res) {
+
+        var options = {
+            rejectUnauthorized: false
+        };
+
+        jive.util.buildRequest( 'https://jenkins.jiveland.com/api/json', 'GET', null, null, options).then( function(response) {
+            res.writeHead(200);
+            res.end( JSON.stringify(response.entity, null, 4));
+        });
+
+    }
+};
