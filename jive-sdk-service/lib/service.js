@@ -408,6 +408,9 @@ exports.serviceURL = function() {
         urlParts['port'] = port;
         urlParts['host'] = null;
         clientUrl = url.format(urlParts);
+        if ( clientUrl.lastIndexOf( '/') == clientUrl.length-1 ) {
+            clientUrl = clientUrl.substring( 0, clientUrl.length - 1);
+        }
     }
 
     return clientUrl;
