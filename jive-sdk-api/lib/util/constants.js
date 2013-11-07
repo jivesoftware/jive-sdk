@@ -23,6 +23,7 @@ exports.tileEventNames = {
     'FETCH_COMMENTS_ON_ACTIVITY':'fetchCommentsOnActivity',
     'FETCH_ALL_COMMENTS_FOR_EXT_STREAM':'fetchAllCommentsForExtstream',
     'INSTANCE_REGISTRATION':'registration',
+    'INSTANCE_UNREGISTRATION':'unregistration',
     'CLIENT_APP_REGISTRATION':'clientAppRegistration',
     'GET_PAGINATED_RESULTS':'getPaginatedResults',
     'GET_EXTERNAL_PROPS':'getExternalProps',

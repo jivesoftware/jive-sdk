@@ -25,42 +25,26 @@ var jive = require("../api");
 var dev = require('./dev');
 
 exports.unregister = function( req, res ) {
-    var conf = jive.service.options;
-    var clientId = conf.clientId;
-    var secret = conf.clientSecret;
-    var name = req.body['name'];
-    var jiveUrl = req.body['jiveUrl'];
-    var remoteTileId = req.body['id'];
-
-    // xxx todo - remove the tile instance
-    console.log("Unregister!!") ;
-};
-
-var findCredentials = function(jiveUrl) {
-    var deferred = q.defer();
-    var conf = jive.service.options;
-
-    // default to system credentials
-    var credentials = {
-        'clientId': conf.clientId,
-        'clientSecret': conf.clientSecret
+    var context = {
+        'guid'          :   req.body['guid'],
+        'remoteID'      :   req.body['id'],
+        'name'          :   req.body['name'],
+        'jiveUrl'       :   req.body['jiveUrl'],
+        'tenantID'      :   req.body['tenantID'],
+        'pushUrl'       :   req.body['url']
     };
 
-    if ( !jiveUrl) {
-        // default to service credentials -- cannot look it up by community
-        deferred.resolve( credentials );
-    } else {
-        // try to resolve trust by jiveUrl
-        jive.community.findByJiveURL( jiveUrl).then( function(community) {
-            if ( community ) {
-                credentials['clientId'] = community['clientId'];
-                credentials['clientSecret'] = community['clientSecret'];
-            }
-            deferred.resolve( credentials );
-        }) ;
-    }
-
-    return deferred.promise;
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.INSTANCE_UNREGISTRATION, context).then(
+        function (result) {
+            res.writeHead(200);
+            res.end(JSON.stringify(result));
+        },
+        function (result) {
+            var status = result.status || 500;
+            res.writeHead(status);
+            res.end(JSON.stringify(result));
+        }
+    );
 };
 
 exports.registration = function( req, res ) {

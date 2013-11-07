@@ -117,3 +117,63 @@ exports.registration = function(context) {
         }
     });
 };
+
+exports.unregistration = function(context) {
+    var name = context.name;
+    var tenantID = context.tenantID;
+    var remoteID = context.remoteID;
+    var guid = context.guid;
+
+    if ( tenantID && remoteID ) {
+        // the guid may be unreliable because it could be based on jiveURL which can change.
+        // create one based on those invariants instead
+        guid = tenantID + '_' + remoteID;
+    }
+
+    var unregisterer = function(scope, instanceLibrary) {
+        var deferred = q.defer();
+
+        instanceLibrary.findByGuid(guid).then(function (tileInstance) {
+            // the instance exists
+            // update the config only
+            // destroy the instance
+            if ( tileInstance ) {
+                    instanceLibrary.remove(tileInstance['id']).then( function() {
+                    jive.logger.log('Destroying tile instance from database', tileInstance);
+                    jive.events.emit("destroyedInstance", tileInstance);
+                    deferred.resolve(statusObj);
+                });
+            } else {
+                jive.logger.warn('Instance not found');
+                var statusObj = { status: 404, 'error': 'Instance not found' };
+                deferred.reject(statusObj);
+            }
+        });
+
+        return deferred.promise;
+    };
+
+    // try tiles
+    var tile;
+    var stream;
+    return q.all([jive.tiles.definitions.findByTileName(name).then(function(found) {
+            tile = found;
+        }),
+            jive.extstreams.definitions.findByTileName(name).then(function(found) {
+                stream = found;
+            })
+        ]).then(function() {
+            if (tile || stream) {
+                // register a tile instance
+            return unregisterer(guid, tile ? jive.tiles : jive.extstreams);
+        } else {
+            // its neither tile nor externalstream, so return error
+            var statusObj = {
+                status: 400,
+                message: "No tile or external stream definition was found for the given name '" + name + "'"
+            };
+            //fail and return statusObj
+            return q.reject(statusObj);
+        }
+    });
+};

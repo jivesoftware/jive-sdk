@@ -221,6 +221,12 @@ exports.baseEvents = [
         }
     },
     {
+        'event':jive.constants.tileEventNames.INSTANCE_UNREGISTRATION,
+        'handler':function(context) {
+            return regHandler.unregistration(context);
+        }
+    },
+    {
         'event':jive.constants.tileEventNames.CLIENT_APP_REGISTRATION,
         'handler':function(context) {
             return jive.community.register(context);

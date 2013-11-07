@@ -486,6 +486,15 @@ exports.getExpandedTileDefinitions = function(all) {
                 processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];
             }
         }
+        if ( !processedTile['unregister']) {
+            processedTile['unregister'] = host + '/unregister';
+        } else {
+            if ( processedTile['unregister'].indexOf('http') != 0 ) {
+                // assume its relative to host then
+                processedTile['unregister'] = host + ( processedTile['unregister'].indexOf('/') == 0 ? "" : "/" ) + processedTile['unregister'];
+            }
+        }
+
         if ( !processedTile['register'] ) {
             processedTile['register'] = host + '/registration';
         } else {
