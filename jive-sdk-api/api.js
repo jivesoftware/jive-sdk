@@ -27,13 +27,11 @@ exports.logger = logger;
 // - each strategy must expose find, save, remove methods
 exports.persistence = {
     'file' : require('./lib/persistence/file'),
-    'memory' : require('./lib/persistence/memory'),
-    'mongo' : require('./lib/persistence/mongo')
+    'memory' : require('./lib/persistence/memory')
 };
 
 exports.scheduler  = {
-    'memory' : require('./lib/scheduler/scheduler'),
-    'kue' : require('./lib/scheduler/kue/scheduler')
+    'memory' : require('./lib/scheduler/scheduler')
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,10 +61,6 @@ exports.events = require( './lib/event/events');
 // util
 exports.util = require('./lib/util/jiveutil');
 exports.oauthUtil = require('./lib/util/oauthUtil');
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// coreV3
-exports.coreV3 = require('./lib/v3/api');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For managing jive communities registered with this service

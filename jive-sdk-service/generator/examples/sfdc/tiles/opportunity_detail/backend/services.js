@@ -1,6 +1,10 @@
 var jive = require('jive-sdk');
 
 function processTileInstance(instance) {
+    if ( instance['name'] !== '{{{TILE_NAME}}}') {
+        return;
+    }
+
     var eventContext = { 'eventListener' :'{{{TILE_PREFIX}}}sfdc', 'instance' : instance };
     jive.context.scheduler.schedule('sfdcPullOpportunity', eventContext ).then(function (data) {
         jive.tiles.pushData(instance, data);
