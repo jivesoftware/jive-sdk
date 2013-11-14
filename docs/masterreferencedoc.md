@@ -6,10 +6,4 @@ The [Readme](../Readme.md) doc is a great place to get started. Hopefully, you'v
 
 > This document is a work in progress! We'll be building it out over time so make sure you watch the repository for any updates. 
 
-1. [Overview](overview.md)
-2. [Introduction to Tiles](introduction-tiles.md)
-	* [Table](tile-table.md)
-	* [Gauge](tile-gauge.md)
-	* [Calendar](tile-calendar.md)
-	* [List](tile-list.md)
-
+1. [Configuring the SDK for High Availability[(high-avail.md)
