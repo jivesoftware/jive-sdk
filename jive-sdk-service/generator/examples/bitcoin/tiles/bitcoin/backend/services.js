@@ -48,6 +48,10 @@ exports.eventHandlers = [
     {
         'event': jive.constants.globalEventNames.NEW_INSTANCE,
         'handler' : function(theInstance){
+            if ( theInstance['name'] !== '{{{TILE_NAME}}}') {
+                return;
+            }
+
             jive.logger.info("Caught newInstance event, trying to push now.");
             fetchPrices().then(function(prices) {
                 jive.logger.info("Fetched prices", prices);

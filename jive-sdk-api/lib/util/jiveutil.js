@@ -234,6 +234,13 @@ exports.buildRequest = function (url, method, postBody, headers, requestOptions)
 
     var deferred = q.defer();
 
+    requestOptions = requestOptions || {};
+    if ( jive.context && jive.context.config ) {
+        if ( jive.context.config['development'] == true ) {
+            requestOptions['rejectUnauthorized']  = false;
+        }
+    }
+
     requestMaker(
         method,
         { host: host, port: port },

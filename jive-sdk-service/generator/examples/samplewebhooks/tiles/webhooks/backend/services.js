@@ -22,6 +22,10 @@ exports.eventHandlers = [
     {
         'event': jive.constants.globalEventNames.NEW_INSTANCE,
         'handler' : function(theInstance){
+            if ( theInstance['name'] !== '{{{TILE_NAME}}}' ) {
+                return;
+            }
+
             var webhookCallback = jive.service.serviceURL() + '/webhooks';
             var jiveCommunity = theInstance['jiveCommunity'];
 

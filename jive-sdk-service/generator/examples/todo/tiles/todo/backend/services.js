@@ -24,6 +24,10 @@ var jive = require("jive-sdk" ),
 
 
 function processTileInstance(instance) {
+    if ( instance['name'] !== '{{{TILE_NAME}}}') {
+        return;
+    }
+
     jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id);
     shared.getClientIDForInstanceConfig(instance).then(function(clientid) {
 

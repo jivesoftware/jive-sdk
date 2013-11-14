@@ -97,21 +97,27 @@ exports.eventHandlers = [
         'event': 'activityUpdateInstance',
         'handler' : function(theInstance){
             jive.logger.info("Caught activityUpdateInstance event, trying to push now.");
-            pushUpdate(theInstance);
+            if ( theInstance['name'] == '{{{TILE_NAME}}}' ) {
+                pushUpdate(theInstance);
+            }
         }
     },
     {
         'event': jive.constants.globalEventNames.NEW_INSTANCE,
         'handler' : function(theInstance){
             jive.logger.info("Caught activityUpdateInstance event, trying to push now.");
-            pushUpdate(theInstance);
+            if ( theInstance['name'] == '{{{TILE_NAME}}}' ) {
+                pushUpdate(theInstance);
+            }
         }
     },
     {
         'event': jive.constants.globalEventNames.INSTANCE_UPDATED,
         'handler' : function(theInstance){
             jive.logger.info("Caught activityUpdateInstance event, trying to push now.");
-            pushUpdate(theInstance);
+            if ( theInstance['name'] == '{{{TILE_NAME}}}' ) {
+                pushUpdate(theInstance);
+            }
         }
     }
 ];

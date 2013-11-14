@@ -295,8 +295,15 @@ function initPersistence(options) {
             exports.persistence(new jive.persistence[persistence](options)); //pass options, such as location of DB for mongoDB.
         }
         else {
-            jive.logger.warn('Invalid persistence option given "' + persistence + '". Must be one of ' + Object.keys(jive.persistence));
-            jive.logger.warn('Defaulting to file persistence');
+            // finally try to require the persistence strategy
+            try {
+                var persistenceStrategy = require(process.cwd() + '/node_modules/' + persistence);
+                exports.persistence(new persistenceStrategy(options));
+            } catch ( e ) {
+                jive.logger.error(e);
+                jive.logger.warn('Invalid persistence option given "' + persistence + '". Must be one of ' + Object.keys(jive.persistence));
+                process.exit(-1);
+            }
         }
     }
     return options;
@@ -314,8 +321,15 @@ function initScheduler(options) {
             exports.scheduler(new jive.scheduler[scheduler](options)); //pass options, such as location of redis for Kue.
         }
         else {
-            jive.logger.warn('Invalid scheduler option given "' + scheduler + '". Must be one of ' + Object.keys(jive.scheduler));
-            jive.logger.warn('Defaulting to memory scheduler');
+            // finally try to require the scheduler strategy
+            try {
+                var schedulerStrategy = require(process.cwd() + '/node_modules/' + scheduler);
+                exports.scheduler(new schedulerStrategy(options));
+            } catch ( e ) {
+                jive.logger.error(e);
+                jive.logger.warn('Invalid scheduler option given "' + scheduler + '". Must be one of ' + Object.keys(jive.scheduler));
+                process.exit(-1);
+            }
         }
     }
     return options;
