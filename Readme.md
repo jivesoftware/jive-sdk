@@ -22,14 +22,12 @@ The steps below will generate out a sample application that you can use as the b
 
 **Step 4. Make it your own**
 
-The generated example needs to be configured with your own information, specifically, your credentials, and where you want the server to start. The configuration is in a very simple json file named jiveclientconfiguration.json. Here's what gets generated out of the box.
+The generated example needs to be configured with your own information, specifically, where you want the server to start. The configuration is in a very simple json file named jiveclientconfiguration.json. Here's what gets generated out of the box.
 
 	{ "clientUrl": "http://localhost",
-    	"port": "8090",
-    	"clientId": "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_JIVE!!!",
-    	"clientSecret": "!!!_CHANGE_ME_DO_NOT_START_SERVER_WITH_OUT_A_REAL_ONE_FROM_JIVE!!!"}
+    	"port": "8090"}
 
-What you should do is fill in the proper values for your server & port. The clientId and clientSecret are the credentials that you received when you registered with Jive as developer. (Note: We'll cover how to register with Jive later.)
+What you should do is fill in the proper values for your server & port.
 
 **Step 5. Run the puppy!**
 
@@ -44,13 +42,11 @@ That's it! You have just created your first tile! If you'd like to see the tile 
 Now that your killer integration application is up and running, let's see your tiles in action. 
 
 **Installing your tiles**
-Currently, to install your tiles into a Jive instance, you will need to be an admin. However, we've created a utility that will make this easy for you! The first step is to get the tile definitions that you'd like to install. The framework provides an endpoint for you that makes this easy:
-`http://<yourServer:yourPort>/tiles`
+Tiles are installed using the new "Add-ons" menu available to admins. Note: If your Jive instance is in "sandbox" mode, then the Add-ons menu is available to everyone.
+![Add-ons Menu](https://github.com/jivesoftware/jive-sdk/raw/master/docs/images/add-ons-menu.png)
 
-Copy your tile definitions to the clipboard. Then navigate to the tile-installer utility. In your browser, go to the following URL:
-`https://jivedev-tileinstaller.nodejitsu.com/`
+When you select this menu option, you'll be able to upload a zip file that contains all the information about your extension. The file, extension.zip is automatically created for you by the jive-sdk and is available directly under the root directory of your project. This is the file that you will upload into Jive.
 
-At this URL, you are presented with a form. Paste in your definitions and enter the tile-installer key you were provided when you signed up. After submitting, you should see a success dialog box. Now, your tiles are available in the sandbox!
 
 **Add your tiles to a Purposeful Place**
 Using your tile in Purposeful Place is easy! All you need to do is create a group that uses a template. When you configure the group, you'll be able to add your tile! 
