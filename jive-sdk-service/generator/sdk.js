@@ -495,44 +495,70 @@ function prepare() {
         });
 }
 
-exports.init = function(target) {
-    // init lists
-    prepare().then( function() {
-
-        // default command to help
-        var cmd = argv._.length > 0 ? argv._[0] : 'help';
-        var subject = argv._[1];
-
-        var name = argv['name'];
-        var force = argv['force'] || false;
-
-        if (name) {
-            name = name.replace(/[^\S]+/, '');
-            name = name.replace(/[^a-zA-Z0-9]/, '-');
-        }
-
-        var options = {
-            'name'      : name,
-            'cmd'       : cmd,
-            'subject'   : subject,
-            'force'     : force,
-            'target'    : target
-        };
-
-        var err = validate(options);
-        if ( err.length > 0 ) {
-            console.log('Could not execute command, errors were found:');
-            err.forEach( function(err) {
-                console.log('   ', err);
+var getSDKVersion = function() {
+    var sdkPackagePath = __dirname + '/../../package.json';
+    return jive.util.fsexists( sdkPackagePath ).then( function(exists) {
+        if ( exists ) {
+            return jive.util.fsreadJson( sdkPackagePath ).then( function(packageContents) {
+                if ( packageContents ) {
+                    return packageContents['version'];
+                } else {
+                    return nul;
+                }
             });
-
-            console.log();
-
-            doHelp();
-
-            process.exit(-1);
+        } else {
+            return null;
         }
-
-        execute(options);
     });
+};
+
+
+exports.init = function(target) {
+    getSDKVersion().then( function(version ) {
+        if ( version ) {
+            console.log("Jive SDK version version " + version);
+        }
+    }).then( function() {
+        // init lists
+        prepare().then( function() {
+
+            // default command to help
+            var cmd = argv._.length > 0 ? argv._[0] : 'help';
+            var subject = argv._[1];
+
+            var name = argv['name'];
+            var force = argv['force'] || false;
+
+            if (name) {
+                name = name.replace(/[^\S]+/, '');
+                name = name.replace(/[^a-zA-Z0-9]/, '-');
+            }
+
+            var options = {
+                'name'      : name,
+                'cmd'       : cmd,
+                'subject'   : subject,
+                'force'     : force,
+                'target'    : target
+            };
+
+            var err = validate(options);
+            if ( err.length > 0 ) {
+                console.log('Could not execute command, errors were found:');
+                err.forEach( function(err) {
+                    console.log('   ', err);
+                });
+
+                console.log();
+
+                doHelp();
+
+                process.exit(-1);
+            }
+
+            execute(options);
+        });
+
+    });
+
 };
