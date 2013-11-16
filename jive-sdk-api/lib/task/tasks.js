@@ -16,23 +16,24 @@
 
 var jive = require('../../api');
 
-var task = function( _runnable, _interval ) {
+var task = function( _runnable, _interval, _id ) {
     if ( !_runnable ) {
         throw 'A runnable function is required!';
     }
 
     return {
         'handler' : _runnable,
-        'interval' : _interval
+        'interval': _interval,
+        'id'      : _id
     };
 };
 
-exports.build = function(handler, interval) {
-    return new task( handler, interval );
+exports.build = function(handler, interval, id) {
+    return new task( handler, interval, id );
 };
 
 exports.schedule = function( task, scheduler ) {
-    var eventID = jive.util.guid();
+    var eventID = task['id'] || '__anonymous';
     var context = { 'eventListener' : '__jive_system_tasks' };
     var interval = task['interval'];
     jive.events.addDefinitionEventListener( eventID, '__jive_system_tasks', task['handler']);

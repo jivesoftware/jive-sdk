@@ -54,6 +54,8 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
  * @param interval The interval to invoke the callback
  */
 Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
+    eventID = eventID || jive.util.guid();
+
     context = context || {};
     var deferred = q.defer();
     var handlers;
