@@ -125,8 +125,7 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
     return exports.recursiveDirectoryProcessor( app, definitionName, routesPath, routesPath, processCandidateRoutes );
 };
 
-
-function defaultSetupDefinitionEventListener(handlerInfo, definitionName) {
+function defaultSetupEventListener(handlerInfo, definitionName) {
     if (!handlerInfo['event']) {
         throw new Error('Event handler "'
             + definitionName + '" must specify an event name.');
@@ -152,11 +151,11 @@ function defaultSetupDefinitionEventListener(handlerInfo, definitionName) {
 
 /**
  */
-exports.setupServices = function( app, definitionName, svcDir, setupDefinitionEventListener ) {
+exports.setupServices = function( app, definitionName, svcDir, setupEventListener ) {
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
 
-    setupDefinitionEventListener = setupDefinitionEventListener || defaultSetupDefinitionEventListener;
+    setupEventListener = setupEventListener || defaultSetupEventListener;
 
     return exports.recursiveDirectoryProcessor( app, definitionName, svcDir, svcDir,
         function(app, definitionName, theFile, theDirectory) {
@@ -183,7 +182,7 @@ exports.setupServices = function( app, definitionName, svcDir, setupDefinitionEv
             // event handlers
             if (target.eventHandlers) {
                 target.eventHandlers.forEach(function (handlerInfo) {
-                    setupDefinitionEventListener(handlerInfo, definitionName);
+                    setupEventListener(handlerInfo, definitionName);
                 });
             }
 
@@ -201,13 +200,22 @@ exports.setupServices = function( app, definitionName, svcDir, setupDefinitionEv
                     tasksToAdd.push(typeof tasks === 'function' ?  { 'handler': tasks, 'interval': 60 * 1000 } : tasks);
                 }
 
+                var noIDCounter = {};
                 tasksToAdd.forEach(function(task) {
                     var eventID = task['event'], handler = task['handler'],  interval = task['interval'] || 60 * 1000,
                         context = task['context'] || {}, timeout = task['timeout'], event = task['event'];
 
                     if ( !eventID ) {
                         // if no eventID -- then the event is <tilename>.<interval>
-                        eventID = definitionName + ( interval ? '.' + interval : '' );
+                        var eventIDBase = definitionName + ( interval ? '.' + interval : '' );
+                        var eventIDCount = noIDCounter[eventIDBase];
+                        if ( !eventIDCount ) {
+                            eventIDCount = 0;
+                        }
+
+                        eventID = eventIDBase + '.' + eventIDCount;
+                        eventIDCount++;
+                        noIDCounter[eventIDBase] = eventIDCount;
                     }
 
                     if ( !handler ) {
@@ -222,7 +230,7 @@ exports.setupServices = function( app, definitionName, svcDir, setupDefinitionEv
 
                         // task came with a handler; mix it into the list of target eventHandlers
                         if ( target.eventHandlers ) {
-                            setupDefinitionEventListener( {
+                            setupEventListener( {
                                 'event' : eventID,
                                 'handler' : handler
                             }, definitionName );
