@@ -68,6 +68,11 @@ var tilePush = function (method, tileInstance, data, pushURL) {
         'Authorization': auth
     };
 
+    if ( data && !data['status'] ) {
+        // add an empty status object if it doesn't exist
+        data['status'] = {};
+    }
+
     return jive.util.buildRequest(pushURL, method, data, reqHeaders);
 };
 
