@@ -73,33 +73,108 @@ var findCredentials = function(req) {
     return deferred.promise;
 };
 
-exports.checkAuthHeaders = function (req, res,next) {
+var lockedRoutes = {};
 
-    findCredentials(req).then( function(credentials) {
-        if ( credentials ) {
-            var clientId = credentials['clientId'];
-            var secret = credentials['clientSecret'];
-            var auth = req.headers['authorization'];
+/**
+ * Any routes passed into this method will become open: e.g the service will NOT validate security
+ * if the headers are not present.
+ * @param routePath
+ */
+exports.lockRoute = function( routePath ) {
+    // pre
+    if ( !routePath) {
+        return;
+    }
 
-            if ( !jive.util.basicAuthorizationHeaderValid(auth, clientId, secret ) ) {
-                jive.logger.debug("Basic auth header found, but failed clientID/secret match.");
-                res.writeHead(403, { 'Content-Type': 'application/json' });
-                res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
+    if ( !routePath['verb'] ) {
+        throw new Error('Invalid route, cannot lock: missing verb');
+    }
+
+    if ( !routePath['path'] ) {
+        throw new Error('Invalid route, cannot lock: missing path');
+    }
+
+    var key = routePath['verb'] + '.' + routePath['path'];
+    lockedRoutes[key] = routePath;
+};
+
+exports.getLockedRoutes = function() {
+    // return immutable copy
+    return JSON.parse( JSON.stringify( lockedRoutes ) );
+};
+
+exports.isLocked = function( req ) {
+    // in development, we're not locked down
+    if ( jive.service.isDevelopment() ) {
+        return false;
+    }
+
+    var key = req.method.toLowerCase() + '.' + req.path;
+    return lockedRoutes[key];
+};
+
+function invalidAuthResponse(res) {
+    if ( !res ) {
+        return;
+    }
+
+    // bad
+    res.writeHead(403, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ 'status': 403, 'error': 'Invalid or missing authorization headers.' }));
+}
+
+/**
+ * General purpose utility that checks the request for security headers and validates them.
+ * If error, a 403 response will be added to the passed in res object
+ * @param req
+ * @param res
+ */
+exports.checkAuthHeaders = function(req, res) {
+    var deferred = q.defer();
+
+    if ( !exports.isLocked(req) ) {
+        // we're ok
+        deferred.resolve(true);
+    } else {
+        findCredentials(req).then( function(credentials) {
+            if ( credentials ) {
+                var clientId = credentials['clientId'];
+                var secret = credentials['clientSecret'];
+                var auth = req.headers['authorization'];
+
+                if ( !auth ) {
+                    jive.logger.debug("No security headers found, even though security credentials were required.");
+                    invalidAuthResponse(res);
+                    deferred.reject(false);
+                    return;
+                }
+
+                var passedBasic  =  jive.util.basicAuthorizationHeaderValid(auth, clientId, secret, true );
+                var passedJiveEXTN = jive.util.jiveAuthorizationHeaderValid(auth, clientId, secret, true );
+
+                if ( !passedBasic && !passedJiveEXTN ) {
+                    jive.logger.debug("Unauthorized access. Failed basic auth, and jiveEXTN header checks.");
+                    invalidAuthResponse(res);
+                    deferred.reject(false);
+                    return;
+                }
+
+                // we're ok
+                deferred.resolve(true);
+            } else {
+                jive.logger.debug("No credentials were found to check against.");
+                deferred.resolve(true);
             }
+        });
+    }
 
-            if ( !jive.util.jiveAuthorizationHeaderValid(auth, clientId, secret ) ) {
-                jive.logger.debug("JiveEXTN found, but failed clientID/secret match.");
-                res.writeHead(403, { 'Content-Type': 'application/json' });
-                res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
-            }
-        } else {
-            jive.logger.debug("No security headers found, even though security credentials were required.");
-            // problem!
-            res.writeHead(403, { 'Content-Type': 'application/json' });
-            res.end( JSON.stringify( { 'status': 403, 'error': 'Invalid or missing HMAC authorization header' } ) );
+    return deferred.promise;
+};
+
+exports.checkAuthHeadersMiddleware = function (req, res, next ) {
+    return exports.checkAuthHeaders( req, res ).finally( function() {
+        if ( next ) {
+            next();
         }
-    }).finally( function() {
-        next();
-    })
-
+    });
 };

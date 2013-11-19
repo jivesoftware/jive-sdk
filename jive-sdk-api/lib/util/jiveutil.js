@@ -555,8 +555,12 @@ exports.base64Decode = function (str) {
     return new Buffer(str, 'base64').toString('ascii');
 };
 
-exports.basicAuthorizationHeaderValid = function (auth, clientId, clientSecret) {
-    if (auth && auth.indexOf('Basic ') == 0) {
+exports.basicAuthorizationHeaderValid = function (auth, clientId, clientSecret, authRequired) {
+    if (!auth && !authRequired) {
+        return true;
+    }
+
+    if (auth.indexOf('Basic ') == 0) {
         var authParts = auth.split('Basic ');
         var p = new Buffer(authParts[1], 'base64').toString();
         var pParts = p.split(':');
@@ -570,8 +574,8 @@ exports.basicAuthorizationHeaderValid = function (auth, clientId, clientSecret) 
     return true;
 };
 
-exports.jiveAuthorizationHeaderValid = function (auth, clientId, clientSecret) {
-    if (!auth) {
+exports.jiveAuthorizationHeaderValid = function (auth, clientId, clientSecret, authRequired) {
+    if (!auth && !authRequired) {
         return true;
     }
 

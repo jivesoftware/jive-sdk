@@ -65,11 +65,13 @@ var setupExpressApp = function (app, rootDir, config) {
         app.set('port', config['port']);
 
         // attach security middleware
-        app.all( '*', security.checkAuthHeaders );
+        app.all( '*', security.checkAuthHeadersMiddleware );
 
         jive.logger.debug('Global framework routes:');
         app.post('/registration', service.routes.tiles.registration);
+        service.security().lockRoute({ 'verb' : 'post', 'path' : '/registration' });
         app.post('/unregister', service.routes.tiles.unregister);
+        service.security().lockRoute({ 'verb' : 'post', 'path' : '/unregister' });
         app.post('/jive/oauth/register', service.routes.jive.oauthRegister);
 
         jive.logger.debug("/registration");
@@ -100,10 +102,6 @@ var setupExpressApp = function (app, rootDir, config) {
         app.get('/tiles', service.routes.dev.tiles);
         app.get('/dev/tiles', service.routes.dev.tiles);
         jive.logger.debug("/dev/tiles");
-
-        app.get('/tilesInstall', service.routes.dev.installTiles);
-        app.get('/dev/tilesInstall', service.routes.dev.installTiles);
-        jive.logger.debug("/dev/tilesInstall");
 
         p2.resolve();
     });

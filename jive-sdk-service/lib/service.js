@@ -36,6 +36,7 @@ var tilesDir = rootDir + '/tiles';
 var osAppsDir = rootDir + '/apps';
 var cartridgesDir = rootDir + '/cartridges';
 var storagesDir = rootDir + '/storages';
+var security = require('./security');
 
 var _dir = function(theDir, defaultDir ) {
     theDir = theDir || defaultDir;
@@ -534,4 +535,12 @@ exports.getExpandedTileDefinitions = function(all) {
         processed.push( processedTile );
     });
     return processed;
+};
+
+exports.security = function() {
+    return security;
+};
+
+exports.isDevelopment = function() {
+    return exports.options['development'] === true;
 };

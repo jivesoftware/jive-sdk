@@ -92,6 +92,8 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
                 }
                 app[httpVerb](routeContextPath, routeHandler.route.bind(app));
                 added = true;
+                // autowired verb file routes are never locked; explicitly wire if
+                // lock is wanted
             } else {
                 // if its a valid route descriptor object, analyze it
                 if ( typeof candidate == 'object' && candidate['verb'] && candidate['route'] ) {
@@ -110,6 +112,17 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
 
                     httpVerb = candidate['verb'];
                     app[httpVerb](routeContextPath, candidate['route']);
+
+                    // lock the route if its marked to be locked
+                    if ( candidate['jiveLocked'] ) {
+                        service.security().lockRoute(  {
+                            'verb' : httpVerb,
+                            'path' : routeContextPath
+                        }  );
+
+                        jive.logger.info("locked route:", httpVerb, routeContextPath);
+                    }
+
                     added = true;
                 }
             }
