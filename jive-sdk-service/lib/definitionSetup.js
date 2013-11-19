@@ -44,6 +44,75 @@ function fsexists(path) {
     return deferred.promise;
 }
 
+var tileLifeCycleEvents = [
+    jive.constants.globalEventNames.NEW_INSTANCE,
+    jive.constants.globalEventNames.INSTANCE_UPDATED,
+    jive.constants.globalEventNames.INSTANCE_REMOVED
+];
+
+var tileDataPushEvents = [
+    jive.constants.globalEventNames.DATA_PUSHED,
+    jive.constants.globalEventNames.ACTIVITY_PUSHED,
+    jive.constants.globalEventNames.COMMENT_PUSHED
+];
+
+function buildHandlerFunction(handlerInfo) {
+    if ( handlerInfo['globalListener'] ) {
+        // if explicitly marked as a globalListener, then there are no conditions for handling, just pass it to the
+        // event handler
+        return handlerInfo['handler'];
+    } else {
+        // otherwise its a 'protected' handler
+        return function(context, event ) {
+            var definitionName = handlerInfo['definitionName'];
+            var eventListener;
+
+            if ( context['eventListener'] ) {
+                eventListener = context['eventListener'];
+            } else if ( event ) {
+                if ( tileLifeCycleEvents.indexOf(event) > -1 ) {
+                    eventListener = context['name'];
+                }
+
+                if ( tileDataPushEvents.indexOf(event) > -1 ) {
+                    if ( context['theInstance'] ) {
+                        eventListener = context['theInstance']['name'];
+                    }
+                }
+            }
+
+            if ( !eventListener || eventListener === definitionName ) {
+                handlerInfo['handler'](context);
+            }
+        }
+    }
+}
+
+function tileDefinitionStupEventListener(handlerInfo, definitionName) {
+    handlerInfo['definitionName'] = definitionName;
+
+    if (!handlerInfo['event']) {
+        throw new Error('Event handler "'
+            + definitionName + '" must specify an event name.');
+    }
+    if (!handlerInfo['handler']) {
+        throw new Error('Event handler "'
+            + definitionName + '" must specify a function handler.');
+    }
+
+    var eventListener = handlerInfo['eventListener'] || definitionName;
+    if (jive.events.globalEvents.indexOf(handlerInfo['event']) != -1) {
+        jive.events.addSystemEventListener(handlerInfo['event'], buildHandlerFunction(handlerInfo) );
+    } else {
+        jive.events.addDefinitionEventListener(
+            handlerInfo['event'],
+            eventListener,
+            buildHandlerFunction(handlerInfo),
+            handlerInfo['description'] || 'Unique to definition'
+        );
+    }
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
@@ -58,7 +127,8 @@ definitionSetup.setupDefinitionServices = function( app, definitionName, svcDir 
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
 
-    return definitionSetup.setupServices(app, definitionName, svcDir);
+    return definitionSetup.setupServices(app, definitionName, svcDir,
+        tileDefinitionStupEventListener);
 };
 
 /**

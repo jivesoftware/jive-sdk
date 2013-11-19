@@ -76,7 +76,9 @@ exports.addSystemEventListener = function(event, handler, description) {
 };
 
 exports.addLocalEventListener = function( event, handler ) {
-    exports.addListener( event, handler );
+    exports.addListener( event, function(context) {
+        return handler(context, event);
+    } );
 };
 
 /**
@@ -95,7 +97,9 @@ exports.globalEvents = [
     jive.constants.globalEventNames.INSTANCE_REMOVED,
     jive.constants.globalEventNames.DATA_PUSHED,
     jive.constants.globalEventNames.ACTIVITY_PUSHED,
-    jive.constants.globalEventNames.COMMENT_PUSHED
+    jive.constants.globalEventNames.COMMENT_PUSHED,
+    jive.constants.globalEventNames.CLIENT_APP_REGISTRATION_SUCCESS,
+    jive.constants.globalEventNames.CLIENT_APP_REGISTRATION_FAILED
 ];
 
 /**

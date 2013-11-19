@@ -44,7 +44,7 @@ var doRefreshTokenFlow = function( instanceLibrary, instance ) {
         // failure
         function (result) {
             jive.logger.warn("RefreshTokenFlow failed.", result || '');
-            jive.events.emit("refreshTokenFailed." + instance['name'], instance);
+            jive.events.emit("refreshTokenFailed", instance);
             deferred.reject( {statusCode: result.statusCode,
                 error: 'Error refreshing token. Response from Jive ID in details field', details: result } );
         }

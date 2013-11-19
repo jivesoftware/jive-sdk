@@ -37,11 +37,13 @@ exports.globalEventNames = {
     'INSTANCE_REMOVED':'destroyedInstance',
     'DATA_PUSHED':'dataPushed',
     'ACTIVITY_PUSHED':'activityPushed',
-    'COMMENT_PUSHED':'commentPushed'
-}
+    'COMMENT_PUSHED':'commentPushed',
+    'CLIENT_APP_REGISTRATION_SUCCESS' : 'registeredJiveInstanceSuccess',
+    'CLIENT_APP_REGISTRATION_FAILED' : 'registeredJiveInstanceFailed'
+};
 
 exports.roles = {
     'WORKER':'worker',
     'PUSHER':'pusher',
     'HTTP_HANDLER':'http'
-}
+};

@@ -60,7 +60,9 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
     var deferred = q.defer();
     var handlers;
     if (context['eventListener']) {
-        handlers = eventHandlerMap[context['eventListener']][eventID];
+        if ( eventHandlerMap[context['eventListener']] ) {
+            handlers = eventHandlerMap[context['eventListener']][eventID];
+        }
     } else {
         handlers = eventHandlerMap[eventID];
     }
