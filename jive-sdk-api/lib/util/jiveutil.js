@@ -150,7 +150,7 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
             } else if (typeof body === 'string') {
                 postBodyStr = body;
             } else {
-                throw "Illegal type of post body; only object or string is permitted.";
+                throw new Error("Illegal type of post body; only object or string is permitted.");
             }
         } else if (contentType === 'application/x-www-form-urlencoded') {
             var postObject;
@@ -164,7 +164,7 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
                 postObject = body;
             }
             else {
-                throw "Illegal type of post body; only object or string is permitted.";
+                throw new Error("Illegal type of post body; only object or string is permitted.");
             }
 
             for (var key in postObject) {

@@ -1,4 +1,4 @@
-var jive = require('../.'),
+var jive = require('../'),
     assert = require('assert'),
     testUtil = require('../test-util'),
     testRunner = require('../node-test-runner');
