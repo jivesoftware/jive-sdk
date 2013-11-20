@@ -14,7 +14,7 @@
 
         var json = config || { };
         json.posting = json.posting || "on";
-        json.project = json.project || container.name;
+        json.project = json.project || (container && container.name) || "";
 
 
         // prepopulate the sequence input dialog
