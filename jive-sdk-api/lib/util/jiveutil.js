@@ -202,9 +202,9 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
             jive.logger.debug("Request: " + url + ", body: " + postBodyStr);
             request(options, function (error, response, body) {
                 if (error) {
-                    console.log("Error making request: %s", JSON.stringify(error));
-                    console.log("response body: ", response ? (response.statusCode || "no status code") : "no response", body || "no body");
-                    console.log("Options: %s", JSON.stringify(options));
+                    jive.logger.warn("Error making request: %s", JSON.stringify(error));
+                    jive.logger.debug("response body: ", response ? (response.statusCode || "no status code") : "no response", body || "no body");
+                    jive.logger.debug("Options: %s", JSON.stringify(options));
                     errCallback(error);
                 }
                 else {

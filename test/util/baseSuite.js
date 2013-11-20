@@ -1,7 +1,7 @@
 var Mocha = require('mocha');
 var fs = require('fs');
+var q = require('q');
 var path = require('path');
-var jive = require('../../jive-sdk-service/api.js');
 var mockery = require('mockery');
 
 exports.getTestDir = function() {
@@ -20,23 +20,39 @@ exports.onTestFail = function(test) {
 };
 
 exports.setupSuite = function(test) {
-    test['jive'] = jive;
+    test['jive'] = exports.jive;
     test['mockery'] = mockery;
 
     mockery.enable();
+    mockery.warnOnReplace(false);
 };
+
+exports.jive = {};
 
 exports.teardownSuite = function(test) {
     mockery.disable();
 };
 
-exports.runTests = function() {
+exports.runTests = function(options) {
+    var deferred = q.defer();
 
-    var mocha = new Mocha({
+    exports.jive = options['jive'];
+
+    var mochaOptions = {
         reporter: 'dot',
         ui: 'bdd',
         timeout: 10000
-    });
+    };
+
+    var suppressMessages;
+    if ( options['runMode'] == 'coverage' ) {
+        mochaOptions['reporter'] = 'html-cov';
+        suppressMessages = true;
+    } else {
+        mochaOptions['reporter'] = 'list';
+    }
+
+    var mocha = new Mocha(mochaOptions);
 
     var that = this;
     var testDir = that.getTestDir();
@@ -50,7 +66,9 @@ exports.runTests = function() {
         }
         files.forEach(function (file) {
             if (path.extname(file) === '.js') {
-                console.log('adding test file: %s', file);
+                if ( !suppressMessages ) {
+                    console.log('adding test file: %s', file);
+                }
                 var test = mocha.addFile(testDir + file);
             }
         });
@@ -61,7 +79,9 @@ exports.runTests = function() {
 
         runner.on('suite', function (test) {
             if ( test['title'] == that.getParentSuiteName() ) {
-                console.log('start');
+                if ( !suppressMessages ) {
+                    console.log('\n', that.getParentSuiteName());
+                }
                 that.setupSuite( test['ctx']);
             }
         });
@@ -72,20 +92,31 @@ exports.runTests = function() {
             }
         });
 
+        runner.on('end', function (test) {
+            deferred.resolve();
+        });
+
         runner.on('test', function (test) {
         });
 
         runner.on('pass', function (test) {
-            console.log('...Test "%s" passed', test.title);
+            if ( !suppressMessages ) {
+                console.log('...Test "%s" passed', test.title);
+            }
             that.onTestPass(test);
         });
 
         runner.on('fail', function (test) {
-            console.log('...Test "%s" failed', test.title);
-            if (test.err && (test.err.expected || test.err.actual) ) {
-                console.log('Expected: \'%s\', Actual: \'%s\'', test.err.expected, test.err.actual);
+            if ( !suppressMessages ) {
+                console.log('...Test "%s" failed', test.title);
+                if (test.err && (test.err.expected || test.err.actual) ) {
+                    console.log('Expected: \'%s\', Actual: \'%s\'', test.err.expected, test.err.actual);
+                }
             }
             that.onTestFail(test);
         });
+
     });
+
+    return deferred.promise;
 };

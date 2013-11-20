@@ -165,5 +165,114 @@ describe('jive.util', function () {
             jive.util.buildRequest( 'https://xyz.com/mypath?foo=bar', 'POST', postObj, headers);
         });
 
+        it('test POST stringified object as application/x-www-form-urlencoded', function (done) {
+            var jive = this['jive'];
+            var mockery = this['mockery'];
+            var postObj = JSON.stringify( {
+                "my" : "object"
+            } );
+
+            mockery.registerMock('request', function (options, cb) {
+                if ( options['body'] !== 'my=object' ) {
+                    assert.fail( options['body'], 'my=object' );
+                }
+                done();
+            });
+
+            var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            jive.util.buildRequest( 'https://xyz.com/mypath?foo=bar', 'POST', postObj, headers);
+        });
+
+        it('test error callback on exception', function (done) {
+            var jive = this['jive'];
+            var mockery = this['mockery'];
+
+            mockery.registerMock('request', function (options, cb) {
+                cb(new Error("Ouch!"));
+            });
+
+            jive.util.buildRequest( 'https://xyz.com/mypath?foo=bar').then(
+                // success
+                function() {
+                    assert.fail('Expected an error');
+                },
+
+                // error
+                function(e) {
+                    if ( e ) {
+                        done();
+                    } else {
+                        assert.fail('Expected an error');
+                    }
+                }
+            );
+
+        });
+
+        it('test error callback on error response code', function (done) {
+            var jive = this['jive'];
+            var mockery = this['mockery'];
+            var response = {
+                'headers' : {},
+                'statusCode' : 400
+
+            };
+            var body = JSON.stringify( {
+                'not' : 'allowed'
+            } );
+
+            mockery.registerMock('request', function (options, cb) {
+                cb(undefined, response, body);
+            });
+
+            jive.util.buildRequest( 'https://xyz.com/mypath?foo=bar').then(
+                // success
+                function() {
+                    assert.fail('Expected an error');
+                },
+
+                // error
+                function(e) {
+                    if ( e['statusCode'] != 400 ) {
+                        assert.fail( e['statusCode'] , 400 );
+                    }
+                    if ( JSON.stringify(e['entity']) !== body ) {
+                        assert.fail( e['body'] , body, 'expected entity response' );
+                    }
+                    done();
+                }
+            );
+
+        });
+
+        it('test successful call', function (done) {
+            var jive = this['jive'];
+            var mockery = this['mockery'];
+            var response = {
+                'headers' : {},
+                'statusCode' : 200
+
+            };
+            var body = JSON.stringify( {
+                'a' : 'ok'
+            } );
+
+            mockery.registerMock('request', function (options, cb) {
+                cb(undefined, response, body);
+            });
+
+            jive.util.buildRequest( 'https://xyz.com/mypath?foo=bar').then(
+                // success
+                function() {
+                    done();
+                },
+
+                // error
+                function(e) {
+                    assert.fail();
+                }
+            );
+        });
+
     });
 });
