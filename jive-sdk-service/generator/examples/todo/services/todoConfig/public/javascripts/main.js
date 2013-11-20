@@ -1,5 +1,6 @@
-var host, setHost = function( newHost ) {
+var host, url, setHost = function( newHost ) {
     host = newHost;
+    url = host + "/todoConfig/config";
 };
 
 
