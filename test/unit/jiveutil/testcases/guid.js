@@ -1,15 +1,8 @@
 var assert = require('assert');
 
-describe('jive.util', function () {
-    before(function (done) {
-        done();
-    });
+describe('jive', function () {
 
-    after(function (done) {
-        done();
-    });
-
-    describe('#guid()', function () {
+    describe('#util.guid()', function () {
         it('generates a unique guid', function (done) {
             var jive = this['jive'];
             var guid = jive.util.guid();
@@ -38,3 +31,4 @@ describe('jive.util', function () {
     });
 
 });
+

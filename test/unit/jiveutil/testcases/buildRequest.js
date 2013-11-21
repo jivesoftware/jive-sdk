@@ -1,8 +1,8 @@
 var assert = require('assert');
 
-describe('jive.util', function () {
+describe('jive', function () {
 
-    describe('#buildRequest()', function () {
+    describe('#util.buildRequest()', function () {
 
         it('test rejectUnauthorized option is added', function (done) {
             var jive = this['jive'];
@@ -264,6 +264,41 @@ describe('jive.util', function () {
             jive.util.buildRequest( 'https://xyz.com/mypath?foo=bar').then(
                 // success
                 function() {
+                    done();
+                },
+
+                // error
+                function(e) {
+                    assert.fail();
+                }
+            );
+        });
+
+        it('test successful call, non json response', function (done) {
+            var jive = this['jive'];
+            var mockery = this['mockery'];
+            var response = {
+                'headers' : {},
+                'statusCode' : 200
+
+            };
+            var body = 'why u no give me json';
+
+            mockery.registerMock('request', function (options, cb) {
+                cb(undefined, response, body);
+            });
+
+            jive.util.buildRequest( 'https://xyz.com/mypath?foo=bar').then(
+                // success
+                function(response) {
+                    if ( !response ) {
+                        assert.fail();
+                    }
+
+                    if ( response['entity']['body'] !== body ) {
+                        assert.fail();
+                    }
+
                     done();
                 },
 

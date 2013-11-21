@@ -53,25 +53,15 @@ exports.runTests = function(options) {
     }
 
     var mocha = new Mocha(mochaOptions);
-
     var that = this;
-    var testDir = that.getTestDir();
+    var testDir = options['testcases'] || exports.getTestDir();
 
-    var tests = [];
-
-    fs.readdir(testDir, function (err, files) {
-        if (err) {
-            console.log(err);
-            return;
+    recursiveDirectoryProcessor( testDir, testDir, testDir, true, function(type, file) {
+        if (path.extname(file) === '.js') {
+            mocha.addFile(file);
         }
-        files.forEach(function (file) {
-            if (path.extname(file) === '.js') {
-                if ( !suppressMessages ) {
-                    console.log('adding test file: %s', file);
-                }
-                var test = mocha.addFile(testDir + file);
-            }
-        });
+        return q.resolve();
+    }).then( function() {
 
         var runner = mocha.run(function () {
             that.beforeTest();
@@ -79,9 +69,6 @@ exports.runTests = function(options) {
 
         runner.on('suite', function (test) {
             if ( test['title'] == that.getParentSuiteName() ) {
-                if ( !suppressMessages ) {
-                    console.log('\n', that.getParentSuiteName());
-                }
                 that.setupSuite( test['ctx']);
             }
         });
@@ -100,22 +87,67 @@ exports.runTests = function(options) {
         });
 
         runner.on('pass', function (test) {
-            if ( !suppressMessages ) {
-                console.log('...Test "%s" passed', test.title);
-            }
             that.onTestPass(test);
         });
 
         runner.on('fail', function (test) {
-            if ( !suppressMessages ) {
-                console.log('...Test "%s" failed', test.title);
-                if (test.err && (test.err.expected || test.err.actual) ) {
-                    console.log('Expected: \'%s\', Actual: \'%s\'', test.err.expected, test.err.actual);
-                }
-            }
             that.onTestFail(test);
         });
 
+    });
+
+    return deferred.promise;
+};
+
+var recursiveDirectoryProcessor = function (currentFsItem, root, targetRoot, force, processor) {
+
+    var recurseDirectory = function (directory) {
+        return q.nfcall(fs.readdir, directory).then(function (subItems) {
+            var promises = [];
+            subItems.forEach(function (subItem) {
+                promises.push(recursiveDirectoryProcessor(directory + '/' + subItem, root, targetRoot, force, processor));
+            });
+
+            return q.all(promises);
+        });
+    };
+
+    return q.nfcall(fs.stat, currentFsItem).then(function (stat) {
+        var targetPath = targetRoot + '/' + currentFsItem.substr(root.length + 1, currentFsItem.length);
+
+        if (stat.isDirectory()) {
+            if (root !== currentFsItem) {
+                return fsexists(targetPath).then(function (exists) {
+                    if (root == currentFsItem || (exists && !force)) {
+                        return recurseDirectory(currentFsItem);
+                    } else {
+                        return processor('dir', currentFsItem, targetPath).then(function () {
+                            return recurseDirectory(currentFsItem)
+                        });
+                    }
+                });
+            }
+
+            return recurseDirectory(currentFsItem);
+        }
+
+        // must be a file
+        return fsexists(targetPath).then(function (exists) {
+            if (!exists || force) {
+                return processor('file', currentFsItem, targetPath)
+            } else {
+                return q.fcall(function () {
+                });
+            }
+        });
+    });
+};
+
+var fsexists = function (path) {
+    var deferred = q.defer();
+    var method = fs.exists ? fs.exists : require('path').exists;
+    method(path, function (exists) {
+        deferred.resolve(exists);
     });
 
     return deferred.promise;

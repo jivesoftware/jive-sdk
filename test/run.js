@@ -1,7 +1,8 @@
 
-var jive = require('../jive-sdk-service/api.js');
+var realJive = require('../jive-sdk-service/api.js');
 var q = require('q');
 var path = require('path');
+var fs = require('fs');
 
 var apiDirSrc = path.normalize(  process.cwd() + '/../jive-sdk-api' );
 var apiDirTarget = path.normalize( process.cwd() + '/node_modules/jive-sdk-cov' );
@@ -33,25 +34,71 @@ var setupCoverageDirs = function(apiDirSrc, apiDirTarget) {
 var runMode = process.env.JIVE_SDK_TEST_RUN_MODE || process.argv[2] || 'test';
 
 var runTests = function(jive) {
-    require('./unit/run').runTests(
-        {
-            'jive': jive,
-            'runMode' : runMode
-        }
-    );
+
+    var unitDir = process.cwd() + '/unit';
+
+    realJive.util.fsreaddir(unitDir).then( function(items) {
+
+        var promises = [];
+
+        items.forEach( function(item) {
+            var fullItemPath = unitDir + '/' + item;
+
+            var p = realJive.util.fsisdir( fullItemPath).then( function(isDir ) {
+                if ( isDir ) {
+                    var toRequire = fullItemPath + '/run.js';
+                    console.log(toRequire);
+                    var testSpec =  {
+                        'jive': jive,
+                        'runMode' : runMode,
+                        'testcases' :  fullItemPath + '/testcases'
+                    };
+
+                    return realJive.util.fsexists(toRequire).then( function(exists) {
+                        console.log(exists);
+                        if ( !exists ) {
+                            return makeRunner().runTests(testSpec);
+                        } else {
+                            return require( toRequire ).runTests(testSpec);
+                        }
+                    });
+                }
+            });
+
+            promises.push(p);
+        });
+
+        q.all(promises);
+
+    });
+};
+
+var makeRunner = function() {
+    var runner = Object.create(require('./util/baseSuite'));
+    runner.getParentSuiteName = function() {
+        return 'jive';
+    };
+    return runner;
 };
 
 if ( runMode =='test' ) {
-    runTests(jive);
+    runTests(realJive);
 } else if ( runMode == 'coverage' )  {
-    jive.util.fsexists(apiDirTarget).then( function(exists) {
-        return exists ? jive.util.fsrmdir(apiDirTarget) : q.resolve();
+    realJive.util.fsexists(apiDirTarget).then( function(exists) {
+        return exists ? realJive.util.fsrmdir(apiDirTarget) : q.resolve();
     }).then( function() {
         return setupCoverageDirs( apiDirSrc, apiDirTarget + '/jive-sdk-api' );
     }).then( function() {
         return setupCoverageDirs( apiDirSrc, apiDirTarget + '/jive-sdk-service' );
     }).then( function() {
-        runTests(require(apiDirTarget + '/jive-sdk-service/api'));
+        var jive = require(apiDirTarget + '/jive-sdk-service/api');
+        makeRunner().runTests(
+            {
+                'jive': jive,
+                'runMode' : runMode,
+                'testcases' :   process.cwd()  + '/unit'
+            }
+        );
     });
 
 } else {
