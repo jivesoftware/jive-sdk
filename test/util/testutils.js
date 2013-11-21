@@ -134,6 +134,15 @@ var sampleTileInstance = {
     "jiveCommunity": "lt-a7-120000.jiveland.com"
 };
 
+var sampleCommunity = {
+    "jiveUrl": "http://lt-a7-120000.jiveland.com:8080",
+    "version": "post-samurai",
+    "tenantId": "fe519521-f3f8-4028-a03b-c51d6a74b0e3-dev",
+    "clientId": "nupmcbes7biwedkjpav7g8bzw4egb6yq.i",
+    "clientSecret": "o8q1mnhhjy1gb497ngo0kvw6fmpbjfl8.s",
+    "jiveCommunity": "lt-a7-120000.jiveland.com"
+};
+
 exports.createExampleDefinition = function() {
     var definition = JSON.parse(JSON.stringify(sampleDefinition));
     definition['name'] = exports.guid();
@@ -146,10 +155,22 @@ exports.createExampleInstance = function() {
     instance['name'] = exports.guid();
     instance['id'] = exports.guid();
     instance['guid'] = exports.guid();
+    instance['accessToken'] = exports.guid();
+    instance['refreshToken'] = exports.guid();
     instance['scope'] = exports.guid();
     instance['url'] = instance['url'] + '/' + exports.guid();
     instance['jiveCommunity'] = exports.guid() + '.' + instance['jiveCommunity'];
     return instance;
+};
+
+exports.createExampleCommunity = function() {
+    var community = JSON.parse(JSON.stringify(sampleCommunity));
+    community['jiveUrl'] = exports.createFakeURL();
+    community['tenantId'] = exports.guid();
+    community['clientId'] = exports.guid();
+    community['clientSecret'] = exports.guid();
+    community['jiveCommunity'] = require('url').parse(community['jiveUrl']).host;
+    return community;
 };
 
 exports.persistExampleDefinitions = function(jive, quantity) {
@@ -190,4 +211,31 @@ exports.persistExampleInstances = function(jive, quantity) {
     });
 };
 
+exports.persistExampleCommunities = function(jive, quantity) {
+    var communities = [];
+    var promises = [];
+
+    for ( var i = 0; i < quantity; i++ ){
+        var instance = exports.createExampleCommunity();
+
+        var p = jive.community.save(instance).then(function(saved) {
+            communities.push(saved);
+            return q.resolve();
+        });
+        promises.push( p );
+    }
+
+    return q.all(promises).then( function() {
+        return quantity == 1 ? communities[0] : communities;
+    });
+};
+
+exports.createFakeURL = function(fakePath) {
+    var url = 'http://' + exports.guid() + '.com';
+    if ( fakePath ) {
+        url += '/' + exports.guid();
+    }
+
+    return url;
+};
 

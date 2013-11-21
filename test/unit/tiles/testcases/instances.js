@@ -410,6 +410,44 @@ describe('jive', function () {
 
         });
 
+        it('register fail', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            // setup memory persistence
+            jive.context['persistence'] = new jive.persistence.memory();
+
+            var instance = testUtils.createExampleInstance();
+
+            var jiveUrl = testUtils.createFakeURL();
+            var config = { 'my': 'config' };
+            var code = testUtils.guid();
+
+            var mockery = this['mockery'];
+
+            mockery.registerMock('request', function (options, cb) {
+                console.log('wheee');
+                var response  = {
+                    'statusCode' : 400
+                };
+                cb( undefined, response, body );
+            });
+
+            testUtils.persistExampleCommunities(jive, 1)
+            .then( function(community) {
+                var jiveUrl = community['jiveUrl'];
+                var pushUrl = jiveUrl + '/api/jivelinks/v1/tiles/100';
+                return jive.tiles.register(jiveUrl, pushUrl, config, instance['name'], code, instance['guid']).then(
+                    function(newInstance) {
+                        assert.fail();
+                    },
+
+                    function(e) {
+                        done();
+                    });
+                })
+        });
+
         it('refresh access token', function (done) {
             var jive = this['jive'];
             var testUtils = this['testUtils'];
@@ -465,6 +503,38 @@ describe('jive', function () {
 
                     function(e) {
                         assert.fail();
+                    });
+                })
+
+        });
+
+       it('refresh access token fail', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            // setup memory persistence
+            jive.context['persistence'] = new jive.persistence.memory();
+
+            var instance = testUtils.createExampleInstance();
+
+            var mockery = this['mockery'];
+
+            mockery.registerMock('request', function (options, cb) {
+                var response  = {
+                    'statusCode' : 400
+                };
+                cb( undefined, response );
+            });
+
+            testUtils.persistExampleCommunities(jive, 1)
+            .then( function(community) {
+                return jive.tiles.refreshAccessToken(instance).then(
+                    function(updatedInstance) {
+                        assert.fail();
+                    },
+
+                    function(e) {
+                        done();
                     });
                 })
 
