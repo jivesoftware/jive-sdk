@@ -46,10 +46,10 @@ module.exports = function(serviceConfig) {
         if(err){
             fs.mkdir(path, function(err){
                 if(err) throw err;
-                intervalId = setInterval(flushDirty, 15000);
+                intervalId = setInterval(flushDirty, serviceConfig['fileFlushInterval'] || 15000);
             });
         } else if(stat.isDirectory()){
-            intervalId = setInterval(flushDirty, 15000);
+            intervalId = setInterval(flushDirty, serviceConfig['fileFlushInterval'] || 15000);
         } else {
             throw "Persistence startup failed: " + path + " is not a directory!";
         }

@@ -88,9 +88,13 @@ function buildHandlerFunction(handlerInfo) {
     }
 }
 
-function tileDefinitionStupEventListener(handlerInfo, definitionName) {
+function tileDefinitionStupEventListener(handlerInfo, _definitionName, setupContext) {
+    var definitionJson;
+    if ( setupContext ) {
+        definitionJson = setupContext['definitionJson'];
+    }
+    var definitionName = definitionJson ? definitionJson['name'] : _definitionName;
     handlerInfo['definitionName'] = definitionName;
-
     if (!handlerInfo['event']) {
         throw new Error('Event handler "'
             + definitionName + '" must specify an event name.');
@@ -123,12 +127,27 @@ function tileDefinitionStupEventListener(handlerInfo, definitionName) {
  * @param svcDir
  * @return {*}
  */
-definitionSetup.setupDefinitionServices = function( app, definitionName, svcDir ) {
+definitionSetup.setupDefinitionServices = function( app, definitionName, svcDir, definitionJson ) {
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
+    var next;
+    if ( !definitionJson ) {
+        // set it up
+        var definitionLocation = require('path').dirname( svcDir ) + '/definition.json';
+        next = definitionSetup.setupDefinitionMetadata(definitionLocation);
+    } else {
+        next = q.resolve(definitionJson);
+    }
 
-    return definitionSetup.setupServices(app, definitionName, svcDir,
-        tileDefinitionStupEventListener);
+    var setupContext = {
+        'definitionJson' : definitionJson
+    };
+
+    return next.then( function(definition) {
+        return definitionSetup.setupServices(app, definitionName, svcDir,
+            tileDefinitionStupEventListener, setupContext );
+    });
+
 };
 
 /**
@@ -189,7 +208,7 @@ definitionSetup.setupOneDefinition = function( app, definitionDir, definitionNam
             var definitionPromise = definitionSetup.setupDefinitionMetadata(definitionPath);
 
             // wire up service and routes
-            return definitionPromise.then( function() {
+            return definitionPromise.then( function(definitionJson) {
                 var promises = [];
 
                 promises.push( fsexists(routesPath).then( function(exists) {
@@ -200,7 +219,7 @@ definitionSetup.setupOneDefinition = function( app, definitionDir, definitionNam
 
                 promises.push( fsexists(definitionDir).then( function(exists) {
                     if ( exists ) {
-                        return definitionSetup.setupDefinitionServices( app, definitionName, servicesPath );
+                        return definitionSetup.setupDefinitionServices( app, definitionName, servicesPath, definitionJson );
                     }
                 }));
 

@@ -164,7 +164,7 @@ function defaultSetupEventListener(handlerInfo, definitionName) {
 
 /**
  */
-exports.setupServices = function( app, definitionName, svcDir, setupEventListener ) {
+exports.setupServices = function( app, definitionName, svcDir, setupEventListener, setupContext ) {
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
 
@@ -195,7 +195,7 @@ exports.setupServices = function( app, definitionName, svcDir, setupEventListene
             // event handlers
             if (target.eventHandlers) {
                 target.eventHandlers.forEach(function (handlerInfo) {
-                    setupEventListener(handlerInfo, definitionName);
+                    setupEventListener(handlerInfo, definitionName, setupContext);
                 });
             }
 

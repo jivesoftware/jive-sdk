@@ -10,11 +10,13 @@ describe('jive', function () {
             var testUtils = this['testUtils'];
 
             testUtils.createTempDir().then( function(dir) {
-                var persistence = new jive.persistence.file({ 'dataDirPath': dir });
+                var persistence = new jive.persistence.file({ 'fileFlushInterval' : 200, 'dataDirPath': dir });
 
                 test.testSave(testUtils, persistence).then(
                     function() {
-                        done();
+                        setTimeout( function() {
+                            done();
+                        }, 1000);
                     },
 
                     function(e) {
