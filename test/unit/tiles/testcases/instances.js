@@ -236,59 +236,107 @@ describe('jive', function () {
             });
         });
 
-//        it('find all', function (done) {
-//            var jive = this['jive'];
-//
-//            // setup memory persistence
-//            jive.context['persistence'] = new jive.persistence.memory();
-//
-//            this['testUtils'].persistExampleInstances(jive, 3).then( function(instances) {
-//
-//                // by criteria
-//                return jive.tiles.instances.findAll()
-//                    .then( function(found) {
-//                        if ( !found || found.length < 1) {
-//                            assert.fail();
-//                        }
-//
-//                        if ( found.length != 3 ) {
-//                            assert.fail();
-//                        }
-//
-//                        return require('q').resolve();
-//                    });
-//            }).finally(function() {
-//                    done();
-//                });
-//        });
-//
-//        it('remove', function (done) {
-//            var jive = this['jive'];
-//
-//            // setup memory persistence
-//            jive.context['persistence'] = new jive.persistence.memory();
-//
-//            this['testUtils'].persistExampleInstances(jive, 3).then( function(instances) {
-//
-//                var instance = instances[1];
-//
-//                return jive.tiles.instances.remove(instance['id'])
-//                    .then( function(found) {
-//                        if ( !found ) {
-//                            assert.fail();
-//                        }
-//
-//                        if ( found['id'] !== instance['id'] ) {
-//                            assert.fail();
-//                        }
-//
-//                        return require('q').resolve();
-//                    });
-//            }).finally(function() {
-//                    done();
-//                });
-//        });
-//
+        it('find by url', function (done) {
+            var jive = this['jive'];
+
+            // setup memory persistence
+            jive.context['persistence'] = new jive.persistence.memory();
+
+            this['testUtils'].persistExampleInstances(jive, 3).then( function(instances) {
+                var instance2 = instances[1];
+
+                return jive.tiles.findByURL( instance2['url'] )
+                    .then(function(found) {
+                        if ( !found ) {
+                            assert.fail();
+                        }
+
+                        if ( found['url'] !== instance2['url'] ) {
+                            assert.fail();
+                        }
+                    });
+            }).finally(function() {
+                done();
+            });
+        });
+
+        it('find by community', function (done) {
+            var jive = this['jive'];
+
+            // setup memory persistence
+            jive.context['persistence'] = new jive.persistence.memory();
+
+            this['testUtils'].persistExampleInstances(jive, 3).then( function(instances) {
+                var instance2 = instances[1];
+
+                return jive.tiles.findByCommunity( instance2['jiveCommunity'] )
+                    .then(function(found) {
+                        if ( !found ) {
+                            assert.fail();
+                        }
+
+                        if ( found['jiveCommunity'] !== instance2['jiveCommunity'] ) {
+                            assert.fail();
+                        }
+                    });
+            }).finally(function() {
+                done();
+            });
+        });
+
+        it('find all', function (done) {
+            var jive = this['jive'];
+
+            // setup memory persistence
+            jive.context['persistence'] = new jive.persistence.memory();
+
+            this['testUtils'].persistExampleInstances(jive, 3).then( function(instances) {
+
+                // by criteria
+                return jive.tiles.findAll()
+                    .then( function(found) {
+                        if ( !found || found.length < 1) {
+                            assert.fail();
+                        }
+
+                        if ( found.length != 3 ) {
+                            assert.fail();
+                        }
+
+                        return require('q').resolve();
+                    });
+            }).finally(function() {
+                done();
+            });
+        });
+
+        it('remove', function (done) {
+            var jive = this['jive'];
+
+            // setup memory persistence
+            jive.context['persistence'] = new jive.persistence.memory();
+
+            this['testUtils'].persistExampleInstances(jive, 3).then( function(instances) {
+
+                var instance = instances[1];
+
+                return jive.tiles.remove(instance['id'])
+                    .then( function(found) {
+                        if ( !found ) {
+                            assert.fail();
+                        }
+
+                        if ( found['id'] !== instance['id'] ) {
+                            assert.fail();
+                        }
+
+                        return require('q').resolve();
+                    });
+            }).finally(function() {
+                done();
+            });
+        });
+
     });
 
 });
