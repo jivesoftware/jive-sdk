@@ -5,8 +5,9 @@ function func(input) {
 
     var src = input['apiDirSrc'];
     var target = input['apiDirTarget'];
+    var excludes = input['excludes'];
 
-    jscoverage.processFile(src, target);
+    jscoverage.processFile(src, target, excludes);
     process.send('Done');
 }
 

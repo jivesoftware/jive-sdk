@@ -33,6 +33,7 @@ exports.setupSuite = function(test) {
 
     mockery.enable();
     mockery.warnOnReplace(false);
+    mockery.warnOnUnregistered(false);
 };
 
 exports.jive = {};
@@ -50,7 +51,7 @@ exports.runTests = function(options) {
     var mochaOptions = {
         reporter: 'dot',
         ui: 'bdd',
-        timeout: 10000
+        timeout: options['timeout'] || 10000
     };
 
     var suppressMessages;

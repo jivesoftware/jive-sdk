@@ -5,9 +5,11 @@ var path = require('path');
 var fs = require('fs');
 
 var apiDirSrc = path.normalize(  process.cwd() + '/../jive-sdk-api' );
+var serviceDirSrc = path.normalize(  process.cwd() + '/../jive-sdk-service' );
 var apiDirTarget = path.normalize( process.cwd() + '/node_modules/jive-sdk-cov' );
 
-var setupCoverageDirs = function(apiDirSrc, apiDirTarget) {
+var setupCoverageDirs = function(apiDirSrc, apiDirTarget, excludes) {
+    excludes = excludes || [];
     var deferred = q.defer();
 
     var jscoverage =  process.cwd() + '/jscoverage.js';
@@ -23,7 +25,8 @@ var setupCoverageDirs = function(apiDirSrc, apiDirTarget) {
 
     var options = {
         'apiDirSrc' : apiDirSrc,
-        'apiDirTarget' : apiDirTarget
+        'apiDirTarget' : apiDirTarget,
+        'excludes' : excludes
     };
 
     child.send({func: JSON.stringify(options)});
@@ -49,16 +52,14 @@ var runTests = function(jive) {
             var p = realJive.util.fsisdir( fullItemPath).then( function(isDir ) {
                 if ( isDir ) {
                     var toRequire = fullItemPath + '/run.js';
-                    console.log(toRequire);
                     var testSpec =  {
                         'jive': jive,
                         'runMode' : runMode,
-                        'testcases' :  fullItemPath + '/testcases'
+                        'testcases' :  fullItemPath + '/testcases',
+                        'timeout' : 1500
                     };
 
                     return realJive.util.fsexists(toRequire).then( function(exists) {
-
-                        console.log(exists);
                         if ( !exists ) {
                             return makeRunner().runTests(testSpec);
                         } else {
@@ -85,27 +86,30 @@ var makeRunner = function() {
 };
 
 function muteJiveLogging(jive) {
-    jive.logger = {
-        'debug': function () {
-        },
-        'info': function () {
-        },
-        'error': function () {
-        },
-        'warn': function () {
-        }
-    };
+    var logger = jive.logger;
+    logger.setLevel('FATAL');
+    jive['context']['config']['logLevel'] = 'FATAL';
 }
 
 if ( runMode =='test' ) {
     runTests(realJive);
+
+//    makeRunner().runTests(
+//        {
+//            'jive': realJive,
+//            'runMode' : runMode,
+//            'testcases' :   process.cwd()  + '/unit',
+//            'timeout' : 2000
+//        }
+//    );
+
 } else if ( runMode == 'coverage' )  {
     realJive.util.fsexists(apiDirTarget).then( function(exists) {
         return exists ? realJive.util.fsrmdir(apiDirTarget) : q.resolve();
     }).then( function() {
         return setupCoverageDirs( apiDirSrc, apiDirTarget + '/jive-sdk-api' );
     }).then( function() {
-        return setupCoverageDirs( apiDirSrc, apiDirTarget + '/jive-sdk-service' );
+        return setupCoverageDirs( serviceDirSrc, apiDirTarget + '/jive-sdk-service', [ 'generator' ]);
     }).then( function() {
         var jive = require(apiDirTarget + '/jive-sdk-service/api');
         // suppress logging
@@ -114,7 +118,8 @@ if ( runMode =='test' ) {
             {
                 'jive': jive,
                 'runMode' : runMode,
-                'testcases' :   process.cwd()  + '/unit'
+                'testcases' :   process.cwd()  + '/unit',
+                'timeout' : 2000
             }
         );
     });

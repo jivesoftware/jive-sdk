@@ -353,7 +353,6 @@ describe('jive', function () {
             var mockery = this['mockery'];
 
             mockery.registerMock('request', function (options, cb) {
-                console.log('wheee');
                 var response  = {
                     'statusCode' : 200
                 };
@@ -365,6 +364,8 @@ describe('jive', function () {
                 });
                 cb( undefined, response, body );
             });
+
+            jive.service.serviceURL();
 
             testUtils.persistExampleCommunities(jive, 1)
             .then( function(community) {
@@ -426,9 +427,8 @@ describe('jive', function () {
             var mockery = this['mockery'];
 
             mockery.registerMock('request', function (options, cb) {
-                console.log('wheee');
                 var response  = {
-                    'statusCode' : 400
+                    'statusCode' : 200
                 };
                 cb( undefined, response, body );
             });
