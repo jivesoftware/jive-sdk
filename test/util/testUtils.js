@@ -255,3 +255,7 @@ exports.cleanupTemp = function() {
     temp.cleanup();
 };
 
+exports.getResourceFilePath = function(filename) {
+    return process.cwd() + '/resources/' + filename;
+}
+
