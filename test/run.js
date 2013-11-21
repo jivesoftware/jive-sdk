@@ -111,6 +111,10 @@ if ( runMode =='test' ) {
     }).then( function() {
         return setupCoverageDirs( serviceDirSrc, apiDirTarget + '/jive-sdk-service', [ 'generator' ]);
     }).then( function() {
+        return realJive.util.recursiveCopy( serviceDirSrc + '/generator', apiDirTarget + '/jive-sdk-service/generator' );
+    }).then( function() {
+        return setupCoverageDirs( serviceDirSrc + '/generator/sdk.js', apiDirTarget + '/jive-sdk-service/generator/sdk.js', []);
+    }).then( function() {
         var jive = require(apiDirTarget + '/jive-sdk-service/api');
         // suppress logging
         muteJiveLogging(jive);
