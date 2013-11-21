@@ -14,9 +14,11 @@ exports.beforeTest = function() {
 };
 
 exports.onTestPass = function(test) {
+    mockery.resetCache();
 };
 
 exports.onTestFail = function(test) {
+    mockery.resetCache();
 };
 
 exports.setupSuite = function(test) {
@@ -30,6 +32,7 @@ exports.setupSuite = function(test) {
 exports.jive = {};
 
 exports.teardownSuite = function(test) {
+    mockery.deregisterAll();
     mockery.disable();
 };
 
