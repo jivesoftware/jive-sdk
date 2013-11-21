@@ -2,7 +2,8 @@
     "dependencies": {
 
         "mockery" : "*",
-	    "jscoverage" : "*"
+	    "jscoverage" : "*",
+        "temp" : "*"
 
     }
 }

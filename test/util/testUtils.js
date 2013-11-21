@@ -2,6 +2,10 @@ var q = require('q');
 var fs = require('fs');
 var uuid = require('node-uuid');
 var crypto = require('crypto');
+var temp = require('temp');
+
+// track temp files
+temp.track();
 
 exports.recursiveDirectoryProcessor = function (currentFsItem, root, targetRoot, force, processor) {
 
@@ -237,5 +241,17 @@ exports.createFakeURL = function(fakePath) {
     }
 
     return url;
+};
+
+exports.createTempDir = function() {
+    var deferred = q.defer();
+    temp.mkdir(exports.guid(), function(err, dirPath) {
+        deferred.resolve(dirPath);
+    });
+    return deferred.promise;
+};
+
+exports.cleanupTemp = function() {
+    temp.cleanup();
 };
 

@@ -285,10 +285,20 @@ module.exports = function(serviceConfig) {
         },
 
         close : function() {
+            var deferred = q.defer();
+
             if(intervalId) {
                 clearInterval(intervalId);
+                deferred.resolve(flushDirty());
+            } else {
+                setTimeout( function() {
+                    if ( intervalId ) {
+                        clearInterval(intervalId);
+                    }
+                    deferred.resolve(flushDirty());
+                }, 2000);
             }
-            return flushDirty();
+            return deferred.promise;
         }
 
     };
