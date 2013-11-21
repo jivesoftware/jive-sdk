@@ -92,16 +92,17 @@ function muteJiveLogging(jive) {
 }
 
 if ( runMode =='test' ) {
-    runTests(realJive);
+//    runTests(realJive);
 
-//    makeRunner().runTests(
-//        {
-//            'jive': realJive,
-//            'runMode' : runMode,
-//            'testcases' :   process.cwd()  + '/unit',
-//            'timeout' : 2000
-//        }
-//    );
+    muteJiveLogging(realJive);
+    makeRunner().runTests(
+        {
+            'jive': realJive,
+            'runMode' : runMode,
+            'testcases' :   process.cwd()  + '/unit',
+            'timeout' : 2000
+        }
+    );
 
 } else if ( runMode == 'coverage' )  {
     realJive.util.fsexists(apiDirTarget).then( function(exists) {
