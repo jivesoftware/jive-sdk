@@ -35,6 +35,8 @@ var runMode = process.env.JIVE_SDK_TEST_RUN_MODE || process.argv[2] || 'test';
 
 var runTests = function(jive) {
 
+    muteJiveLogging(jive);
+
     var unitDir = process.cwd() + '/unit';
 
     realJive.util.fsreaddir(unitDir).then( function(items) {
@@ -55,6 +57,7 @@ var runTests = function(jive) {
                     };
 
                     return realJive.util.fsexists(toRequire).then( function(exists) {
+
                         console.log(exists);
                         if ( !exists ) {
                             return makeRunner().runTests(testSpec);
@@ -81,6 +84,19 @@ var makeRunner = function() {
     return runner;
 };
 
+function muteJiveLogging(jive) {
+    jive.logger = {
+        'debug': function () {
+        },
+        'info': function () {
+        },
+        'error': function () {
+        },
+        'warn': function () {
+        }
+    };
+}
+
 if ( runMode =='test' ) {
     runTests(realJive);
 } else if ( runMode == 'coverage' )  {
@@ -92,6 +108,8 @@ if ( runMode =='test' ) {
         return setupCoverageDirs( apiDirSrc, apiDirTarget + '/jive-sdk-service' );
     }).then( function() {
         var jive = require(apiDirTarget + '/jive-sdk-service/api');
+        // suppress logging
+        muteJiveLogging(jive);
         makeRunner().runTests(
             {
                 'jive': jive,

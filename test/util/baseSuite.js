@@ -3,9 +3,14 @@ var fs = require('fs');
 var q = require('q');
 var path = require('path');
 var mockery = require('mockery');
+var testUtils = require('./testUtils');
 
 exports.getTestDir = function() {
     // overridden
+};
+
+var cleanup = function() {
+    mockery.resetCache();
 };
 
 exports.beforeTest = function() {
@@ -14,14 +19,15 @@ exports.beforeTest = function() {
 };
 
 exports.onTestPass = function(test) {
-    mockery.resetCache();
+    cleanup();
 };
 
 exports.onTestFail = function(test) {
-    mockery.resetCache();
+    cleanup();
 };
 
 exports.setupSuite = function(test) {
+    test['testUtils'] = testUtils;
     test['jive'] = exports.jive;
     test['mockery'] = mockery;
 
@@ -59,7 +65,7 @@ exports.runTests = function(options) {
     var that = this;
     var testDir = options['testcases'] || exports.getTestDir();
 
-    recursiveDirectoryProcessor( testDir, testDir, testDir, true, function(type, file) {
+    testUtils.recursiveDirectoryProcessor( testDir, testDir, testDir, true, function(type, file) {
         if (path.extname(file) === '.js') {
             mocha.addFile(file);
         }
@@ -102,56 +108,3 @@ exports.runTests = function(options) {
     return deferred.promise;
 };
 
-var recursiveDirectoryProcessor = function (currentFsItem, root, targetRoot, force, processor) {
-
-    var recurseDirectory = function (directory) {
-        return q.nfcall(fs.readdir, directory).then(function (subItems) {
-            var promises = [];
-            subItems.forEach(function (subItem) {
-                promises.push(recursiveDirectoryProcessor(directory + '/' + subItem, root, targetRoot, force, processor));
-            });
-
-            return q.all(promises);
-        });
-    };
-
-    return q.nfcall(fs.stat, currentFsItem).then(function (stat) {
-        var targetPath = targetRoot + '/' + currentFsItem.substr(root.length + 1, currentFsItem.length);
-
-        if (stat.isDirectory()) {
-            if (root !== currentFsItem) {
-                return fsexists(targetPath).then(function (exists) {
-                    if (root == currentFsItem || (exists && !force)) {
-                        return recurseDirectory(currentFsItem);
-                    } else {
-                        return processor('dir', currentFsItem, targetPath).then(function () {
-                            return recurseDirectory(currentFsItem)
-                        });
-                    }
-                });
-            }
-
-            return recurseDirectory(currentFsItem);
-        }
-
-        // must be a file
-        return fsexists(targetPath).then(function (exists) {
-            if (!exists || force) {
-                return processor('file', currentFsItem, targetPath)
-            } else {
-                return q.fcall(function () {
-                });
-            }
-        });
-    });
-};
-
-var fsexists = function (path) {
-    var deferred = q.defer();
-    var method = fs.exists ? fs.exists : require('path').exists;
-    method(path, function (exists) {
-        deferred.resolve(exists);
-    });
-
-    return deferred.promise;
-};

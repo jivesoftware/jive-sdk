@@ -1,61 +1,18 @@
 var assert = require('assert');
 
-var sampleDefinition = {
-    "displayName": "JIRA Filter Results",
-    "name": "filterresults",
-    "description": "Shows the issues/results for a saved filter.",
-    "style": "LIST",
-    "icons": {
-        "16": "http://jira-pp.appfusions.com/images/jira16.png",
-        "48": "http://jira-pp.appfusions.com/images/jira48.png",
-        "128": "http://jira-pp.appfusions.com/images/jira128.png"
-    },
-    "action": "/filterresults/action",
-    "definitionDirName": "filterresults"
-};
-
-var createExampleDefinition = function() {
-    var example = JSON.parse( JSON.stringify(sampleDefinition) );
-    return example;
-};
-
-var createExampleDefinitions = function(jive) {
-    var definition1 = createExampleDefinition();
-    definition1['name'] = jive.util.guid();
-    definition1['id'] = jive.util.guid();
-
-    var definition2 = createExampleDefinition();
-    definition2['name'] = jive.util.guid();
-    definition2['id'] = jive.util.guid();
-
-    var definition3 = createExampleDefinition();
-    definition3['name'] = jive.util.guid();
-    definition3['id'] = jive.util.guid();
-
-    var definitions = [];
-
-    return jive.tiles.definitions.save(definition1).then(function(saved) {
-        definitions.push(saved);
-        return jive.tiles.definitions.save( definition2);
-    }).then( function(saved) {
-        definitions.push(saved);
-        return jive.tiles.definitions.save( definition3 );
-    }).then( function(saved ) {
-        definitions.push(saved);
-        return definitions;
-    });
-};
-
 describe('jive', function () {
     describe('#tiles.definitions', function () {
 
-        it('save new', function (done) {
+        it('save', function (done) {
             var jive = this['jive'];
+            var testUtils = this['testUtils'];
 
             // setup memory persistence
             jive.context['persistence'] = new jive.persistence.memory();
 
-            var definition = createExampleDefinition();
+            var definition = testUtils.createExampleDefinition();
+            definition['id'] = undefined;
+
             jive.tiles.definitions.save(definition).then(
                 function(o) {
                     if ( !o ) {
@@ -74,13 +31,14 @@ describe('jive', function () {
             );
         });
 
-        it('save update', function (done) {
+        it('update', function (done) {
             var jive = this['jive'];
+            var testUtils = this['testUtils'];
 
             // setup memory persistence
             jive.context['persistence'] = new jive.persistence.memory();
 
-            var definition = createExampleDefinition();
+            var definition = testUtils.createExampleDefinition();
             jive.tiles.definitions.save(definition).then( function(saved) {
 
                 var id = definition['id'];
@@ -109,7 +67,7 @@ describe('jive', function () {
             // setup memory persistence
             jive.context['persistence'] = new jive.persistence.memory();
 
-            createExampleDefinitions(jive).then( function(definitions) {
+            this['testUtils'].persistExampleDefinitions(jive, 3).then( function(definitions) {
                 var definition2 = definitions[1];
 
                 // by criteria
@@ -141,7 +99,7 @@ describe('jive', function () {
             // setup memory persistence
             jive.context['persistence'] = new jive.persistence.memory();
 
-            createExampleDefinitions(jive).then( function(definitions) {
+            this['testUtils'].persistExampleDefinitions(jive, 3).then( function(definitions) {
 
                 // by criteria
                 return jive.tiles.definitions.find( {
@@ -168,7 +126,7 @@ describe('jive', function () {
             // setup memory persistence
             jive.context['persistence'] = new jive.persistence.memory();
 
-            createExampleDefinitions(jive).then( function(definitions) {
+            this['testUtils'].persistExampleDefinitions(jive, 3).then( function(definitions) {
                 var definition2 = definitions[1];
 
                 return jive.tiles.definitions.findByID( definition2['id'] )
@@ -192,7 +150,7 @@ describe('jive', function () {
             // setup memory persistence
             jive.context['persistence'] = new jive.persistence.memory();
 
-            createExampleDefinitions(jive).then( function(definitions) {
+            this['testUtils'].persistExampleDefinitions(jive, 3).then( function(definitions) {
 
                 // by criteria
                 return jive.tiles.definitions.findByID(jive.util.guid() ).then(function(found) {
@@ -211,7 +169,7 @@ describe('jive', function () {
             // setup memory persistence
             jive.context['persistence'] = new jive.persistence.memory();
 
-            createExampleDefinitions(jive).then( function(definitions) {
+            this['testUtils'].persistExampleDefinitions(jive, 3).then( function(definitions) {
 
                 // by criteria
                 return jive.tiles.definitions.findAll()
@@ -237,7 +195,7 @@ describe('jive', function () {
             // setup memory persistence
             jive.context['persistence'] = new jive.persistence.memory();
 
-            createExampleDefinitions(jive).then( function(definitions) {
+            this['testUtils'].persistExampleDefinitions(jive, 3).then( function(definitions) {
 
                 var definition = definitions[1];
 
