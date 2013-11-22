@@ -269,3 +269,20 @@ exports.setupService = function(jive, config) {
     });
 };
 
+exports.waitSec = function(seconds) {
+    var deferred = q.defer();
+    setTimeout( function() { deferred.resolve() }, seconds * 1000);
+    return deferred.promise;
+};
+
+exports.createBaseServiceOptions = function(sourceDir) {
+    return {
+        'svcRootDir' : exports.getResourceFilePath(sourceDir),
+        'persistence' : 'memory',
+        'logLevel' : 'FATAL',
+        'skipCreateExtension' : true,
+        'clientUrl' : exports.createFakeURL(),
+        'role' : 'worker'
+    };
+};
+

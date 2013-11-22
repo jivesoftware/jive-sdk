@@ -82,7 +82,7 @@ function buildHandlerFunction(handlerInfo) {
             }
 
             if ( !eventListener || eventListener === definitionName ) {
-                handlerInfo['handler'](context);
+                return handlerInfo['handler'](context);
             }
         }
     }

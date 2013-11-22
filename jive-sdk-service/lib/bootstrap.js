@@ -151,7 +151,7 @@ var getSDKVersion = function() {
                 if ( packageContents ) {
                     return packageContents['version'];
                 } else {
-                    return nul;
+                    return null;
                 }
             });
         } else {
@@ -199,4 +199,16 @@ exports.start = function (app, options, rootDir, tilesDir, appsDir, cartridgesDi
             jive.events.emit("serviceBootstrapped");
             return q.resolve();
         });
+};
+
+exports.teardown = function() {
+    jive.logger.info("Running teardown.");
+
+    return service.persistence().close().then( function() {
+        return service.scheduler().shutdown();
+    }).then( function( ){
+        alreadyBootstrapped = false;
+        jive.logger.info("Teardown complete.");
+        return q.resolve();
+    });
 };

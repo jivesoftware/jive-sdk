@@ -89,7 +89,7 @@ var pushData = function() {
  */
 exports.task = [
     {
-        'interval' : 10000,
+        'interval' : 1000,
         'handler' : pushData
     },
     {
@@ -101,6 +101,11 @@ exports.task = [
                 jive.service.options[testDataKey] = jive.util.guid();
             }
         }
+    },
+
+    {
+        'interval' : 10,
+        'event' :  'customSelfServiceEvent'
     }
 ];
 
@@ -119,6 +124,27 @@ exports.eventHandlers = [
     {
         'event' : jive.constants.globalEventNames.INSTANCE_UPDATED,
         'handler' : processTileInstance
+    },
+
+    {
+        'event' : 'customServiceEvent',
+        'handler' : function(context) {
+            // inline handler
+            // echoes it out
+            return q.resolve(context);
+        }
+    },
+
+    {
+        'event' : 'customSelfServiceEvent',
+        'handler' : function(context) {
+            var testDataKey = jive.service.options['__testDataKeyCustomSelfServiceEvent'];
+            if ( testDataKey ) {
+                jive.service.options[testDataKey] = jive.util.guid();
+            }
+
+            return q.resolve(context);
+        }
     }
 ];
 

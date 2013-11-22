@@ -26,10 +26,16 @@ exports.onTestFail = function(test) {
     cleanup();
 };
 
+exports.onTestStart = function(test) {
+//    test['ctx']['jive'] = require(exports.jivePath );
+};
+
 exports.setupSuite = function(test) {
     test['testUtils'] = testUtils;
     test['jive'] = exports.jive;
     test['mockery'] = mockery;
+
+    mockery.registerMock('jive-sdk', exports.jive);
 
     mockery.enable();
     mockery.warnOnReplace(false);
@@ -94,6 +100,7 @@ exports.runTests = function(options) {
         });
 
         runner.on('test', function (test) {
+            that.onTestStart(test);
         });
 
         runner.on('pass', function (test) {
