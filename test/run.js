@@ -93,45 +93,62 @@ function muteJiveLogging(jive) {
     jive['context']['config']['logLevel'] = 'FATAL';
 }
 
-if ( runMode =='test' ) {
+if ( true ) {
+    if ( runMode =='test' ) {
 //    runTests(realJive);
 
-    muteJiveLogging(realJive);
-    makeRunner().runTests(
-        {
-            'jive': realJive,
-            'runMode' : runMode,
-            'testcases' :   process.cwd()  + '/' + runGroup,
-            'timeout' : runTimeout
-        }
-    );
-
-} else if ( runMode == 'coverage' )  {
-    realJive.util.fsexists(apiDirTarget).then( function(exists) {
-        return exists ? realJive.util.fsrmdir(apiDirTarget) : q.resolve();
-    }).then( function() {
-        return setupCoverageDirs( apiDirSrc, apiDirTarget + '/jive-sdk-api' );
-    }).then( function() {
-        return setupCoverageDirs( serviceDirSrc, apiDirTarget + '/jive-sdk-service', [ 'generator' ]);
-    }).then( function() {
-        return realJive.util.recursiveCopy( serviceDirSrc + '/generator', apiDirTarget + '/jive-sdk-service/generator' );
-    }).then( function() {
-        return setupCoverageDirs( serviceDirSrc + '/generator/sdk.js', apiDirTarget + '/jive-sdk-service/generator/sdk.js', []);
-    }).then( function() {
-        var jive = require(apiDirTarget + '/jive-sdk-service/api');
-        // suppress logging
-        muteJiveLogging(jive);
+        muteJiveLogging(realJive);
         makeRunner().runTests(
             {
-                'jive': jive,
+                'jive': realJive,
                 'runMode' : runMode,
                 'testcases' :   process.cwd()  + '/' + runGroup,
                 'timeout' : runTimeout
             }
         );
-    });
 
-} else {
-    console.log("Unrecognized run mode:" ,runMode);
+    } else if ( runMode == 'coverage' )  {
+        realJive.util.fsexists(apiDirTarget).then( function(exists) {
+            return exists ? realJive.util.fsrmdir(apiDirTarget) : q.resolve();
+        }).then( function() {
+                return setupCoverageDirs( apiDirSrc, apiDirTarget + '/jive-sdk-api' );
+            }).then( function() {
+                return setupCoverageDirs( serviceDirSrc, apiDirTarget + '/jive-sdk-service', [ 'generator' ]);
+            }).then( function() {
+                return realJive.util.recursiveCopy( serviceDirSrc + '/generator', apiDirTarget + '/jive-sdk-service/generator' );
+            }).then( function() {
+                return setupCoverageDirs( serviceDirSrc + '/generator/sdk.js', apiDirTarget + '/jive-sdk-service/generator/sdk.js', []);
+            }).then( function() {
+                var jive = require(apiDirTarget + '/jive-sdk-service/api');
+                // suppress logging
+                muteJiveLogging(jive);
+                makeRunner().runTests(
+                    {
+                        'jive': jive,
+                        'runMode' : runMode,
+                        'testcases' :   process.cwd()  + '/' + runGroup,
+                        'timeout' : runTimeout
+                    }
+                );
+            });
+
+    } else {
+        console.log("Unrecognized run mode:" ,runMode);
+    }
+} else
+{
+    var server = require('./util/serverControl');
+    server.start({port:5555}).then( function() {
+        return server.setEndpoint('post', '200', '/hi', {"a":"b"} );
+    }).then( function() {
+            return realJive.util.buildRequest('http://localhost:5555/hi', 'post').then( function(r) {
+                console.log('R', r);
+            }, function(e) {
+                console.log('E', e);
+            });
+        }).then( function() {
+            return server.stop();
+        });
+
+
 }
-

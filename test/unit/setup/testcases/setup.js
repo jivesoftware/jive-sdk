@@ -15,7 +15,7 @@ describe('jive', function () {
             options['__testDataKey'] = __testDataKey;
 
             testUtils.setupService(jive, options).then( function() {
-                return testUtils.waitSec(0.5);
+                return testUtils.waitSec(0.3);
             }).then( function() {
                 var p = q.defer();
                 // test tiles
@@ -55,7 +55,7 @@ describe('jive', function () {
 
             testUtils.setupService(jive, {
                 'svcRootDir' : testUtils.getResourceFilePath('/services/samplesvc'),
-                'persistence' : {}, 'logLevel': 'FATAL'
+                'persistence' : {}, 'logLevel': 'FATAL', 'role' : 'worker'
             }).then(
                 function() {
                     assert.fail();
@@ -73,7 +73,7 @@ describe('jive', function () {
 
             testUtils.setupService(jive, {
                 'svcRootDir' : testUtils.getResourceFilePath('/services/samplesvc'),
-                'persistence' : 'memory', 'scheduler': {}, 'logLevel': 'FATAL'
+                'persistence' : 'memory', 'scheduler': {}, 'logLevel': 'FATAL', 'role' : 'worker'
             }).then(
                 function() {
                     assert.fail();

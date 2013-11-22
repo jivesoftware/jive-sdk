@@ -14,7 +14,7 @@ describe('jive', function () {
             options['__testDataKeyCustomSelfServiceEvent'] = __testDataKey;
 
             testUtils.setupService(jive, options).then( function() {
-                return testUtils.waitSec(0.5);
+                return testUtils.waitSec(0.3);
             }).then( function() {
                 var deferred = q.defer();
                 var expectedData = testUtils.guid();
@@ -57,7 +57,7 @@ describe('jive', function () {
                 testUtils.createBaseServiceOptions('/services/tile_name_different_from_dir')
             ).then( function() {
                 jive.events.emit("newInstance", newInstance );
-                return testUtils.waitSec(0.5);
+                return testUtils.waitSec(0.3);
             }).then( function() {
                 return jive.service.options['__testData'] ? q.resolve() : q.reject();
             }).then(
@@ -84,7 +84,7 @@ describe('jive', function () {
                 testUtils.createBaseServiceOptions('/services/tile_name_same_as_dir')
             ).then( function() {
                 jive.events.emit("newInstance", newInstance );
-                return testUtils.waitSec(0.5);
+                return testUtils.waitSec(0.3);
             }).then( function() {
                 return jive.service.options['__testData'] ? q.resolve() : q.reject();
             }).then(
@@ -111,7 +111,7 @@ describe('jive', function () {
                 testUtils.createBaseServiceOptions('/services/tile_name_same_as_dir')
             ).then( function() {
                 jive.events.emit("newInstance", newInstance );
-                return testUtils.waitSec(0.5);
+                return testUtils.waitSec(0.3);
             }).then( function() {
                 return jive.service.options['__testData'] ? q.reject() : q.resolve();
             }).then(

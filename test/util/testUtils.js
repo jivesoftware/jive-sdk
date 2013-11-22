@@ -3,6 +3,7 @@ var fs = require('fs');
 var uuid = require('node-uuid');
 var crypto = require('crypto');
 var temp = require('temp');
+var baseServer = require('./baseServer');
 
 // track temp files
 temp.track();
@@ -167,9 +168,9 @@ exports.createExampleInstance = function() {
     return instance;
 };
 
-exports.createExampleCommunity = function() {
+exports.createExampleCommunity = function(jiveUrl) {
     var community = JSON.parse(JSON.stringify(sampleCommunity));
-    community['jiveUrl'] = exports.createFakeURL();
+    community['jiveUrl'] = jiveUrl || exports.createFakeURL();
     community['tenantId'] = exports.guid();
     community['clientId'] = exports.guid();
     community['clientSecret'] = exports.guid();
@@ -215,12 +216,12 @@ exports.persistExampleInstances = function(jive, quantity) {
     });
 };
 
-exports.persistExampleCommunities = function(jive, quantity) {
+exports.persistExampleCommunities = function(jive, quantity,jiveUrl) {
     var communities = [];
     var promises = [];
 
     for ( var i = 0; i < quantity; i++ ){
-        var instance = exports.createExampleCommunity();
+        var instance = exports.createExampleCommunity(jiveUrl);
 
         var p = jive.community.save(instance).then(function(saved) {
             communities.push(saved);
@@ -260,13 +261,41 @@ exports.getResourceFilePath = function(filename) {
 };
 
 exports.setupService = function(jive, config) {
-    return jive.service.init( {use: function() {}}, config).then( function() {
+    var p = q.defer();
+    var startHttp = !config['role'] || config['role'] == 'http';
+    var app = startHttp ? require('express')() : {use: function() {}};
+    jive.service.init( app, config).then(function() {
         return jive.service.autowire();
     }).then( function() {
-        return jive.service.start().then( function() {
-            console.log();
+        return jive.service.start();
+    }).then( function() {
+
+        var deferred = q.defer();
+        if ( startHttp ) {
+            var server = require('http').createServer(app);
+            server.listen(config.port, function () {
+                deferred.resolve(server);
+            } );
+        } else {
+            deferred.resolve();
+        }
+
+        return deferred.promise;
+    }).then( function(server) {
+        p.resolve({
+            'stop' : function() {
+                if ( server ) {
+                    server.close();
+                }
+                return jive.service.stop();
+            }
         });
+    }).fail( function(e) {
+        console.log(e);
+        p.reject(e);
     });
+
+    return p.promise;
 };
 
 exports.waitSec = function(seconds) {
@@ -284,5 +313,55 @@ exports.createBaseServiceOptions = function(sourceDir) {
         'clientUrl' : exports.createFakeURL(),
         'role' : 'worker'
     };
+};
+
+exports.createServer = function(config) {
+    var d = q.defer();
+    var server = require('./serverControl');
+
+    server.start(config).then(
+        function() {
+            // build up endpoints
+            var routes = config['routes'] || [];
+            var promises = [];
+
+            routes.forEach( function(route) {
+                var p = server.setEndpoint(
+                    route['method'],
+                    route['statusCode'],
+                    route['path'],
+                    route['body']
+                );
+                promises.push(p);
+            });
+
+            return q.all(promises);
+        }, function() {
+           return q.reject();
+        }
+    ).then( function() {
+        return d.resolve(server);
+    });
+
+    return d.promise;
+};
+
+exports.createAuthorizationHeader = function( community ) {
+    var jiveURL = community['jiveUrl'], tenantId = community['tenantId'],
+        clientId = community['clientId'], clientSecret = community['clientSecret'];
+    var header = 'JiveEXTN ';
+    var headerDetail='';
+    headerDetail += 'algorithm=HmacSHA256';
+    headerDetail += '&client_id=' + clientId;
+    headerDetail += '&jive_url=' + encodeURIComponent( jiveURL );
+    headerDetail += '&tenant_id=' + tenantId;
+    headerDetail += '&timestamp=' + new Date().getTime();
+
+    var hmac_signature = require('crypto').createHmac('SHA256', new Buffer(clientSecret, 'base64')).update(headerDetail).digest('base64');
+
+    header += headerDetail;
+    header += '&signature=' + hmac_signature + '=';
+
+    return header;
 };
 

@@ -207,6 +207,9 @@ exports.teardown = function() {
     return service.persistence().close().then( function() {
         return service.scheduler().shutdown();
     }).then( function( ){
+        // clear all events
+        jive.events.reset();
+
         alreadyBootstrapped = false;
         jive.logger.info("Teardown complete.");
         return q.resolve();

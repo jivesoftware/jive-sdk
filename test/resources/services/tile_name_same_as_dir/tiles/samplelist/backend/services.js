@@ -22,7 +22,6 @@ var q = require('q');
  * @param instance
  */
 function processTileInstance(instance) {
-    console.log(instance);
     jive.service.options['__testData'] = jive.util.guid();
 }
 

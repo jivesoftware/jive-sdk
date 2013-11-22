@@ -128,6 +128,7 @@ Scheduler.prototype.isScheduled = function( eventID ) {
 
 Scheduler.prototype.shutdown = function(){
     var scheduler = this;
+    eventHandlerMap = {};
     this.getTasks().forEach(function(taskKey){
         scheduler.unschedule(taskKey);
     });
