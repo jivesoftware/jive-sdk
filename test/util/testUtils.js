@@ -257,5 +257,15 @@ exports.cleanupTemp = function() {
 
 exports.getResourceFilePath = function(filename) {
     return process.cwd() + '/resources/' + filename;
-}
+};
+
+exports.setupService = function(jive, config) {
+    return jive.service.init( {use: function() {}}, config).then( function() {
+        return jive.service.autowire();
+    }).then( function() {
+        return jive.service.start().then( function() {
+            console.log();
+        });
+    });
+};
 

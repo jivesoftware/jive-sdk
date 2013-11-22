@@ -82,7 +82,7 @@ JiveIdServer.prototype.getDefaultAuthzResponse = function() {
         "token_type":"bearer",
         "refresh_token": uuid.v4(),
         "expires_in": 3599,
-        "scope": require('./test-util').makeGuid(config.clientUrl + (config.port ? ":" + config.port : ""), true, 1234),
+        "scope": require('./../functional/test-util').makeGuid(config.clientUrl + (config.port ? ":" + config.port : ""), true, 1234),
         "state":null
     };
     return response;
@@ -96,7 +96,7 @@ JiveIdServer.prototype.getDefaultRefreshResponse = function() {
         "token_type":"bearer",
         "refresh_token": uuid.v4(),
         "expires_in": 3599,
-        "scope": require('./test-util').makeGuid(config.clientUrl + (config.port ? ":" + config.port : ""), true, 1234),
+        "scope": require('./../functional/test-util').makeGuid(config.clientUrl + (config.port ? ":" + config.port : ""), true, 1234),
         "state":null
     };
     return response;

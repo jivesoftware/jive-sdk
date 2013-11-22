@@ -1,4 +1,4 @@
-var assert = require('assert'),
+    var assert = require('assert'),
     testUtils = require(process.cwd() + '/util/testUtils');
 
 describe('jive', function () {
@@ -41,9 +41,9 @@ describe('jive', function () {
 
         it('test with a directory', function (done) {
             var jive = this['jive'];
-            jive.util.fsGetSize(testUtils.getResourceFilePath('')).then(
+            jive.util.fsGetSize(testUtils.getResourceFilePath('sizetestdir')).then(
                 function ( size ) {
-                    assert.equal(size, 4096, 'Wrong size.');
+                    assert.equal(size, 136, 'Wrong size.');
                     done();
                 }
             );

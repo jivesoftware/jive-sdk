@@ -178,7 +178,7 @@ exports.init = function(_app, options ) {
     else {
         app = express();
     }
-    rootDir =  rootDir || process.cwd();
+    rootDir =  options['svcRootDir'] || rootDir || process.cwd();
     tilesDir = rootDir + '/tiles';
 
     // for some reason this needs to be configured earlier than later
@@ -405,7 +405,16 @@ exports.autowireDefinitionMetadata = function( definitionMetadataFile ) {
  */
 exports.start = function() {
     return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir, cartridgesDir, storagesDir).then( function() {
-        jive.logger.info("Service started in " + app['settings']['env'] + " mode");
+        if (app['settings'] && app['settings']['env']) {
+            jive.logger.info("Service started in " + app['settings']['env'] + " mode");
+        }
+        return q.resolve();
+    });
+};
+
+exports.stop = function() {
+    return exports.persistence().close().then( function() {
+        return exports.scheduler().shutdown();
     });
 };
 

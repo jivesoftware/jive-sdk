@@ -35,12 +35,14 @@ var setupCoverageDirs = function(apiDirSrc, apiDirTarget, excludes) {
 };
 
 var runMode = process.env.JIVE_SDK_TEST_RUN_MODE || process.argv[2] || 'test';
+var runGroup = process.env.JIVE_SDK_TEST_RUN_GROUP || 'unit';
+var runTimeout = 5000 || process.env.JIVE_SDK_TEST_RUN_TIMEOUT || 2000;
 
 var runTests = function(jive) {
 
     muteJiveLogging(jive);
 
-    var unitDir = process.cwd() + '/unit';
+    var unitDir = process.cwd() + '/' + runGroup;
 
     realJive.util.fsreaddir(unitDir).then( function(items) {
 
@@ -56,7 +58,7 @@ var runTests = function(jive) {
                         'jive': jive,
                         'runMode' : runMode,
                         'testcases' :  fullItemPath + '/testcases',
-                        'timeout' : 1500
+                        'timeout' : runTimeout
                     };
 
                     return realJive.util.fsexists(toRequire).then( function(exists) {
@@ -99,8 +101,8 @@ if ( runMode =='test' ) {
         {
             'jive': realJive,
             'runMode' : runMode,
-            'testcases' :   process.cwd()  + '/unit',
-            'timeout' : 2000
+            'testcases' :   process.cwd()  + '/' + runGroup,
+            'timeout' : runTimeout
         }
     );
 
@@ -123,8 +125,8 @@ if ( runMode =='test' ) {
             {
                 'jive': jive,
                 'runMode' : runMode,
-                'testcases' :   process.cwd()  + '/unit',
-                'timeout' : 2000
+                'testcases' :   process.cwd()  + '/' + runGroup,
+                'timeout' : runTimeout
             }
         );
     });

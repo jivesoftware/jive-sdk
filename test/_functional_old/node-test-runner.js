@@ -3,7 +3,7 @@ var Mocha = require('mocha'),
     fs = require('fs'),
     jive = require('.'),
     http = require('http'),
-    testUtil = require('./test-util');
+    testUtil = require('./../functional/test-util');
 
 var configuration = {
     'port' : 8106,

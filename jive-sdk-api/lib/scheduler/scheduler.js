@@ -86,12 +86,10 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
 
     if (interval) {
         var wrapper = setTimeout( function() {
-            setInterval(function() {
+            tasks[eventID] = setInterval(function() {
                 next();
             }, interval);
         }, delay || 1 );
-
-        tasks[eventID] = wrapper;
     }
     else {
         setTimeout( function() {
@@ -104,7 +102,7 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
 };
 
 Scheduler.prototype.unschedule = function unschedule(eventID){
-    if(this.isScheduled(eventID)) {
+    if(tasks[eventID]) {
         clearInterval(tasks[eventID]);
         delete tasks[eventID];
     }
@@ -130,4 +128,6 @@ Scheduler.prototype.shutdown = function(){
     this.getTasks().forEach(function(taskKey){
         scheduler.unschedule(taskKey);
     });
+
+    return q.resolve();
 };

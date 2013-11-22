@@ -171,7 +171,7 @@ module.exports = function() {
         },
 
         close: function() {
-            return q();
+            return q.resolve();
         }
     };
 

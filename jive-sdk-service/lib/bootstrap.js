@@ -160,6 +160,13 @@ var getSDKVersion = function() {
     });
 };
 
+var setupExtension = function(options, tilesDir, appsDir, cartridgesDir, storagesDir) {
+    if ( options['skipCreateExtension'] ) {
+        return q.resolve();
+    }
+    return extension.prepare(tilesDir, appsDir, cartridgesDir, storagesDir);
+};
+
 /**
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
@@ -180,7 +187,7 @@ exports.start = function (app, options, rootDir, tilesDir, appsDir, cartridgesDi
 
     return setupScheduler()
         .then( function() { return setupHttp(app, rootDir, options) })
-        .then( function() { return extension.prepare(tilesDir, appsDir, cartridgesDir, storagesDir) })
+        .then( function() { return setupExtension(options, tilesDir, appsDir, cartridgesDir, storagesDir) })
         .then( function() { return jive.util.fsexists( __dirname + '/../../package.json') })
         .then( function() { return getSDKVersion() })
         .then( function(sdkVersion) {
@@ -190,5 +197,6 @@ exports.start = function (app, options, rootDir, tilesDir, appsDir, cartridgesDi
             }
             jive.logger.info("Started service in ", service.options.role || 'self-contained', "mode");
             jive.events.emit("serviceBootstrapped");
+            return q.resolve();
         });
 };
