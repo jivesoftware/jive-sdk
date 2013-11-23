@@ -160,55 +160,67 @@ describe('jive', function () {
                 '/services/tile_simple_datapush');
         });
 
-//       it.only('failed datapush - 403 (refresh token flow)', function (done) {
-//            var testUtils = this['testUtils'];
-//
-//           var expectedAccessToken = {
-//               'access_token' : testUtils.guid(),
-//               'expiresIn' : new Date().getTime(),
-//               'refreshToken' : testUtils.guid()
-//           };
-//
-//           var expectedDatapushEntity = { 'my': 'entity' };
-//            testUtils.runServerTest(testUtils, this['jive'], done, {
-//                    'port' : 5556,
-//                    'routes' : [
-//                        {
-//                            'method'        : 'put',
-//                            'statusCode'    : '403',
-//                            'path'          : '/datapush',
-//                            'body'          : expectedDatapushEntity
-//                        },
-//                        {
-//                            'method' : 'post',
-//                            'statusCode' : '200',
-//                            'path' : '/oauth2/token',
-//                            'body' : expectedAccessToken
-//                        }
-//                    ]
-//                },
-//                function(testUtils, jive, community) {
-//
-//                    var pushUrl = community['jiveUrl'] + '/datapush';
-//
-//                    return testUtils.persistExampleInstances(jive, 1, community['jiveCommunity'], 'samplelist', pushUrl)
-//                    .then( function(instance) {
-//
-//                        return jive.service.scheduler().schedule('pushMeData', {
-//                            'eventListener' : 'samplelist',
-//                            'instance' : instance
-//                        }).then(
-//                            function(response) {
-//                                assert.ok( response );
-//                            },
-//                            function(e) {
-//                                assert.fail( e );
-//                            }
-//                        );
-//                    });
-//                },
-//                '/services/tile_simple_datapush');
-//        });
+       it('failed datapush - 403 (refresh token flow)', function (done) {
+            var testUtils = this['testUtils'];
+
+           var expectedAccessToken = {
+               'access_token' : testUtils.guid(),
+               'expiresIn' : new Date().getTime(),
+               'refreshToken' : testUtils.guid()
+           };
+
+           var expectedDatapushEntity = { 'my': 'entity' };
+            testUtils.runServerTest(testUtils, this['jive'], done, {
+                    'port' : 5556,
+                    'routes' : [
+                        {
+                            'method'        : 'put',
+                            'statusCode'    : '403',
+                            'path'          : '/datapush',
+                            'body'          : expectedDatapushEntity
+                        },
+                        {
+                            'method' : 'post',
+                            'statusCode' : '200',
+                            'path' : '/oauth2/token',
+                            'body' : expectedAccessToken,
+                            'handler' : function() {
+                                // this is going to run on the remote server!
+                                delete app.routes.put;
+                                self.setEndpoint(
+                                    'put',
+                                    '/datapush',
+                                    '200',
+                                    JSON.stringify({ 'ok' : 'now'})
+                                );
+                            }
+                        }
+                    ]
+                },
+                function(testUtils, jive, community) {
+
+                    var pushUrl = community['jiveUrl'] + '/datapush';
+
+                    return testUtils.persistExampleInstances(jive, 1, community['jiveCommunity'], 'samplelist', pushUrl)
+                    .then( function(instance) {
+
+                        return jive.service.scheduler().schedule('pushMeData', {
+                            'eventListener' : 'samplelist',
+                            'instance' : instance
+                        }).then(
+                            function(response) {
+                                assert.ok( response );
+                                assert.ok( response['entity']);
+                                assert.equal( response['entity']['ok'], 'now');
+                            },
+                            function(e) {
+                                assert.fail( e );
+                            }
+                        );
+                    });
+                },
+                '/services/tile_simple_datapush');
+        });
 
 
     });

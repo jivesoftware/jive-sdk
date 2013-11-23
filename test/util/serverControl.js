@@ -1,6 +1,7 @@
 var q = require('q');
 var path = require('path');
 var testUtils = require('./testUtils');
+var funcster = require('funcster');
 
 var serverProcess;
 
@@ -44,7 +45,7 @@ exports.stop = function() {
     });
 };
 
-exports.setEndpoint = function( method, statusCode, path, body) {
+exports.setEndpoint = function( method, statusCode, path, body, handler) {
     method = method.toUpperCase();
     if (method != "GET" && method != "PUT" && method != "POST" && method != "DELETE") {
         throw Error('Invalid method given in setEndpoint: ' + method);
@@ -55,6 +56,10 @@ exports.setEndpoint = function( method, statusCode, path, body) {
     if (typeof body === 'object') {
         body = JSON.stringify(body);
     }
+    var serializedHandler;
+    if ( handler ) {
+        serializedHandler = funcster.deepSerialize(handler);
+    }
     var operation = {
         "type": "setEndpoint",
         "method": method,
@@ -63,6 +68,11 @@ exports.setEndpoint = function( method, statusCode, path, body) {
         "body": body,
         "headers": { "Content-Type": "application/json" }
     };
+
+    if ( serializedHandler ) {
+        operation['handler'] = serializedHandler;
+    }
+
     return sendOperation(operation, serverProcess);
 };
 

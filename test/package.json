@@ -3,7 +3,8 @@
 
         "mockery" : "*",
 	    "jscoverage" : "*",
-        "temp" : "*"
+        "temp" : "*",
+        "functster" : "*"
 
     }
 }

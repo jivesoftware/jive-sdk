@@ -330,7 +330,8 @@ exports.createServer = function(config) {
                     route['method'],
                     route['statusCode'],
                     route['path'],
-                    route['body']
+                    route['body'],
+                    route['handler']
                 );
                 promises.push(p);
             });

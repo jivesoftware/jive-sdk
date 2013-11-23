@@ -1,12 +1,6 @@
-/**
- * Created with IntelliJ IDEA.
- * User: charles
- * Date: 4/23/13
- * Time: 11:15 AM
- * To change this template use File | Settings | File Templates.
- */
 var http = require('http');
 var express = require('express');
+var funcster = require('funcster');
 
 exports.instance = BaseServer;
 
@@ -53,8 +47,9 @@ BaseServer.prototype.doOperation = function(operation) {
         var statusCode = operation['statusCode'];
         var body = operation['body'];
         var headers = operation['headers'];
+        var handler = operation['handler'];
 
-        this.setEndpoint(method, path, statusCode, body, headers);
+        this.setEndpoint(method, path, statusCode, body, headers, handler);
         return {}; //operation handled
     }
     else if (type == "setEnv") {
@@ -68,19 +63,38 @@ BaseServer.prototype.doOperation = function(operation) {
     return null;
 };
 
-BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, headers) {
+BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, headers, handler) {
     var app = this.app;
 //    console.log('Server with config %s called setEndpoint',JSON.stringify(this.config));
 //    console.log('method=%s, path=%s, statusCode=%d, headers=%s',method,path,statusCode,JSON.stringify(headers));
     //Default header with json content type
+
+    var hydratedHandler;
+    if ( handler ) {
+
+        var self = this;
+        hydratedHandler = funcster.deepDeserialize( handler, {
+            globals : {
+                console : console,
+                self : self,
+                app  : app
+            }
+        } );
+    }
+
     if (!headers || headers.length <= 0) {
         headers = {"Content-Type": "application/json"};
     }
+
     if (method.toUpperCase() == "GET") {
 //        delete app.routes.get;
         app.get( path, function( req, res ) {
             res.writeHead(statusCode, headers);
             res.end(body );
+
+            if ( hydratedHandler ) {
+                hydratedHandler();
+            }
         } );
     }
     if (method.toUpperCase() == "POST") {
@@ -88,6 +102,9 @@ BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, head
         app.post( path, function( req, res ) {
             res.writeHead(statusCode, headers);
             res.end(body );
+            if ( hydratedHandler ) {
+                hydratedHandler();
+            }
         } );
     }
     if (method.toUpperCase() == "PUT") {
@@ -95,6 +112,10 @@ BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, head
         app.put( path, function( req, res ) {
             res.writeHead(statusCode, headers);
             res.end(body );
+
+            if ( hydratedHandler ) {
+                hydratedHandler();
+            }
         } );
     }
     if (method.toUpperCase() == "DELETE") {
@@ -102,6 +123,10 @@ BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, head
         app.delete( path, function( req, res ) {
             res.writeHead(statusCode, headers);
             res.end(body );
+
+            if ( hydratedHandler ) {
+                hydratedHandler();
+            }
         } );
     }
 };

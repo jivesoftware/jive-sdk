@@ -137,18 +137,42 @@ if ( true ) {
     }
 } else
 {
-    var server = require('./util/serverControl');
-    server.start({port:5555}).then( function() {
-        return server.setEndpoint('post', '200', '/hi', {"a":"b"} );
-    }).then( function() {
-            return realJive.util.buildRequest('http://localhost:5555/hi', 'post').then( function(r) {
-                console.log('R', r);
-            }, function(e) {
-                console.log('E', e);
-            });
-        }).then( function() {
-            return server.stop();
-        });
+//    var server = require('./util/serverControl');
+//    server.start({port:5555}).then( function() {
+//        return server.setEndpoint('post', '200', '/hi', {"a":"b"} );
+//    }).then( function() {
+//            return realJive.util.buildRequest('http://localhost:5555/hi', 'post').then( function(r) {
+//                console.log('R', r);
+//            }, function(e) {
+//                console.log('E', e);
+//            });
+//        }).then( function() {
+//            return server.stop();
+//        });
+//
 
+    var funcster = require('funcster');
+    var myFunction = function() {
+        console.log('what the heck');
+
+        var doIt = function() {
+            console.log('wow');
+        };
+
+        setTimeout( function() {
+            doIt();
+        }, 1000);
+    };
+
+    var serialized = funcster.deepSerialize(myFunction);
+    console.log(serialized);
+
+    var deserialized = funcster.deepDeserialize( serialized, {
+        globals : {
+            console : console,
+            setTimeout : setTimeout
+        }
+    } );
+    deserialized();
 
 }
