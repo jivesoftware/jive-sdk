@@ -326,14 +326,16 @@ exports.createServer = function(config) {
             var promises = [];
 
             routes.forEach( function(route) {
-                var p = server.setEndpoint(
-                    route['method'],
-                    route['statusCode'],
-                    route['path'],
-                    route['body'],
-                    route['handler']
-                );
-                promises.push(p);
+                if ( route && route['method'] ) {
+                    var p = server.setEndpoint(
+                        route['method'],
+                        route['statusCode'],
+                        route['path'],
+                        route['body'],
+                        route['handler']
+                    );
+                    promises.push(p);
+                }
             });
 
             return q.all(promises);
@@ -397,21 +399,21 @@ exports.runServerTest = function(testUtils, jive, done, serverOptions, test, til
         jiveServer = _jiveServer;
         return q.resolve();
     }).then( function(){
-            // setup service options
-            var options = testUtils.createBaseServiceOptions(tileDir || '/services/tile_simple');
-            delete options['role'];
-            options['port'] = 5555; options['logLevel'] = 'FATAL'; options['clientUrl'] = 'http://localhost:5555';
-            return testUtils.setupService(jive, options);
-        }).then(function(_service) {
-            service = _service;
-            return testUtils.persistExampleCommunities(jive, 1, 'http://localhost:5556')
-        }).then( function (_community ) {
-            community = _community;
-            return q.resolve(community);
-        }).then( function() {
-            // do some tests
-            return test(testUtils, jive, community);
-        }).then(
+        // setup service options
+        var options = testUtils.createBaseServiceOptions(tileDir || '/services/tile_simple');
+        delete options['role'];
+        options['port'] = 5555; options['logLevel'] = 'FATAL'; options['clientUrl'] = 'http://localhost:5555';
+        return testUtils.setupService(jive, options);
+    }).then(function(_service) {
+        service = _service;
+        return testUtils.persistExampleCommunities(jive, 1, 'http://localhost:5556')
+    }).then( function (_community ) {
+        community = _community;
+        return q.resolve(community);
+    }).then( function() {
+        // do some tests
+        return test(testUtils, jive, community);
+    }).then(
         function() {
             return tearDown(jive, service, jiveServer).then( function() {
                 done();
