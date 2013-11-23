@@ -222,6 +222,57 @@ describe('jive', function () {
                 '/services/tile_simple_datapush');
         });
 
+       it('failed datapush - failed refresh token flow', function (done) {
+            var testUtils = this['testUtils'];
+
+           var expectedAccessToken = {
+               'access_token' : testUtils.guid(),
+               'expiresIn' : new Date().getTime(),
+               'refreshToken' : testUtils.guid()
+           };
+
+           var expectedDatapushEntity = { 'my': 'entity' };
+            testUtils.runServerTest(testUtils, this['jive'], done, {
+                    'port' : 5556,
+                    'routes' : [
+                        {
+                            'method'        : 'put',
+                            'statusCode'    : '403',
+                            'path'          : '/datapush',
+                            'body'          : expectedDatapushEntity
+                        },
+                        {
+                            'method' : 'post',
+                            'statusCode' : '403',
+                            'path' : '/oauth2/token',
+                            'body' : expectedAccessToken
+                        }
+                    ]
+                },
+                function(testUtils, jive, community) {
+
+                    var pushUrl = community['jiveUrl'] + '/datapush';
+
+                    return testUtils.persistExampleInstances(jive, 1, community['jiveCommunity'], 'samplelist', pushUrl)
+                    .then( function(instance) {
+
+                        return jive.service.scheduler().schedule('pushMeData', {
+                            'eventListener' : 'samplelist',
+                            'instance' : instance
+                        }).then(
+                            function(response) {
+                                assert.fail( response );
+                            },
+                            function(e) {
+                                assert.ok(e);
+                                assert.equal(e['statusCode'], 403);
+                            }
+                        );
+                    });
+                },
+                '/services/tile_simple_datapush');
+        });
+
 
     });
 
