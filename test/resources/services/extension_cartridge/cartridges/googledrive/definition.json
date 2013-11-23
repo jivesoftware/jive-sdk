@@ -1,0 +1,6 @@
+{
+    "name": "google_drive_cartridge",
+    "displayName": "Google Drive",
+    "patterns": ["drive.google.com"],
+    "zipFileName":"googledrive.zip"
+}
