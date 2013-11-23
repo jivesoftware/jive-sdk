@@ -6,7 +6,7 @@ var http = require('http');
 describe('jive', function () {
     describe('tiles registration', function () {
 
-        it('happy path', function (done) {
+        it('happy path - save', function (done) {
             var jive = this['jive'];
             var testUtils = this['testUtils'];
 
@@ -56,6 +56,64 @@ describe('jive', function () {
                         assert.equal( response['entity']['expiresIn'], expectedAccessToken['expires_in'] );
                     }, function(e) {
                         assert.fail(e, 'instance');
+                    });
+                },
+            done );
+        });
+
+        it('happy path - update', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            var expectedAccessToken = {
+                'access_token' : testUtils.guid(),
+                'expiresIn' : new Date().getTime(),
+                'refreshToken' : testUtils.guid()
+            };
+
+            testUtils.runServerTest(testUtils, jive, done,
+                {
+                    'port' : 5556,
+                    'routes' : [
+                        {
+                            'method' : 'post',
+                            'statusCode' : '200',
+                            'path' : '/oauth2/token',
+                            'body' : expectedAccessToken
+                        }
+                    ]
+                },
+                function(testUtils, jive, community) {
+
+                    return testUtils.persistExampleInstances(jive, 1, community['jiveCommunity'], 'samplelist').then( function(instance) {
+
+                        // do some tests
+                        var header = testUtils.createAuthorizationHeader(community);
+                        return jive.util.buildRequest('http://localhost:5555/registration', 'POST',
+                            // body
+                            {
+                                'guid'          :   instance['guid'],
+                                'remoteID'      :   instance['id'],
+                                'config'        :   { 'my' : 'updatedconfig' },
+                                'name'          :   instance['name'],
+                                'jiveUrl'       :   community['jiveUrl'],
+                                'tenantID'      :   community['tenantId'],
+                                'pushUrl'       :   instance['url']
+                            },
+
+                            // headers
+                            {
+                                'Authorization' : header
+                            }
+                        ).then( function(response) {
+                            assert.ok(response);
+                            assert.ok(response['entity']);
+                            assert.equal( response['entity']['config']['my'], 'updatedconfig' );
+                            assert.equal( response['entity']['guid'], instance['guid'] );
+                        }, function(e) {
+                            assert.fail(e, 'instance');
+                        });
+
                     });
                 },
             done );

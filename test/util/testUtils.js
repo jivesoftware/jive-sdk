@@ -155,16 +155,16 @@ exports.createExampleDefinition = function() {
     return definition;
 };
 
-exports.createExampleInstance = function() {
+exports.createExampleInstance = function(jiveCommunity, name) {
     var instance = JSON.parse(JSON.stringify(sampleTileInstance));
-    instance['name'] = exports.guid();
+    instance['name'] = name || exports.guid();
     instance['id'] = exports.guid();
     instance['guid'] = exports.guid();
     instance['accessToken'] = exports.guid();
     instance['refreshToken'] = exports.guid();
     instance['scope'] = exports.guid();
     instance['url'] = instance['url'] + '/' + exports.guid();
-    instance['jiveCommunity'] = exports.guid() + '.' + instance['jiveCommunity'];
+    instance['jiveCommunity'] = jiveCommunity || exports.guid() + '.' + instance['jiveCommunity'];
     return instance;
 };
 
@@ -197,12 +197,12 @@ exports.persistExampleDefinitions = function(jive, quantity) {
     });
 };
 
-exports.persistExampleInstances = function(jive, quantity) {
+exports.persistExampleInstances = function(jive, quantity, jiveCommunity, name) {
     var instances = [];
     var promises = [];
 
     for ( var i = 0; i < quantity; i++ ){
-        var instance = exports.createExampleInstance();
+        var instance = exports.createExampleInstance(jiveCommunity, name);
 
         var p = jive.tiles.save(instance).then(function(saved) {
             instances.push(saved);
@@ -212,7 +212,7 @@ exports.persistExampleInstances = function(jive, quantity) {
     }
 
     return q.all(promises).then( function() {
-        return instances;
+        return quantity == 1 ? instances[0] : instances;
     });
 };
 
