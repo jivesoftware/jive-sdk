@@ -33,10 +33,45 @@ describe('jive', function () {
                         extensionRoot + '/storages'
                     ).then( function() {
                         return service.stop();
+                    }).then( function() {
+                        return extensionRoot;
                     });
-                })
-            }).then( function() {
-                done();
+                });
+            }).then( function(extensionRoot) {
+                // validate that extension.zip exists
+                jive.util.fsexists( extensionRoot + '/extension.zip').then( function( exists ) {
+                    assert.ok(exists);
+                    return jive.util.fsexists( extensionRoot + '/extension_src');
+                }).then( function(exists) {
+                    assert.ok(exists);
+                    return jive.util.fsexists( extensionRoot + '/extension_src/definition.json');
+                }).then( function(exists) {
+                    assert.ok(exists);
+                    return jive.util.fsexists( extensionRoot + '/extension_src/meta.json');
+                }).then( function(exists) {
+                    assert.ok(exists);
+                    return jive.util.fsreadJson( extensionRoot + '/extension_src/definition.json' );
+                }).then( function(definitionJson) {
+                    console.log(definitionJson);
+                    assert.ok( definitionJson );
+                    assert.ok( definitionJson['tiles'] );
+                    assert.equal( definitionJson['tiles'].length, 2 );
+
+                    assert.ok( definitionJson['templates'] );
+                    assert.equal( definitionJson['templates'].length, 1 );
+
+                    assert.ok( definitionJson['osapps'] );
+                    assert.equal( definitionJson['osapps'].length, 1 );
+
+                    assert.ok( definitionJson['storageDefinitions'] );
+                    assert.equal( definitionJson['storageDefinitions'].length, 1 );
+
+                    assert.ok( definitionJson['jabCartridges'] );
+                    assert.equal( definitionJson['jabCartridges'].length, 0 );
+
+                }).then( function() {
+                    done();
+                });
             });
         });
 
@@ -66,8 +101,18 @@ describe('jive', function () {
                         extensionRoot + '/storages'
                     ).then( function() {
                         return service.stop();
+                    }).then( function() {
+                        return extensionRoot;
                     });
                 })
+            }).then( function(extensionRoot) {
+                // validate that extension.zip exists
+                return jive.util.fsreadJson( extensionRoot + '/extension_src/definition.json' );
+            }).then( function(definitionJson) {
+                console.log(definitionJson);
+                assert.ok( definitionJson );
+                assert.ok( definitionJson['jabCartridges'] );
+                assert.equal( definitionJson['jabCartridges'].length, 4  );
             }).then( function() {
                 done();
             });
