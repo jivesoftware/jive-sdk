@@ -3,7 +3,7 @@ var fs = require('fs');
 var uuid = require('node-uuid');
 var crypto = require('crypto');
 var temp = require('temp');
-var baseServer = require('./baseServer');
+var assert = require('assert');
 
 // track temp files
 temp.track();
@@ -360,8 +360,67 @@ exports.createAuthorizationHeader = function( community ) {
     var hmac_signature = require('crypto').createHmac('SHA256', new Buffer(clientSecret, 'base64')).update(headerDetail).digest('base64');
 
     header += headerDetail;
-    header += '&signature=' + hmac_signature + '=';
+    header += '&signature=' + hmac_signature;
 
     return header;
+};
+
+exports.runServerTest = function(testUtils, jive, done, serverOptions, test) {
+    serverOptions = serverOptions || {
+        'port' : 5556,
+        'routes' : [
+            {
+                'method' : 'post',
+                'statusCode' : '200',
+                'path' : '/oauth2/token',
+                'body' : {
+                    'access_token' : testUtils.guid(),
+                    'expiresIn' : new Date().getTime(),
+                    'refreshToken' : testUtils.guid()
+                }
+            }
+        ]
+    };
+
+    var community;
+    var service;
+    var jiveServer;
+
+    var tearDown = function(jive, service, jiveServer) {
+        return (service ? service : q.resolve() ).stop().then( function() {
+            return (jiveServer ? jiveServer : q.resolve()).stop();
+        });
+    };
+
+    testUtils.createServer( serverOptions ).then( function(_jiveServer ) {
+        jiveServer = _jiveServer;
+        return q.resolve();
+    }).then( function(){
+            // setup service options
+            var options = testUtils.createBaseServiceOptions('/services/tile_simple');
+            delete options['role'];
+            options['port'] = 5555; options['logLevel'] = 'FATAL'; options['clientUrl'] = 'http://localhost:5555';
+            return testUtils.setupService(jive, options);
+        }).then(function(_service) {
+            service = _service;
+            return testUtils.persistExampleCommunities(jive, 1, 'http://localhost:5556')
+        }).then( function (_community ) {
+            community = _community;
+            return q.resolve(community);
+        }).then( function() {
+            // do some tests
+            return test(testUtils, jive, community);
+        }).then(
+        function() {
+            return tearDown(jive, service, jiveServer).then( function() {
+                done();
+            });
+        },
+        function (e) {
+            return tearDown(jive, service, jiveServer).then( function() {
+                assert.fail(e[0], e[1]);
+            });
+        }
+    );
 };
 

@@ -570,6 +570,8 @@ exports.basicAuthorizationHeaderValid = function (auth, clientId, clientSecret, 
         if (authClientId !== clientId || authSecret !== clientSecret) {
             return false;
         }
+    } else {
+        return !authRequired;
     }
     return true;
 };
@@ -577,6 +579,10 @@ exports.basicAuthorizationHeaderValid = function (auth, clientId, clientSecret, 
 exports.jiveAuthorizationHeaderValid = function (auth, clientId, clientSecret, authRequired) {
     if (!auth && !authRequired) {
         return true;
+    }
+
+    if ( !clientSecret ) {
+        return false;
     }
 
     var authVars = auth.split(' ');
@@ -587,7 +593,7 @@ exports.jiveAuthorizationHeaderValid = function (auth, clientId, clientSecret, a
         var signature;
         authParams.forEach(function (p) {
             if (p.indexOf('signature') == 0) {
-                signature = p.split("=")[1];
+                signature = p.split("signature=")[1];
             } else {
                 if (str.length > 0) {
                     str += '&';

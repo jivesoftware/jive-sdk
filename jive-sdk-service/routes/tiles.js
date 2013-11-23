@@ -36,7 +36,7 @@ exports.unregister = function( req, res ) {
 
     return jive.context.scheduler.schedule(jive.constants.tileEventNames.INSTANCE_UNREGISTRATION, context).then(
         function (result) {
-            res.writeHead(200);
+            res.writeHead(204);
             res.end(JSON.stringify(result));
         },
         function (result) {

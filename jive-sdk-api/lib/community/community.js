@@ -62,7 +62,9 @@ exports.findByTenantID = function( tenantID ) {
 };
 
 exports.parseJiveCommunity = function( jiveUrl ) {
-    var parts = jiveUrl.split('http')[1].split('\/\/')[1].split(':')[0].split('/')[0].split('www.');
+//    var parts = jiveUrl.split('http')[1].split('\/\/')[1].split(':')[0].split('/')[0].split('www.');
+    var parts = require('url').parse(jiveUrl).host.split('www.');
+
     return parts.length > 1 ? parts[1] : parts[0];
 };
 

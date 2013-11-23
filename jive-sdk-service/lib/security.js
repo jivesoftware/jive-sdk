@@ -124,9 +124,9 @@ function invalidAuthResponse(res) {
 
 /**
  * General purpose utility that checks the request for security headers and validates them.
- * If error, a 403 response will be added to the passed in res object
+ * If error, a 403 response will be added to the passed in res object (if available)
  * @param req
- * @param res
+ * @param res optional
  */
 exports.checkAuthHeaders = function(req, res) {
     var deferred = q.defer();
