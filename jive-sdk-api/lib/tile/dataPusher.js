@@ -146,7 +146,9 @@ var handleError = function( instance, response, retryIfFail ) {
 };
 
 var push = function (pushOperation, type, instance, dataToPush, pushURL, retryIfFail) {
-    return pushOperation( instance, dataToPush, pushURL ).then(
+    var p = q.defer();
+
+    pushOperation( instance, dataToPush, pushURL ).then(
         // successful push
         function (response) {
             jive.events.emit( type + "Pushed", {
@@ -154,7 +156,7 @@ var push = function (pushOperation, type, instance, dataToPush, pushURL, retryIf
                 'pushedData' : dataToPush,
                 'response' : response
             });
-            return response;
+            p.resolve(response);
         },
 
         // failed push
@@ -162,15 +164,25 @@ var push = function (pushOperation, type, instance, dataToPush, pushURL, retryIf
             return handleError( instance, response, retryIfFail).then(
                 function(instanceToRetry) {
                     // retry push once if refreshtoken was reason for error
-                    return push( pushOperation, type, instanceToRetry, dataToPush, pushURL, false);
+                    push( pushOperation, type, instanceToRetry, dataToPush, pushURL, false).then(
+                        function(r) {
+                            p.resolve(r);
+                        },
+                        function(e) {
+                            p.reject(e);
+                        }
+                    );
+
                 },
 
                 function( err ) {
-                    return err;
+                    p.reject(err);
                 }
             );
         }
     );
+
+    return p.promise;
 };
 
 var fetch = function( fetchOperation, type, instance, fetchURL, retryIfFail ) {

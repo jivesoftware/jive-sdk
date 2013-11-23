@@ -155,7 +155,7 @@ exports.createExampleDefinition = function() {
     return definition;
 };
 
-exports.createExampleInstance = function(jiveCommunity, name) {
+exports.createExampleInstance = function(jiveCommunity, name, pushUrl) {
     var instance = JSON.parse(JSON.stringify(sampleTileInstance));
     instance['name'] = name || exports.guid();
     instance['id'] = exports.guid();
@@ -163,7 +163,7 @@ exports.createExampleInstance = function(jiveCommunity, name) {
     instance['accessToken'] = exports.guid();
     instance['refreshToken'] = exports.guid();
     instance['scope'] = exports.guid();
-    instance['url'] = instance['url'] + '/' + exports.guid();
+    instance['url'] = pushUrl || instance['url'] + '/' + exports.guid();
     instance['jiveCommunity'] = jiveCommunity || exports.guid() + '.' + instance['jiveCommunity'];
     return instance;
 };
@@ -197,12 +197,12 @@ exports.persistExampleDefinitions = function(jive, quantity) {
     });
 };
 
-exports.persistExampleInstances = function(jive, quantity, jiveCommunity, name) {
+exports.persistExampleInstances = function(jive, quantity, jiveCommunity, name, pushUrl) {
     var instances = [];
     var promises = [];
 
     for ( var i = 0; i < quantity; i++ ){
-        var instance = exports.createExampleInstance(jiveCommunity, name);
+        var instance = exports.createExampleInstance(jiveCommunity, name, pushUrl);
 
         var p = jive.tiles.save(instance).then(function(saved) {
             instances.push(saved);
@@ -365,7 +365,7 @@ exports.createAuthorizationHeader = function( community ) {
     return header;
 };
 
-exports.runServerTest = function(testUtils, jive, done, serverOptions, test) {
+exports.runServerTest = function(testUtils, jive, done, serverOptions, test, tileDir) {
     serverOptions = serverOptions || {
         'port' : 5556,
         'routes' : [
@@ -397,7 +397,7 @@ exports.runServerTest = function(testUtils, jive, done, serverOptions, test) {
         return q.resolve();
     }).then( function(){
             // setup service options
-            var options = testUtils.createBaseServiceOptions('/services/tile_simple');
+            var options = testUtils.createBaseServiceOptions(tileDir || '/services/tile_simple');
             delete options['role'];
             options['port'] = 5555; options['logLevel'] = 'FATAL'; options['clientUrl'] = 'http://localhost:5555';
             return testUtils.setupService(jive, options);

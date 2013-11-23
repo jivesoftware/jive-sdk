@@ -57,32 +57,15 @@ describe('jive', function () {
                     }, function(e) {
                         assert.fail(e, 'instance');
                     });
-                },
-            done );
+                }
+             );
         });
 
         it('happy path - update', function (done) {
             var jive = this['jive'];
             var testUtils = this['testUtils'];
 
-            var expectedAccessToken = {
-                'access_token' : testUtils.guid(),
-                'expiresIn' : new Date().getTime(),
-                'refreshToken' : testUtils.guid()
-            };
-
-            testUtils.runServerTest(testUtils, jive, done,
-                {
-                    'port' : 5556,
-                    'routes' : [
-                        {
-                            'method' : 'post',
-                            'statusCode' : '200',
-                            'path' : '/oauth2/token',
-                            'body' : expectedAccessToken
-                        }
-                    ]
-                },
+            testUtils.runServerTest(testUtils, jive, done, undefined,
                 function(testUtils, jive, community) {
 
                     return testUtils.persistExampleInstances(jive, 1, community['jiveCommunity'], 'samplelist').then( function(instance) {
@@ -115,8 +98,8 @@ describe('jive', function () {
                         });
 
                     });
-                },
-            done );
+                }
+            );
         });
 
         it('unrecognized tile name', function (done) {
@@ -156,8 +139,8 @@ describe('jive', function () {
                         assert.ok(e);
                         assert.equal(e.statusCode, 400);
                     });
-                },
-            done );
+                }
+            );
         });
 
         it('jive rejects access token request', function (done) {
@@ -208,8 +191,8 @@ describe('jive', function () {
                             assert.ok(e);
                             assert.equal(e.statusCode, 500);
                         });
-                },
-            done );
+                }
+            );
         });
 
         it('jive unregisters tile instance', function (done) {
@@ -271,8 +254,8 @@ describe('jive', function () {
                             }
                         );
                     });
-                },
-            done );
+                }
+            );
         });
 
         it('jive unregisters unknown tile instance', function (done) {
@@ -309,8 +292,8 @@ describe('jive', function () {
                             assert.equal(e['statusCode'], 404);
                         }
                     );
-                },
-            done );
+                }
+            );
         });
 
     });
