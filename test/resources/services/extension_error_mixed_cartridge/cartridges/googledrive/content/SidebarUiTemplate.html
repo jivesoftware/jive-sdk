@@ -1,0 +1,9 @@
+﻿<div class="moduleTitle">
+    {{if viewType == "relatedContainers"}}
+        The related discussions tab is not available for this cartridge.
+    {{else viewType == "notSupported"}}
+        This cartridge is not compatible with the selected Jive community. Please consider upgrading the server.
+    {{else viewType == "discussions"}}
+        <a class="lnkToggleDiscussion a1">Upload selected files</a> from Google Drive to your Jive community.
+    {{/if}}
+</div>

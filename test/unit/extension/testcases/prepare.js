@@ -10,13 +10,11 @@ describe('jive', function () {
         it('prepare', function (done) {
             var jive = this['jive'];
             var testUtils = this['testUtils'];
-            var mockery = this['mockery'];
-
-            var serviceSrcPath = testUtils.getResourceFilePath('/services/extension_full');
 
             testUtils.createTempDir().then( function(dir) {
                 var extensionRoot = dir + '/extension';
-                return qiofs.copyTree(serviceSrcPath, extensionRoot ).then( function() {
+                return qiofs.copyTree(testUtils.getResourceFilePath('/services/extension_full'),
+                        extensionRoot ).then( function() {
                     return testUtils.setupService(jive,{
                         'svcRootDir' : extensionRoot,
                         'persistence' : 'memory',
@@ -78,13 +76,11 @@ describe('jive', function () {
         it('prepare - cartridges', function (done) {
             var jive = this['jive'];
             var testUtils = this['testUtils'];
-            var mockery = this['mockery'];
-
-            var serviceSrcPath = testUtils.getResourceFilePath('/services/extension_cartridge');
 
             testUtils.createTempDir().then( function(dir) {
                 var extensionRoot = dir + '/extension';
-                return qiofs.copyTree(serviceSrcPath, extensionRoot ).then( function() {
+                return qiofs.copyTree(testUtils.getResourceFilePath('/services/extension_cartridge'),
+                        extensionRoot ).then( function() {
                     return testUtils.setupService(jive,{
                         'svcRootDir' : extensionRoot,
                         'persistence' : 'memory',
@@ -117,5 +113,46 @@ describe('jive', function () {
                 done();
             });
         });
+
+        it('prepare - error (mixing cartridges with tiles)', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            testUtils.createTempDir().then( function(dir) {
+                var extensionRoot = dir + '/extension';
+                return qiofs.copyTree(testUtils.getResourceFilePath('/services/extension_error_mixed_cartridge'),
+                        extensionRoot ).then( function() {
+                    return testUtils.setupService(jive,{
+                        'svcRootDir' : extensionRoot,
+                        'persistence' : 'memory',
+                        'logLevel' : 'FATAL',
+                        'skipCreateExtension' : true,
+                        'clientUrl' : testUtils.createFakeURL(),
+                        'role' : 'worker'
+                    });
+                }).then( function(service) {
+                    return jive.service.extensions().prepare(extensionRoot,
+                        extensionRoot + '/tiles',
+                        extensionRoot + '/apps',
+                        extensionRoot + '/cartridges',
+                        extensionRoot + '/storages'
+                    ).then(
+                        function(r) {
+                            assert.fail();
+                            return service.stop().then( function() {
+                                done();
+                            });
+                        },
+                        function(e) {
+                            assert.ok(e);
+                            return service.stop().then( function() {
+                                done();
+                            });
+                        }
+                    );
+                })
+            });
+        });
+
     });
 });
