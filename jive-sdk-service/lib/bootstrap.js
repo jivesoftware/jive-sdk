@@ -164,7 +164,7 @@ var setupExtension = function(options, tilesDir, appsDir, cartridgesDir, storage
     if ( options['skipCreateExtension'] ) {
         return q.resolve();
     }
-    return extension.prepare(tilesDir, appsDir, cartridgesDir, storagesDir);
+    return extension.prepare('', tilesDir, appsDir, cartridgesDir, storagesDir);
 };
 
 /**

@@ -12,6 +12,7 @@ describe('jive', function () {
             var __testDataKey = testUtils.guid();
             var options = testUtils.createBaseServiceOptions('/services/samplesvc');
             options['__testDataKeyCustomSelfServiceEvent'] = __testDataKey;
+            options['__testDataKey'] = __testDataKey;
 
             testUtils.setupService(jive, options).then( function() {
                 return testUtils.waitSec(0.3);

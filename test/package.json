@@ -4,7 +4,8 @@
         "mockery" : "*",
 	    "jscoverage" : "*",
         "temp" : "*",
-        "functster" : "*"
+        "functster" : "*",
+        "q-io" : "*"
 
     }
 }

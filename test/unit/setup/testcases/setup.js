@@ -9,7 +9,7 @@ describe('jive', function () {
 
             var jive = this['jive'];
             var testUtils = this['testUtils'];
-            var mockery = this['mockery'];
+
             var __testDataKey = testUtils.guid();
             var options = testUtils.createBaseServiceOptions('/services/samplesvc');
             options['__testDataKey'] = __testDataKey;
