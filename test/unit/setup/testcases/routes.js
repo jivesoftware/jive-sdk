@@ -6,7 +6,6 @@ describe('jive', function () {
     describe('service routes', function () {
 
         it('happy path', function (done) {
-
             var jive = this['jive'];
             var testUtils = this['testUtils'];
 
@@ -36,7 +35,33 @@ describe('jive', function () {
                     });
                 });
             })
+        });
 
+        it('locked route', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            var options = testUtils.createBaseServiceOptions('/services/tile_routes');
+            delete options['role'];
+            options['port'] = 5555; options['logLevel'] = 'FATAL'; options['clientUrl'] = 'http://localhost:5555';
+            testUtils.setupService(jive, options).then( function(service) {
+                jive.util.buildRequest('http://localhost:5555/locked').then(
+                    function(r) {
+                        assert.fail(r, 'expected error');
+                    },
+
+                    function(e) {
+                        assert.ok(e);
+                        assert.equal(e['statusCode'], 403);
+                        assert.equal(e['entity']['error'], 'Invalid or missing authorization headers.');
+                        console.log(e);
+                    }
+                ).then( function() {
+                    service.stop().then( function() {
+                        done();
+                    });
+                });
+            })
         });
 
     });
