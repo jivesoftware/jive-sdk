@@ -273,6 +273,58 @@ describe('jive', function () {
                 '/services/tile_simple_datapush');
         });
 
+       it('failed datapush - 410 (gone)', function (done) {
+            var testUtils = this['testUtils'];
+
+           var expectedAccessToken = {
+               'access_token' : testUtils.guid(),
+               'expiresIn' : new Date().getTime(),
+               'refreshToken' : testUtils.guid()
+           };
+
+            testUtils.runServerTest(testUtils, this['jive'], done, {
+                    'port' : 5556,
+                    'routes' : [
+                        {
+                            'method'        : 'put',
+                            'statusCode'    : '410',
+                            'path'          : '/datapush',
+                            'body'          : {}
+                        }
+                    ]
+                },
+                function(testUtils, jive, community) {
+
+                    var pushUrl = community['jiveUrl'] + '/datapush';
+
+                    return testUtils.persistExampleInstances(jive, 1, community['jiveCommunity'], 'samplelist', pushUrl)
+                    .then( function(instance) {
+
+                        return jive.service.scheduler().schedule('pushMeData', {
+                            'eventListener' : 'samplelist',
+                            'instance' : instance
+                        }).then(
+                            function(response) {
+                                assert.fail( response );
+                            },
+                            function(e) {
+                                assert.ok(e);
+                                assert.equal(e['statusCode'], 410);
+                            }
+                        ).then( function() {
+                            return jive.tiles.findByID(instance['id']).then( function(found) {
+                                if ( found ) {
+                                    assert.fail();
+                                } else {
+                                    return q.resolve();
+                                }
+                            });
+                        });
+                    });
+                },
+                '/services/tile_simple_datapush');
+        });
+
 
     });
 
