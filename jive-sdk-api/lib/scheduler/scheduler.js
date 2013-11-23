@@ -78,15 +78,25 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
             }
         });
 
-        q.all( promises).then( function(result ) {
-            result = result['forEach'] && result.length == 1 ? result[0] : result;
+        q.all( promises).then(
+            // success
+            function(result ) {
+                result = result['forEach'] && result.length == 1 ? result[0] : result;
+                // nuke self, if no longer scheduled
+                if ( timer && eventID && !tasks[eventID] ) {
+                    clearInterval(timer);
+                }
+                deferred.resolve(result);
+            },
 
-            // nuke self, if no longer scheduled
-            if ( timer && eventID && !tasks[eventID] ) {
-                clearInterval(timer);
+            // fail
+            function(e) {
+                if ( timer && eventID && !tasks[eventID] ) {
+                    clearInterval(timer);
+                }
+                deferred.reject(e);
             }
-            deferred.resolve(result);
-        });
+        );
     };
 
     if (interval) {

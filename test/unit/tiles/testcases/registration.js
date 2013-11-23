@@ -12,11 +12,9 @@ describe('jive', function () {
             });
         };
 
-        it('tile name same as tile dir', function (done) {
+        it('happy path', function (done) {
             var jive = this['jive'];
             var testUtils = this['testUtils'];
-            var newInstance = testUtils.createExampleInstance();
-            newInstance['name'] = 'samplelist';
 
             // setup mock jive
             var app = express();
@@ -25,6 +23,12 @@ describe('jive', function () {
             var service;
             var jiveServer;
 
+            var expectedAccessToken = {
+                'access_token' : testUtils.guid(),
+                'expiresIn' : new Date().getTime(),
+                'refreshToken' : testUtils.guid()
+            };
+
             testUtils.createServer( {
                 'port' : 5556,
                 'routes' : [
@@ -32,9 +36,7 @@ describe('jive', function () {
                         'method' : 'post',
                         'statusCode' : '200',
                         'path' : '/oauth2/token',
-                        'body' : {
-                            'yee'  : 'haaa'
-                        }
+                        'body' : expectedAccessToken
                     }
                 ]
             }).then( function(_jiveServer ) {
@@ -44,9 +46,7 @@ describe('jive', function () {
                 // setup service options
                 var options = testUtils.createBaseServiceOptions('/services/tile_simple');
                 delete options['role'];
-                options['port'] = 5555;
-                options['logLevel'] = 'FATAL';
-                options['clientUrl'] = 'http://localhost:5555';
+                options['port'] = 5555; options['logLevel'] = 'FATAL'; options['clientUrl'] = 'http://localhost:5555';
                 return testUtils.setupService(jive, options, app);
             }).then(function(_service) {
                 service = _service;
@@ -62,8 +62,8 @@ describe('jive', function () {
                     {
                         'guid'          :   jive.util.guid(),
                         'remoteID'      :   jive.util.guid(),
-                        'config'        :   {},
-                        'name'          :   newInstance['name'],
+                        'config'        :   { 'my' : 'config' },
+                        'name'          :   'samplelist',
                         'jiveUrl'       :   community['jiveUrl'],
                         'tenantID'      :   community['tenantId'],
                         'pushUrl'       :   testUtils.createFakeURL(),
@@ -75,14 +75,99 @@ describe('jive', function () {
                         'Authorization' : header
                     }
                 ).then( function(response) {
-                    console.log(response);
+                    assert.ok(response);
+                    assert.ok(response['entity']);
+                    assert.equal( response['entity']['accessToken'], expectedAccessToken['access_token'] );
+                    assert.equal( response['entity']['refreshToken'], expectedAccessToken['refresh_token'] );
+                    assert.equal( response['entity']['expiresIn'], expectedAccessToken['expires_in'] );
                 }, function(e) {
-                    console.log(e);
+                    assert.fail(e, 'instance');
                 });
             }).then(
                 function() {
                     return tearDown(jive, service, jiveServer).then( function() {
-                        console.log("WORKED");
+                        done();
+                    });
+                },
+                function (e) {
+                    return tearDown(jive, service, jiveServer).then( function() {
+                        assert.fail(e[0], e[1]);
+                    });
+                }
+            );
+        });
+
+        it('unrecognized tile name', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            // setup mock jive
+            var app = express();
+
+            var community;
+            var service;
+            var jiveServer;
+
+            var expectedAccessToken = {
+                'access_token' : testUtils.guid(),
+                'expiresIn' : new Date().getTime(),
+                'refreshToken' : testUtils.guid()
+            };
+
+            testUtils.createServer( {
+                'port' : 5556,
+                'routes' : [
+                    {
+                        'method' : 'post',
+                        'statusCode' : '200',
+                        'path' : '/oauth2/token',
+                        'body' : expectedAccessToken
+                    }
+                ]
+            }).then( function(_jiveServer ) {
+                jiveServer = _jiveServer;
+                return q.resolve();
+            }).then( function(){
+                // setup service options
+                var options = testUtils.createBaseServiceOptions('/services/tile_simple');
+                delete options['role'];
+                options['port'] = 5555; options['logLevel'] = 'FATAL'; options['clientUrl'] = 'http://localhost:5555';
+                return testUtils.setupService(jive, options, app);
+            }).then(function(_service) {
+                service = _service;
+                return testUtils.persistExampleCommunities(jive, 1, 'http://localhost:5556')
+            }).then( function (_community ) {
+                community = _community;
+                return q.resolve(community);
+            }).then( function() {
+                // do some tests
+                var header = testUtils.createAuthorizationHeader(community);
+                return jive.util.buildRequest('http://localhost:5555/registration', 'POST',
+                    // body
+                    {
+                        'guid'          :   jive.util.guid(),
+                        'remoteID'      :   jive.util.guid(),
+                        'config'        :   { 'my' : 'config' },
+                        'name'          :   'XsamplelistX',
+                        'jiveUrl'       :   community['jiveUrl'],
+                        'tenantID'      :   community['tenantId'],
+                        'pushUrl'       :   testUtils.createFakeURL(),
+                        'code'          :   testUtils.guid()
+                    },
+
+                    // headers
+                    {
+                        'Authorization' : header
+                    }
+                ).then( function(response) {
+                    assert.fail('expected fail',response);
+                }, function(e) {
+                    assert.ok(e);
+                    assert.equal(e.statusCode, 400);
+                });
+            }).then(
+                function() {
+                    return tearDown(jive, service, jiveServer).then( function() {
                         done();
                     });
                 },

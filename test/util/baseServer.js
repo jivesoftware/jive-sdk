@@ -84,10 +84,8 @@ BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, head
         } );
     }
     if (method.toUpperCase() == "POST") {
-        console.log("--->","POST", path, body);
 //        delete app.routes.post;
         app.post( path, function( req, res ) {
-            console.log("!!!!!!!!!!!!!");
             res.writeHead(statusCode, headers);
             res.end(body );
         } );
