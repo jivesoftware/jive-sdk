@@ -403,6 +403,9 @@ exports.runServerTest = function(testUtils, jive, done, serverOptions, test, til
         var options = testUtils.createBaseServiceOptions(tileDir || '/services/tile_simple');
         delete options['role'];
         options['port'] = 5555; options['logLevel'] = 'FATAL'; options['clientUrl'] = 'http://localhost:5555';
+        if ( serverOptions['development'] ) {
+            options['development'] = true;
+        }
         return testUtils.setupService(jive, options);
     }).then(function(_service) {
         service = _service;
