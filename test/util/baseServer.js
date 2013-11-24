@@ -89,43 +89,56 @@ BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, head
     if (method.toUpperCase() == "GET") {
 //        delete app.routes.get;
         app.get( path, function( req, res ) {
-            res.writeHead(statusCode, headers);
-            res.end(body );
-
             if ( hydratedHandler ) {
-                hydratedHandler();
+                if ( !hydratedHandler(res, req, body) ) {
+                    res.writeHead(statusCode, headers);
+                    res.end(body );
+                }
+            } else {
+                res.writeHead(statusCode, headers);
+                res.end(body );
             }
         } );
     }
     if (method.toUpperCase() == "POST") {
 //        delete app.routes.post;
         app.post( path, function( req, res ) {
-            res.writeHead(statusCode, headers);
-            res.end(body );
             if ( hydratedHandler ) {
-                hydratedHandler();
+                if ( !hydratedHandler(res, req, body) ) {
+                    res.writeHead(statusCode, headers);
+                    res.end(body );
+                }
+            } else {
+                res.writeHead(statusCode, headers);
+                res.end(body );
             }
         } );
     }
     if (method.toUpperCase() == "PUT") {
 //        delete app.routes.put;
         app.put( path, function( req, res ) {
-            res.writeHead(statusCode, headers);
-            res.end(body );
-
             if ( hydratedHandler ) {
-                hydratedHandler();
+                if ( !hydratedHandler(res, req, body) ) {
+                    res.writeHead(statusCode, headers);
+                    res.end(body );
+                }
+            } else {
+                res.writeHead(statusCode, headers);
+                res.end(body );
             }
         } );
     }
     if (method.toUpperCase() == "DELETE") {
 //        delete app.routes.delete;
         app.delete( path, function( req, res ) {
-            res.writeHead(statusCode, headers);
-            res.end(body );
-
             if ( hydratedHandler ) {
-                hydratedHandler();
+                if ( !hydratedHandler(res, req, body) ) {
+                    res.writeHead(statusCode, headers);
+                    res.end(body );
+                }
+            } else {
+                res.writeHead(statusCode, headers);
+                res.end(body );
             }
         } );
     }
@@ -140,7 +153,7 @@ BaseServer.prototype.startServer = function() {
         var data = '';
         req.setEncoding('utf8');
         req.on('data', function(chunk) {
-            data += chunk;
+//            data += chunk;
         });
         req.on('end', function() {
             req.rawBody = data;
@@ -162,7 +175,9 @@ BaseServer.prototype.startServer = function() {
     var serverName = config['serverName'] || '(unnamed)';
     this.server.listen(config.port, function () {
         // when its up, send the signal that its ready to listen
-        console.log("Test server '" + serverName + "' listening on port " + config.port);
+        if ( config.verbos ) {
+            console.log("Test server '" + serverName + "' listening on port " + config.port);
+        }
         process.send( {serverStarted: true});
     } );
 };
@@ -170,7 +185,9 @@ BaseServer.prototype.startServer = function() {
 BaseServer.prototype.stopServer = function(messageID) {
     var self = this;
     this.server.on('close', function() {
-        console.log("Server at port %d with name \"%s\" stopped", self.config.port, self.config.serverName);
+        if ( self.config.verbose ) {
+            console.log("Server at port %d with name \"%s\" stopped", self.config.port, self.config.serverName);
+        }
         process.send({
             serverStopped: true,
             id: messageID

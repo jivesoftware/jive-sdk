@@ -50,7 +50,6 @@ describe('jive', function () {
                     assert.ok(exists);
                     return jive.util.fsreadJson( extensionRoot + '/extension_src/definition.json' );
                 }).then( function(definitionJson) {
-                    console.log(definitionJson);
                     assert.ok( definitionJson );
                     assert.ok( definitionJson['tiles'] );
                     assert.equal( definitionJson['tiles'].length, 2 );
@@ -105,7 +104,6 @@ describe('jive', function () {
                 // validate that extension.zip exists
                 return jive.util.fsreadJson( extensionRoot + '/extension_src/definition.json' );
             }).then( function(definitionJson) {
-                console.log(definitionJson);
                 assert.ok( definitionJson );
                 assert.ok( definitionJson['jabCartridges'] );
                 assert.equal( definitionJson['jabCartridges'].length, 4  );

@@ -54,7 +54,6 @@ describe('jive', function () {
                         assert.ok(e);
                         assert.equal(e['statusCode'], 403);
                         assert.equal(e['entity']['error'], 'Invalid or missing authorization headers.');
-                        console.log(e);
                     }
                 ).then( function() {
                     service.stop().then( function() {

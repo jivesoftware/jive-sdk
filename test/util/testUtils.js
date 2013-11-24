@@ -147,11 +147,62 @@ var sampleCommunity = {
     "clientSecret": "o8q1mnhhjy1gb497ngo0kvw6fmpbjfl8.s",
     "jiveCommunity": "lt-a7-120000.jiveland.com"
 };
+exports.createExampleExternalActivity = function(externalID) {
+    return {
+        "activity": {
+            "action": {
+                "name": "posted",
+                "description": exports.guid()
+            },
+            "actor": {
+                "name": exports.guid(),
+                "email": "actor@email.com"
+            },
+            "object": {
+                "type": "website",
+                "url": exports.createFakeURL(),
+                "image": "http://farm6.staticflickr.com/5106/5678094118_a78e6ff4e7.jpg",
+                "title": exports.guid(),
+                "description": exports.guid()
+            },
+            "externalID": exports.guid()
+        }
+    }
+};
 
-exports.createExampleDefinition = function() {
+exports.createExampleJiveActivity = function(parent) {
+    var commentURL = parent + '/comments';
+    return {
+        "resources" : {
+            "comments" : {
+                "ref" : commentURL
+            }
+        },
+        "parent" : parent
+    }
+};
+
+exports.createExampleComment = function(externalID, externalActivityID) {
+    return {
+        "author": {
+            "name": {
+                "givenName": exports.guid(),
+                "familyName": exports.guid()
+            },
+            "email": exports.guid() + '@' + exports.guid() + '.com'
+        },
+        "content": {"type": "text/html", "text": "<p>" + exports.guid() + "</p>"},
+        "type": "comment",
+        "externalID": externalID,
+        "externalActivityID": externalActivityID
+    };
+};
+
+exports.createExampleDefinition = function(style) {
     var definition = JSON.parse(JSON.stringify(sampleDefinition));
     definition['name'] = exports.guid();
     definition['id'] = exports.guid();
+    definition['style'] = style || 'LIST';
     return definition;
 };
 
@@ -178,12 +229,12 @@ exports.createExampleCommunity = function(jiveUrl) {
     return community;
 };
 
-exports.persistExampleDefinitions = function(jive, quantity) {
+exports.persistExampleDefinitions = function(jive, quantity, style) {
     var definitions = [];
     var promises = [];
 
     for ( var i = 0; i < quantity; i++ ){
-        var definition = exports.createExampleDefinition();
+        var definition = exports.createExampleDefinition(style);
 
         var p = jive.tiles.definitions.save(definition).then(function(saved) {
             definitions.push(saved);
@@ -193,7 +244,7 @@ exports.persistExampleDefinitions = function(jive, quantity) {
     }
 
     return q.all(promises).then( function() {
-        return definitions;
+        return quantity == 1 ? definitions[0] : definitions;
     });
 };
 

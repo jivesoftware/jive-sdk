@@ -17,15 +17,21 @@
 var jive = require('../../api');
 var q = require('q');
 
-exports.commentOnActivity = function(activity, comment) {
-    if (!(activity && activity.resources && activity.resources.comments && activity.resources.comments.ref)
-        || !activity.parent) {
+/**
+ * Comment on a jive activity.
+ * @param jiveActivity
+ * @param comment
+ * @return {*}
+ */
+exports.commentOnActivity = function(jiveActivity, comment) {
+    if (!(jiveActivity && jiveActivity.resources && jiveActivity.resources.comments && jiveActivity.resources.comments.ref)
+        || !jiveActivity.parent) {
 
         return q.reject({ 'err' : 'Error in jive.extstreams.commentOnActivity: input activity is not a valid Jive object.' +
             'It is missing the resources.comments.ref field or parent field.'} );
     }
-    var commentsURL = activity.resources.comments.ref;
-    var parentInstanceURL = activity.parent + '/activities';
+    var commentsURL = jiveActivity.resources.comments.ref;
+    var parentInstanceURL = jiveActivity.parent + '/activities';
 
     return jive.extstreams.findByURL(parentInstanceURL).then(function(extstream) {
         if (!comment.externalID){
@@ -42,6 +48,14 @@ exports.commentOnActivity = function(activity, comment) {
     });
 };
 
+/**
+ * Comment on jive activity via its external activity ID, eg. the ID by which that jive activity
+ * is known in an external system such as salesforce.
+ * @param extstream
+ * @param externalActivityID
+ * @param comment
+ * @return {*}
+ */
 exports.commentOnActivityByExternalID = function(extstream, externalActivityID, comment) {
     var dataURL = extstream['url'];
     var commentsURL = dataURL.replace(/activities$/, 'extactivities/') + externalActivityID + '/comments';
@@ -58,17 +72,23 @@ exports.commentOnActivityByExternalID = function(extstream, externalActivityID, 
     } );
 };
 
-exports.fetchCommentsOnActivity = function(activity, opts) {
-    if (!(activity && activity.resources && activity.resources.comments && activity.resources.comments.ref)
-        || !activity.parent) {
+/**
+ * Fetches all comments associated with a jive activity item.
+ * @param jiveActivity
+ * @param opts commentSourceType can be JIVE or EXTERNAL
+ * @return {*}
+ */
+exports.fetchCommentsOnActivity = function(jiveActivity, opts) {
+    if (!(jiveActivity && jiveActivity.resources && jiveActivity.resources.comments && jiveActivity.resources.comments.ref)
+        || !jiveActivity.parent) {
 
         return q.reject({ 'err' : 'Error in jive.extstreams.fetchCommentsOnActivity: ' +
             'input activity is not a valid Jive object. It is missing the resources.comments.ref field or parent field.'} );
     }
 
-    var commentsURL = activity.resources.comments.ref;
+    var commentsURL = jiveActivity.resources.comments.ref;
     commentsURL += buildQueryString(opts['fieldList'], opts['itemsPerPage'], opts['commentSourceType']);
-    var parentInstanceURL = activity.parent + '/activities';
+    var parentInstanceURL = jiveActivity.parent + '/activities';
 
     return jive.extstreams.findByURL(parentInstanceURL).then( function(extstream) {
         return jive.context.scheduler.schedule(jive.constants.tileEventNames.GET_PAGINATED_RESULTS, {

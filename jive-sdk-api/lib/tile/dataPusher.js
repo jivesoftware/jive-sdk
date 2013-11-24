@@ -62,7 +62,7 @@ var doDestroyInstance = function(instance, instanceLibrary, response) {
     // destroy the instance
     if ( instance ) {
         instanceLibrary.remove(instance['id']).then( function() {
-            jive.logger.log('Destroying tile instance from database after receiving 410 GONE response', instance);
+            jive.logger.info('Destroying tile instance from database after receiving 410 GONE response', instance);
             jive.events.emit("destroyedInstance", instance);
             deferred.resolve(response);
         });
@@ -186,10 +186,11 @@ var push = function (pushOperation, type, instance, dataToPush, pushURL, retryIf
 };
 
 var fetch = function( fetchOperation, type, instance, fetchURL, retryIfFail ) {
-    return fetchOperation( instance, fetchURL ).then(
+    var p = q.defer();
+     fetchOperation( instance, fetchURL ).then(
         // successful fetch
         function(response) {
-            return response;
+            p.resolve(response);
         },
 
         // failed fetch
@@ -201,11 +202,13 @@ var fetch = function( fetchOperation, type, instance, fetchURL, retryIfFail ) {
                 },
 
                 function( err ) {
-                    return err;
+                    p.reject(err);
                 }
             );
         }
     );
+
+    return p.promise;
 };
 
 var remove = function( removeOperation, type, instance, retryIfFail ) {
