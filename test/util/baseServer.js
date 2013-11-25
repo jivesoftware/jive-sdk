@@ -90,7 +90,7 @@ BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, head
 //        delete app.routes.get;
         app.get( path, function( req, res ) {
             if ( hydratedHandler ) {
-                if ( !hydratedHandler(res, req, body) ) {
+                if ( !hydratedHandler(req, res, body) ) {
                     res.writeHead(statusCode, headers);
                     res.end(body );
                 }
@@ -104,7 +104,7 @@ BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, head
 //        delete app.routes.post;
         app.post( path, function( req, res ) {
             if ( hydratedHandler ) {
-                if ( !hydratedHandler(res, req, body) ) {
+                if ( !hydratedHandler(req, res, body) ) {
                     res.writeHead(statusCode, headers);
                     res.end(body );
                 }
@@ -118,7 +118,7 @@ BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, head
 //        delete app.routes.put;
         app.put( path, function( req, res ) {
             if ( hydratedHandler ) {
-                if ( !hydratedHandler(res, req, body) ) {
+                if ( !hydratedHandler(req, res, body) ) {
                     res.writeHead(statusCode, headers);
                     res.end(body );
                 }
@@ -132,7 +132,7 @@ BaseServer.prototype.setEndpoint = function(method, path, statusCode, body, head
 //        delete app.routes.delete;
         app.delete( path, function( req, res ) {
             if ( hydratedHandler ) {
-                if ( !hydratedHandler(res, req, body) ) {
+                if ( !hydratedHandler(req, res, body) ) {
                     res.writeHead(statusCode, headers);
                     res.end(body );
                 }
