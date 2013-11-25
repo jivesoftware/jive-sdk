@@ -110,7 +110,8 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
                         }
                     }
 
-                    httpVerb = candidate['verb'];
+                    httpVerb = candidate['verb'] || 'get';  // default to GET verb
+                    httpVerb = httpVerb.toLowerCase();
                     app[httpVerb](routeContextPath, candidate['route']);
 
                     // lock the route if its marked to be locked
