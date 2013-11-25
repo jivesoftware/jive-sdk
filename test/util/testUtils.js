@@ -481,3 +481,31 @@ exports.runServerTest = function(testUtils, jive, done, serverOptions, test, til
     );
 };
 
+exports.fsread = function (path) {
+    var deferred = q.defer();
+    fs.readFile(path, function (err, data) {
+        deferred.resolve(data);
+        return data;
+    });
+    return deferred.promise;
+};
+
+exports.fsreadJson = function (path) {
+    return exports.fsread(path).then(function (data) {
+        return JSON.parse(new Buffer(data).toString());
+    });
+};
+
+exports.fswrite = function (data, path) {
+    var deferred = q.defer();
+
+    fs.writeFile(path, data, function (err) {
+        if (err) {
+            deferred.reject(err);
+        }
+        else {
+            deferred.resolve();
+        }
+    });
+    return deferred.promise;
+};

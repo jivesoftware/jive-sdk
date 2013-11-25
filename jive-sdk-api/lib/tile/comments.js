@@ -73,9 +73,10 @@ exports.commentOnActivityByExternalID = function(extstream, externalActivityID, 
 };
 
 /**
- * Fetches all comments associated with a jive activity item.
+ * Fetches all comments associated with a jive activity item. Can be filtered for only Jive originated comments,
+ * or for those originating outside of Jive (external comments).
  * @param jiveActivity
- * @param opts commentSourceType can be JIVE or EXTERNAL
+ * @param opts commentSourceType can be JIVE or EXTERNAL.
  * @return {*}
  */
 exports.fetchCommentsOnActivity = function(jiveActivity, opts) {

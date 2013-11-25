@@ -146,6 +146,53 @@ describe('jive', function () {
                 '/services/tile_activity_push');
         });
 
+        it('pull all for extstream instance', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            var commentList = [];
+            for ( var i = 0; i < 25; i++ ) {
+                var comment = testUtils.createExampleComment();
+                commentList.push(comment);
+            }
+
+            testUtils.runServerTest(testUtils, jive, done, {
+                    'port' : 5556,
+                    'routes' : [
+                        {
+                            'method'        : 'get',
+                            'statusCode'    : '200',
+                            'path'          : '/extstreams/1/comments',
+                            'body'          : { 'list': commentList }
+                        }
+                    ]
+                },
+                function(testUtils, jive, community) {
+
+                    var externalStreamInstance = testUtils.createExampleInstance(community['jiveCommunity'], 'sampleactivity',
+                        community['jiveUrl'] + '/extstreams/1/activities');
+
+                    return jive.extstreams.save(externalStreamInstance).then(function (instance ) {
+
+                        return jive.service.scheduler().schedule('fetchAllCommentsForExtstream', {
+                            'extstream' : externalStreamInstance,
+                            'opts' : {}
+                        });
+                    }).then(
+                        function(r) {
+                            assert.ok(r);
+                            assert.ok(r['entity']);
+                            assert.ok(r['entity']['list']);
+                            assert.equal(r['entity']['list'].length, 25);
+                        },
+                        function(e) {
+                            assert.fail(e);
+                        }
+                    );
+                },
+                '/services/tile_activity_push');
+        });
+
         it('pull all JIVE for activity', function (done) {
             var jive = this['jive'];
             var testUtils = this['testUtils'];
