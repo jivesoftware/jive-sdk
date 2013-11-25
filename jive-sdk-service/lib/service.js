@@ -184,7 +184,7 @@ exports.init = function(_app, options ) {
 
     // for some reason this needs to be configured earlier than later
     app.use(express.bodyParser());
-    if ( !options['suppressHttpLogging'] ) {
+    if ( options && !options['suppressHttpLogging'] ) {
         app.use(express.logger('dev'));
     }
     app.use(express.methodOverride());

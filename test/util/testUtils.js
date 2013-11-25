@@ -313,7 +313,7 @@ exports.getResourceFilePath = function(filename) {
 
 exports.setupService = function(jive, config) {
     var p = q.defer();
-    var startHttp = !config['role'] || config['role'] == 'http';
+    var startHttp = config && (!config['role'] || config['role'] == 'http');
     var app = startHttp ? require('express')() : {use: function() {}};
     jive.service.init( app, config).then(function() {
         return jive.service.autowire();
@@ -342,7 +342,6 @@ exports.setupService = function(jive, config) {
             }
         });
     }).fail( function(e) {
-        console.log(e);
         p.reject(e);
     });
 

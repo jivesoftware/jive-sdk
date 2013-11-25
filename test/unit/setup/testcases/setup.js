@@ -48,6 +48,49 @@ describe('jive', function () {
 
         });
 
+        it('specify config file location, role', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            process.env['jive_sdk_config_file'] = testUtils.getResourceFilePath('/services/tile_simple/config.json');
+            process.env['jive_sdk_service_role'] = 'worker';
+
+            testUtils.setupService(jive, undefined).then( function() {
+                return testUtils.waitSec(0.3);
+            }).then(
+                function() {
+                    var p = q.defer();
+                    if ( jive.service.options['xyz'] == '123' && jive.service.options['role'] == 'worker' ) {
+                        p.resolve();
+                    } else {
+                        p.reject(new Error("Failed to resolve configuration file"));
+                    }
+
+                    return p.promise;
+                },
+
+                function(e) {
+                    return q.reject(e);
+                }
+
+            ).then(
+                function() {
+                    jive.service.stop().then( function() {
+                        delete process.env['jive_sdk_config_file'];
+                        delete process.env['jive_sdk_service_role'];
+                        done();
+                    });
+                },
+                function (e) {
+                    jive.service.stop().then( function() {
+                        delete process.env['jive_sdk_config_file'];
+                        delete process.env['jive_sdk_service_role'];
+                        assert.fail(e[0], e[1]);
+                    });
+                }
+            );
+        });
+
         it('bad persistence', function (done) {
             var jive = this['jive'];
             var testUtils = this['testUtils'];

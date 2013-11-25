@@ -1,0 +1,11 @@
+{
+    "clientUrl": "http://localhost",
+    "port": "5556",
+    "logLevel" : "FATAL",
+    "persistence" : "memory",
+    "role" : "worker",
+    "skipCreateExtension" : true,
+    "suppressHttpLoggin" : true,
+    "xyz" : "123"
+
+}
