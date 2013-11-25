@@ -6,7 +6,6 @@ describe('jive', function () {
     describe('service setup', function () {
 
         it('happy path', function (done) {
-
             var jive = this['jive'];
             var testUtils = this['testUtils'];
 

@@ -23,6 +23,7 @@ exports.onTestPass = function(test) {
 };
 
 exports.onTestFail = function(test) {
+    exports.allClear = false;
     cleanup();
 };
 
@@ -47,6 +48,8 @@ exports.teardownSuite = function(test) {
     mockery.deregisterAll();
     mockery.disable();
 };
+
+exports.allClear = true;
 
 exports.runTests = function(options) {
     var deferred = q.defer();
@@ -95,7 +98,7 @@ exports.runTests = function(options) {
         });
 
         runner.on('end', function (test) {
-            deferred.resolve();
+            deferred.resolve(exports.allClear);
         });
 
         runner.on('test', function (test) {

@@ -105,7 +105,13 @@ if ( true ) {
                 'testcases' :   process.cwd()  + '/' + runGroup,
                 'timeout' : runTimeout
             }
-        );
+        ).then( function(allClear) {
+            if ( allClear ) {
+                process.exit(0);
+            } else {
+                process.exit(-1);
+            }
+        });
 
     } else if ( runMode == 'coverage' )  {
         realJive.util.fsexists(apiDirTarget).then( function(exists) {
