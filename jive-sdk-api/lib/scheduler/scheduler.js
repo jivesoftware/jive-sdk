@@ -18,6 +18,7 @@ var q = require('q');
 var jive = require('../../api');
 
 function Scheduler() {
+    return this;
 }
 
 module.exports = Scheduler;
@@ -45,6 +46,8 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
         }
 
     });
+
+    return this;
 };
 
 /**
