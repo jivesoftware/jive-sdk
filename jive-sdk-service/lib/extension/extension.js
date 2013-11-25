@@ -35,8 +35,9 @@ exports.save = function(record) {
     return jive.service.persistence().save('jiveExtension', 'jiveExtension', record);
 };
 
-exports.prepare = function (tilesDir, appsDir, cartridgesDir, storagesDir) {
-    var extensionSrcDir = 'extension_src';
+exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesDir) {
+    var extensionSrcDir = ( rootDir ? rootDir + '/' : '' ) + 'extension_src';
+    var extensionZipDir = ( rootDir ? rootDir + '/' : '' ) + 'extension.zip';
 
     return jive.util.fsexists(extensionSrcDir).then(function( exists ) {
         if ( !exists ) jive.util.fsmkdir( extensionSrcDir)
@@ -65,7 +66,7 @@ exports.prepare = function (tilesDir, appsDir, cartridgesDir, storagesDir) {
             });
     }).then( function() {
         // zip it all
-        return jive.util.zipFolder( extensionSrcDir, 'extension.zip' );
+        return jive.util.zipFolder( extensionSrcDir, extensionZipDir );
     }).catch( function(e) {
         var error = new Error(e);
         var stack = error.stack;

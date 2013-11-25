@@ -18,6 +18,7 @@ var q = require('q');
 var jive = require('../../api');
 
 function Scheduler() {
+    return this;
 }
 
 module.exports = Scheduler;
@@ -45,6 +46,8 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
         }
 
     });
+
+    return this;
 };
 
 /**
@@ -69,7 +72,7 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
 
     handlers = handlers || [];
 
-    var next = function() {
+    var next = function(timer, eventID) {
         var promises = [];
         handlers.forEach( function(handler) {
             var p = handler(context);
@@ -78,20 +81,33 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
             }
         });
 
-        q.all( promises).then( function(result ) {
-            result = result['forEach'] && result.length == 1 ? result[0] : result;
-            deferred.resolve(result);
-        });
+        q.all( promises).then(
+            // success
+            function(result ) {
+                result = result['forEach'] && result.length == 1 ? result[0] : result;
+                // nuke self, if no longer scheduled
+                if ( timer && eventID && !tasks[eventID] ) {
+                    clearInterval(timer);
+                }
+                deferred.resolve(result);
+            },
+
+            // fail
+            function(e) {
+                if ( timer && eventID && !tasks[eventID] ) {
+                    clearInterval(timer);
+                }
+                deferred.reject(e);
+            }
+        );
     };
 
     if (interval) {
-        var wrapper = setTimeout( function() {
-            setInterval(function() {
-                next();
+        setTimeout( function() {
+            var timer = tasks[eventID] = setInterval(function() {
+                next(timer, eventID);
             }, interval);
         }, delay || 1 );
-
-        tasks[eventID] = wrapper;
     }
     else {
         setTimeout( function() {
@@ -104,10 +120,8 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
 };
 
 Scheduler.prototype.unschedule = function unschedule(eventID){
-    if(this.isScheduled(eventID)) {
-        clearInterval(tasks[eventID]);
-        delete tasks[eventID];
-    }
+    clearInterval(tasks[eventID]);
+    delete tasks[eventID];
 };
 
 Scheduler.prototype.getTasks = function getTasks(){
@@ -127,7 +141,10 @@ Scheduler.prototype.isScheduled = function( eventID ) {
 
 Scheduler.prototype.shutdown = function(){
     var scheduler = this;
+    eventHandlerMap = {};
     this.getTasks().forEach(function(taskKey){
         scheduler.unschedule(taskKey);
     });
+
+    return q.resolve();
 };

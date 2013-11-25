@@ -1,0 +1,6 @@
+{
+    "name": "jira_cartridge",
+    "displayName": "Jira",
+    "patterns": ["jira.mycompany.com/browse/"],
+    "zipFileName":"jira.zip"
+}

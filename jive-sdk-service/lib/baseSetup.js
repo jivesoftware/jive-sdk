@@ -110,7 +110,8 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
                         }
                     }
 
-                    httpVerb = candidate['verb'];
+                    httpVerb = candidate['verb'] || 'get';  // default to GET verb
+                    httpVerb = httpVerb.toLowerCase();
                     app[httpVerb](routeContextPath, candidate['route']);
 
                     // lock the route if its marked to be locked
@@ -164,7 +165,7 @@ function defaultSetupEventListener(handlerInfo, definitionName) {
 
 /**
  */
-exports.setupServices = function( app, definitionName, svcDir, setupEventListener ) {
+exports.setupServices = function( app, definitionName, svcDir, setupEventListener, setupContext ) {
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.
 
@@ -182,7 +183,6 @@ exports.setupServices = function( app, definitionName, svcDir, setupEventListene
                     'Please choose a different definition name.');
             }
 
-
             // do service bootstrap
             if ( target['onBootstrap'] ) {
                 jive.events.addLocalEventListener( "serviceBootstrapped", function() {
@@ -195,7 +195,7 @@ exports.setupServices = function( app, definitionName, svcDir, setupEventListene
             // event handlers
             if (target.eventHandlers) {
                 target.eventHandlers.forEach(function (handlerInfo) {
-                    setupEventListener(handlerInfo, definitionName);
+                    setupEventListener(handlerInfo, definitionName, setupContext);
                 });
             }
 
@@ -218,6 +218,15 @@ exports.setupServices = function( app, definitionName, svcDir, setupEventListene
                     var eventID = task['event'], handler = task['handler'],  interval = task['interval'] || 60 * 1000,
                         context = task['context'] || {}, timeout = task['timeout'], event = task['event'];
 
+                    if ( event && handler ) {
+                        // anomalous situation; tasks should not have an inline handler AND a named event (which
+                        // is a pointer to a handler).
+                        // in this case, then inline handler wins; remove the named event.
+                        jive.logger.warn('Task for', definitionName,'defined both inline handler and event; ' +
+                            'honoring only the inline handler.');
+                        event = undefined;
+                    }
+
                     if ( !eventID ) {
                         // if no eventID -- then the event is <tilename>.<interval>
                         var eventIDBase = definitionName + ( interval ? '.' + interval : '' );
@@ -227,21 +236,24 @@ exports.setupServices = function( app, definitionName, svcDir, setupEventListene
                         }
 
                         eventID = eventIDBase + '.' + eventIDCount;
-                        eventIDCount++;
-                        noIDCounter[eventIDBase] = eventIDCount;
+                        noIDCounter[eventIDBase] = ++eventIDCount;
                     }
 
                     if ( !handler ) {
+                        // task did not come with an inline handler;
+                        // try to resolve one from listeners on the named event for the task
                         handler = jive.events.getDefinitionEventListenerFor(definitionName, event );
                         if ( handler && handler['forEach'] ) {
                             handler = handler[0]; // get only the first one
                         }
-                    }
 
-                    if ( handler ) {
-                        target.eventHandlers = target.eventHandlers || [];
-
-                        // task came with a handler; mix it into the list of target eventHandlers
+                        if ( !handler ) {
+                            throw new Error('Task for tile definition "'
+                                + definitionName + '" must specify a function handler, or reference an event (which has a handler).');
+                        }
+                    } else {
+                        // task did come with an inline handler;
+                        // mix it into the list of target eventHandlers
                         if ( target.eventHandlers ) {
                             setupEventListener( {
                                 'event' : eventID,
@@ -249,9 +261,6 @@ exports.setupServices = function( app, definitionName, svcDir, setupEventListene
                             }, definitionName );
                             target.eventHandlers.push( );
                         }
-                    } else {
-                        throw new Error('Task for tile definition "'
-                            + definitionName + '" must specify a function handler.');
                     }
 
                     context['event'] = eventID;

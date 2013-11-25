@@ -146,32 +146,12 @@ module.exports = function() {
             });
         },
 
-        /******************TEST TOOLS. NOT IMPLEMENTED BY OTHER PERSISTENCE CLASSES*******************************/
-
         /**
-         * Remove an entire collection
-         * @param collectionID
+         * Close it down
+         * @return {*}
          */
-        removeCollection: function(collectionID) {
-            return q.fcall( function () {
-                var removed = db[collectionID];
-                delete db[collectionID];
-                return removed;
-            });
-        },
-
-        clearInstances: function() {
-            var p1 = this.removeCollection('tileInstance'),
-                p2 = this.removeCollection('extstreamInstance');
-            return q.all([p1, p2]);
-        },
-
-        getDb: function() {
-            return db;
-        },
-
         close: function() {
-            return q();
+            return q.resolve();
         }
     };
 

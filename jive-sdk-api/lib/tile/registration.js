@@ -139,7 +139,7 @@ exports.unregistration = function(context) {
             // destroy the instance
             if ( tileInstance ) {
                     instanceLibrary.remove(tileInstance['id']).then( function() {
-                    jive.logger.log('Destroying tile instance from database', tileInstance);
+                    jive.logger.info('Destroying tile instance from database', tileInstance);
                     jive.events.emit("destroyedInstance", tileInstance);
                     deferred.resolve(statusObj);
                 });

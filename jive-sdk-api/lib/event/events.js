@@ -266,3 +266,8 @@ exports.baseEvents = [
         'description' : 'Framework handler'
     }
 ];
+
+exports.reset = function() {
+    exports.eventHandlerMap = {};
+    exports.removeAllListeners();
+};

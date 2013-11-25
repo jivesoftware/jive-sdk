@@ -37,6 +37,7 @@ var osAppsDir = rootDir + '/apps';
 var cartridgesDir = rootDir + '/cartridges';
 var storagesDir = rootDir + '/storages';
 var security = require('./security');
+var serviceState = 'stopped';
 
 var _dir = function(theDir, defaultDir ) {
     theDir = theDir || defaultDir;
@@ -178,12 +179,14 @@ exports.init = function(_app, options ) {
     else {
         app = express();
     }
-    rootDir =  rootDir || process.cwd();
+    rootDir =  (options && options['svcRootDir']) || rootDir || process.cwd();
     tilesDir = rootDir + '/tiles';
 
     // for some reason this needs to be configured earlier than later
     app.use(express.bodyParser());
-    app.use(express.logger('dev'));
+    if ( options && !options['suppressHttpLogging'] ) {
+        app.use(express.logger('dev'));
+    }
     app.use(express.methodOverride());
     app.use(app.router);
     app.use(express.errorHandler());
@@ -404,8 +407,20 @@ exports.autowireDefinitionMetadata = function( definitionMetadataFile ) {
  * Return promise - fail or succeed
  */
 exports.start = function() {
+    serviceState = 'starting';
     return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir, cartridgesDir, storagesDir).then( function() {
-        jive.logger.info("Service started in " + app['settings']['env'] + " mode");
+        if (app['settings'] && app['settings']['env']) {
+            jive.logger.info("Service started in " + app['settings']['env'] + " mode");
+            serviceState = 'started';
+        }
+        return q.resolve();
+    });
+};
+
+exports.stop = function() {
+    return bootstrap.teardown().then( function() {
+        jive.logger.info("Service stopped.");
+        serviceState = 'stopped';
     });
 };
 
@@ -543,4 +558,8 @@ exports.security = function() {
 
 exports.isDevelopment = function() {
     return exports.options['development'] === true;
+};
+
+exports.serviceStatus = function() {
+    return serviceState;
 };

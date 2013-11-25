@@ -21,7 +21,17 @@ exports.save = function( webhook ) {
     return jive.context.persistence.save( "webhook", webhook['url'], webhook );
 };
 
-exports.register = function( jiveCommunity, events, object, webhookCallback, accessToken ) {
+/**
+ * Register a webhook for the named jive community. Uses either the registered community access token for your
+ * service, or the supplied access token.
+ * @param jiveCommunity
+ * @param events
+ * @param object
+ * @param webhookCallbackURL
+ * @param accessToken
+ * @return promise
+ */
+exports.register = function( jiveCommunity, events, object, webhookCallbackURL, accessToken ) {
     var deferred = q.defer();
 
     jive.community.findByCommunity(jiveCommunity).then( function(community) {
@@ -30,7 +40,7 @@ exports.register = function( jiveCommunity, events, object, webhookCallback, acc
             var webhookRequest = {
                 "events": events,
                 "object": object,
-                "callback": webhookCallback
+                "callback": webhookCallbackURL
             };
 
             if ( (!community['oauth'] || !community['oauth']['access_token']) && !accessToken ) {
@@ -57,7 +67,7 @@ exports.register = function( jiveCommunity, events, object, webhookCallback, acc
                 }
             );
         } else {
-            deferred.reject( { "error" : "No such jive community"} );
+            deferred.reject( { "error" : "No such jive community " + jiveCommunity} );
         }
     });
 

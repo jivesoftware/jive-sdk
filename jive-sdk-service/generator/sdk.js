@@ -454,7 +454,7 @@ function doCreateExtension( options ) {
         .then(function() {
             var extension = require("../lib/extension/extension.js");
 
-            extension.prepare(options.target + "/tiles", options.target + "/apps", options.target + "/cartridges", options.target + "/storages").then(function(){
+            extension.prepare('', options.target + "/tiles", options.target + "/apps", options.target + "/cartridges", options.target + "/storages").then(function(){
                 var persistence = jive.service.persistence();
 
                 persistence.close().then(function() {

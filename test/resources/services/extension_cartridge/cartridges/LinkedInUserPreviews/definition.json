@@ -1,0 +1,6 @@
+{
+    "name": "linked_in_user_previews_cartridge",
+    "displayName": "LinkedIn User Previews",
+    "patterns": ["linkedin.com"],
+    "zipFileName":"linkedinuserpreviews.zip"
+}

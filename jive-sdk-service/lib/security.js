@@ -41,7 +41,6 @@ var findCredentials = function(req) {
         var authVars = authorization.split(' ');
         if ( authVars[0] == 'JiveEXTN') {
             // try to parse out jiveURL
-            var str = '';
             var authParams = authVars[1].split('&');
             authParams.forEach( function(p) {
                 if (p.indexOf('jive_url') == 0 ) {
@@ -125,9 +124,9 @@ function invalidAuthResponse(res) {
 
 /**
  * General purpose utility that checks the request for security headers and validates them.
- * If error, a 403 response will be added to the passed in res object
+ * If error, a 403 response will be added to the passed in res object (if available)
  * @param req
- * @param res
+ * @param res optional
  */
 exports.checkAuthHeaders = function(req, res) {
     var deferred = q.defer();
