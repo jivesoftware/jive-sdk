@@ -362,7 +362,8 @@ exports.createBaseServiceOptions = function(sourceDir) {
         'logLevel' : 'FATAL',
         'skipCreateExtension' : true,
         'clientUrl' : exports.createFakeURL(),
-        'role' : 'worker'
+        'role' : 'worker',
+        'suppressHttpLogging' : true
     };
 };
 

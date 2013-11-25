@@ -49,6 +49,27 @@ describe('jive', function () {
             });
         });
 
+        it('find', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            testUtils.createTempDir().then( function(dir) {
+                var persistence = new jive.persistence.file({ 'dataDirPath': dir });
+
+                test.testFind(testUtils, persistence).then(
+                    function() {
+                        done();
+                    },
+
+                    function(e) {
+                        assert.fail(e);
+                    }
+                ).finally( function() {
+                    return persistence.close();
+                });
+            });
+        });
+
         // xxx todo
     });
 

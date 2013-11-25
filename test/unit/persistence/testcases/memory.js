@@ -26,6 +26,27 @@ describe('jive', function () {
             });
         });
 
+        it('find', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            var persistence = new jive.persistence.memory();
+
+            test.testFind(testUtils, persistence).then(
+                function() {
+                    setTimeout( function() {
+                        done();
+                    }, 1000);
+                },
+
+                function(e) {
+                    assert.fail(e);
+                }
+            ).finally( function() {
+                return persistence.close();
+            });
+        });
+
         it('remove', function (done) {
             var jive = this['jive'];
             var testUtils = this['testUtils'];

@@ -27,7 +27,6 @@ exports.onTestFail = function(test) {
 };
 
 exports.onTestStart = function(test) {
-//    test['ctx']['jive'] = require(exports.jivePath );
 };
 
 exports.setupSuite = function(test) {
