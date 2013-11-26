@@ -160,6 +160,38 @@ exports.testFind = function( testUtils, persistence ) {
                 });
             })
 
+            // find using cursor
+            .then( function( ) {
+                return persistence.find('myOtherCollection',
+                    { 'data.number' : { '$lt' : 3 } }, true
+                ).then( function(cursor) {
+
+                    var p = q.defer();
+                    var foundCount = 0;
+                    cursor.on('data', function(entry, key) {
+                        if ( [1,2].indexOf( entry['data']['number']) < 0 ) {
+                            deferred.reject("failed cursor");
+                        } else {
+                            foundCount++;
+                        }
+                    });
+
+                    cursor.on('end', function() {
+                        if ( foundCount != 2 ) {
+                            deferred.reject('failed cursor');
+                        } else {
+                            p.resolve();
+                        }
+                    });
+
+                    cursor.on('error', function(e) {
+                        p.reject(e);
+                    });
+
+                    return p.promise;
+                });
+            })
+
             .then( function() {
                 deferred.resolve();
             });

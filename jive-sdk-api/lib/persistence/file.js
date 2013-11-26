@@ -17,6 +17,7 @@
 var fs = require('fs');
 var q = require('q');
 var jive = require('../../api');
+var ArrayStream = require('stream-array');
 
 module.exports = function(serviceConfig) {
 
@@ -242,7 +243,7 @@ module.exports = function(serviceConfig) {
             return deferred.promise;
         },
 
-        find : function( collectionID, keyValues ) {
+        find : function( collectionID, keyValues, cursor ) {
 
             var deferred = q.defer();
 
@@ -304,7 +305,7 @@ module.exports = function(serviceConfig) {
                     }
                 }
 
-                deferred.resolve( collectionItems );
+                deferred.resolve( cursor ? ArrayStream(collectionItems) : collectionItems );
             });
 
             return deferred.promise;

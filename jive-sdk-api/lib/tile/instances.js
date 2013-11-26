@@ -63,8 +63,8 @@ exports.save = function (instance) {
     return this.persistence().save(this.getCollection(), instance.id, instance );
 };
 
-exports.find = function ( keyValues, expectOne ) {
-    return this.persistence().find(this.getCollection(), keyValues).then( function( found ) {
+exports.find = function ( keyValues, expectOne, cursor ) {
+    return this.persistence().find(this.getCollection(), keyValues, cursor).then( function( found ) {
         return expectOne ? returnOne( found ) : found;
     } );
 };
@@ -73,8 +73,8 @@ exports.findByID = function (instanceID) {
     return this.find( { "id" : instanceID }, true );
 };
 
-exports.findByDefinitionName = function (definitionName) {
-    return this.find( { "name": definitionName } );
+exports.findByDefinitionName = function (definitionName, cursor) {
+    return this.find( { "name": definitionName }, false, cursor );
 };
 
 exports.findByScope = function (scope) {
@@ -93,8 +93,8 @@ exports.findByCommunity = function (community) {
     return this.find( { "jiveCommunity" : community }, true );
 };
 
-exports.findAll = function () {
-    return this.find( null );
+exports.findAll = function (cursor) {
+    return this.find( null, false, cursor );
 };
 
 exports.remove = function (instanceID) {

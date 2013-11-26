@@ -16,6 +16,7 @@
 
 var q = require('q');
 var jive = require('../../api');
+var ArrayStream = require('stream-array');
 
 /**
  * New instances of this module will separate state from every other instance.
@@ -95,8 +96,8 @@ module.exports = function() {
          * @param collectionID
          * @param keyValues
          */
-        find: function( collectionID, keyValues ) {
-            return q.fcall( function() {
+        find: function( collectionID, keyValues, cursor ) {
+            var p = q.defer();
 
                 var collectionItems = [];
                 var collection = getCollection(collectionID );
@@ -156,8 +157,13 @@ module.exports = function() {
                     }
                 }
 
-                return collectionItems;
-            });
+                if ( !cursor ) {
+                    p.resolve( collectionItems );
+                } else {
+                    var stream = ArrayStream(collectionItems);
+                    p.resolve(stream );
+                }
+            return p.promise;
         },
 
         /**
