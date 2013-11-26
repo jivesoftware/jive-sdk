@@ -15,7 +15,7 @@
 
         var json = config || { };
 
-        json.project = json.project || container.name;
+        json.project = json.project || (container && container.name) || "";
 
         // prepopulate the sequence input dialog
         $("#project").val( json.project);
