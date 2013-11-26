@@ -193,11 +193,10 @@ exports.setupServices = function( app, definitionName, svcDir, setupEventListene
             }
 
             // event handlers
-            if (target.eventHandlers) {
-                target.eventHandlers.forEach(function (handlerInfo) {
-                    setupEventListener(handlerInfo, definitionName, setupContext);
-                });
-            }
+            target.eventHandlers = target.eventHandlers || [];
+            target.eventHandlers.forEach(function (handlerInfo) {
+                setupEventListener(handlerInfo, definitionName, setupContext);
+            });
 
             // recurrent tasks
             // these are scheduled only if they haven't yet been scheduled by some other node
@@ -254,13 +253,11 @@ exports.setupServices = function( app, definitionName, svcDir, setupEventListene
                     } else {
                         // task did come with an inline handler;
                         // mix it into the list of target eventHandlers
-                        if ( target.eventHandlers ) {
-                            setupEventListener( {
-                                'event' : eventID,
-                                'handler' : handler
-                            }, definitionName );
-                            target.eventHandlers.push( );
-                        }
+                        setupEventListener( {
+                            'event' : eventID,
+                            'handler' : handler
+                        }, definitionName );
+                        target.eventHandlers.push( );
                     }
 
                     context['event'] = eventID;

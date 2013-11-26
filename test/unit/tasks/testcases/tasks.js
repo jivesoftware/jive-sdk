@@ -62,6 +62,31 @@ describe('jive', function () {
             });
         });
 
+        it('service with only task defined', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+            var newInstance = testUtils.createExampleInstance();
+            newInstance['name'] = 'samplelist';
+
+            testUtils.setupService(jive,
+                    testUtils.createBaseServiceOptions('/services/tile_tasks')
+                ).then( function() {
+                    return testUtils.waitSec(0.3);
+                }).then( function() {
+                    return jive.service.options['__testData'] ? q.resolve() : q.reject();
+                }).then(
+                function() {
+                    jive.service.stop().then( function() {
+                        done();
+                    });
+                },
+                function (e) {
+                    jive.service.stop().then( function() {
+                        assert.fail(e[0], e[1]);
+                    });
+                }
+            );
+        });
 
 
     });
