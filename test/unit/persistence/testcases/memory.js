@@ -3,7 +3,7 @@ var test = require('../basePersistenceTest');
 
 describe('jive', function () {
 
-    describe('#persistence.memory', function () {
+    describe ('#persistence.memory', function () {
 
         it('save', function (done) {
             var jive = this['jive'];

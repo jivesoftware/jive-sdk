@@ -128,8 +128,22 @@ module.exports = function() {
                                         }
                                     }
 
+                                    if ( keyValue['$gte'] ) {
+                                        if ( entryObj < keyValue['$gte'] ) {
+                                            match = false;
+                                            break;
+                                        }
+                                    }
+
                                     if ( keyValue['$lt'] ) {
                                         if ( entryObj >= keyValue['$lt'] ) {
+                                            match = false;
+                                            break;
+                                        }
+                                    }
+
+                                    if ( keyValue['$lte'] ) {
+                                        if ( entryObj > keyValue['$lte'] ) {
                                             match = false;
                                             break;
                                         }

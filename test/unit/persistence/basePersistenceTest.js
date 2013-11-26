@@ -128,12 +128,34 @@ exports.testFind = function( testUtils, persistence ) {
                 });
             })
 
+            // find using gt operation
+            .then( function( ) {
+                return persistence.find('myOtherCollection',
+                    { 'data.number' : { '$gte' : 2 } }
+                ).then( function(result) {
+                    if ( result.length != 4 ) {
+                        deferred.reject('Failed gt');
+                    }
+                });
+            })
+
             // find using lt operation
             .then( function( ) {
                 return persistence.find('myOtherCollection',
                     { 'data.number' : { '$lt' : 3 } }
                 ).then( function(result) {
                     if ( result.length != 2 ) {
+                        deferred.reject('Failed lt');
+                    }
+                });
+            })
+
+            // find using lte operation
+            .then( function( ) {
+                return persistence.find('myOtherCollection',
+                    { 'data.number' : { '$lte' : 3 } }
+                ).then( function(result) {
+                    if ( result.length != 3 ) {
                         deferred.reject('Failed lt');
                     }
                 });
