@@ -183,8 +183,8 @@ module.exports = function() {
                             return null;
                         }
                         this.nextCtr++;
-                        if ( this.nextCtr > this.fullCollection.length ) {
-                            return null;
+                        if ( this.nextCtr > this.fullCollection.length - 1 ) {
+                            processorFunction(null, null);
                         } else {
                             processorFunction(null, this.fullCollection[this.nextCtr]);
                         }
