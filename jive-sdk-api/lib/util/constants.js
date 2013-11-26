@@ -47,3 +47,5 @@ exports.roles = {
     'PUSHER':'pusher',
     'HTTP_HANDLER':'http'
 };
+
+exports.SECURITY_STRING = "throw 'allowIllegalResourceCall is false.';\n";

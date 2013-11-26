@@ -23,6 +23,7 @@ var mustache = require('mustache');
 var jive = require('../../api');
 var oauthUtil = require('./oauthUtil');
 var crypto = require('crypto');
+var constants = require("./constants");
 
 var hex_high_10 = { // set the highest bit and clear the next highest
     '0': '8',
@@ -252,6 +253,10 @@ exports.buildRequest = function (url, method, postBody, headers, requestOptions)
     ).execute(
         // success
         function (response) {
+            var body = response && response.entity && response.entity.body;
+            if (body && body.indexOf(constants.SECURITY_STRING) === 0) {
+                response.entity.body = body.substring(constants.SECURITY_STRING.length);
+            }
             deferred.resolve(response);
         },
 

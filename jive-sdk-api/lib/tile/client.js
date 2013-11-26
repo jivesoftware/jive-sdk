@@ -25,6 +25,7 @@
 
 var jive = require('../../api');
 var util = require('util');
+var constants = require('../util/constants');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Private
@@ -38,7 +39,6 @@ var configuration = {
 };
 
 var JIVE_OAUTH2_TOKEN_REQUEST_PATH = "/oauth2/token";
-var SECURITY_STRING = "throw 'allowIllegalResourceCall is false.';\n";
 
 var requestMaker = function (method, server, path, params) {
     var override = process.env['jive_jiveid_servers_' + server];
@@ -106,9 +106,7 @@ exports.getWithTileInstanceAuth = function (tileInstance, url) {
         }
 
         var body = response.entity.body;
-        if (body.indexOf(SECURITY_STRING) === 0) {
-            response.entity.body = body = body.substring(SECURITY_STRING.length);
-        }
+
         try {
             response.entity = JSON.parse(body);
         }

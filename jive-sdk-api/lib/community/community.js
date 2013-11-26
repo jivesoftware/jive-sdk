@@ -85,7 +85,6 @@ exports.doRequest = function( community, options ) {
 
     if( !oauth ) {
         jive.logger.info("No oauth credentials found.  Continuing without them.");
-        debugger;
     }
 
     if( path.charAt(0) !== '/' ) {
@@ -100,7 +99,9 @@ exports.doRequest = function( community, options ) {
 
     var url = jiveUrl + path;
 
-    headers.Authorization = 'Bearer ' + oauth['access_token'];
+    if(oauth) {
+        headers.Authorization = 'Bearer ' + oauth['access_token'];
+    }
 
     return jive.util.buildRequest( url, options.method, options.postBody, headers, options.requestOptions );
 };
