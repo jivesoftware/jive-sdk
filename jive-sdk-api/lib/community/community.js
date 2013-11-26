@@ -68,6 +68,43 @@ exports.parseJiveCommunity = function( jiveUrl ) {
     return parts.length > 1 ? parts[1] : parts[0];
 };
 
+
+/**
+ * Make a request to the current community.
+ *
+ * @param community
+ * @param options
+ * @returns {*}
+ */
+exports.doRequest = function( community, options ) {
+    options = options || {};
+    var path = options.path,
+        headers = options.headers || {},
+        oauth = options.oauth || community.oauth,
+        jiveUrl = community.jiveUrl;
+
+    if( !oauth ) {
+        jive.logger.info("No oauth credentials found.  Continuing without them.");
+        debugger;
+    }
+
+    if( path.charAt(0) !== '/' ) {
+        // ensure there a starting /
+        path = "/" + path;
+    }
+
+    if( jiveUrl.slice(-1) === '/') {
+        // Trim the last /
+        jiveUrl = jiveUrl.slice(0, -1);
+    }
+
+    var url = jiveUrl + path;
+
+    headers.Authorization = 'Bearer ' + oauth['access_token'];
+
+    return jive.util.buildRequest( url, options.method, options.postBody, headers, options.requestOptions );
+};
+
 function validateRegistration(registration) {
 
     if ( jive.context.config['development'] == true ) {
