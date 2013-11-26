@@ -46,6 +46,21 @@ exports.testFind = function( testUtils, persistence ) {
             .then( function( ) {
                 return persistence.save('myCollection', '789', { 'key': '3', 'data': { 'name': 'abbey', 'age' : '6' } });
             })
+            .then( function( ) {
+                return persistence.save('myOtherCollection', '1', { 'data' : { 'number' : 1 } } );
+            })
+            .then( function( ) {
+                return persistence.save('myOtherCollection', '2', { 'data' : { 'number' : 2 } } );
+            })
+            .then( function( ) {
+                return persistence.save('myOtherCollection', '3', { 'data' : { 'number' : 3 } } );
+            })
+            .then( function( ) {
+                return persistence.save('myOtherCollection', '4', { 'data' : { 'number' : 4 } } );
+            })
+            .then( function( ) {
+                return persistence.save('myOtherCollection', '5', { 'data' : { 'number' : 5 } } );
+            })
 
             // find by ID
             .then( function( ) {
@@ -100,7 +115,52 @@ exports.testFind = function( testUtils, persistence ) {
                         deferred.reject('Failed find multiple results');
                     }
                 });
-            }).then( function() {
+            })
+
+            // find using gt operation
+            .then( function( ) {
+                return persistence.find('myOtherCollection',
+                    { 'data.number' : { '$gt' : 2 } }
+                ).then( function(result) {
+                    if ( result.length != 3 ) {
+                        deferred.reject('Failed gt');
+                    }
+                });
+            })
+
+            // find using lt operation
+            .then( function( ) {
+                return persistence.find('myOtherCollection',
+                    { 'data.number' : { '$lt' : 3 } }
+                ).then( function(result) {
+                    if ( result.length != 2 ) {
+                        deferred.reject('Failed lt');
+                    }
+                });
+            })
+
+            // find using lt and gt operation (range)
+            .then( function( ) {
+                return persistence.find('myOtherCollection',
+                    { 'data.number' : { '$gt' : 2,  '$lt' : 5 } }
+                ).then( function(result) {
+                    if ( result.length != 2 ) {
+                        deferred.reject('Failed range (gt, lt)');
+                    }
+                });
+            })
+
+            .then( function( ) {
+                return persistence.find('myOtherCollection',
+                    { 'data.number' : { '$in' : [ 2, 3 ] } }
+                ).then( function(result) {
+                    if ( result.length != 2 ) {
+                        deferred.reject('Failed in');
+                    }
+                });
+            })
+
+            .then( function() {
                 deferred.resolve();
             });
     } catch( e ) {

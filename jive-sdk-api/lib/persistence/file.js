@@ -265,9 +265,35 @@ module.exports = function(serviceConfig) {
                                     entryObj = entryObj[keyPart];
                                 }
 
-                                if ( entryObj !== keyValues[ findKey ] ) {
-                                    match = false;
-                                    break;
+                                var keyValue = keyValues[ findKey ];
+                                if ( typeof keyValue == 'object' ) {
+
+                                    if ( keyValue['$gt'] ) {
+                                        if ( entryObj <= keyValue['$gt'] ) {
+                                            match = false;
+                                            break;
+                                        }
+                                    }
+
+                                    if ( keyValue['$lt'] ) {
+                                        if ( entryObj >= keyValue['$lt'] ) {
+                                            match = false;
+                                            break;
+                                        }
+                                    }
+
+                                    if ( keyValue['$in'] ) {
+                                        if ( keyValue['$in'].indexOf(entryObj) < 0 ) {
+                                            match = false;
+                                            break;
+                                        }
+                                    }
+
+                                } else {
+                                    if ( entryObj !== keyValue ) {
+                                        match = false;
+                                        break;
+                                    }
                                 }
                             }
                         }
