@@ -187,8 +187,46 @@ exports.testFind = function( testUtils, persistence ) {
                     cursor.on('error', function(e) {
                         p.reject(e);
                     });
+                });
+            })
 
-                    return p.promise;
+            // find using iterator
+            .then( function( ) {
+                return persistence.find('myOtherCollection',
+                    { 'data.number' : { '$lt' : 3 } }, true
+                ).then( function(cursor) {
+                    var foundCount = 0;
+                    var deferred = q.defer();
+                    var process = function(entry) {
+                        var p = q.defer();
+                        if ( [1,2].indexOf( entry['data']['number']) < 0 ) {
+                            deferred.reject("failed cursor");
+                        } else {
+                            foundCount++;
+                            deferred.resolve();
+                        }
+                        return p.promise;
+                    };
+
+                    function processItem(err, item) {
+                        if(item === null) {
+
+                            if ( foundCount != 2 ) {
+                                deferred.reject('failed cursor');
+                            } else {
+                                deferred.resolve();
+                            }
+                            return;
+                        }
+
+                        process(item).then( function() {
+                            cursor.next(processItem);
+                        })
+                    }
+
+                    cursor.next(processItem);
+
+                    return deferred.promise;
                 });
             })
 

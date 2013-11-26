@@ -161,6 +161,21 @@ module.exports = function() {
                     p.resolve( collectionItems );
                 } else {
                     var stream = ArrayStream(collectionItems);
+                    // graft next method
+                    stream.nextCtr = 0;
+                    stream.fullCollection = collectionItems;
+                    stream.next = function(processorFunction) {
+                        if ( !processorFunction ) {
+                            return null;
+                        }
+                        this.nextCtr++;
+                        if ( this.nextCtr > this.fullCollection.length ) {
+                            return null;
+                        } else {
+                            processorFunction(null, this.fullCollection[this.nextCtr]);
+                        }
+                    };
+
                     p.resolve(stream );
                 }
             return p.promise;
