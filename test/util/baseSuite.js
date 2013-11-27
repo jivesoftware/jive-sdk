@@ -2,59 +2,42 @@ var Mocha = require('mocha');
 var fs = require('fs');
 var q = require('q');
 var path = require('path');
-var mockery = require('mockery');
 var testUtils = require('./testUtils');
 
 exports.getTestDir = function() {
     // overridden
 };
 
-var cleanup = function() {
-    mockery.resetCache();
-};
-
 exports.beforeTest = function() {
     // overridden
-    mockery.enable();
 };
 
 exports.onTestPass = function(test) {
-    cleanup();
+    // overridden
 };
 
 exports.onTestFail = function(test) {
-    exports.allClear = false;
-    cleanup();
+    // overridden
 };
 
 exports.onTestStart = function(test) {
 };
 
 exports.setupSuite = function(test) {
-    test['testUtils'] = testUtils;
-    test['jive'] = exports.jive;
-    test['mockery'] = mockery;
-
-    mockery.registerMock('jive-sdk', exports.jive);
-
-    mockery.enable();
-    mockery.warnOnReplace(false);
-    mockery.warnOnUnregistered(false);
+    // overridden
 };
 
-exports.jive = {};
-
 exports.teardownSuite = function(test) {
-    mockery.deregisterAll();
-    mockery.disable();
+    // overridden
 };
 
 exports.allClear = true;
+exports.context = {};
 
 exports.runTests = function(options) {
     var deferred = q.defer();
 
-    exports.jive = options['jive'];
+    exports.context = options['context'];
 
     var mochaOptions = {
         reporter: 'dot',
@@ -110,6 +93,7 @@ exports.runTests = function(options) {
         });
 
         runner.on('fail', function (test) {
+            that.allClear = false;
             that.onTestFail(test);
         });
 
