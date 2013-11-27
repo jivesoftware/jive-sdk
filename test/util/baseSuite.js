@@ -67,7 +67,7 @@ exports.runTests = function(options) {
         mochaOptions['reporter'] = 'html-cov';
         suppressMessages = true;
     } else {
-        mochaOptions['reporter'] = 'min';
+        mochaOptions['reporter'] = 'list';
     }
 
     var mocha = new Mocha(mochaOptions);
