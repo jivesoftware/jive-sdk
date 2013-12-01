@@ -5,109 +5,9 @@ var crypto = require('crypto');
 var temp = require('temp');
 var assert = require('assert');
 
-// track temp files
-temp.track();
+var sdkUtils = Object.create(require('jive-testing-framework/testUtils'));
 
-exports.recursiveDirectoryProcessor = function (currentFsItem, root, targetRoot, force, processor) {
-
-    var recurseDirectory = function (directory) {
-        return q.nfcall(fs.readdir, directory).then(function (subItems) {
-            var promises = [];
-            subItems.forEach(function (subItem) {
-                promises.push(exports.recursiveDirectoryProcessor(directory + '/' + subItem, root, targetRoot, force, processor));
-            });
-
-            return q.all(promises);
-        });
-    };
-
-    return q.nfcall(fs.stat, currentFsItem).then(function (stat) {
-        var targetPath = targetRoot + '/' + currentFsItem.substr(root.length + 1, currentFsItem.length);
-
-        if (stat.isDirectory()) {
-            if (root !== currentFsItem) {
-                return fsexists(targetPath).then(function (exists) {
-                    if (root == currentFsItem || (exists && !force)) {
-                        return recurseDirectory(currentFsItem);
-                    } else {
-                        return processor('dir', currentFsItem, targetPath).then(function () {
-                            return recurseDirectory(currentFsItem)
-                        });
-                    }
-                });
-            }
-
-            return recurseDirectory(currentFsItem);
-        }
-
-        // must be a file
-        return fsexists(targetPath).then(function (exists) {
-            if (!exists || force) {
-                return processor('file', currentFsItem, targetPath)
-            } else {
-                return q.fcall(function () {
-                });
-            }
-        });
-    });
-};
-
-var fsexists = function (path) {
-    var deferred = q.defer();
-    var method = fs.exists ? fs.exists : require('path').exists;
-    method(path, function (exists) {
-        deferred.resolve(exists);
-    });
-
-    return deferred.promise;
-};
-
-var hex_high_10 = { // set the highest bit and clear the next highest
-    '0': '8',
-    '1': '9',
-    '2': 'a',
-    '3': 'b',
-    '4': '8',
-    '5': '9',
-    '6': 'a',
-    '7': 'b',
-    '8': '8',
-    '9': '9',
-    'a': 'a',
-    'b': 'b',
-    'c': '8',
-    'd': '9',
-    'e': 'a',
-    'f': 'b'
-};
-
-exports.guid = function (src) {
-    if (!src) {
-        return uuid.v4();
-    } else {
-        var sum = crypto.createHash('sha1');
-
-        // namespace in raw form. FIXME using ns:URL for now, what should it be?
-        sum.update(new Buffer('a6e4EZ2tEdGAtADAT9QwyA==', 'base64'));
-
-        // add HTTP path
-        sum.update(src);
-
-        // get sha1 hash in hex form
-        var u = sum.digest('hex');
-
-        // format as UUID (add dashes, version bits and reserved bits)
-        u =
-            u.substr(0, 8) + '-' + // time_low
-                u.substr(8, 4) + '-' + // time_mid
-                '5' + // time_hi_and_version high 4 bits (version)
-                u.substr(13, 3) + '-' + // time_hi_and_version low 4 bits (time high)
-                hex_high_10[u.substr(16, 1)] + u.substr(17, 1) + // cloc_seq_hi_and_reserved
-                u.substr(18, 2) + '-' + // clock_seq_low
-                u.substr(20, 12); // node
-        return u;
-    }
-};
+module.exports = sdkUtils;
 
 var sampleDefinition = {
     "displayName": "Filter Results",
@@ -147,30 +47,31 @@ var sampleCommunity = {
     "clientSecret": "o8q1mnhhjy1gb497ngo0kvw6fmpbjfl8.s",
     "jiveCommunity": "lt-a7-120000.jiveland.com"
 };
-exports.createExampleExternalActivity = function(externalID) {
+
+sdkUtils.createExampleExternalActivity = function(externalID) {
     return {
         "activity": {
             "action": {
                 "name": "posted",
-                "description": exports.guid()
+                "description": sdkUtils.guid()
             },
             "actor": {
-                "name": exports.guid(),
+                "name": sdkUtils.guid(),
                 "email": "actor@email.com"
             },
             "object": {
                 "type": "website",
-                "url": exports.createFakeURL(),
+                "url": sdkUtils.createFakeURL(),
                 "image": "http://farm6.staticflickr.com/5106/5678094118_a78e6ff4e7.jpg",
-                "title": exports.guid(),
-                "description": exports.guid()
+                "title": sdkUtils.guid(),
+                "description": sdkUtils.guid()
             },
-            "externalID": exports.guid()
+            "externalID": sdkUtils.guid()
         }
     }
 };
 
-exports.createExampleJiveActivity = function(parent) {
+sdkUtils.createExampleJiveActivity = function(parent) {
     var commentURL = parent + '/comments';
     return {
         "resources" : {
@@ -182,59 +83,59 @@ exports.createExampleJiveActivity = function(parent) {
     }
 };
 
-exports.createExampleComment = function(externalID, externalActivityID) {
+sdkUtils.createExampleComment = function(externalID, externalActivityID) {
     return {
         "author": {
             "name": {
-                "givenName": exports.guid(),
-                "familyName": exports.guid()
+                "givenName": sdkUtils.guid(),
+                "familyName": sdkUtils.guid()
             },
-            "email": exports.guid() + '@' + exports.guid() + '.com'
+            "email": sdkUtils.guid() + '@' + sdkUtils.guid() + '.com'
         },
-        "content": {"type": "text/html", "text": "<p>" + exports.guid() + "</p>"},
+        "content": {"type": "text/html", "text": "<p>" + sdkUtils.guid() + "</p>"},
         "type": "comment",
         "externalID": externalID,
         "externalActivityID": externalActivityID
     };
 };
 
-exports.createExampleDefinition = function(style) {
+sdkUtils.createExampleDefinition = function(style) {
     var definition = JSON.parse(JSON.stringify(sampleDefinition));
-    definition['name'] = exports.guid();
-    definition['id'] = exports.guid();
+    definition['name'] = sdkUtils.guid();
+    definition['id'] = sdkUtils.guid();
     definition['style'] = style || 'LIST';
     return definition;
 };
 
-exports.createExampleInstance = function(jiveCommunity, name, pushUrl) {
+sdkUtils.createExampleInstance = function(jiveCommunity, name, pushUrl) {
     var instance = JSON.parse(JSON.stringify(sampleTileInstance));
-    instance['name'] = name || exports.guid();
-    instance['id'] = exports.guid();
-    instance['guid'] = exports.guid();
-    instance['accessToken'] = exports.guid();
-    instance['refreshToken'] = exports.guid();
-    instance['scope'] = exports.guid();
-    instance['url'] = pushUrl || instance['url'] + '/' + exports.guid();
-    instance['jiveCommunity'] = jiveCommunity || exports.guid() + '.' + instance['jiveCommunity'];
+    instance['name'] = name || sdkUtils.guid();
+    instance['id'] = sdkUtils.guid();
+    instance['guid'] = sdkUtils.guid();
+    instance['accessToken'] = sdkUtils.guid();
+    instance['refreshToken'] = sdkUtils.guid();
+    instance['scope'] = sdkUtils.guid();
+    instance['url'] = pushUrl || instance['url'] + '/' + sdkUtils.guid();
+    instance['jiveCommunity'] = jiveCommunity || sdkUtils.guid() + '.' + instance['jiveCommunity'];
     return instance;
 };
 
-exports.createExampleCommunity = function(jiveUrl) {
+sdkUtils.createExampleCommunity = function(jiveUrl) {
     var community = JSON.parse(JSON.stringify(sampleCommunity));
-    community['jiveUrl'] = jiveUrl || exports.createFakeURL();
-    community['tenantId'] = exports.guid();
-    community['clientId'] = exports.guid();
-    community['clientSecret'] = exports.guid();
+    community['jiveUrl'] = jiveUrl || sdkUtils.createFakeURL();
+    community['tenantId'] = sdkUtils.guid();
+    community['clientId'] = sdkUtils.guid();
+    community['clientSecret'] = sdkUtils.guid();
     community['jiveCommunity'] = require('url').parse(community['jiveUrl']).host;
     return community;
 };
 
-exports.persistExampleDefinitions = function(jive, quantity, style) {
+sdkUtils.persistExampleDefinitions = function(jive, quantity, style) {
     var definitions = [];
     var promises = [];
 
     for ( var i = 0; i < quantity; i++ ){
-        var definition = exports.createExampleDefinition(style);
+        var definition = sdkUtils.createExampleDefinition(style);
 
         var p = jive.tiles.definitions.save(definition).then(function(saved) {
             definitions.push(saved);
@@ -248,12 +149,12 @@ exports.persistExampleDefinitions = function(jive, quantity, style) {
     });
 };
 
-exports.persistExampleInstances = function(jive, quantity, jiveCommunity, name, pushUrl) {
+sdkUtils.persistExampleInstances = function(jive, quantity, jiveCommunity, name, pushUrl) {
     var instances = [];
     var promises = [];
 
     for ( var i = 0; i < quantity; i++ ){
-        var instance = exports.createExampleInstance(jiveCommunity, name, pushUrl);
+        var instance = sdkUtils.createExampleInstance(jiveCommunity, name, pushUrl);
 
         var p = jive.tiles.save(instance).then(function(saved) {
             instances.push(saved);
@@ -267,12 +168,12 @@ exports.persistExampleInstances = function(jive, quantity, jiveCommunity, name, 
     });
 };
 
-exports.persistExampleCommunities = function(jive, quantity,jiveUrl) {
+sdkUtils.persistExampleCommunities = function(jive, quantity,jiveUrl) {
     var communities = [];
     var promises = [];
 
     for ( var i = 0; i < quantity; i++ ){
-        var instance = exports.createExampleCommunity(jiveUrl);
+        var instance = sdkUtils.createExampleCommunity(jiveUrl);
 
         var p = jive.community.save(instance).then(function(saved) {
             communities.push(saved);
@@ -286,32 +187,7 @@ exports.persistExampleCommunities = function(jive, quantity,jiveUrl) {
     });
 };
 
-exports.createFakeURL = function(fakePath) {
-    var url = 'http://' + exports.guid() + '.com';
-    if ( fakePath ) {
-        url += '/' + exports.guid();
-    }
-
-    return url;
-};
-
-exports.createTempDir = function() {
-    var deferred = q.defer();
-    temp.mkdir(exports.guid(), function(err, dirPath) {
-        deferred.resolve(dirPath);
-    });
-    return deferred.promise;
-};
-
-exports.cleanupTemp = function() {
-    temp.cleanup();
-};
-
-exports.getResourceFilePath = function(filename) {
-    return process.cwd() + '/resources/' + filename;
-};
-
-exports.setupService = function(jive, config) {
+sdkUtils.setupService = function(jive, config) {
     var p = q.defer();
     var startHttp = config && (!config['role'] || config['role'] == 'http');
     var app = startHttp ? require('express')() : {use: function() {}};
@@ -348,59 +224,19 @@ exports.setupService = function(jive, config) {
     return p.promise;
 };
 
-exports.waitSec = function(seconds) {
-    var deferred = q.defer();
-    setTimeout( function() { deferred.resolve() }, seconds * 1000);
-    return deferred.promise;
-};
-
-exports.createBaseServiceOptions = function(sourceDir) {
+sdkUtils.createBaseServiceOptions = function(sourceDir) {
     return {
-        'svcRootDir' : exports.getResourceFilePath(sourceDir),
+        'svcRootDir' : sdkUtils.getResourceFilePath(sourceDir),
         'persistence' : 'memory',
         'logLevel' : 'FATAL',
         'skipCreateExtension' : true,
-        'clientUrl' : exports.createFakeURL(),
+        'clientUrl' : sdkUtils.createFakeURL(),
         'role' : 'worker',
         'suppressHttpLogging' : true
     };
 };
 
-exports.createServer = function(config) {
-    var d = q.defer();
-    var server = require('./serverControl');
-
-    server.start(config).then(
-        function() {
-            // build up endpoints
-            var routes = config['routes'] || [];
-            var promises = [];
-
-            routes.forEach( function(route) {
-                if ( route && route['method'] ) {
-                    var p = server.setEndpoint(
-                        route['method'],
-                        route['statusCode'],
-                        route['path'],
-                        route['body'],
-                        route['handler']
-                    );
-                    promises.push(p);
-                }
-            });
-
-            return q.all(promises);
-        }, function() {
-           return q.reject();
-        }
-    ).then( function() {
-        return d.resolve(server);
-    });
-
-    return d.promise;
-};
-
-exports.createAuthorizationHeader = function( community ) {
+sdkUtils.createAuthorizationHeader = function( community ) {
     var jiveURL = community['jiveUrl'], tenantId = community['tenantId'],
         clientId = community['clientId'], clientSecret = community['clientSecret'];
     var header = 'JiveEXTN ';
@@ -419,7 +255,7 @@ exports.createAuthorizationHeader = function( community ) {
     return header;
 };
 
-exports.runServerTest = function(testUtils, jive, done, serverOptions, test, tileDir) {
+sdkUtils.runServerTest = function(testUtils, jive, done, serverOptions, test, tileDir) {
     serverOptions = serverOptions || {
         'port' : 5556,
         'routes' : [
@@ -479,33 +315,4 @@ exports.runServerTest = function(testUtils, jive, done, serverOptions, test, til
             });
         }
     );
-};
-
-exports.fsread = function (path) {
-    var deferred = q.defer();
-    fs.readFile(path, function (err, data) {
-        deferred.resolve(data);
-        return data;
-    });
-    return deferred.promise;
-};
-
-exports.fsreadJson = function (path) {
-    return exports.fsread(path).then(function (data) {
-        return JSON.parse(new Buffer(data).toString());
-    });
-};
-
-exports.fswrite = function (data, path) {
-    var deferred = q.defer();
-
-    fs.writeFile(path, data, function (err) {
-        if (err) {
-            deferred.reject(err);
-        }
-        else {
-            deferred.resolve();
-        }
-    });
-    return deferred.promise;
 };

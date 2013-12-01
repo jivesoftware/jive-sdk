@@ -1,6 +1,6 @@
 {
     "dependencies": {
-
+        "jive-testing-framework" : "git+ssh://git@github.com/jivesoftware/jive-testing-framework.git",
         "mockery" : "*",
 	    "jscoverage" : "*",
         "temp" : "*",

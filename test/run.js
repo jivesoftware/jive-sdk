@@ -38,7 +38,7 @@ var runGroup = process.env.JIVE_SDK_TEST_RUN_GROUP || 'unit';
 var runTimeout = 5000 || process.env.JIVE_SDK_TEST_RUN_TIMEOUT || 2000;
 
 var makeRunner = function() {
-    var runner = Object.create(require('./util/baseSuite'));
+    var runner = Object.create(require('jive-testing-framework/baseSuite'));
     var mockery = require('mockery');
 
     runner.getParentSuiteName = function() {
@@ -62,12 +62,7 @@ var makeRunner = function() {
     };
 
     runner.setupSuite = function(test) {
-        test['testUtils'] = require('./util/testUtils');
-        test['jive'] = runner.context.jive;
-        test['mockery'] = mockery;
-
         mockery.registerMock('jive-sdk', runner.context.jive);
-
         mockery.enable();
         mockery.warnOnReplace(false);
         mockery.warnOnUnregistered(false);
@@ -93,7 +88,9 @@ if ( runMode =='test' ) {
     makeRunner().runTests(
         {
             'context' : {
-                'jive': realJive
+                'testUtils' : require('./util/testUtils'),
+                'jive': realJive,
+                'mockery' : require('mockery')
             },
             'runMode' : runMode,
             'testcases' :   process.cwd()  + '/' + runGroup,
@@ -125,7 +122,9 @@ if ( runMode =='test' ) {
             makeRunner().runTests(
                 {
                     'context' : {
-                        'jive': jive
+                        'testUtils' : require('./util/testUtils'),
+                        'jive': jive,
+                        'mockery' : require('mockery')
                     },
                     'runMode' : runMode,
                     'testcases' :   process.cwd()  + '/' + runGroup,
