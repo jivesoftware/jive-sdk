@@ -2,10 +2,12 @@ var realJive = require('../jive-sdk-service/api.js');
 var q = require('q');
 var path = require('path');
 var fs = require('fs');
+var mockery = require('mockery');
 
 var apiDirSrc = path.normalize(  process.cwd() + '/../jive-sdk-api' );
 var serviceDirSrc = path.normalize(  process.cwd() + '/../jive-sdk-service' );
 var apiDirTarget = path.normalize( process.cwd() + '/node_modules/jive-sdk-cov' );
+var testUtils = require('./util/testUtils');
 
 var setupCoverageDirs = function(apiDirSrc, apiDirTarget, excludes) {
     excludes = excludes || [];
@@ -38,40 +40,33 @@ var runGroup = process.env.JIVE_SDK_TEST_RUN_GROUP || 'unit';
 var runTimeout = 5000 || process.env.JIVE_SDK_TEST_RUN_TIMEOUT || 2000;
 
 var makeRunner = function() {
-    var runner = Object.create(require('jive-testing-framework/baseSuite'));
-    var mockery = require('mockery');
-
-    runner.getParentSuiteName = function() {
-        return 'jive';
-    };
-
     var cleanup = function() {
         mockery.resetCache();
     };
 
-    runner.beforeTest = function() {
-        mockery.enable();
-    };
-
-    runner.onTestPass = function(test) {
-        cleanup();
-    };
-
-    runner.onTestFail = function(test) {
-        cleanup();
-    };
-
-    runner.setupSuite = function(test) {
-        mockery.registerMock('jive-sdk', runner.context.jive);
-        mockery.enable();
-        mockery.warnOnReplace(false);
-        mockery.warnOnUnregistered(false);
-    };
-
-    runner.teardownSuite = function(test) {
-        mockery.deregisterAll();
-        mockery.disable();
-    };
+    var runner = testUtils.makeRunner( {
+        'eventHandlers' : {
+            'beforeTest' : function(test) {
+                mockery.enable();
+            },
+            'onTestPass' : function(test) {
+                cleanup();
+            },
+            'onTestFail' : function(test) {
+                cleanup();
+            },
+            'setupSuite' : function(test) {
+                mockery.registerMock('jive-sdk', runner.context.jive);
+                mockery.enable();
+                mockery.warnOnReplace(false);
+                mockery.warnOnUnregistered(false);
+            },
+            'teardownSuite' : function(test) {
+                mockery.deregisterAll();
+                mockery.disable();
+            }
+        }
+    });
 
     return runner;
 };
@@ -88,12 +83,13 @@ if ( runMode =='test' ) {
     makeRunner().runTests(
         {
             'context' : {
-                'testUtils' : require('./util/testUtils'),
+                'testUtils' : testUtils,
                 'jive': realJive,
-                'mockery' : require('mockery')
+                'mockery' : mockery
             },
+            'rootSuiteName'  : 'jive',
             'runMode' : runMode,
-            'testcases' :   process.cwd()  + '/' + runGroup,
+            'testcases' : process.cwd()  + '/' + runGroup,
             'timeout' : runTimeout
         }
     ).then( function(allClear) {
@@ -122,10 +118,11 @@ if ( runMode =='test' ) {
             makeRunner().runTests(
                 {
                     'context' : {
-                        'testUtils' : require('./util/testUtils'),
+                        'testUtils' : testUtils,
                         'jive': jive,
-                        'mockery' : require('mockery')
+                        'mockery' : mockery
                     },
+                    'rootSuiteName'  : 'jive',
                     'runMode' : runMode,
                     'testcases' :   process.cwd()  + '/' + runGroup,
                     'timeout' : runTimeout
