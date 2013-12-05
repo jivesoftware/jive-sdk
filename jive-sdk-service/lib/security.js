@@ -33,18 +33,25 @@ var findCredentials = function(req) {
     };
 
     var authorization = req.headers['authorization'];
+    var tenantID;
 
     if ( !jiveUrl && authorization ) {
-        jive.logger.debug("Trying to parse jiveURL from JiveEXTN authorization header...");
+        jive.logger.debug("Trying to parse jiveURL/tenantID from JiveEXTN authorization header...");
 
         // check authorization header
         var authVars = authorization.split(' ');
+        req['jive'] = {};
         if ( authVars[0] == 'JiveEXTN') {
             // try to parse out jiveURL
             var authParams = authVars[1].split('&');
             authParams.forEach( function(p) {
                 if (p.indexOf('jive_url') == 0 ) {
                     jiveUrl = decodeURIComponent( p.split("=")[1] );
+                    req['jive']['jiveURL'] = jiveUrl;
+                }
+                if (p.indexOf('tenant_id') == 0 ) {
+                    tenantID = decodeURIComponent( p.split("=")[1] );
+                    req['jive']['tenantID'] = tenantID;
                 }
             });
         } else {
