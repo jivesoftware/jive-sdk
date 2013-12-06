@@ -115,7 +115,9 @@ module.exports = function() {
                                 var entryObj = entryToInspect;
                                 for ( var k = 0; k < keyParts.length; k++ ) {
                                     var keyPart = keyParts[k];
-                                    entryObj = entryObj[keyPart];
+                                    if ( typeof entryObj == 'object' ) {
+                                        entryObj = entryObj[keyPart];
+                                    }
                                 }
 
                                 var keyValue = keyValues[ findKey ];
