@@ -15,80 +15,14 @@
  */
 
 /**
- * This is the network client. You may override specific servers by setting
- * environment variables, for example:
- *
- * jive.jiveid.servers.public=http://myjive:4000
- *
- * This will configure the client to use a different endpoint for Jive ID public.
+ * This is the jive network client.
  */
 
 var jive = require('../../api');
 var util = require('util');
 var constants = require('../util/constants');
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Private
-
-var configuration = {
-    "jiveid": {
-        "servers": {
-            "public": "https://jive-id-public.jiveon.com"
-        }
-    }
-};
-
 var JIVE_OAUTH2_TOKEN_REQUEST_PATH = "/oauth2/token";
-
-var requestMaker = function (method, server, path, params) {
-    var override = process.env['jive_jiveid_servers_' + server];
-    var serverUrl = override || configuration['jiveid']['servers'][server];
-    var url = serverUrl + path;
-
-    return jive.util.buildRequest(url, method, params['postObject'], params['headers']);
-};
-
-var jiveIDEndpointProvider = {
-
-    requestAccessToken: function (accessTokenRequest) {
-        return requestMaker("POST", "public", "/v1/oauth2/token", {
-            "postObject": accessTokenRequest,
-            "headers": {
-                "Content-Type": "application/json"
-            }
-        });
-    }
-};
-
-var tilePush = function (method, tileInstance, data, pushURL) {
-    var auth = 'Bearer ' + tileInstance['accessToken'];
-    var reqHeaders = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': auth
-    };
-
-    if ( data && !data['status'] ) {
-        // add an empty status object if it doesn't exist
-        data['status'] = {};
-    }
-
-    return jive.util.buildRequest(pushURL, method, data, reqHeaders);
-};
-
-var tileFetch = function (tileInstance, fetchURL) {
-    var auth = 'Bearer ' + tileInstance['accessToken'];
-    var reqHeaders = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': auth
-    };
-
-    return jive.util.buildRequest(fetchURL, 'GET', null, reqHeaders);
-};
-
-exports.tileFetch = tileFetch;
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Public
@@ -100,7 +34,7 @@ exports.tileFetch = tileFetch;
  * If this fails, returns the original response, so be careful to check if obj.statusCode exists in your callback.
  */
 exports.getWithTileInstanceAuth = function (tileInstance, url) {
-    return tileFetch(tileInstance, url ).then(function (response) {
+    return exports.tileFetch(tileInstance, url ).then(function (response) {
         if (!response.entity || !response.entity.body) {
             return response;
         }
@@ -126,9 +60,7 @@ exports.requestAccessToken = function (options, successCallback, failureCallback
 
     try {
         if ( !options.jiveUrl ) {
-            // if not working directly with a jive instance, then use jiveID to broker trust
-            var request = jiveIDEndpointProvider.requestAccessToken(accessTokenRequest);
-            request.then(successCallback, failureCallback);
+            throw new Error("Cannot request access token without a jiveUrl");
         } else {
             // otherwise we deal directly with jive
             var tokenRequestEndPoint = options.jiveUrl + JIVE_OAUTH2_TOKEN_REQUEST_PATH;
@@ -161,9 +93,7 @@ exports.refreshAccessToken = function (options, successCallback, failureCallback
 
     try {
         if ( !options.jiveUrl ) {
-            // if not working directly with a jive instance, then use jiveID to broker trust
-            var request = jiveIDEndpointProvider.requestAccessToken(accessTokenRequest);
-            request.then(successCallback, failureCallback);
+            throw new Error("Cannot refresh token without a jiveUrl");
         } else {
             // otherwise we deal directly with jive
             var tokenRequestEndPoint = options.jiveUrl + JIVE_OAUTH2_TOKEN_REQUEST_PATH;
@@ -199,6 +129,51 @@ exports.pushComment = function (tileInstance, comment, commentURL) {
     return tilePush('POST', tileInstance, comment, commentURL);
 };
 
+exports.fetchExtendedProperties = function( instance ) {
+    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
+        'GET', null, makeExternalPropsHeader(instance) );
+};
+
+exports.pushExtendedProperties = function( instance, props ) {
+    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
+        'POST', props, makeExternalPropsHeader(instance)  );
+};
+
+exports.removeExtendedProperties = function( instance ) {
+    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
+        'DELETE', null, makeExternalPropsHeader(instance) );
+};
+
+exports.tileFetch = function (tileInstance, fetchURL) {
+    var auth = 'Bearer ' + tileInstance['accessToken'];
+    var reqHeaders = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': auth
+    };
+
+    return jive.util.buildRequest(fetchURL, 'GET', null, reqHeaders);
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Private
+
+var tilePush = function (method, tileInstance, data, pushURL) {
+    var auth = 'Bearer ' + tileInstance['accessToken'];
+    var reqHeaders = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': auth
+    };
+
+    if ( data && !data['status'] ) {
+        // add an empty status object if it doesn't exist
+        data['status'] = {};
+    }
+
+    return jive.util.buildRequest(pushURL, method, data, reqHeaders);
+};
+
 function endsWith(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }
@@ -215,23 +190,8 @@ var extractExternalPropsUrl = function( instance ) {
     throw new Error( 'Could not extract external props url from instance' );
 };
 
-
 var makeExternalPropsHeader = function(instance ) {
     var auth = 'Bearer ' + instance['accessToken'];
     return { 'X-Client-Id': jive.context.config['clientId'], 'Authorization' : auth };
 };
 
-exports.fetchExtendedProperties = function( instance ) {
-    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
-        'GET', null, makeExternalPropsHeader(instance) );
-};
-
-exports.pushExtendedProperties = function( instance, props ) {
-    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
-        'POST', props, makeExternalPropsHeader(instance)  );
-};
-
-exports.removeExtendedProperties = function( instance ) {
-    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
-        'DELETE', null, makeExternalPropsHeader(instance) );
-};

@@ -455,12 +455,6 @@ describe('jive', function () {
             // setup memory persistence
             jive.context['persistence'] = new jive.persistence.memory();
 
-            var instance = testUtils.createExampleInstance();
-
-            var accessToken = instance['accessToken'];
-            var scope = instance['scope'];
-            var refreshToken =  instance['refreshToken'];
-
             var mockery = this['mockery'];
 
             mockery.registerMock('request', function (options, cb) {
@@ -477,6 +471,14 @@ describe('jive', function () {
 
             testUtils.persistExampleCommunities(jive, 1)
             .then( function(community) {
+
+                var instance = testUtils.createExampleInstance();
+                    instance['jiveCommunity'] = community['jiveCommunity'];
+
+                var accessToken = instance['accessToken'];
+                var scope = instance['scope'];
+                var refreshToken =  instance['refreshToken'];
+
                 return jive.tiles.refreshAccessToken(instance).then(
                     function(updatedInstance) {
                         if ( !updatedInstance ) {
@@ -502,7 +504,7 @@ describe('jive', function () {
                     },
 
                     function(e) {
-                        assert.fail();
+                        assert.fail(e);
                     });
                 })
 

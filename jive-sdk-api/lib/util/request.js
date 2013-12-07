@@ -1,0 +1,218 @@
+/*
+ * Copyright 2013 Jive Software
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+var URL = require('url');
+var request = require('request');
+var q = require('q');
+var jive = require('../../api');
+var constants = require("./constants");
+
+/**
+ * By default this will build a request of type 'application/json'. Set a Content-Type header
+ * explicitly if its supposed to be a different type.
+ * @param url
+ * @param method
+ * @param postBody leave null unless PUT or POST
+ * @param headers leave null or empty [] if no additional headers
+ * @param requestOptions leave null or empty [] if no additional request optinos
+ * @return {*}
+ */
+exports.buildRequest = function (url, method, postBody, headers, requestOptions) {
+    var urlParts = URL.parse(url, true);
+    var path = urlParts.path;
+    var host = urlParts.hostname;
+    var port = urlParts.port;
+    var protocol = urlParts.protocol;
+
+    var deferred = q.defer();
+
+    requestOptions = requestOptions || {};
+    if ( jive.context && jive.context.config ) {
+        if ( jive.context.config['development'] == true ) {
+            requestOptions['rejectUnauthorized']  = false;
+        }
+    }
+
+    requestMaker(
+        method,
+        { host: host, port: port },
+        path,
+        headers || {},
+        postBody,
+        protocol && protocol.indexOf('https') == 0,
+        requestOptions || {}
+    ).execute(
+        // success
+        function (response) {
+            var body = response && response.entity && response.entity.body;
+            if (body && body.indexOf(constants.SECURITY_STRING) === 0) {
+                response.entity.body = body.substring(constants.SECURITY_STRING.length);
+            }
+            deferred.resolve(response);
+        },
+
+        // failure
+        function (response) {
+            deferred.reject(response);
+        }
+    );
+
+    return deferred.promise;
+};
+
+var jsonResponseCallbackWrapper = function (response, body, successCallback, errCallback) {
+    var responseHeaders = response['headers'];
+    var statusCode = response['statusCode'];
+
+    var isErrorCode = !( statusCode >= 200 && statusCode <= 299 );
+
+    var resp = {
+        'statusCode': statusCode,
+        'headers': responseHeaders
+    };
+
+    if (body && body.length > 0) {
+        try {
+            resp['entity'] = JSON.parse(body);
+        } catch (e) {
+            resp['entity'] = {status: statusCode, body: body }
+        }
+    }
+
+    if (isErrorCode && errCallback) {
+        jive.logger.debug("err:", resp);
+        errCallback(resp);
+    } else if (successCallback) {
+        jive.logger.debug("success:", resp);
+        successCallback(resp);
+    }
+
+};
+
+var requestMaker = function (method, serverInfo, path, headers, body, secure, requestOptions) {
+
+    if (typeof body === 'undefined' || body === null) {
+        body = '';
+    }
+
+    // these are used in the http or https .request
+    var options = {
+        host: serverInfo.host,
+        port: serverInfo.port,
+        method: method || 'GET',
+        path: path,
+        headers: headers || {}
+    };
+
+    if (requestOptions) {
+        for (var key in requestOptions) {
+            if (requestOptions.hasOwnProperty(key)) {
+                options[key] = requestOptions[key];
+            }
+        }
+    }
+
+    var postBodyStr;
+
+    if (method === 'POST' || method === 'PUT') {
+
+        if (!(headers['Content-Type'])) {
+            if (typeof body === 'object') {
+                headers['Content-Type'] = 'application/json'; //If it's an object, set default content type to application/json
+            }
+            else if (typeof body === 'string') {
+                try {
+                    var parsed = JSON.parse(body);
+                    headers['Content-Type'] = 'application/json'; //If it parses as a JSON object set Content-Type to application/json
+                } catch (e) {
+                    //do nothing, send request without content type
+                }
+            }
+        }
+
+        postBodyStr = '';
+        var contentType = headers['Content-Type'];
+
+        if (contentType === 'application/json') {
+            if (typeof body === 'object') {
+                postBodyStr = JSON.stringify(body);
+            } else if (typeof body === 'string') {
+                postBodyStr = body;
+            } else {
+                throw new Error("Illegal type of post body; only object or string is permitted.");
+            }
+        } else if (contentType === 'application/x-www-form-urlencoded') {
+            var postObject;
+            if (typeof body === 'string') {
+                try {
+                    postObject = JSON.parse(body);
+                } catch (e) {
+                    postBodyStr = body;
+                }
+            } else if (typeof body === 'object') {
+                postObject = body;
+            }
+            else {
+                throw new Error("Illegal type of post body; only object or string is permitted.");
+            }
+
+            for (var key in postObject) {
+                if (postObject.hasOwnProperty(key)) {
+                    if (postBodyStr.length > 0) {
+                        postBodyStr += '&';
+                    }
+                    postBodyStr += encodeURIComponent(key) + '=' + encodeURIComponent(postObject[key]);
+                }
+            }
+        }
+        else {
+            postBodyStr = body.toString();
+        }
+
+        headers['Content-Length'] = Buffer.byteLength(postBodyStr, 'utf8');
+    }
+
+    return {
+        execute: function (successCallback, errCallback) {
+            var request = require('request');
+            var url = ( secure ? 'https' : 'http') + '://' +
+                    options['host'] +
+                    ( options['port'] ? ':' + options['port'] : ( secure ? (':' + 443) : '' ) ) +
+                    options['path']
+                ;
+            options['url'] = url;
+            if (postBodyStr) {
+                options['body'] = postBodyStr;
+            }
+
+            delete options['host'];
+            delete options['path'];
+
+            jive.logger.debug("Request: " + url + ", body: " + postBodyStr);
+            request(options, function (error, response, body) {
+                if (error) {
+                    jive.logger.warn("Error making request: %s", JSON.stringify(error));
+                    jive.logger.debug("response body: ", response ? (response.statusCode || "no status code") : "no response", body || "no body");
+                    jive.logger.debug("Options: %s", JSON.stringify(options));
+                    errCallback(error);
+                }
+                else {
+                    jsonResponseCallbackWrapper(response, body, successCallback, errCallback);
+                }
+            });
+        }
+    }
+};
