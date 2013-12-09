@@ -4,7 +4,7 @@ var express = require('express');
 var http = require('http');
 
 describe('jive', function () {
-    describe('commity registration', function () {
+    describe('community registration', function () {
 
         it('happy path', function (done) {
             var jive = this['jive'];

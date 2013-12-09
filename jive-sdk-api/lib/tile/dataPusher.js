@@ -14,43 +14,128 @@
  *    limitations under the License.
  */
 
-var jiveClient = require('./client');
+var jiveClient = require('./../client/jive');
 var jive = require('../../api');
 var q = require('q');
 
-var doRefreshTokenFlow = function( instanceLibrary, instance ) {
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// public
 
-    jive.logger.debug("Trying refresh flow for ", instance);
+exports.pushData = function (instance, dataToPush) {
+    return push(pushDataDelegate, "data", { 'instance' : instance, 'dataToPush': dataToPush });
+};
 
-    var deferred = q.defer();
+exports.pushActivity = function (instance, dataToPush) {
+    return push(pushActivityDelegate, "activity", { 'instance' : instance, 'dataToPush': dataToPush });
+};
 
-     instanceLibrary.refreshAccessToken(instance).then(
-        // success
-        function (updated) {
-            if ( !updated['accessToken'] ) {
-                // failure
-                jive.logger.debug('Failed to refresh access token.');
-                deferred.reject();
-            } else {
-                // success
-                jive.logger.debug('Successfully refreshed token.');
-                instanceLibrary.save(updated).then(function(instanceToRetry) {
-                    jive.logger.debug("Retrying fetch.");
-                    deferred.resolve(instanceToRetry);
-                });
-            }
-        },
+exports.pushComment = function(instance, commentURL, dataToPush) {
+    return push(pushCommentDelegate, "comment", { 'instance' : instance, 'dataToPush': dataToPush, 'pushURL' : commentURL});
+};
 
-        // failure
-        function (result) {
-            jive.logger.warn("RefreshTokenFlow failed.", result || '');
-            jive.events.emit("refreshTokenFailed", instance);
-            deferred.reject( {statusCode: result.statusCode,
-                error: 'Error refreshing token. Response from Jive ID in details field', details: result } );
+exports.fetchExtendedProperties = function( instance ) {
+    return fetch(fetchExtendedPropertiesDelegate, 'extendedProperties', { 'instance' : instance });
+};
+
+exports.pushExtendedProperties = function (instance, props) {
+    return push(pushExtendedPropertiesDelegate, "extendedProperties", { 'instance' : instance, 'props': props});
+};
+
+exports.removeExtendedProperties = function (instance) {
+    return remove(removeExtendedPropertiesDelegate, "extendedProperties", { 'instance' : instance });
+};
+
+exports.getPaginated = function(instance, url) {
+    var promise = getWithTileInstanceAuth(instance, url);
+    return promise.then(function(response){
+        var entity = response.entity;
+        if (typeof entity !== 'object') {
+            return response;
         }
-    );
 
-    return deferred.promise;
+        if (!entity.links || !entity.links.next) {
+            return response;
+        }
+
+        entity.next = function() {
+            return exports.getPaginated( instance, entity.links.next );
+        };
+
+        return response;
+    });
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// private
+
+var oAuthHandler;
+
+var tileLibraryLookup = function(instance) {
+    return jive.tiles.definitions.findByTileName( instance['name'] ).then( function(tile) {
+        return tile ? jive.tiles: jive.extstreams;
+    });
+};
+
+var accessTokenRefresher = function(oauth, operationContext) {
+    var d = q.defer();
+    var instance = operationContext['instance'];
+    var jiveCommunity = instance['jiveCommunity'];
+
+    tileLibraryLookup(instance).then( function(instanceLibrary) {
+
+        jive.community.findByCommunity( jiveCommunity).then( function(community) {
+            var options = {};
+            if ( community ) {
+                options['client_id'] = community['clientId'];
+                options['client_secret'] = community['clientSecret'];
+                options['refresh_token'] = oauth['refreshToken'];
+                options['jiveUrl'] = community['jiveUrl'];
+
+                jiveClient.refreshAccessToken(options,
+                    function (response) {
+                        if (response.statusCode >= 200 && response.statusCode <= 299) {
+                            var accessTokenResponse = response['entity'];
+
+                            // success
+                            instance['accessToken'] = accessTokenResponse['access_token'];
+                            instance['expiresIn'] = accessTokenResponse['expires_in'];
+                            instance['refreshToken'] = accessTokenResponse['refresh_token'];
+
+                            var updatedOAuth = {
+                                'accessToken' : instance['accessToken'],
+                                'refreshToken' : instance['refreshToken']
+                            };
+
+                            instanceLibrary.save(instance).then(function() {
+                                d.resolve(updatedOAuth);
+                            });
+                        } else {
+                            jive.logger.error('error refreshing access token for ', instance);
+                            d.reject(response);
+                        }
+                    }, function (result) {
+                        // failure
+                        jive.logger.error('error refreshing access token for ', instance, result);
+                        d.reject(result);
+                    }
+                );
+            } else {
+                d.reject();
+            }
+        });
+
+    });
+
+
+    return d.promise;
+};
+
+var getOAuthHandler = function() {
+    if ( !oAuthHandler  ) {
+        oAuthHandler = jive.util.oauth.buildOAuthHandler(accessTokenRefresher);
+    }
+
+    return oAuthHandler;
 };
 
 var doDestroyInstance = function(instance, instanceLibrary, response) {
@@ -74,210 +159,123 @@ var doDestroyInstance = function(instance, instanceLibrary, response) {
     return deferred.promise;
 };
 
-/**
- * Analyzes provided response, and does the following:
- * - if 400 - 409, then this is likely a bad access token problem. in this case, perform the s
- *   token flow; if that is successful, perform the successful token refresh callback; otherwise perform the
- *   unsuccessful refresh callback.
- * - if 410, then this is caused by the remote instance being permanently deactivated; the integration
- *   should destroy the locally registered instance.
- * - otherwise its unknown error; call the error callback.
- * @param instance
- * @param response
- * @param retryIfFail
- */
-var handleError = function( instance, response, retryIfFail ) {
+var push = function (pushDelegate, type, operationContext) {
+    var d = q.defer();
+    var instance = operationContext['instance'];
+    var dataToPush = operationContext['dataToPush'];
+    var oauth = {
+        'accessToken' : instance['accessToken'],
+        'refreshToken' : instance['refreshToken']
+    };
 
-    var tileLookup =  jive.tiles.definitions.findByTileName( instance['name'] ).then( function(tile) {
-        return tile;
-    } );
+    tileLibraryLookup(instance).then( function(instanceLibrary) {
+        getOAuthHandler().doOperation(pushDelegate, operationContext, oauth).then(
+            // success
+            function(r) {
+                jive.events.emit( type + "Pushed", {
+                    'theInstance' : instance,
+                    'pushedData' : dataToPush,
+                    'response' : r
+                });
+                d.resolve(r);
+            },
 
-    var deferred = q.defer();
-
-    tileLookup.then(
-
-        // successful lookup
-        function(tile) {
-            // determine library type
-            var instanceLibrary = tile ? jive.tiles: jive.extstreams;
-
-            if (response.statusCode == 400) {
-                jive.logger.info('Bad request (400) returned pushing data to jive', response);
-                deferred.reject(response);
-            }
-            else if (response.statusCode == 401 || response.statusCode == 403) {
-                jive.logger.info("Unauthorized (" + response.statusCode + ") returned pushing data to Jive", response);
-
-                if ( !retryIfFail ) {
-                    jive.logger.error('Not executing refresh flow. Failure on second attempt.', response);
-                    deferred.reject( response );
+            // err
+            function(error) {
+                if ( error.statusCode == 410 ) {
+                    doDestroyInstance(instance, instanceLibrary, error).then( function(err) {
+                        d.reject(err);
+                    } );
                 } else {
-                    doRefreshTokenFlow( instanceLibrary, instance ).then(
-                        // successful token refresh
-                        function(instanceToRetry) {
-                            deferred.resolve( instanceToRetry );
-                        },
-
-                        // failed token refresh
-                        function(err) {
-                            deferred.reject( err );
-                        }
-                    );
+                    jive.logger.info('4XX error returned from jive', error);
+                    d.reject(error); //Another error code
                 }
+
             }
-            else if ( response.statusCode == 410 ) {
-                doDestroyInstance(instance, instanceLibrary, response).then( function(err) {
-                    deferred.reject(err);
-                } );
-            }
-            else {
-                jive.logger.info('4XX error returned from jive', response);
-                deferred.reject(response); //Another error code
-            }
-        },
-
-        // fail to lookup
-        function(err) {
-            deferred.reject(err);
-        }
-    );
-
-    return deferred.promise;
-};
-
-var push = function (pushOperation, type, instance, dataToPush, pushURL, retryIfFail) {
-    var p = q.defer();
-
-    pushOperation( instance, dataToPush, pushURL ).then(
-        // successful push
-        function (response) {
-            jive.events.emit( type + "Pushed", {
-                'theInstance' : instance,
-                'pushedData' : dataToPush,
-                'response' : response
-            });
-            p.resolve(response);
-        },
-
-        // failed push
-        function(response) {
-            return handleError( instance, response, retryIfFail).then(
-                function(instanceToRetry) {
-                    // retry push once if refreshtoken was reason for error
-                    push( pushOperation, type, instanceToRetry, dataToPush, pushURL, false).then(
-                        function(r) {
-                            p.resolve(r);
-                        },
-                        function(e) {
-                            p.reject(e);
-                        }
-                    );
-
-                },
-
-                function( err ) {
-                    p.reject(err);
-                }
-            );
-        }
-    );
-
-    return p.promise;
-};
-
-var fetch = function( fetchOperation, type, instance, fetchURL, retryIfFail ) {
-    var p = q.defer();
-     fetchOperation( instance, fetchURL ).then(
-        // successful fetch
-        function(response) {
-            p.resolve(response);
-        },
-
-        // failed fetch
-        function(response) {
-            handleError( instance, response, retryIfFail).then(
-                function(instanceToRetry) {
-                    // retry fetch once if refreshtoken was reason for error
-                    return fetch( fetchOperation, type, instanceToRetry, fetchURL, false);
-                },
-
-                function( err ) {
-                    p.reject(err);
-                }
-            );
-        }
-    );
-
-    return p.promise;
-};
-
-var remove = function( removeOperation, type, instance, retryIfFail ) {
-    removeOperation( instance ).then(
-        // successful fetch
-        function(response) {
-            return response;
-        },
-
-        // failed fetch
-        function(response) {
-            return handleError(instance, response, retryIfFail).then(
-                function(instanceToRetry) {
-                    // retry fetch once if refreshtoken was reason for error
-                    remove( removeOperation, type, instanceToRetry, false);
-                },
-
-                function( err ) {
-                    return err;
-                }
-            );
-        }
-    );
-};
-
-exports.pushData = function (instance, dataToPush) {
-    return push(jiveClient.pushData, "data", instance, dataToPush, null, true);
-};
-
-exports.pushActivity = function (instance, dataToPush) {
-    return push(jiveClient.pushActivity, "activity", instance, dataToPush, null, true);
-};
-
-exports.pushComment = function(instance, commentURL, dataToPush) {
-    return push(jiveClient.pushComment, "comment", instance, dataToPush, commentURL, true);
-};
-
-exports.fetchExtendedProperties = function( instance ) {
-    return fetch( jiveClient.fetchExtendedProperties, 'extendedProperties', instance, null, true );
-};
-
-exports.pushExtendedProperties = function (instance, props) {
-    return push(jiveClient.pushExtendedProperties, "extendedProperties", instance, props, null, true);
-};
-
-exports.removeExtendedProperties = function (instance) {
-    return remove(jiveClient.removeExtendedProperties, "extendedProperties", instance, null, true);
-};
-
-var getWithTileInstanceAuth = function(instance, url ) {
-    return fetch( jiveClient.getWithTileInstanceAuth, "instance", instance, url, true);
-};
-
-exports.getPaginated = function(instance, url) {
-    var promise = getWithTileInstanceAuth(instance, url);
-    return promise.then(function(response){
-        var entity = response.entity;
-        if (typeof entity !== 'object') {
-            return response;
-        }
-
-        if (!entity.links || !entity.links.next) {
-            return response;
-        }
-
-        entity.next = function() {
-            return exports.getPaginated( instance, entity.links.next );
-        };
-
-        return response;
+        );
     });
+
+    return d.promise;
+};
+
+var fetch = function( fetchDelegate, type, operationContext ) {
+    var d = q.defer();
+    var instance = operationContext['instance'];
+
+    var oauth = {
+        'accessToken' : instance['accessToken'],
+        'refreshToken' : instance['refreshToken']
+    };
+
+    getOAuthHandler().doOperation(fetchDelegate, operationContext, oauth).then(
+        // success
+        function(r) {
+            d.resolve(r);
+        },
+
+        // err
+        function(error) {
+            d.reject(error); //Another error code
+        }
+    );
+
+    return d.promise;
+};
+
+var remove = function( removeDelegate, type, operationContext ) {
+    var d = q.defer();
+    var instance = operationContext['instance'];
+
+    var oauth = {
+        'accessToken' : instance['accessToken'],
+        'refreshToken' : instance['refreshToken']
+    };
+
+    getOAuthHandler().doOperation(removeDelegate, operationContext, oauth).then(
+        // success
+        function(r) {
+            d.resolve(r);
+        },
+
+        // err
+        function(error) {
+            d.reject(error); //Another error code
+        }
+    );
+
+    return d.promise;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// private delagates
+
+var pushDataDelegate = function(operationContext) {
+    return jiveClient.pushData(operationContext['instance'], operationContext['dataToPush'], operationContext['pushURL']);
+};
+
+var pushActivityDelegate = function(operationContext) {
+    return jiveClient.pushActivity(operationContext['instance'], operationContext['dataToPush']);
+};
+
+var pushCommentDelegate = function(operationContext) {
+    return jiveClient.pushComment(operationContext['instance'], operationContext['dataToPush'], operationContext['pushURL']);
+};
+
+var fetchExtendedPropertiesDelegate = function(operationContext) {
+    return jiveClient.getWithTileInstanceAuth(operationContext['instance']);
+};
+
+var pushExtendedPropertiesDelegate = function(operationContext) {
+    return jiveClient.pushExtendedProperties(operationContext['instance'], operationContext['props']);
+};
+
+var removeExtendedPropertiesDelegate = function(operationContext) {
+    return jiveClient.removeExtendedProperties(operationContext['instance']);
+};
+
+var getWithTileInstanceAuthDelegate = function(operationContext) {
+    return jiveClient.getWithTileInstanceAuth(operationContext['instance'], operationContext['url']);
+};
+var getWithTileInstanceAuth = function(instance, url ) {
+    return fetch( getWithTileInstanceAuthDelegate, "instance", { 'instance' : instance, 'url' : url } );
 };

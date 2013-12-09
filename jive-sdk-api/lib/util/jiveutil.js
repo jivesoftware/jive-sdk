@@ -19,7 +19,7 @@ var fs = require('fs-extra');
 var uuid = require('node-uuid');
 var mustache = require('mustache');
 var jive = require('../../api');
-var oauthUtil = require('./oauthUtil');
+var oauth = require('./oauth');
 var iterator = require('./iterator');
 var crypto = require('crypto');
 var constants = require("./constants");
@@ -560,6 +560,6 @@ exports.zipFolder = function (root, targetZip, flatten) {
         });
 };
 
-exports.oauth = oauthUtil;
+exports.oauth = oauth;
 
 exports.iterator = iterator;

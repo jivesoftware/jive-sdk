@@ -12,7 +12,7 @@ exports.registerPlace = function (req, res) {
     var containerPath = jive.service.options.rootFolder + "/" + registerReq.container.name;
     var cotainerGuid = jive.util.guid();
 
-    jive.util.oauth.requestAccessToken(registerReq.jiveUrl, registerReq.oauthCode)
+    jive.community.requestAccessToken(registerReq.jiveUrl, registerReq.oauthCode)
         .then(function (oauthResponse) {
             registerReq.oauth = oauthResponse.entity;
             return jive.util.fsexists(containerPath);

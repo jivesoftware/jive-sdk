@@ -16,7 +16,7 @@
 
 var jive = require('../../api');
 var q = require('q');
-var client = require('./../tile/client');
+var jiveClient = require('./../client/jive');
 
 var returnOne = function(found ) {
     if ( found == null || found.length < 1 ) {
@@ -68,9 +68,100 @@ exports.parseJiveCommunity = function( jiveUrl ) {
     return parts.length > 1 ? parts[1] : parts[0];
 };
 
+/**
+ * Requests an access token by oauth access code (oauth access code is given in registration requests and valid for few minutes).
+ * @param jiveUrl - the url of the jive community. this function will use this url to find the community in the persistence and get the client id and secret.
+ * @param oauthCode - the code needed to be use to get access to a specific registration scope (usually a group).
+ * @returns a promise for success and failure [use .then(...) and .catch(...)]
+ */
+exports.requestAccessToken = function (jiveUrl, oauthCode) {
+    var defer = q.defer();
+
+    exports.findByJiveURL(jiveUrl)
+        .then(function (communityObj) {
+            if (communityObj) {
+                var oauthConf = {
+                    client_id: communityObj.clientId,
+                    client_secret: communityObj.clientSecret,
+                    code: oauthCode,
+                    jiveUrl: jiveUrl
+                };
+                jiveClient.requestAccessToken(oauthConf, defer.resolve, defer.reject);
+            }
+            else {
+                defer.reject(new Error("No community found by the url: " + jiveUrl));
+            }
+        })
+        .catch(defer.reject);
+
+    return defer.promise;
+};
+
+var accessTokenRefresher = function(oauth, operationContext) {
+    var community = operationContext['community'];
+    var doNotModifyCommunityOAuth = operationContext['doNotModifyCommunityOAuth'];
+
+    var d = q.defer();
+
+    var options = {};
+    if ( community ) {
+        options['client_id'] = community['clientId'];
+        options['client_secret'] = community['clientSecret'];
+        options['refresh_token'] = oauth['refresh_token'];
+        options['jiveUrl'] = community['jiveUrl'];
+
+        jiveClient.refreshAccessToken(options,
+            function (response) {
+                if (response.statusCode >= 200 && response.statusCode <= 299) {
+                    var accessTokenResponse = response['entity'];
+
+                    // success
+                    community['oauth']['access_token'] = accessTokenResponse['access_token'];
+                    community['oauth']['expires_in'] = accessTokenResponse['expires_in'];
+                    community['oauth']['refresh_token'] = accessTokenResponse['refresh_token'];
+
+                    var updatedOAuth = {
+                        'access_token' : accessTokenResponse['access_token'],
+                        'refresh_token' : accessTokenResponse['refresh_token']
+                    };
+
+                    if ( !doNotModifyCommunityOAuth ) {
+                        exports.save(community).then(function() {
+                            d.resolve(updatedOAuth);
+                        });
+                    } else {
+                        d.resolve(updatedOAuth);
+                    }
+
+                } else {
+                    jive.logger.error('error refreshing access token for ', instance);
+                    d.reject(response);
+                }
+            }, function (result) {
+                // failure
+                jive.logger.error('error refreshing access token for ', instance, result);
+                d.reject(result);
+            }
+        );
+    } else {
+        d.reject();
+    }
+
+    return d.promise;
+};
+
+var oAuthHandler;
+var getOAuthHandler = function() {
+    if ( !oAuthHandler  ) {
+        oAuthHandler = jive.util.oauth.buildOAuthHandler(accessTokenRefresher);
+    }
+
+    return oAuthHandler;
+};
 
 /**
  * Make a request to the current community.
+ * Automatically handle access token refresh flow if failure.
  *
  * @param community
  * @param options
@@ -79,31 +170,61 @@ exports.parseJiveCommunity = function( jiveUrl ) {
 exports.doRequest = function( community, options ) {
     options = options || {};
     var path = options.path,
+        url = options.url,
         headers = options.headers || {},
         oauth = options.oauth || community.oauth,
         jiveUrl = community.jiveUrl;
 
-    if( !oauth ) {
+    if ( !url ) {
+        // construct from path and jiveURL
+        if( path.charAt(0) !== '/' ) {
+            // ensure there a starting /
+            path = "/" + path;
+        }
+
+        if( jiveUrl.slice(-1) === '/') {
+            // Trim the last /
+            jiveUrl = jiveUrl.slice(0, -1);
+        }
+
+        url = jiveUrl + path;
+    }
+
+    if (!oauth) {
         jive.logger.info("No oauth credentials found.  Continuing without them.");
+        return jive.util.buildRequest( url, options.method, options.postBody, headers, options.requestOptions );
     }
 
-    if( path.charAt(0) !== '/' ) {
-        // ensure there a starting /
-        path = "/" + path;
-    }
+    // oauth
+    var doNotModifyCommunityOAuth = options.oauth;
+    headers.Authorization = 'Bearer ' + oauth['access_token'];
 
-    if( jiveUrl.slice(-1) === '/') {
-        // Trim the last /
-        jiveUrl = jiveUrl.slice(0, -1);
-    }
+    return getOAuthHandler().doOperation(
+        // operation
+        function(operationContext) {
+            var community = operationContext['community'];
+            return exports.findByCommunity(community['jiveCommunity']).then( function( community ) {
+                if ( !community ) {
+                    return q.reject();
+                }
 
-    var url = jiveUrl + path;
+                headers.Authorization = 'Bearer ' + community['oauth']['access_token'];
+                return jive.util.buildRequest( url, options.method, options.postBody, headers, options.requestOptions );
+            });
+        },
 
-    if(oauth) {
-        headers.Authorization = 'Bearer ' + oauth['access_token'];
-    }
+        // operation context
+        {
+            'community' : community,
+            'doNotModifyCommunityOAuth' : doNotModifyCommunityOAuth
+        },
 
-    return jive.util.buildRequest( url, options.method, options.postBody, headers, options.requestOptions );
+        // oauth
+        {
+            'access_token' : oauth['access_token'],
+            'refresh_token' : oauth['refresh_token']
+        }
+    );
 };
 
 function validateRegistration(registration) {
@@ -213,7 +334,7 @@ exports.register = function( registration ) {
             }
 
             if ( authorizationCode ) {
-                client.requestAccessToken(
+                jiveClient.requestAccessToken(
                     {
                         'client_secret' : clientSecret,
                         'client_id' : clientId,

@@ -19,8 +19,7 @@ var url = require('url');
 var jive = require('../api');
 var mustache = require('mustache');
 var q = require('q');
-
-var oauthUtil = jive.oauthUtil;
+var util = require("util");
 
 exports.redirectHtmlTxt = "<html> <head> <script> window.location='{{{redirect}}}'; </script>" +
     "</head> <body> Redirecting ... </body> </html>";
@@ -99,9 +98,10 @@ exports.authorizeUrl = function(req, res ) {
             return;
         }
     }
+    var self = this;
     getOAuth2Conf(jiveTenantID, this).then( function(oauth2Conf) {
         jive.logger.info(JSON.stringify(oauth2Conf, null, 4));
-        var responseMap = oauthUtil.buildAuthorizeUrlResponseMap(
+        var responseMap = self.buildAuthorizeUrlResponseMap(
             oauth2Conf, callback, { 'viewerID': viewerID, 'context': context}, extraAuthParams );
 
         jive.logger.debug('Sending', responseMap);
@@ -179,7 +179,7 @@ exports.oauth2Callback = function(req, res ) {
 
             var oauth2CallbackExtraParams = oauth2Conf['oauth2CallbackExtraParams'];
 
-            var postObject = oauthUtil.buildOauth2CallbackObject( oauth2Conf, code, oauth2CallbackExtraParams );
+            var postObject = self.buildOauth2CallbackObject( oauth2Conf, code, oauth2CallbackExtraParams );
             jive.logger.debug("Post object", postObject);
 
             var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
@@ -239,4 +239,49 @@ exports.oauth2Callback = function(req, res ) {
     );
 
 };
+
+exports.buildAuthorizeUrlResponseMap = function (oauth2Conf, callback, context, extraAuthParams) {
+    var stateToEncode = { 'jiveRedirectUrl': callback };
+    if (context) {
+        stateToEncode = util._extend(stateToEncode, context);
+    }
+
+    var url = oauth2Conf['originServerAuthorizationUrl'] + "?" +
+        "state=" + jive.util.base64Encode(JSON.stringify(stateToEncode)) +
+        "&redirect_uri=" + oauth2Conf['clientOAuth2CallbackUrl'] +
+        "&client_id=" + oauth2Conf['oauth2ConsumerKey'] +
+        "&response_type=" + "code";
+
+    if (extraAuthParams) {
+        var extraAuthStr = '';
+        for (var key in extraAuthParams) {
+            if (extraAuthParams.hasOwnProperty(key)) {
+                extraAuthStr += '&' + key + '=' + extraAuthParams[key];
+            }
+        }
+
+        url += extraAuthStr;
+    }
+
+    return {
+        'url': url
+    };
+};
+
+exports.buildOauth2CallbackObject = function (oauth2Conf, code, extraParams) {
+    var postObject = {
+        'grant_type': 'authorization_code',
+        'redirect_uri': oauth2Conf['clientOAuth2CallbackUrl'],
+        'client_id': oauth2Conf['oauth2ConsumerKey'],
+        'client_secret': oauth2Conf['oauth2ConsumerSecret'],
+        'code': code
+    };
+
+    if (extraParams) {
+        postObject = util._extend(postObject, extraParams);
+    }
+
+    return postObject;
+};
+
 

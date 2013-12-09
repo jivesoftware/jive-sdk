@@ -58,7 +58,7 @@ exports.buildRequest = function (url, method, postBody, headers, requestOptions)
         // success
         function (response) {
             var body = response && response.entity && response.entity.body;
-            if (body && body.indexOf(constants.SECURITY_STRING) === 0) {
+            if (body && body.indexOf && body.indexOf(constants.SECURITY_STRING) === 0) {
                 response.entity.body = body.substring(constants.SECURITY_STRING.length);
             }
             deferred.resolve(response);
