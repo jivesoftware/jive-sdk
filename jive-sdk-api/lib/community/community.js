@@ -122,7 +122,7 @@ var accessTokenRefresher = function(operationContext, oauth) {
                     };
 
                     if(tokenPersistenceFunction) {
-                        var promise = tokenPersistenceFunction(accessTokenResponse);
+                        var promise = tokenPersistenceFunction(accessTokenResponse, community);
                         if(promise) {
                             promise.then(resolve, resolve);
                         } else {
