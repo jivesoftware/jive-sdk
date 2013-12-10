@@ -97,7 +97,7 @@ exports.requestAccessToken = function (jiveUrl, oauthCode) {
     return defer.promise;
 };
 
-var accessTokenRefresher = function(oauth, operationContext) {
+var accessTokenRefresher = function(operationContext, oauth) {
     var community = operationContext['community'];
     var doNotModifyCommunityOAuth = operationContext['doNotModifyCommunityOAuth'];
 

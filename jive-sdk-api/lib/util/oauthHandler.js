@@ -2,6 +2,14 @@ var jive = require('../../../jive-sdk-service/api');
 var q = require('q');
 
 
+/**
+ * The default implementation of access token refresh.  If you
+ * use oauth.js buildOAuthHandler, you will be required to provide
+ * your own implementation of this function.
+ *
+ * @param oauth
+ * @returns {}
+ */
 exports.accessTokenRefresher = function(oauth) {
     return accessTokenRefresher(oauth);
 };
@@ -35,7 +43,7 @@ exports.doRefreshTokenFlow = function(operationContext, oauth ) {
 
     var deferred = q.defer();
 
-    this.accessTokenRefresher(oauth, operationContext).then(
+    this.accessTokenRefresher(operationContext, oauth).then(
         // success
         function (operationContext) {
             // success
@@ -124,6 +132,12 @@ exports.handleOperation = function (operation, operationContext, oauth, retryIfF
     return p.promise;
 };
 
+/**
+ * This is the default implementation of access token refresh.
+ *
+ * @param oauth
+ * @returns {*}
+ */
 var accessTokenRefresher = function (oauth) {
     var postObject = {
         'grant_type': 'refresh_token',

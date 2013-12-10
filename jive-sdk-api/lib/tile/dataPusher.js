@@ -76,7 +76,7 @@ var tileLibraryLookup = function(instance) {
     });
 };
 
-var accessTokenRefresher = function(oauth, operationContext) {
+var accessTokenRefresher = function(operationContext, oauth) {
     var d = q.defer();
     var instance = operationContext['instance'];
     var jiveCommunity = instance['jiveCommunity'];
