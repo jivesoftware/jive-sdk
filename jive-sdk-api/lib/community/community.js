@@ -99,7 +99,7 @@ exports.requestAccessToken = function (jiveUrl, oauthCode) {
 
 var accessTokenRefresher = function(operationContext, oauth) {
     var community = operationContext['community'];
-    var doNotModifyCommunityOAuth = operationContext['doNotModifyCommunityOAuth'];
+    var tokenPersistenceFunction = operationContext.tokenPersistenceFunction;
 
     var d = q.defer();
 
@@ -110,36 +110,34 @@ var accessTokenRefresher = function(operationContext, oauth) {
         options['refresh_token'] = oauth['refresh_token'];
         options['jiveUrl'] = community['jiveUrl'];
 
+
         jiveClient.refreshAccessToken(options,
             function (response) {
                 if (response.statusCode >= 200 && response.statusCode <= 299) {
                     var accessTokenResponse = response['entity'];
 
-                    // success
-                    community['oauth']['access_token'] = accessTokenResponse['access_token'];
-                    community['oauth']['expires_in'] = accessTokenResponse['expires_in'];
-                    community['oauth']['refresh_token'] = accessTokenResponse['refresh_token'];
 
-                    var updatedOAuth = {
-                        'access_token' : accessTokenResponse['access_token'],
-                        'refresh_token' : accessTokenResponse['refresh_token']
+                    var resolve = function() {
+                        d.resolve(accessTokenResponse);
                     };
 
-                    if ( !doNotModifyCommunityOAuth ) {
-                        exports.save(community).then(function() {
-                            d.resolve(updatedOAuth);
-                        });
+                    if(tokenPersistenceFunction) {
+                        var promise = tokenPersistenceFunction(accessTokenResponse);
+                        if(promise) {
+                            promise.then(resolve, resolve);
+                        } else {
+                            resolve();
+                        }
                     } else {
-                        d.resolve(updatedOAuth);
+                        resolve();
                     }
-
                 } else {
-                    jive.logger.error('error refreshing access token for ', instance);
+                    jive.logger.error('error refreshing access token for ', community);
                     d.reject(response);
                 }
             }, function (result) {
                 // failure
-                jive.logger.error('error refreshing access token for ', instance, result);
+                jive.logger.error('error refreshing access token for ', community, result);
                 d.reject(result);
             }
         );
@@ -173,7 +171,8 @@ exports.doRequest = function( community, options ) {
         url = options.url,
         headers = options.headers || {},
         oauth = options.oauth || community.oauth,
-        jiveUrl = community.jiveUrl;
+        jiveUrl = community.jiveUrl,
+        tokenPersistenceFunction = options.tokenPersistenceFunction;
 
     if ( !url ) {
         // construct from path and jiveURL
@@ -196,19 +195,24 @@ exports.doRequest = function( community, options ) {
     }
 
     // oauth
-    var doNotModifyCommunityOAuth = options.oauth;
+    if (!tokenPersistenceFunction && !options.oauth) {
+        tokenPersistenceFunction = function(updatedOAuth) {
+            community.oauth = updatedOAuth;
+            return exports.save(community);
+        };
+    }
+
     headers.Authorization = 'Bearer ' + oauth['access_token'];
 
     return getOAuthHandler().doOperation(
         // operation
-        function(operationContext) {
+        function(operationContext, oauth) {
             var community = operationContext['community'];
             return exports.findByCommunity(community['jiveCommunity']).then( function( community ) {
                 if ( !community ) {
                     return q.reject();
                 }
-
-                headers.Authorization = 'Bearer ' + community['oauth']['access_token'];
+                headers.Authorization = 'Bearer ' + oauth.access_token;
                 return jive.util.buildRequest( url, options.method, options.postBody, headers, options.requestOptions );
             });
         },
@@ -216,7 +220,7 @@ exports.doRequest = function( community, options ) {
         // operation context
         {
             'community' : community,
-            'doNotModifyCommunityOAuth' : doNotModifyCommunityOAuth
+            'tokenPersistenceFunction' : tokenPersistenceFunction
         },
 
         // oauth

@@ -99,7 +99,7 @@ exports.handleOperation = function (operation, operationContext, oauth, retryIfF
     var p = q.defer();
     var self = this;
 
-    operation( operationContext ).then(
+    operation( operationContext, oauth ).then(
         // successful push
         function (response) {
             p.resolve(response);
