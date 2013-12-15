@@ -316,7 +316,7 @@ function initPersistence(options) {
         'tileDefinition' : {
             'sampleData' : { type: "text", required: false },
             'displayName': { type: "text", required: false },
-            'name': { type: "text", required: true },
+            'name': { type: "text", required: true, index: true },
             'description': { type: "text", required: false },
             'style': { type: "text", required: false },
             'icons': { type: "text", required: false },
@@ -326,7 +326,7 @@ function initPersistence(options) {
         },
         'extstreamsDefinition': {
             'displayName': { type: "text", required: false },
-            'name': { type: "text", required: true },
+            'name': { type: "text", required: true, index: true },
             'description': { type: "text", required: false },
             'style': { type: "text", required: false },
             'icons': { type: "text", required: false },
@@ -344,7 +344,7 @@ function initPersistence(options) {
         'tileInstance' : {
             "url":  { type: "text", required: false },
             "config":  { type: "text", required: false, expandable: true },
-            "name":  { type: "text", required: false },
+            "name":  { type: "text", required: false, index: true },
             "accessToken": { type: "text", required: false },
             "expiresIn": { type: "text", required: false },
             "refreshToken": { type: "text", required: false },
@@ -355,9 +355,9 @@ function initPersistence(options) {
         },
         'community': {
             "id": { type: "text", required: false },
-            "jiveUrl": { type: "text", required: false },
+            "jiveUrl": { type: "text", required: false, index: true },
             "version":{ type: "text", required: false },
-            "tenantId": { type: "text", required: false },
+            "tenantId": { type: "text", required: false, index: true },
             "clientId": { type: "text", required: false },
             "clientSecret": { type: "text", required: false },
             "jiveCommunity": { type: "text", required: false },
