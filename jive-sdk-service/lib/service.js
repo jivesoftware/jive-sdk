@@ -141,6 +141,26 @@ exports.persistence = function(_persistence) {
             return persistence ? persistence.close() :  function() {
                 return q.reject( new Error("persistence not defined") );
             }
+        },
+
+        sync: function() {
+            if ( !persistence ) {
+                return q.reject( new Error("persistence not defined") );
+            }
+
+            if ( !persistence['sync'] ) {
+                return q.resolve();
+            }
+
+            return persistence.sync(
+                arguments.length > 0 ? arguments[0] : undefined,
+                arguments.length > 1 ? arguments[1] : undefined,
+                arguments.length > 2 ? arguments[2] : undefined,
+                arguments.length > 3 ? arguments[3] : undefined,
+                arguments.length > 4 ? arguments[4] : undefined,
+                arguments.length > 5 ? arguments[5] : undefined
+            );
+
         }
     }
 };
@@ -288,6 +308,63 @@ function initLogger(options) {
 }
 
 function initPersistence(options) {
+
+    /**
+     * Offered to the persistence strategy; may or may not be used.
+     */
+    var defaultSchema = {
+        'tileDefinition' : {
+            'sampleData' : { type: "text", required: false },
+            'displayName': { type: "text", required: false },
+            'name': { type: "text", required: true },
+            'description': { type: "text", required: false },
+            'style': { type: "text", required: false },
+            'icons': { type: "text", required: false },
+            'action': { type: "text", required: false },
+            'id': { type: "text", required: true },
+            'definitionDirName': { type: "text", required: false }
+        },
+        'extstreamsDefinition': {
+            'displayName': { type: "text", required: false },
+            'name': { type: "text", required: true },
+            'description': { type: "text", required: false },
+            'style': { type: "text", required: false },
+            'icons': { type: "text", required: false },
+            'action': { type: "text", required: false },
+            'id': { type: "text", required: true },
+            'definitionDirName': { type: "text", required: false }
+        },
+        'jiveExtension' : {
+            'id': { type: "text", required: false },
+            'uuid': { type: "text", required: false },
+            'name': { type: "text", required: false },
+            'systemAdmin': { type: "text", required: false },
+            'jiveServiceSignature': { type: "text", required: false }
+        },
+        'tileInstance' : {
+            "url":  { type: "text", required: false },
+            "config":  { type: "text", required: false, expandable: true },
+            "name":  { type: "text", required: false },
+            "accessToken": { type: "text", required: false },
+            "expiresIn": { type: "text", required: false },
+            "refreshToken": { type: "text", required: false },
+            "scope": { type: "text", required: false },
+            "guid": { type: "text", required: false },
+            "jiveCommunity": { type: "text", required: false },
+            "id": { type: "text", required: true }
+        },
+        'community': {
+            "id": { type: "text", required: false },
+            "jiveUrl": { type: "text", required: false },
+            "version":{ type: "text", required: false },
+            "tenantId": { type: "text", required: false },
+            "clientId": { type: "text", required: false },
+            "clientSecret": { type: "text", required: false },
+            "jiveCommunity": { type: "text", required: false },
+            "oauth": { type: "text", required: false }
+        }
+    };
+
     var persistence = options['persistence'];
     if ( typeof persistence === 'object' ) {
         // set persistence if the object is provided
@@ -295,10 +372,11 @@ function initPersistence(options) {
     }
     else if ( typeof persistence === 'string' ) {
         //If a string is provided, and it's a valid type exported in jive.persistence, then use that.
+        options['schema'] = defaultSchema;
+
         if (jive.persistence[persistence]) {
             exports.persistence(new jive.persistence[persistence](options)); //pass options, such as location of DB for mongoDB.
-        }
-        else {
+        } else {
             // finally try to require the persistence strategy
             try {
                 var persistenceStrategy = require(process.cwd() + '/node_modules/' + persistence);

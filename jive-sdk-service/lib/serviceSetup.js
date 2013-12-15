@@ -77,11 +77,11 @@ function setupBackendRoutes(app, pathPrefix, serviceName, routesPath){
 
 serviceSetup.setupOneService = function( app, serviceDir ) {
     var definitionJsonPath = serviceDir + '/definition.json';
-    jive.util.fsexists( definitionJsonPath).then( function(exists) {
+    return jive.util.fsexists( definitionJsonPath).then( function(exists) {
         if ( exists ) {
             return jive.util.fsreadJson(definitionJsonPath);
         } else {
-            return {}
+            return {};
         }
     }).then( function( definitionJson ) {
             var pathPrefix = definitionJson['pathPrefix'];
@@ -106,6 +106,8 @@ serviceSetup.setupOneService = function( app, serviceDir ) {
             promises.push( fsexists(serviceDir).then( function(exists) {
                 if ( exists ) {
                     return setupBackendRoutes( servicesApp, pathPrefix, serviceName, routesPath );
+                } else {
+                    return q.resolve();
                 }
             }));
 
@@ -126,10 +128,12 @@ serviceSetup.setupAllServices = function( app, servicesRootDir ) {
                 var proms = [];
                 dirContents.forEach(function(item) {
                     if ( !isValidFile(item) ) {
-                        return;
+                        proms.push(q.resolve());
+                    } else {
+                        var dirPath = servicesRootDir + '/' + item ;
+                        var serviceSetupPromise = serviceSetup.setupOneService(app, dirPath, item);
+                        proms.push(serviceSetupPromise);
                     }
-                    var dirPath = servicesRootDir + '/' + item ;
-                    proms.push(serviceSetup.setupOneService(app, dirPath, item));
                 });
 
                 return q.all(proms);
