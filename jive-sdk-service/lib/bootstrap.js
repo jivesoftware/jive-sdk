@@ -121,7 +121,7 @@ var setupScheduler = function() {
         );
     });
 
-    service.scheduler().init(jive.events.eventHandlerMap, service.options);
+    service.scheduler().init(jive.events.eventHandlerMap, service.options, jive);
     deferred.resolve();
 
     return deferred.promise;
