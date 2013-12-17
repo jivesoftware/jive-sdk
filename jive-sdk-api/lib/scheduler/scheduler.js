@@ -24,6 +24,8 @@ function Scheduler() {
 module.exports = Scheduler;
 
 var tasks = {};
+var running = {};
+var lastRunTs = {};
 
 var eventHandlerMap = {};
 
@@ -56,7 +58,7 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
  * @param context what to pass to the event
  * @param interval The interval to invoke the callback
  */
-Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay) {
+Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay, exclusive, timeout) {
     eventID = eventID || jive.util.guid();
 
     context = context || {};
@@ -74,6 +76,9 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
 
     var next = function(timer, eventID) {
         var promises = [];
+        running[eventID] = true;
+        lastRunTs[eventID] = new Date().getTime();
+
         handlers.forEach( function(handler) {
             var p = handler(context);
             if ( p && p['then'] ) {
@@ -89,6 +94,7 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
                 if ( timer && eventID && !tasks[eventID] ) {
                     clearInterval(timer);
                 }
+                delete running[eventID];
                 deferred.resolve(result);
             },
 
@@ -97,21 +103,39 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
                 if ( timer && eventID && !tasks[eventID] ) {
                     clearInterval(timer);
                 }
+                delete running[eventID];
                 deferred.reject(e);
             }
         );
     };
 
     if (interval) {
-        setTimeout( function() {
-            var timer = tasks[eventID] = setInterval(function() {
-                next(timer, eventID);
-            }, interval);
-        }, delay || 1 );
+        if ( !running[eventID] ) {
+            var d = delay || 1;
+            setTimeout( function() {
+                var timer = tasks[eventID] = setInterval(function() {
+                    var hasTimedOut = timeout ? new Date().getTime() - (lastRunTs[eventID] || 0) > timeout : false;
+                    if ( !running[eventID] || hasTimedOut ) {
+                        if (hasTimedOut ) {
+                            jive.logger.debug(eventID,'timed out!');
+                        }
+                        next(timer, eventID);
+                    }
+                }, interval);
+            }, delay - interval > 0 ? (delay - interval) : delay );
+        } else {
+            jive.logger.debug("Skipping", eventID, "already running.");
+        }
     }
     else {
         setTimeout( function() {
-            next();
+            var hasTimedOut = timeout ? new Date().getTime() - (lastRunTs[eventID] || 0) > timeout : false;
+            if ( !exclusive || !running[eventID] || hasTimedOut ) {
+                if (hasTimedOut ) {
+                    jive.logger.debug(eventID,'timed out!');
+                }
+                next(undefined, eventID);
+            }
         }, delay || 1);
     }
     jive.logger.debug("Scheduled task: " + eventID, interval || "immediate");
@@ -142,6 +166,8 @@ Scheduler.prototype.isScheduled = function( eventID ) {
 Scheduler.prototype.shutdown = function(){
     var scheduler = this;
     eventHandlerMap = {};
+    running = {};
+    lastRunTs = {};
     this.getTasks().forEach(function(taskKey){
         scheduler.unschedule(taskKey);
     });
