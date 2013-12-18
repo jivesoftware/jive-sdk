@@ -146,7 +146,7 @@ describe('jive', function () {
             });
         });
 
-        it.only('testFailedEvent', function (done) {
+        it('testFailedEvent', function (done) {
             var jive = this['jive'];
             var testUtils = this['testUtils'];
 
