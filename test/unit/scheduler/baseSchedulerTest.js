@@ -261,3 +261,22 @@ exports.testConcurrentIntervalEvents = function( jive, testUtils, scheduler ) {
     return deferred.promise;
 };
 
+exports.testFailedEvent = function( jive, testUtils, scheduler ) {
+
+    var deferred = q.defer();
+
+    var event = jive.util.guid();
+    jive.events.addDefinitionEventListener(event, 'event1Listener', function() {
+        return q.reject();
+    });
+
+    scheduler.init();
+    scheduler.schedule( event, { eventListener: 'event1Listener' }).then( function(r) {
+        deferred.reject(new Error("expected failure"));
+    }, function(e) {
+        deferred.resolve();
+    });
+
+    return deferred.promise;
+};
+
