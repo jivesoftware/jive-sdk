@@ -18,5 +18,5 @@ var jive = require("jive-sdk");
 
 exports.route = function(req, res){
     var conf = jive.service.options;
-    res.render('configuration_oauth2.html', { host: conf.clientUrl + ':' + conf.port  });
+    res.render('configuration_oauth2.html', { host: jive.service.serviceURL() });
 };

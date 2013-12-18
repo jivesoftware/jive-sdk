@@ -5,7 +5,7 @@ exports.todoCreator = {
     'verb' : 'get',
     'route': function(req, res){
         var conf = jive.service.options;
-        res.render('configuration.html', { host: conf.clientUrl + ':' + conf.port  });
+        res.render('configuration.html', { host: jive.service.serviceURL() });
     }
 };
 
