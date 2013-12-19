@@ -226,6 +226,9 @@ exports.init = function(_app, options ) {
         if ( roleFromEnv ) {
             config['role'] = roleFromEnv;
         }
+        if (process && process.env && process.env.PORT) {
+            config['port'] = process.env.PORT;
+        }
     };
 
     var initialPromise;
