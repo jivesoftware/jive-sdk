@@ -21,7 +21,7 @@ exports.save = function( webhook ) {
     return jive.context.persistence.save( "webhook", webhook['id'], webhook );
 };
 
-exports.findByTenantId = function( webhookId ) {
+exports.findByTenantID = function( webhookId ) {
     return jive.context.persistence.findByID( 'webhook', webhookId );
 };
 
