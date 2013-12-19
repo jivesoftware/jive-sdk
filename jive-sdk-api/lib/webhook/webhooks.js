@@ -18,7 +18,24 @@ var jive = require('../../api');
 var q = require('q');
 
 exports.save = function( webhook ) {
-    return jive.context.persistence.save( "webhook", webhook['url'], webhook );
+    return jive.context.persistence.save( "webhook", webhook['id'], webhook );
+};
+
+exports.findByTenantId = function( webhookId ) {
+    return jive.context.persistence.findByID( 'webhook', webhookId );
+};
+
+exports.findByCommunity = function(community) {
+    var deferred = q.defer();
+
+    var tenantId = community['tenantId'];
+    jive.context.persistence.find( 'webhook', { 'tenantId' : tenantId } ).then( function(found) {
+        deferred.resolve(found);
+    }, function(error) {
+        deferred.reject(error);
+    });
+
+    return deferred.promise;
 };
 
 /**
@@ -28,11 +45,16 @@ exports.save = function( webhook ) {
  * @param events
  * @param object
  * @param webhookCallbackURL
- * @param accessToken
+ * @param accessToken if omitted, will registration will use community oauth
+ * @param refreshToken if omitted, will registration will use community oauth
+ * @param tokenPersistenceFunction supply this to handle any new oauth tokens acquired after a token refresh
  * @return promise
  */
-exports.register = function( jiveCommunity, events, object, webhookCallbackURL, accessToken ) {
+exports.register = function( jiveCommunity, events, object, webhookCallbackURL,
+                             accessToken, refreshToken, tokenPersistenceFunction ) {
     var deferred = q.defer();
+
+    var self = this;
 
     jive.community.findByCommunity(jiveCommunity).then( function(community) {
         if ( community ) {
@@ -49,20 +71,38 @@ exports.register = function( jiveCommunity, events, object, webhookCallbackURL, 
                 return;
             }
 
-            accessToken = accessToken || community['oauth']['access_token'];
+            var oauth;
+            if ( accessToken ) {
+                oauth = {};
+                oauth['access_token'] = accessToken;
+                oauth['refresh_token'] = refreshToken;
+            }
 
-            var jiveUrl = community['jiveUrl'];
-            var webhooksEndpoint = jiveUrl + '/api/core/v3/webhooks';
-
-            var headers = {
-                'Authorization' : 'Bearer ' + accessToken
-            };
-
-            jive.util.buildRequest(webhooksEndpoint, "POST", webhookRequest, headers).then(
+            jive.community.doRequest( community, {
+                'path' : '/api/core/v3/webhooks',
+                'oauth' : oauth,
+                'tokenPersistenceFunction' : tokenPersistenceFunction,
+                'method' : 'POST',
+                'postBody' : webhookRequest
+            }).then(
                 function(result) {
-                    deferred.resolve( result );
+                    // success
+                    // save the webhook
+                    var id = jive.util.guid();
+                    var webhook = {
+                        'id' : id,
+                        'tenantId' : community['tenantId'],
+                        'entity' : result['entity']
+                    };
+
+                    self.save( webhook ).then( function() {
+                        deferred.resolve( result );
+                    }, function(error) {
+                        deferred.reject(error);
+                    });
                 },
                 function(error) {
+                    // failed webhook request
                     deferred.reject( error );
                 }
             );
