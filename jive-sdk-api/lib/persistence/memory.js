@@ -19,9 +19,11 @@ var jive = require('../../api');
 var ArrayStream = require('stream-array');
 
 /**
- * New instances of this module will separate state from every other instance.
+ * An in-memory implementation of persistence.
+ * @module memoryPersistence
+ * @constructor
+ * @returns {memoryPersistenceSubtype} persistenceObject An object with functions capable of CRUD operations.
  */
-
 module.exports = function() {
 
     jive.logger.warn("******************************");
@@ -58,12 +60,18 @@ module.exports = function() {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Public
 
-    return {
+    /**
+     * @inner
+     * @namespace
+     * @memberof memory
+     */
+    var memoryPersistenceSubtype = {
         /**
          * Save the provided data in a named collection
-         * @param collectionID
-         * @param key
-         * @param data
+         * @param {String} collectionID
+         * @param {String} key
+         * @param {Object} data
+         * @returns {Object} promise
          */
         save: function( collectionID, key, data) {
             return q.fcall( function () {
@@ -76,8 +84,10 @@ module.exports = function() {
         /**
          * Remove a piece of data from a name collection, based to the provided key and return a promise
          * that returns removed items when done.
-         * @param collectionID
-         * @param key
+         *
+         * @param {String} collectionID
+         * @param {String} key
+         * @returns {Object} promise
          */
         remove: function( collectionID, key ) {
             return q.fcall( function () {
@@ -93,8 +103,11 @@ module.exports = function() {
         /**
          * Retrieve a piece of data from a named collection, based on the criteria, and returns a promise
          * that contains found items when done.
-         * @param collectionID
-         * @param keyValues
+         *
+         * @param {String} collectionID
+         * @param {Object} keyValues
+         * @param {Boolean} cursor If true, returns an iterable cursor.
+         * @returns {Object} promise
          */
         find: function( collectionID, keyValues, cursor ) {
             var p = q.defer();
@@ -201,6 +214,7 @@ module.exports = function() {
          * Retrieve a piece of data from a named collection whose key is the one provided.
          * @param collectionID
          * @param key
+         * @returns {Object} promise
          */
         findByID: function( collectionID, key ) {
             return q.fcall( function() {
@@ -211,12 +225,14 @@ module.exports = function() {
 
         /**
          * Close it down
-         * @return {*}
+         * @returns {Object} promise
          */
         close: function() {
             return q.resolve();
         }
     };
+
+    return memoryPersistenceSubtype;
 
 };
 

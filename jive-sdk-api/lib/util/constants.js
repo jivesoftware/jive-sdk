@@ -14,6 +14,14 @@
  *    limitations under the License.
  */
 
+/**
+ * @class constants
+ */
+
+/**
+ * @static
+ * @type {{PUSH_DATA_TO_JIVE: string, PUSH_ACTIVITY_TO_JIVE: string, PUSH_COMMENT_TO_JIVE: string, COMMENT_ON_ACTIVITY: string, COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID: string, FETCH_COMMENTS_ON_ACTIVITY: string, FETCH_ALL_COMMENTS_FOR_EXT_STREAM: string, INSTANCE_REGISTRATION: string, INSTANCE_UNREGISTRATION: string, CLIENT_APP_REGISTRATION: string, GET_PAGINATED_RESULTS: string, GET_EXTERNAL_PROPS: string, SET_EXTERNAL_PROPS: string, DELETE_EXTERNAL_PROPS: string}}
+ */
 exports.tileEventNames = {
     'PUSH_DATA_TO_JIVE':'pushDataToJive',
     'PUSH_ACTIVITY_TO_JIVE':'pushActivityToJive',

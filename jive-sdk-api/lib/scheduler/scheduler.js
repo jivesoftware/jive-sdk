@@ -21,6 +21,10 @@ function Scheduler() {
     return this;
 }
 
+/**
+ * An in-memory implementation of scheduler.
+ * @class memoryScheduler
+ */
 module.exports = Scheduler;
 
 var tasks = {};
@@ -29,7 +33,12 @@ var lastRunTs = {};
 
 var eventHandlerMap = {};
 
-Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
+
+/**
+ * @memberof memoryScheduler
+ * @param _eventHandlerMap
+ */
+function init( _eventHandlerMap ) {
     eventHandlerMap = _eventHandlerMap || jive.events.eventHandlerMap;
 
     // setup listeners
@@ -50,15 +59,21 @@ Scheduler.prototype.init = function init( _eventHandlerMap, options ) {
     });
 
     return this;
-};
+}
+Scheduler.prototype.init = init;
 
 /**
  * Schedule a task.
+ * @memberof memoryScheduler
  * @param eventID which event to fire
  * @param context what to pass to the event
  * @param interval The interval to invoke the callback
+ * @param delay The number of milliseconds after which the event will be fired for the first time.
+ * @param exclusive If true, then will not execute if another event named with the same eventID is already executing.
+ * @param timeout The number of milliseconds, after which the schedule will declare the event has timed out, and will fire the reject on any promise that was returned.
+ * @returns {Object} Promise
  */
-Scheduler.prototype.schedule = function schedule(eventID, context, interval, delay, exclusive, timeout) {
+function schedule(eventID, context, interval, delay, exclusive, timeout) {
     eventID = eventID || jive.util.guid();
 
     context = context || {};
@@ -141,18 +156,36 @@ Scheduler.prototype.schedule = function schedule(eventID, context, interval, del
     jive.logger.debug("Scheduled task: " + eventID, interval || "immediate");
 
     return deferred.promise;
-};
+}
+Scheduler.prototype.schedule = schedule;
 
-Scheduler.prototype.unschedule = function unschedule(eventID){
+/**
+ * @memberof memoryScheduler
+ * @param eventID
+ * @returns {Object} Promise
+ */
+function unschedule(eventID){
     clearInterval(tasks[eventID]);
     delete tasks[eventID];
-};
+    return q.resolve();
+}
+Scheduler.prototype.unschedule = unschedule;
 
-Scheduler.prototype.getTasks = function getTasks(){
+/**
+ * @memberof memoryScheduler
+ * @returns {Object} Promise
+ */
+function getTasks(){
     return Object.keys(tasks);
-};
+}
+Scheduler.prototype.getTasks = getTasks;
 
-Scheduler.prototype.isScheduled = function( eventID ) {
+/**
+ * @memberof memoryScheduler
+ * @param eventID
+ * @returns {Object} Promise
+ */
+function isScheduled( eventID ) {
     var deferred = q.defer();
     if (tasks[eventID]) {
         deferred.resolve(true);
@@ -161,9 +194,14 @@ Scheduler.prototype.isScheduled = function( eventID ) {
     }
 
     return deferred.promise;
-};
+}
+Scheduler.prototype.isScheduled = isScheduled;
 
-Scheduler.prototype.shutdown = function(){
+/**
+ * @memberof memoryScheduler
+ * @returns {Object} Promise
+ */
+function shutdown(){
     var scheduler = this;
     eventHandlerMap = {};
     running = {};
@@ -173,4 +211,5 @@ Scheduler.prototype.shutdown = function(){
     });
 
     return q.resolve();
-};
+}
+Scheduler.prototype.shutdown =  shutdown;

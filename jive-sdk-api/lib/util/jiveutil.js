@@ -44,6 +44,11 @@ var hex_high_10 = { // set the highest bit and clear the next highest
     'f': 'b'
 };
 
+/**
+ * Useful general utility functions.
+ * @class jiveutil
+ */
+
 exports.guid = function (src) {
     if (!src) {
         return uuid.v4();

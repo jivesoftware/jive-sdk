@@ -17,15 +17,60 @@
 var jive = require('../../api');
 var q = require('q');
 
+/**
+ * API for interacting with Jive communities.
+ * @class webhooks
+ */
+
+/**
+ * Saves the given webhook into persistence.
+ * @memberof webhooks
+ * @param webhook
+ * @returns {Promise} Promise
+ */
 exports.save = function( webhook ) {
     return jive.context.persistence.save( "webhook", webhook['id'], webhook );
 };
 
+/**
+ * Looks through persistence for a webhook object with the provided id.
+ * If no object is found with that id, a null object is resolved to the returned promise.
+ * @memberof webhooks
+ * @param webhookId
+ * @returns {Promise} Promise
+ */
 exports.findByTenantID = function( webhookId ) {
     return jive.context.persistence.findByID( 'webhook', webhookId );
 };
 
+/**
+ * Looks through persistence for all webhooks associated with the provided community object.
+ * If no objects are found with that id, an empty array is resolved to the returned promise; otherwise an
+ * array of objects is resolved.
+ * <br><br>
+ * An error will be thrown if:
+ * <ul>
+ *     <li>No community argument is passed</li>
+ *     <li>Community argument is not an object</li>
+ *     <li>Community object does not contain a tenantId</li>
+ * </ul>
+ * @memberof webhooks
+ * @param community
+ * @returns {Promise} Promise
+ */
 exports.findByCommunity = function(community) {
+    if ( !community ) {
+        throw new Error("Community object is required.");
+    }
+
+    if ( typeof community !== 'object') {
+        throw new Error("Community must be an object.");
+    }
+
+    if ( !community['tenantId'] ) {
+        throw new Error("Community object must contain a tenantId.");
+    }
+
     var deferred = q.defer();
 
     var tenantId = community['tenantId'];
@@ -41,14 +86,17 @@ exports.findByCommunity = function(community) {
 /**
  * Register a webhook for the named jive community. Uses either the registered community access token for your
  * service, or the supplied access token.
- * @param jiveCommunity
- * @param events
- * @param object
- * @param webhookCallbackURL
- * @param accessToken if omitted, will registration will use community oauth
- * @param refreshToken if omitted, will registration will use community oauth
- * @param tokenPersistenceFunction supply this to handle any new oauth tokens acquired after a token refresh
- * @return promise
+ * @memberof webhooks
+ * @param {String} jiveCommunity Required. Name of the jive community.
+ * @param {Array} events Required. Array of String. Elements may be system webhooks (user_account, user_membership, user_session, social_group)
+ * or content events (document, discussion, blogpost, .. )
+ * @param {String} object Optional, if events are system webhooks.
+ * @param {String} webhookCallbackURL Required. URL of the postback that Jive will contact when the conditions of the hook are met.
+ * @param {String} accessToken Optional. If omitted, will registration will use community oauth
+ * @param {String} refreshToken Optional. If omitted, will registration will use community oauth
+ * @param {function} tokenPersistenceFunction Optional. Callback function that will be invoked with new oauth access and refresh
+ * tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, the community will be updated with the new access tokens.
+ * @returns {Promise} Promise
  */
 exports.register = function( jiveCommunity, events, object, webhookCallbackURL,
                              accessToken, refreshToken, tokenPersistenceFunction ) {

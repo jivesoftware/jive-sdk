@@ -134,7 +134,7 @@ exports.handleOperation = function (operation, operationContext, oauth, retryIfF
 
 /**
  * This is the default implementation of access token refresh.
- *
+ * @private
  * @param oauth
  * @returns {*}
  */

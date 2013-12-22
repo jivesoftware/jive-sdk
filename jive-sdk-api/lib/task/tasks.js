@@ -28,11 +28,46 @@ var task = function( _runnable, _interval, _id ) {
     };
 };
 
+/**
+ * API for managing recurrent tasks.
+ * @class tasks
+ */
+
+/**
+ * Schedules a recurrent task.
+ * @memberof tasks
+ * @param {function} handler Required. This function is invoked when the task scheduling condtions are met.
+ * @param {number} interval Optional. Number of milliseconds in between recurrences of the handler being invoked.
+ * @param {String} id Optional. Unique identifier for the task.
+ * @returns {Object} a task object wrapping the provided parameters (handler, interval, id).
+ */
 exports.build = function(handler, interval, id) {
     return new task( handler, interval, id );
 };
 
+/**
+ * @memberof tasks
+ * @param {Object} task Required. Wrapper object for task characteristics.
+ * @param {function} task.handler Required. This function is invoked when the task scheduling conditions are met.
+ * @param {number} task.interval Optional. Number of milliseconds in between recurrences of the handler being invoked.
+ * @param {String} task.id Optional. Unique identifier for the task.
+ * @param {Object} scheduler Required. A scheduler strategy, similar to @see {@link memoryScheduler}.
+ * @returns {Promise} Promise Promise .resolve and .reject handlers will be called depending on the success or failure of the handler
+ * function when it is invoked.
+ */
 exports.schedule = function( task, scheduler ) {
+    if ( !task || typeof task !== 'object' ) {
+        throw Error("A task object is required.");
+    }
+
+    if ( !scheduler ) {
+        throw Error("A scheduler is required.");
+    }
+
+    if ( typeof scheduler['schedule'] !== 'function' ) {
+        throw Error("Invalid scheduler - requires a schedule function.");
+    }
+
     var eventID = task['id'] || jive.util.guid();
     var context = { 'eventListener' : '__jive_system_tasks' };
     var interval = task['interval'];

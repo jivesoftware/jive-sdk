@@ -19,6 +19,12 @@ var q = require('q');
 var jive = require('../../api');
 var ArrayStream = require('stream-array');
 
+/**
+ * An file implementation of persistence.
+ * @module filePersistence
+ * @constructor
+ * @returns {filePersistenceSubtype} persistenceObject An object with functions capable of CRUD operations.
+ */
 module.exports = function(serviceConfig) {
 
     jive.logger.warn("******************************");
@@ -201,10 +207,23 @@ module.exports = function(serviceConfig) {
         }
     };
 
-    return {
+    /**
+     * @inner
+     * @namespace
+     * @memberof file
+     */
+    var filePersistenceSubtype = {
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Public
 
+        /**
+         * Save the provided data in a named collection
+         *
+         * @param {String} collectionID
+         * @param {String} key
+         * @param {Object} data
+         * @returns {Object} promise
+         */
         save : function( collectionID, key, data) {
             var deferred = q.defer();
 
@@ -218,6 +237,14 @@ module.exports = function(serviceConfig) {
             return deferred.promise;
         },
 
+        /**
+         * Remove a piece of data from a name collection, based to the provided key and return a promise
+         * that returns removed items when done.
+         *
+         * @param {String} collectionID
+         * @param {String} key
+         * @returns {Object} promise
+         */
         remove : function( collectionID, key ) {
             var deferred = q.defer();
 
@@ -232,6 +259,12 @@ module.exports = function(serviceConfig) {
             return deferred.promise;
         },
 
+        /**
+         * Retrieve a piece of data from a named collection whose key is the one provided.
+         * @param collectionID
+         * @param key
+         * @returns {Object} promise
+         */
         findByID: function( collectionID, key ) {
             var deferred = q.defer();
 
@@ -243,6 +276,15 @@ module.exports = function(serviceConfig) {
             return deferred.promise;
         },
 
+        /**
+         * Retrieve a piece of data from a named collection, based on the criteria, and returns a promise
+         * that contains found items when done.
+         *
+         * @param {String} collectionID
+         * @param {Object} keyValues
+         * @param {Boolean} cursor If true, returns an iterable cursor.
+         * @returns {Object} promise
+         */
         find : function( collectionID, keyValues, cursor ) {
 
             var deferred = q.defer();
@@ -365,5 +407,7 @@ module.exports = function(serviceConfig) {
         }
 
     };
+
+    return filePersistenceSubtype;
 };
 
