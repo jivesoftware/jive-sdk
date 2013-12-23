@@ -59,8 +59,6 @@ function setupPublicRoutes(serviceDir, app, pathPrefix) {
     });
 }
 
-/**
- */
 serviceSetup.setupServiceRoutes = function(app, serviceName, routesPath){
     return serviceSetup.setupRoutes( app, serviceName, routesPath );
 };
@@ -144,8 +142,6 @@ serviceSetup.setupAllServices = function( app, servicesRootDir ) {
     });
 };
 
-/**
- */
 serviceSetup.setupServiceServices = function( app, definitionName, svcDir ) {
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.

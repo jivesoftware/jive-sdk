@@ -82,8 +82,7 @@ var findCredentials = function(req) {
 var lockedRoutes = {};
 
 /**
- * Any routes passed into this method will become open: e.g the service will NOT validate security
- * if the headers are not present.
+ * Any routes passed into this method will become locked: e.g the service will validate security headers.
  * @param routePath
  */
 exports.lockRoute = function( routePath ) {

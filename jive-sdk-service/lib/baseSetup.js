@@ -62,9 +62,6 @@ exports.recursiveDirectoryProcessor = function(app, definitionName, currentFsIte
     });
 };
 
-/**
- *
- */
 exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
 
     var processCandidateRoutes = function(app, definitionName, theFile, theDirectory, root ) {
@@ -163,8 +160,6 @@ function defaultSetupEventListener(handlerInfo, definitionName) {
     }
 }
 
-/**
- */
 exports.setupServices = function( app, definitionName, svcDir, setupEventListener, setupContext ) {
     /////////////////////////////////////////////////////
     // apply definition specific tasks, life cycle events, etc.

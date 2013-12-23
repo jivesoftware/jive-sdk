@@ -53,16 +53,6 @@ var _dir = function(theDir, defaultDir ) {
 // Public
 
 /**
- * For managing jive communities registered with this service
- */
-exports.community = jive.community;
-
-/**
- * For managing service webhooks
- */
-exports.webhooks = jive.webhooks;
-
-/**
  * Configuration options
  */
 exports.options = {};
@@ -420,9 +410,6 @@ function initScheduler(options) {
     return options;
 }
 
-/**
- *
- */
 exports.autowire = function(definitionsToAutowire) {
     if( definitionsToAutowire ) {
 
