@@ -38,14 +38,13 @@ exports.logger = logger;
 
 /**
  * An object containing the available default persistence strategies.<br>
- * Example usage:
  * <br><br>
- * var jive = require('jive-sdk');
- * <br>
- * new jive.persistence.file();
- * <br>
- * new jive.persistence.memory();
- * <br>
+ * Example Usage:<br>
+ * <pre>
+ *     var jive = require('jive-sdk');
+ *     var persistence = new jive.persistence.memory();
+ *     persistence.save( ... );
+ * </pre>
  * @memberof api
  * @type {Object}
  * @property {filePersistence} file - File based persistence. @see {@link filePersistence} persistence.
@@ -58,12 +57,15 @@ exports.persistence = {
 
 /**
  * An object containing the available default scheduling strategy types.<br>
- * Example usage:
  * <br><br>
- * var jive = require('jive-sdk');
- * <br>
- * new jive.scheduler.memory();
- * <br>
+ * Example Usage:<br>
+ * <pre>
+ *     var jive = require('jive-sdk');
+ *     var scheduler = new jive.scheduler.memory();
+ *     ...
+ *     ...
+ *     scheduler.schedule( ... );
+ * </pre>
  * @memberof api
  * @type {memoryScheduler}
  */
@@ -80,15 +82,13 @@ exports.constants = require('./lib/util/constants.js');
 
 /**
  * API for manipulating external streams and tiles (instances and definitions).
- * <br>
- * Usage:
- * <br>
- * var jive = require('jive-sdk');
- * <ul>
- *    <li>jive.extstreams.find(..)</li>
- *    <li>jive.extstreams.definitions.find(..)</li>
- * </ul>
- *
+ * <br><br>
+ * Example Usage:<br>
+ * <pre>
+ *     var jive = require('jive-sdk');
+ *     jive.extstreams.findByID( ... );
+ *     jive.extstreams.definitions.findByID( ... );
+ * </pre>
  * @memberof api
  * @type {extstreamsInstances}
  * @property {extstreamsDefinitions} definitions - Stream definitions API.
@@ -99,12 +99,12 @@ exports.extstreams['definitions'] = require('./lib/tile/extstreamsDefinitions');
 /**
  * API for manipulating tiles (instances and definitions).
  * <br>
- * Usage:
- * var jive = require('jive-sdk');
- * <ul>
- *    <li>jive.tiles.find(..)</li>
- *    <li>jive.tiles.definitions.find(..)</li>
- * </ul>
+ * Example Usage:<br>
+ * <pre>
+ *     var jive = require('jive-sdk');
+ *     jive.tiles.findByID( ... );
+ *     jive.tiles.definitions.findByID( ... );
+ * </pre>
  * @memberof api
  * @type {tileInstances}
  * @property {tilesDefinitions} definitions - Tiles definitions API.
@@ -120,6 +120,12 @@ exports.events = require( './lib/event/events');
 
 /**
  * Useful general purpose utility functions.
+ * <br>
+ * Example Usage:<br>
+ * <pre>
+ *     var jive = require('jive-sdk');
+ *     var guid = jive.util.guid();
+ * </pre>
  * @memberof api
  * @type {jiveutil}
  */
@@ -133,7 +139,15 @@ exports.util = require('./lib/util/jiveutil');
 exports.oauthUtil = require('./lib/util/oauth');
 
 /**
- * API for managing jive communities registered with this service.
+ * API for managing jive communities.
+ * <br><br>
+ * Example Usage:<br>
+ * <pre>
+ *     var jive = require('jive-sdk');
+ *     jive.community.findByTenantID( '8sakjhdfee1' ).then( function(community) {
+ *          jive.logger.info('Found',JSON.stringify(community));
+ *     });
+ * </pre>
  * @memberof api
  * @type {community}
  */

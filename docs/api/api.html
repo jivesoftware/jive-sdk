@@ -131,7 +131,15 @@
 <dd>
     
     <div class="description">
-        API for managing jive communities registered with this service.
+        API for managing jive communities.
+<br><br>
+Example Usage:<br>
+<pre>
+    var jive = require('jive-sdk');
+    jive.community.findByTenantID( '8sakjhdfee1' ).then( function(community) {
+         jive.logger.info('Found',JSON.stringify(community));
+    });
+</pre>
     </div>
     
     
@@ -170,7 +178,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line140">line 140</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line154">line 154</a>
     </li></ul></dd>
     
     
@@ -234,7 +242,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line79">line 79</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line81">line 81</a>
     </li></ul></dd>
     
     
@@ -395,7 +403,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line175">line 175</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line189">line 189</a>
     </li></ul></dd>
     
     
@@ -481,14 +489,13 @@
     
     <div class="description">
         API for manipulating external streams and tiles (instances and definitions).
-<br>
-Usage:
-<br>
-var jive = require('jive-sdk');
-<ul>
-   <li>jive.extstreams.find(..)</li>
-   <li>jive.extstreams.definitions.find(..)</li>
-</ul>
+<br><br>
+Example Usage:<br>
+<pre>
+    var jive = require('jive-sdk');
+    jive.extstreams.findByID( ... );
+    jive.extstreams.definitions.findByID( ... );
+</pre>
     </div>
     
     
@@ -847,7 +854,7 @@ var jive = require('jive-sdk');
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line133">line 133</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line139">line 139</a>
     </li></ul></dd>
     
     
@@ -873,14 +880,13 @@ var jive = require('jive-sdk');
     
     <div class="description">
         An object containing the available default persistence strategies.<br>
-Example usage:
 <br><br>
-var jive = require('jive-sdk');
-<br>
-new jive.persistence.file();
-<br>
-new jive.persistence.memory();
-<br>
+Example Usage:<br>
+<pre>
+    var jive = require('jive-sdk');
+    var persistence = new jive.persistence.memory();
+    persistence.save( ... );
+</pre>
     </div>
     
     
@@ -993,7 +999,7 @@ new jive.persistence.memory();
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line54">line 54</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line53">line 53</a>
     </li></ul></dd>
     
     
@@ -1019,12 +1025,15 @@ new jive.persistence.memory();
     
     <div class="description">
         An object containing the available default scheduling strategy types.<br>
-Example usage:
 <br><br>
-var jive = require('jive-sdk');
-<br>
-new jive.scheduler.memory();
-<br>
+Example Usage:<br>
+<pre>
+    var jive = require('jive-sdk');
+    var scheduler = new jive.scheduler.memory();
+    ...
+    ...
+    scheduler.schedule( ... );
+</pre>
     </div>
     
     
@@ -1063,7 +1072,7 @@ new jive.scheduler.memory();
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line70">line 70</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line72">line 72</a>
     </li></ul></dd>
     
     
@@ -1127,7 +1136,7 @@ new jive.scheduler.memory();
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line154">line 154</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line168">line 168</a>
     </li></ul></dd>
     
     
@@ -1154,12 +1163,12 @@ new jive.scheduler.memory();
     <div class="description">
         API for manipulating tiles (instances and definitions).
 <br>
-Usage:
-var jive = require('jive-sdk');
-<ul>
-   <li>jive.tiles.find(..)</li>
-   <li>jive.tiles.definitions.find(..)</li>
-</ul>
+Example Usage:<br>
+<pre>
+    var jive = require('jive-sdk');
+    jive.tiles.findByID( ... );
+    jive.tiles.definitions.findByID( ... );
+</pre>
     </div>
     
     
@@ -1275,6 +1284,12 @@ var jive = require('jive-sdk');
     
     <div class="description">
         Useful general purpose utility functions.
+<br>
+Example Usage:<br>
+<pre>
+    var jive = require('jive-sdk');
+    var guid = jive.util.guid();
+</pre>
     </div>
     
     
@@ -1313,7 +1328,7 @@ var jive = require('jive-sdk');
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line126">line 126</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line132">line 132</a>
     </li></ul></dd>
     
     
@@ -1377,7 +1392,7 @@ var jive = require('jive-sdk');
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line147">line 147</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line161">line 161</a>
     </li></ul></dd>
     
     
@@ -1416,7 +1431,7 @@ var jive = require('jive-sdk');
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha2</a> on Sun Dec 22 2013 21:51:41 GMT-0800 (PST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha2</a> on Sun Dec 22 2013 22:10:52 GMT-0800 (PST)
 </footer>
 
 <script> prettyPrint(); </script>
