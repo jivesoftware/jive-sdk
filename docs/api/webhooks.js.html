@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: lib/webhook/webhooks.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: lib/webhook/webhooks.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source"><code>/*
+ * Copyright 2013 Jive Software
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+var jive = require('../../api');
+var q = require('q');
+
+/**
+ * API for interacting with Jive communities.
+ * @class webhooks
+ */
+
+/**
+ * Saves the given webhook into persistence.
+ * @memberof webhooks
+ * @param webhook
+ * @returns {Promise} Promise
+ */
+exports.save = function( webhook ) {
+    return jive.context.persistence.save( "webhook", webhook['id'], webhook );
+};
+
+/**
+ * Looks through persistence for a webhook object with the provided id.
+ * If no object is found with that id, a null object is resolved to the returned promise.
+ * @memberof webhooks
+ * @param webhookId
+ * @returns {Promise} Promise
+ */
+exports.findByTenantID = function( webhookId ) {
+    return jive.context.persistence.findByID( 'webhook', webhookId );
+};
+
+/**
+ * Looks through persistence for all webhooks associated with the provided community object.
+ * If no objects are found with that id, an empty array is resolved to the returned promise; otherwise an
+ * array of objects is resolved.
+ * &lt;br>&lt;br>
+ * An error will be thrown if:
+ * &lt;ul>
+ *     &lt;li>No community argument is passed&lt;/li>
+ *     &lt;li>Community argument is not an object&lt;/li>
+ *     &lt;li>Community object does not contain a tenantId&lt;/li>
+ * &lt;/ul>
+ * @memberof webhooks
+ * @param community
+ * @returns {Promise} Promise
+ */
+exports.findByCommunity = function(community) {
+    if ( !community ) {
+        throw new Error("Community object is required.");
+    }
+
+    if ( typeof community !== 'object') {
+        throw new Error("Community must be an object.");
+    }
+
+    if ( !community['tenantId'] ) {
+        throw new Error("Community object must contain a tenantId.");
+    }
+
+    var deferred = q.defer();
+
+    var tenantId = community['tenantId'];
+    jive.context.persistence.find( 'webhook', { 'tenantId' : tenantId } ).then( function(found) {
+        deferred.resolve(found);
+    }, function(error) {
+        deferred.reject(error);
+    });
+
+    return deferred.promise;
+};
+
+/**
+ * Register a webhook for the named jive community. Uses either the registered community access token for your
+ * service, or the supplied access token.
+ * @memberof webhooks
+ * @param {String} jiveCommunity Required. Name of the jive community.
+ * @param {Array} events Required. Array of String. Elements may be system webhooks (user_account, user_membership, user_session, social_group)
+ * or content events (document, discussion, blogpost, .. )
+ * @param {String} object Optional, if events are system webhooks.
+ * @param {String} webhookCallbackURL Required. URL of the postback that Jive will contact when the conditions of the hook are met.
+ * @param {String} accessToken Optional. If omitted, will registration will use community oauth
+ * @param {String} refreshToken Optional. If omitted, will registration will use community oauth
+ * @param {function} tokenPersistenceFunction Optional. Callback function that will be invoked with new oauth access and refresh
+ * tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, the community will be updated with the new access tokens.
+ * @returns {Promise} Promise
+ */
+exports.register = function( jiveCommunity, events, object, webhookCallbackURL,
+                             accessToken, refreshToken, tokenPersistenceFunction ) {
+    var deferred = q.defer();
+
+    var self = this;
+
+    jive.community.findByCommunity(jiveCommunity).then( function(community) {
+        if ( community ) {
+
+            var webhookRequest = {
+                "events": events,
+                "object": object,
+                "callback": webhookCallbackURL
+            };
+
+            if ( (!community['oauth'] || !community['oauth']['access_token']) &amp;&amp; !accessToken ) {
+                deferred.reject(new Error("Failed to create community webhook. " +
+                    "No access token associated with community, and none provided explicitly."));
+                return;
+            }
+
+            var oauth;
+            if ( accessToken ) {
+                oauth = {};
+                oauth['access_token'] = accessToken;
+                oauth['refresh_token'] = refreshToken;
+            }
+
+            jive.community.doRequest( community, {
+                'path' : '/api/core/v3/webhooks',
+                'oauth' : oauth,
+                'tokenPersistenceFunction' : tokenPersistenceFunction,
+                'method' : 'POST',
+                'postBody' : webhookRequest
+            }).then(
+                function(result) {
+                    // success
+                    // save the webhook
+                    var id = jive.util.guid();
+                    var webhook = {
+                        'id' : id,
+                        'tenantId' : community['tenantId'],
+                        'entity' : result['entity']
+                    };
+
+                    self.save( webhook ).then( function() {
+                        deferred.resolve( result );
+                    }, function(error) {
+                        deferred.reject(error);
+                    });
+                },
+                function(error) {
+                    // failed webhook request
+                    deferred.reject( error );
+                }
+            );
+        } else {
+            deferred.reject( { "error" : "No such jive community " + jiveCommunity} );
+        }
+    });
+
+    return deferred.promise;
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="abstractDefinitions.html">abstractDefinitions</a></li><li><a href="abstractInstances.html">abstractInstances</a></li><li><a href="api.html">api</a></li><li><a href="community.html">community</a></li><li><a href="constants.html">constants</a></li><li><a href="events.html">events</a></li><li><a href="extstreamsDefinitions.html">extstreamsDefinitions</a></li><li><a href="extstreamsInstances.html">extstreamsInstances</a></li><li><a href="filePersistence.html">filePersistence</a></li><li><a href="jiveutil.html">jiveutil</a></li><li><a href="memoryPersistence.html">memoryPersistence</a></li><li><a href="memoryScheduler.html">memoryScheduler</a></li><li><a href="oauthHandler.html">oauthHandler</a></li><li><a href="request.html">request</a></li><li><a href="tasks.html">tasks</a></li><li><a href="tileInstances.html">tileInstances</a></li><li><a href="tilesDefinitions.html">tilesDefinitions</a></li><li><a href="webhooks.html">webhooks</a></li></ul><h3>Namespaces</h3><ul><li><a href="filePersistenceSubtype.html">filePersistenceSubtype</a></li><li><a href="memoryPersistenceSubtype.html">memoryPersistenceSubtype</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha2</a> on Sun Dec 22 2013 21:51:41 GMT-0800 (PST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

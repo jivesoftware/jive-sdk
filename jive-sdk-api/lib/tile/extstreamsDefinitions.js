@@ -16,12 +16,20 @@
 
 /**
  * Library for manipulating external stream definitions.
+ * @extends abstractDefinitions
+ * @class extstreamsDefinitions
  */
+
+///////////////////////////////////////////////////////////////////////////////////
+// private
 
 var util = require('util');
 var definitions = require('./definitions');
 
 var extstreamsDefinitions = Object.create(definitions);
+
+///////////////////////////////////////////////////////////////////////////////////
+// public
 
 module.exports = extstreamsDefinitions;
 

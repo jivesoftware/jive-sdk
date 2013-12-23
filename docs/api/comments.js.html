@@ -1,4 +1,31 @@
-/*
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: lib/tile/comments.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: lib/tile/comments.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source"><code>/*
  * Copyright 2013 Jive Software
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +58,7 @@ var q = require('q');
  * @return {Promise} Promise
  */
 exports.commentOnActivity = function(jiveActivity, comment) {
-    if (!(jiveActivity && jiveActivity.resources && jiveActivity.resources.comments && jiveActivity.resources.comments.ref)
+    if (!(jiveActivity &amp;&amp; jiveActivity.resources &amp;&amp; jiveActivity.resources.comments &amp;&amp; jiveActivity.resources.comments.ref)
         || !jiveActivity.parent) {
 
         return q.reject({ 'err' : 'Error in jive.extstreams.commentOnActivity: input activity is not a valid Jive object.' +
@@ -89,7 +116,7 @@ exports.commentOnActivityByExternalID = function(extstream, externalActivityID, 
  * @return {Promise} Promise
  */
 exports.fetchCommentsOnActivity = function(jiveActivity, opts) {
-    if (!(jiveActivity && jiveActivity.resources && jiveActivity.resources.comments && jiveActivity.resources.comments.ref)
+    if (!(jiveActivity &amp;&amp; jiveActivity.resources &amp;&amp; jiveActivity.resources.comments &amp;&amp; jiveActivity.resources.comments.ref)
         || !jiveActivity.parent) {
 
         return q.reject({ 'err' : 'Error in jive.extstreams.fetchCommentsOnActivity: ' +
@@ -106,7 +133,7 @@ exports.fetchCommentsOnActivity = function(jiveActivity, opts) {
             'commentsURL' : commentsURL
         } );
     }).then(function(response){
-        if (response.entity && response.entity.list) {
+        if (response.entity &amp;&amp; response.entity.list) {
             response.entity.list = filterComments(response.entity.list, opts['commentSourceType'], opts['publishedAfter']);
         }
         return response;
@@ -133,7 +160,7 @@ exports.fetchAllCommentsForExtstream = function(extstream, opts) {
 
     return promise.then(function(response) {
 
-        if (response.entity && response.entity.list) {
+        if (response.entity &amp;&amp; response.entity.list) {
             response.entity.list = filterComments(response.entity.list, opts['commentSourceType'], opts['publishedAfter']);
         }
         return response;
@@ -143,26 +170,26 @@ exports.fetchAllCommentsForExtstream = function(extstream, opts) {
 
 function buildQueryString(optionalFieldList, optionalItemsPerPage, commentSourceType) {
     var queryStr = '';
-    if (optionalFieldList || optionalItemsPerPage || (commentSourceType && commentSourceType.toUpperCase() === 'JIVE')) {
+    if (optionalFieldList || optionalItemsPerPage || (commentSourceType &amp;&amp; commentSourceType.toUpperCase() === 'JIVE')) {
         queryStr += '?';
 
         var q = false;
         if (optionalFieldList) {
-            if (optionalFieldList.indexOf('externalID') < 0) { //Must return the externalID to be able to filter properly by comment source
+            if (optionalFieldList.indexOf('externalID') &lt; 0) { //Must return the externalID to be able to filter properly by comment source
                 optionalFieldList.push('externalID');
             }
-            if (optionalFieldList.indexOf('published') < 0) { //Need publish date for filtering
+            if (optionalFieldList.indexOf('published') &lt; 0) { //Need publish date for filtering
                 optionalFieldList.push('published');
             }
             queryStr +=  'fields=' + encodeURIComponent(optionalFieldList.join(','));
             q = true;
         }
         if (optionalItemsPerPage) {
-            queryStr += (q ? '&' : '') + 'count=' + optionalItemsPerPage;
+            queryStr += (q ? '&amp;' : '') + 'count=' + optionalItemsPerPage;
             q = true;
         }
-        if (commentSourceType && commentSourceType.toUpperCase() === 'JIVE') {
-            queryStr += (q ? '&' : '') + 'filter=omitExternal'; //For efficiency add filter that omits external comments
+        if (commentSourceType &amp;&amp; commentSourceType.toUpperCase() === 'JIVE') {
+            queryStr += (q ? '&amp;' : '') + 'filter=omitExternal'; //For efficiency add filter that omits external comments
             q = true;
         }
     }
@@ -178,7 +205,7 @@ function commentsUrlFromDataUrl(dataURL) {
 
 //Helper to filter comments based on whether the externalID field is present
 function filterComments(list, commentSourceType, publishedAfter) {
-    if (commentSourceType && commentSourceType.toUpperCase() != 'ALL') {
+    if (commentSourceType &amp;&amp; commentSourceType.toUpperCase() != 'ALL') {
 
         if (commentSourceType.toUpperCase() == 'JIVE') {
             list = list.filter(function(comment) {
@@ -203,4 +230,26 @@ function filterComments(list, commentSourceType, publishedAfter) {
     }
 
     return list;
-}
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="abstractDefinitions.html">abstractDefinitions</a></li><li><a href="abstractInstances.html">abstractInstances</a></li><li><a href="api.html">api</a></li><li><a href="community.html">community</a></li><li><a href="constants.html">constants</a></li><li><a href="events.html">events</a></li><li><a href="extstreamsDefinitions.html">extstreamsDefinitions</a></li><li><a href="extstreamsInstances.html">extstreamsInstances</a></li><li><a href="filePersistence.html">filePersistence</a></li><li><a href="jiveutil.html">jiveutil</a></li><li><a href="memoryPersistence.html">memoryPersistence</a></li><li><a href="memoryScheduler.html">memoryScheduler</a></li><li><a href="oauthHandler.html">oauthHandler</a></li><li><a href="request.html">request</a></li><li><a href="tasks.html">tasks</a></li><li><a href="tileInstances.html">tileInstances</a></li><li><a href="tilesDefinitions.html">tilesDefinitions</a></li><li><a href="webhooks.html">webhooks</a></li></ul><h3>Namespaces</h3><ul><li><a href="filePersistenceSubtype.html">filePersistenceSubtype</a></li><li><a href="memoryPersistenceSubtype.html">memoryPersistenceSubtype</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha2</a> on Sun Dec 22 2013 21:51:41 GMT-0800 (PST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

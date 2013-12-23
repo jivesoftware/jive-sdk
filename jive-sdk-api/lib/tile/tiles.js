@@ -16,7 +16,12 @@
 
 /**
  * Library for manipulating tile instances.
+ * @extends abstractInstances
+ * @class tileInstances
  */
+
+///////////////////////////////////////////////////////////////////////////////////
+// private
 
 var q = require('q');
 var util = require('util');
@@ -24,12 +29,22 @@ var jive = require('../../api');
 var instances = require('./instances');
 
 var tiles = Object.create(instances);
+
+///////////////////////////////////////////////////////////////////////////////////
+// pubic
+
 module.exports = tiles;
 
 tiles.getCollection = function() {
     return "tileInstance";
 };
 
+/**
+ * @memberof tileInstances
+ * @param tileInstance
+ * @param data
+ * @returns {Promise} Promise 
+ */
 tiles.pushData = function (tileInstance, data) {
     return jive.context.scheduler.schedule(jive.constants.tileEventNames.PUSH_DATA_TO_JIVE, {
         'tileInstance' : tileInstance,

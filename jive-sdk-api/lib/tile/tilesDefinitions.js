@@ -16,12 +16,20 @@
 
 /**
  * Library for manipulating tile definitions.
+ * @extends abstractDefinitions
+ * @class tilesDefinitions
  */
+
+///////////////////////////////////////////////////////////////////////////////////
+// private
 
 var util = require('util');
 var definitions = require('./definitions');
 
 var tileDefinitions = Object.create(definitions);
+
+///////////////////////////////////////////////////////////////////////////////////
+// public
 
 module.exports = tileDefinitions;
 

@@ -262,7 +262,7 @@ var pushCommentDelegate = function(operationContext) {
 };
 
 var fetchExtendedPropertiesDelegate = function(operationContext) {
-    return jiveClient.getWithTileInstanceAuth(operationContext['instance']);
+    return jiveClient.fetchExtendedProperties(operationContext['instance']);
 };
 
 var pushExtendedPropertiesDelegate = function(operationContext) {

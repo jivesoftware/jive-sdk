@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: lib/task/tasks.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: lib/task/tasks.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source"><code>/*
+ * Copyright 2013 Jive Software
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+var jive = require('../../api');
+
+var task = function( _runnable, _interval, _id ) {
+    if ( !_runnable ) {
+        throw 'A runnable function is required!';
+    }
+
+    return {
+        'handler' : _runnable,
+        'interval': _interval,
+        'id'      : _id
+    };
+};
+
+/**
+ * API for managing recurrent tasks.
+ * @class tasks
+ */
+
+/**
+ * Schedules a recurrent task.
+ * @memberof tasks
+ * @param {function} handler Required. This function is invoked when the task scheduling condtions are met.
+ * @param {number} interval Optional. Number of milliseconds in between recurrences of the handler being invoked.
+ * @param {String} id Optional. Unique identifier for the task.
+ * @returns {Object} a task object wrapping the provided parameters (handler, interval, id).
+ */
+exports.build = function(handler, interval, id) {
+    return new task( handler, interval, id );
+};
+
+/**
+ * @memberof tasks
+ * @param {Object} task Required. Wrapper object for task characteristics.
+ * @param {function} task.handler Required. This function is invoked when the task scheduling conditions are met.
+ * @param {number} task.interval Optional. Number of milliseconds in between recurrences of the handler being invoked.
+ * @param {String} task.id Optional. Unique identifier for the task.
+ * @param {Object} scheduler Required. A scheduler strategy, similar to @see {@link memoryScheduler}.
+ * @returns {Promise} Promise Promise .resolve and .reject handlers will be called depending on the success or failure of the handler
+ * function when it is invoked.
+ */
+exports.schedule = function( task, scheduler ) {
+    if ( !task || typeof task !== 'object' ) {
+        throw Error("A task object is required.");
+    }
+
+    if ( !scheduler ) {
+        throw Error("A scheduler is required.");
+    }
+
+    if ( typeof scheduler['schedule'] !== 'function' ) {
+        throw Error("Invalid scheduler - requires a schedule function.");
+    }
+
+    var eventID = task['id'] || jive.util.guid();
+    var context = { 'eventListener' : '__jive_system_tasks' };
+    var interval = task['interval'];
+    jive.events.addDefinitionEventListener( eventID, '__jive_system_tasks', task['handler']);
+    return scheduler.schedule(eventID, context, interval);
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="abstractDefinitions.html">abstractDefinitions</a></li><li><a href="abstractInstances.html">abstractInstances</a></li><li><a href="api.html">api</a></li><li><a href="community.html">community</a></li><li><a href="constants.html">constants</a></li><li><a href="events.html">events</a></li><li><a href="extstreamsDefinitions.html">extstreamsDefinitions</a></li><li><a href="extstreamsInstances.html">extstreamsInstances</a></li><li><a href="filePersistence.html">filePersistence</a></li><li><a href="jiveutil.html">jiveutil</a></li><li><a href="memoryPersistence.html">memoryPersistence</a></li><li><a href="memoryScheduler.html">memoryScheduler</a></li><li><a href="oauthHandler.html">oauthHandler</a></li><li><a href="request.html">request</a></li><li><a href="tasks.html">tasks</a></li><li><a href="tileInstances.html">tileInstances</a></li><li><a href="tilesDefinitions.html">tilesDefinitions</a></li><li><a href="webhooks.html">webhooks</a></li></ul><h3>Namespaces</h3><ul><li><a href="filePersistenceSubtype.html">filePersistenceSubtype</a></li><li><a href="memoryPersistenceSubtype.html">memoryPersistenceSubtype</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha2</a> on Sun Dec 22 2013 21:51:41 GMT-0800 (PST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
