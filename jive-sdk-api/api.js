@@ -15,7 +15,12 @@
  */
 
 /**
- * Main entrypoint of the jive api.
+ * Main entrypoint of the Jive SDK API.<br>
+ * Example Usage:
+ * <pre>
+ *      var jive = require('jive-sdk');
+ *      jive.logger.info('Welcome!');
+ * </pre>
  * @class api
  */
 
@@ -74,9 +79,9 @@ exports.scheduler = {
 };
 
 /**
- * An object containing constant string values. @see {@link constants}
+ * An object containing constant string values. @see {@link constants}.
  * @memberof api
- * @type {Object}
+ * @type {constants}
  */
 exports.constants = require('./lib/util/constants.js');
 
