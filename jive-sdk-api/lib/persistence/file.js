@@ -23,7 +23,6 @@ var ArrayStream = require('stream-array');
  * An file implementation of persistence.
  * @module filePersistence
  * @constructor
- * @returns {filePersistenceSubtype} persistenceObject An object with functions capable of CRUD operations.
  */
 module.exports = function(serviceConfig) {
 
@@ -209,8 +208,7 @@ module.exports = function(serviceConfig) {
 
     /**
      * @inner
-     * @namespace
-     * @memberof file
+     * @type {{save: Function, remove: Function, findByID: Function, find: Function, close: Function}}
      */
     var filePersistenceSubtype = {
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -218,11 +216,11 @@ module.exports = function(serviceConfig) {
 
         /**
          * Save the provided data in a named collection
-         *
+         * @memberof filePersistence
          * @param {String} collectionID
          * @param {String} key
          * @param {Object} data
-         * @returns {Object} promise
+         * @returns {Promise} promise
          */
         save : function( collectionID, key, data) {
             var deferred = q.defer();
@@ -240,7 +238,7 @@ module.exports = function(serviceConfig) {
         /**
          * Remove a piece of data from a name collection, based to the provided key and return a promise
          * that returns removed items when done.
-         *
+         * @memberof filePersistence
          * @param {String} collectionID
          * @param {String} key
          * @returns {Object} promise
@@ -261,9 +259,10 @@ module.exports = function(serviceConfig) {
 
         /**
          * Retrieve a piece of data from a named collection whose key is the one provided.
+         * @memberof filePersistence
          * @param collectionID
          * @param key
-         * @returns {Object} promise
+         * @returns {Promise} promise
          */
         findByID: function( collectionID, key ) {
             var deferred = q.defer();
@@ -279,11 +278,11 @@ module.exports = function(serviceConfig) {
         /**
          * Retrieve a piece of data from a named collection, based on the criteria, and returns a promise
          * that contains found items when done.
-         *
+         * @memberof filePersistence
          * @param {String} collectionID
          * @param {Object} keyValues
          * @param {Boolean} cursor If true, returns an iterable cursor.
-         * @returns {Object} promise
+         * @returns {Promise} promise
          */
         find : function( collectionID, keyValues, cursor ) {
 
@@ -389,6 +388,10 @@ module.exports = function(serviceConfig) {
             return deferred.promise;
         },
 
+        /**
+         * @memberof filePersistence
+         * @returns {Promise} promise
+         */
         close : function() {
             var deferred = q.defer();
 

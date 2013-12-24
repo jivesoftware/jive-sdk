@@ -22,7 +22,6 @@ var ArrayStream = require('stream-array');
  * An in-memory implementation of persistence.
  * @module memoryPersistence
  * @constructor
- * @returns {memoryPersistenceSubtype} persistenceObject An object with functions capable of CRUD operations.
  */
 module.exports = function() {
 
@@ -62,12 +61,12 @@ module.exports = function() {
 
     /**
      * @inner
-     * @namespace
-     * @memberof memory
+     * @type {{save: Function, remove: Function, find: Function, findByID: Function, close: Function}}
      */
-    var memoryPersistenceSubtype = {
+    var memoryPersistence = {
         /**
          * Save the provided data in a named collection
+         * @memberof memoryPersistence
          * @param {String} collectionID
          * @param {String} key
          * @param {Object} data
@@ -84,7 +83,7 @@ module.exports = function() {
         /**
          * Remove a piece of data from a name collection, based to the provided key and return a promise
          * that returns removed items when done.
-         *
+         * @memberof memoryPersistence
          * @param {String} collectionID
          * @param {String} key
          * @returns {Object} promise
@@ -103,7 +102,7 @@ module.exports = function() {
         /**
          * Retrieve a piece of data from a named collection, based on the criteria, and returns a promise
          * that contains found items when done.
-         *
+         * @memberof memoryPersistence
          * @param {String} collectionID
          * @param {Object} keyValues
          * @param {Boolean} cursor If true, returns an iterable cursor.
@@ -212,6 +211,7 @@ module.exports = function() {
 
         /**
          * Retrieve a piece of data from a named collection whose key is the one provided.
+         * @memberof memoryPersistence
          * @param collectionID
          * @param key
          * @returns {Object} promise
@@ -225,6 +225,7 @@ module.exports = function() {
 
         /**
          * Close it down
+         * @memberof memoryPersistence
          * @returns {Object} promise
          */
         close: function() {
@@ -232,7 +233,7 @@ module.exports = function() {
         }
     };
 
-    return memoryPersistenceSubtype;
+    return memoryPersistence;
 
 };
 
