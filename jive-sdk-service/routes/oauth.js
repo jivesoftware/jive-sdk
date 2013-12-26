@@ -28,14 +28,17 @@ exports.fetchOAuth2Conf = function() {
     return jive.service.options['oauth2'];
 };
 
-function getOAuth2Conf(jiveTenantID, self) {
+function getOAuth2Conf(targetJiveTenantID, originJiveTenantID, self) {
     var deferred = q.defer();
 
-    if ( jiveTenantID ) {
-        jive.community.findByTenantID( jiveTenantID).then( function( community ) {
+    if ( targetJiveTenantID ) {
+        jive.community.findByTenantID(targetJiveTenantID).then( function( community ) {
             if ( community ) {
                 try{
-                    var oauth2Conf = JSON.parse( JSON.stringify(self.fetchOAuth2Conf() || {} ) );
+                    var oauth2Conf = JSON.parse( JSON.stringify(self.fetchOAuth2Conf( {
+                        'originJiveTenantID' : originJiveTenantID,
+                        'targetJiveTenantID' : targetJiveTenantID
+                    }) || {} ) );
                 } catch ( e ) {
                     deferred.reject(e);
                     return;
@@ -47,12 +50,15 @@ function getOAuth2Conf(jiveTenantID, self) {
 
                 deferred.resolve( oauth2Conf );
             } else {
-                deferred.reject(new Error("Could not find community for tenantID " + jiveTenantID ));
+                deferred.reject(new Error("Could not find community for tenantID " + targetJiveTenantID ));
             }
         });
 
     } else {
-        deferred.resolve( self.fetchOAuth2Conf() );
+        deferred.resolve( self.fetchOAuth2Conf({
+            'originJiveTenantID' : originJiveTenantID,
+            'targetJiveTenantID' : targetJiveTenantID
+        }) );
     }
 
     return deferred.promise;
@@ -72,7 +78,12 @@ exports.authorizeUrl = function(req, res ) {
 
     var viewerID = query['viewerID'];
     var callback = query['callback'];
-    var jiveTenantID = query['jiveTenantID'];
+    var targetJiveTargetID = query['jiveTenantID'];
+    var jiveExtensionHeaders = jive.util.request.parseJiveExtensionHeaders(req);
+    if (jiveExtensionHeaders ) {
+        var originJiveTenantID = jiveExtensionHeaders['tenantID'];
+        jive.logger.debug('Origin jive tenantID', originJiveTenantID);
+    }
 
     var contextStr = query['context'];
     if ( contextStr ) {
@@ -84,9 +95,16 @@ exports.authorizeUrl = function(req, res ) {
         }
     }
 
-    // encode the jiveTenantID in the context
-    if ( !context && jiveTenantID ) {
-        context = { 'jiveTenantID' : jiveTenantID };
+    // encode the target jiveTenantID in the context
+    if ( targetJiveTargetID ) {
+        context = context || {};
+        context = { 'jiveTenantID' : targetJiveTargetID };
+    }
+
+    // encode the origin jiveTenantID in the context
+    if ( originJiveTenantID ) {
+        context = context || {};
+        context['originJiveTenantID'] = originJiveTenantID;
     }
 
     var extraAuthParamsStr = query['extraAuthParams'];
@@ -99,7 +117,7 @@ exports.authorizeUrl = function(req, res ) {
         }
     }
     var self = this;
-    getOAuth2Conf(jiveTenantID, this).then( function(oauth2Conf) {
+    getOAuth2Conf(targetJiveTargetID, originJiveTenantID, this ).then( function(oauth2Conf) {
         jive.logger.info(JSON.stringify(oauth2Conf, null, 4));
         var responseMap = self.buildAuthorizeUrlResponseMap(
             oauth2Conf, callback, { 'viewerID': viewerID, 'context': context}, extraAuthParams );
@@ -170,9 +188,10 @@ exports.oauth2Callback = function(req, res ) {
     }
 
     var jiveTenantID = state['context'] ? state['context']['jiveTenantID'] : undefined;
+    var originJiveTenantID = state['context'] ? state['context']['originJiveTenantID'] : undefined;
     var self = this;
 
-    getOAuth2Conf(jiveTenantID, this).then(
+    getOAuth2Conf(jiveTenantID, originJiveTenantID, this).then(
 
         /////////////
         function(oauth2Conf) {

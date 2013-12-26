@@ -226,3 +226,30 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
         }
     }
 };
+
+exports.parseJiveExtensionHeaders = function(req) {
+    var authorization = req.headers['authorization'];
+    if (!authorization) {
+        return;
+    }
+
+    var jiveIdentity = {};
+    var authVars = authorization.split(' ');
+    if (authVars[0] == 'JiveEXTN') {
+        // try to parse out jiveURL
+        var authParams = authVars[1].split('&');
+        authParams.forEach(function (p) {
+            if (p.indexOf('jive_url') == 0) {
+                jiveIdentity['jiveURL'] = decodeURIComponent(p.split("=")[1]);
+            }
+            if (p.indexOf('tenant_id') == 0) {
+                var tenantID = decodeURIComponent(p.split("=")[1]);
+                jiveIdentity['tenantID'] = tenantID;
+            }
+        });
+        return jiveIdentity;
+    } else {
+        return undefined;
+    }
+};
+

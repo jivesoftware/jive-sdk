@@ -102,6 +102,12 @@ exports.buildRequest = function (url, method, postBody, headers, requestOptions)
 };
 
 /**
+ * Useful request related utilities
+ * @type {jiveRequest}
+ */
+exports.request = jiveRequest;
+
+/**
  * Gets the file size in bytes.
  * @memberof jiveutil
  * @param filename - the path to the file.
