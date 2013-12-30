@@ -63,7 +63,17 @@ var find = function( filter, expectOne ) {
 };
 
 /**
- * Searches persistence for community that matches the given jiveUrl. \
+ * Searches persistence for communities that matches the given criteria filter object.
+ * @memberof community
+ * @param filter
+ * @returns {Promise} Promise
+ */
+exports.find = function(filter) {
+    return find( filter );
+};
+
+/**
+ * Searches persistence for community that matches the given jiveUrl.
  * If one is not fond,
  * the promise will resolve with a null (undefined) value.
  * @memberof community
