@@ -79,7 +79,7 @@ Calendars are great for showing important dates that are important to the group.
   </tr>
   <tr>
     <td>style</td>
-    <td>This is the style of the tile. Since this is a table, the value is TABLE</td>
+    <td>This is the style of the tile. Since this is a list, the value is LIST</td>
 	<td>Yes</td>
   </tr>
  <tr>
@@ -116,9 +116,7 @@ Calendars are great for showing important dates that are important to the group.
           }  
       }  
   ],  
-  "config": {  
-      "listStyle": "contentList"  
-  },  
+  "style": "LIST",
   "action": {  
       "text": "Action Link",  
       "context": {  
