@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Documentation Source: lib/util/jiveutil.js</title>
+	<title>Jive SDK Source: lib/util/jiveutil.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -17,10 +17,72 @@
 
 <body>
 <div class="container-fluid">
-	<div class="navbar navbar-fixed-top ">
+	<div class="navbar navbar-fixed-top navbar-inverse">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">Documentation</a>
+			<a class="brand" href="index.html">Jive SDK</a>
 			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="module-abstractDefinitions.html">abstractDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-abstractInstances.html">abstractInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-api.html">api</a>
+						</li>
+						
+						<li>
+							<a href="module-community.html">community</a>
+						</li>
+						
+						<li>
+							<a href="module-constants.html">constants</a>
+						</li>
+						
+						<li>
+							<a href="module-events.html">events</a>
+						</li>
+						
+						<li>
+							<a href="module-extstreamsInstances.html">extstreamsInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-jiveutil.html">jiveutil</a>
+						</li>
+						
+						<li>
+							<a href="module-request.html">request</a>
+						</li>
+						
+						<li>
+							<a href="module-tasks.html">tasks</a>
+						</li>
+						
+						<li>
+							<a href="module-tileInstances.html">tileInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-tilesDefinitions.html">tilesDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-webhooks.html">webhooks</a>
+						</li>
+						
+
+					</ul>
+				</li>
 				
 				<li class="dropdown">
 					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
@@ -29,43 +91,11 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="abstractDefinitions.html">abstractDefinitions</a>
-						</li>
-						
-						<li>
-							<a href="abstractInstances.html">abstractInstances</a>
-						</li>
-						
-						<li>
-							<a href="api.html">api</a>
-						</li>
-						
-						<li>
-							<a href="community.html">community</a>
-						</li>
-						
-						<li>
-							<a href="constants.html">constants</a>
-						</li>
-						
-						<li>
-							<a href="events.html">events</a>
-						</li>
-						
-						<li>
 							<a href="extstreamsDefinitions.html">extstreamsDefinitions</a>
 						</li>
 						
 						<li>
-							<a href="extstreamsInstances.html">extstreamsInstances</a>
-						</li>
-						
-						<li>
 							<a href="filePersistence.html">filePersistence</a>
-						</li>
-						
-						<li>
-							<a href="jiveutil.html">jiveutil</a>
 						</li>
 						
 						<li>
@@ -78,26 +108,6 @@
 						
 						<li>
 							<a href="oauthHandler.html">oauthHandler</a>
-						</li>
-						
-						<li>
-							<a href="request.html">request</a>
-						</li>
-						
-						<li>
-							<a href="tasks.html">tasks</a>
-						</li>
-						
-						<li>
-							<a href="tileInstances.html">tileInstances</a>
-						</li>
-						
-						<li>
-							<a href="tilesDefinitions.html">tilesDefinitions</a>
-						</li>
-						
-						<li>
-							<a href="webhooks.html">webhooks</a>
 						</li>
 						
 
@@ -121,7 +131,7 @@
     
     <section>
         <article>
-            <pre class="sunlight-highlight-javascript ">/*
+            <pre class="sunlight-highlight-javascript linenums">/*
  * Copyright 2013 Jive Software
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,7 +149,7 @@
 
 /**
  * Library of useful functions.
- * @class jiveutil
+ * @module jiveutil
  */
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +187,6 @@ var hex_high_10 = { // set the highest bit and clear the next highest
 
 /**
  * Useful general utility functions.
- * @memberof jiveutil
  * @returns {String} guid
  */
 
@@ -212,7 +221,6 @@ exports.guid = function (src) {
 /**
  * By default this will build a request of type 'application/json'. Set a Content-Type header
  * explicitly if its supposed to be a different type.
- * @memberof request
  * @param {String} url
  * @param {String} method
  * @param {Object} postBody leave null unless PUT or POST
@@ -225,8 +233,13 @@ exports.buildRequest = function (url, method, postBody, headers, requestOptions)
 };
 
 /**
+ * Useful request related utilities
+ * @type module:jiveRequest
+ */
+exports.request = jiveRequest;
+
+/**
  * Gets the file size in bytes.
- * @memberof jiveutil
  * @param filename - the path to the file.
  * @return {Promise} Promise
  */
@@ -244,7 +257,6 @@ exports.fsGetSize = function (filename) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -259,7 +271,6 @@ exports.fsexists = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param source
  * @param target
  * @return {Promise} Promise
@@ -297,7 +308,6 @@ var fsSimpleRename = function (source, target) {
 };
 
 /**
- * @memberof jiveutil
  * @param source
  * @param target
  * @param force
@@ -325,7 +335,6 @@ exports.fsrename = function (source, target, force) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -346,7 +355,6 @@ exports.fsmkdir = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -360,7 +368,6 @@ exports.fsread = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -371,7 +378,6 @@ exports.fsreadJson = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -460,7 +466,6 @@ var removeRecursive = function (path, cb) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -479,7 +484,6 @@ exports.fsrmdir = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -499,7 +503,6 @@ exports.fsisdir = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param data
  * @param path
  * @return {Promise} Promise
@@ -529,7 +532,6 @@ function getExtension(filename) {
 }
 
 /**
- * @memberof jiveutil
  * @param source
  * @param target
  * @param substitutions
@@ -551,7 +553,6 @@ exports.fsTemplateCopy = function (source, target, substitutions) {
 };
 
 /**
- * @memberof jiveutil
  * @param data
  * @param target
  * @param substitutions
@@ -570,7 +571,6 @@ exports.fsTemplateWrite = function (data, target, substitutions) {
 };
 
 /**
- * @memberof jiveutil
  * @param source
  * @param substitutions
  * @return {Promise} Promise
@@ -583,7 +583,6 @@ exports.fsTemplateRead = function (source, substitutions) {
 };
 
 /**
- * @memberof jiveutil
  * @param object
  * @returns {*|string}
  */
@@ -592,7 +591,6 @@ exports.base64Encode = function (object) {
 };
 
 /**
- * @memberof jiveutil
  * @param str
  * @returns {*|string}
  */
@@ -601,7 +599,6 @@ exports.base64Decode = function (str) {
 };
 
 /**
- * @memberof jiveutil
  * @param auth
  * @param clientId
  * @param clientSecret
@@ -630,7 +627,6 @@ exports.basicAuthorizationHeaderValid = function (auth, clientId, clientSecret, 
 };
 
 /**
- * @memberof jiveutil
  * @param auth
  * @param clientId
  * @param clientSecret
@@ -672,7 +668,6 @@ exports.jiveAuthorizationHeaderValid = function (auth, clientId, clientSecret, a
 };
 
 /**
- * @memberof jiveutil
  * @param o
  * @returns {{}}
  */
@@ -695,7 +690,6 @@ exports.sortObject = function (o) {
 };
 
 /**
- * @memberof jiveutil
  * @param currentFsItem
  * @param root
  * @param targetRoot
@@ -759,7 +753,6 @@ var copyFileProcessor = function (type, currentFsItem, targetPath, substitutions
 };
 
 /**
- * @memberof jiveutil
  * @param root
  * @param target
  * @param force
@@ -788,7 +781,6 @@ exports.recursiveCopy = function (root, target, force, substitutions, file) {
 };
 
 /**
- * @memberof jiveutil
  * @param root
  * @param targetZip
  * @param flatten
@@ -830,13 +822,11 @@ exports.zipFolder = function (root, targetZip, flatten) {
 };
 
 /**
- * @memberof jiveutil
  * @type {*}
  */
 exports.oauth = oauth;
 
 /**
- * @memberof jiveutil
  * @type {*}
  */
 exports.iterator = iterator;</pre>
@@ -853,9 +843,14 @@ exports.iterator = iterator;</pre>
 				<footer>
 					
 					
+		<span class="copyright">
+		Jive Software, Inc
+		</span>
+					<br />
+					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Mon Dec 23 2013 19:18:44 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Dec 30 2013 19:51:18 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -877,7 +872,7 @@ exports.iterator = iterator;</pre>
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers:,  showMenu: true, enableDoclinks :true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
 
 	<script>
 		$( function () {

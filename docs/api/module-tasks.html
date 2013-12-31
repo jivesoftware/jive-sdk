@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Jive SDK Class: memoryPersistence</title>
+	<title>Jive SDK Module: tasks</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -127,12 +127,12 @@
 					
 
 
-	<h1 class="page-title">Class: memoryPersistence</h1>
+	<h1 class="page-title">Module: tasks</h1>
 <section>
 
 <header>
     <h2>
-    memoryPersistence
+    tasks
     </h2>
     
 </header>
@@ -143,26 +143,10 @@
 
     
         
-<dt>
-    <h4 class="name" id="memoryPersistence"><span class="type-signature"></span>new memoryPersistence<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>An in-memory implementation of persistence.</p>
-    </div>
-    
+            <div class="description"><p>API for managing recurrent tasks.</p></div>
+        
 
-    
-    
-    
-    
-    
-    
-    
+        
 <dl class="details">
     
 
@@ -185,7 +169,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-21">line 21</a>
+        <a href="tasks.js.html">lib/task/tasks.js</a>, <a href="tasks.js.html#sunlight-1-line-31">line 31</a>
     </li></ul></dd>
     
 
@@ -196,20 +180,8 @@
     
 </dl>
 
-    
-    
 
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
+        
     
     </div>
 
@@ -231,7 +203,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="close"><span class="type-signature">&lt;static> </span>close<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="build"><span class="type-signature">&lt;static> </span>build<span class="signature">(handler, interval, id)</span><span class="type-signature"> &rarr; {Object}</span></h4>
     
     
 </dt>
@@ -239,100 +211,7 @@
     
     
     <div class="description">
-        <p>Close it down</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-231">line 231</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Object</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="find"><span class="type-signature">&lt;static> </span>find<span class="signature">(collectionID, keyValues, cursor)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Retrieve a piece of data from a named collection, based on the criteria, and returns a promise
-that contains found items when done.</p>
+        <p>Schedules a recurrent task.</p>
     </div>
     
 
@@ -366,7 +245,53 @@ that contains found items when done.</p>
 
         <tr>
             
-                <td class="name"><code>collectionID</code></td>
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Required. This function is invoked when the task scheduling condtions are met.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>interval</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Optional. Number of milliseconds in between recurrences of the handler being invoked.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
             
 
             <td class="type">
@@ -382,53 +307,7 @@ that contains found items when done.</p>
 
             
 
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>keyValues</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>cursor</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>If true, returns an iterable cursor.</p></td>
+            <td class="description last"><p>Optional. Unique identifier for the task.</p></td>
         </tr>
 
 	
@@ -460,7 +339,7 @@ that contains found items when done.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-111">line 111</a>
+        <a href="tasks.js.html">lib/task/tasks.js</a>, <a href="tasks.js.html#sunlight-1-line-43">line 43</a>
     </li></ul></dd>
     
 
@@ -485,7 +364,7 @@ that contains found items when done.</p>
     
             
 <div class="param-desc">
-    <p>promise</p>
+    <p>a task object wrapping the provided parameters (handler, interval, id).</p>
 </div>
 
 
@@ -511,16 +390,12 @@ that contains found items when done.</p>
         
             
 <dt>
-    <h4 class="name" id="findByID"><span class="type-signature">&lt;static> </span>findByID<span class="signature">(collectionID, key)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="schedule"><span class="type-signature">&lt;static> </span>schedule<span class="signature">(task, scheduler)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
     
 </dt>
 <dd>
     
-    
-    <div class="description">
-        <p>Retrieve a piece of data from a named collection whose key is the one provided.</p>
-    </div>
     
 
     
@@ -553,138 +428,25 @@ that contains found items when done.</p>
 
         <tr>
             
-                <td class="name"><code>collectionID</code></td>
+                <td class="name"><code>task</code></td>
             
 
             <td class="type">
             
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>key</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-219">line 219</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
+                
 <span class="param-type">Object</span>
 
 
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
             
-<dt>
-    <h4 class="name" id="remove"><span class="type-signature">&lt;static> </span>remove<span class="signature">(collectionID, key)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Remove a piece of data from a name collection, based to the provided key and return a promise
-that returns removed items when done.</p>
-    </div>
-    
+            </td>
 
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
+            
+
+            
+
+            <td class="description last"><p>Required. Wrapper object for task characteristics.</p>
+                <h6>Properties</h6>
+                
 
 <table class="params table table-striped">
     <thead>
@@ -708,13 +470,13 @@ that returns removed items when done.</p>
 
         <tr>
             
-                <td class="name"><code>collectionID</code></td>
+                <td class="name"><code>handler</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">function</span>
 
 
             
@@ -724,14 +486,37 @@ that returns removed items when done.</p>
 
             
 
-            <td class="description last"></td>
+            <td class="description last"><p>Required. This function is invoked when the task scheduling conditions are met.</p></td>
         </tr>
 
 	
 
         <tr>
             
-                <td class="name"><code>key</code></td>
+                <td class="name"><code>interval</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Optional. Number of milliseconds in between recurrences of the handler being invoked.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
             
 
             <td class="type">
@@ -747,7 +532,37 @@ that returns removed items when done.</p>
 
             
 
-            <td class="description last"></td>
+            <td class="description last"><p>Optional. Unique identifier for the task.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>scheduler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Required. A scheduler strategy, similar to @see <a href="memoryScheduler.html">memoryScheduler</a>.</p></td>
         </tr>
 
 	
@@ -779,7 +594,7 @@ that returns removed items when done.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-91">line 91</a>
+        <a href="tasks.js.html">lib/task/tasks.js</a>, <a href="tasks.js.html#sunlight-1-line-56">line 56</a>
     </li></ul></dd>
     
 
@@ -804,7 +619,8 @@ that returns removed items when done.</p>
     
             
 <div class="param-desc">
-    <p>promise</p>
+    <p>Promise Promise .resolve and .reject handlers will be called depending on the success or failure of the handler
+function when it is invoked.</p>
 </div>
 
 
@@ -815,194 +631,7 @@ that returns removed items when done.</p>
 	</dt>
 	<dd>
 		
-<span class="param-type">Object</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="save"><span class="type-signature">&lt;static> </span>save<span class="signature">(collectionID, key, data)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Save the provided data in a named collection</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>collectionID</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>key</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-75">line 75</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Object</span>
+<span class="param-type">Promise</span>
 
 
 	</dd>
@@ -1040,7 +669,7 @@ that returns removed items when done.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Mon Dec 30 2013 19:51:19 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Dec 30 2013 19:51:20 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

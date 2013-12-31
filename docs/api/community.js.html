@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Documentation Source: lib/community/community.js</title>
+	<title>Jive SDK Source: lib/community/community.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -17,10 +17,72 @@
 
 <body>
 <div class="container-fluid">
-	<div class="navbar navbar-fixed-top ">
+	<div class="navbar navbar-fixed-top navbar-inverse">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">Documentation</a>
+			<a class="brand" href="index.html">Jive SDK</a>
 			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="module-abstractDefinitions.html">abstractDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-abstractInstances.html">abstractInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-api.html">api</a>
+						</li>
+						
+						<li>
+							<a href="module-community.html">community</a>
+						</li>
+						
+						<li>
+							<a href="module-constants.html">constants</a>
+						</li>
+						
+						<li>
+							<a href="module-events.html">events</a>
+						</li>
+						
+						<li>
+							<a href="module-extstreamsInstances.html">extstreamsInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-jiveutil.html">jiveutil</a>
+						</li>
+						
+						<li>
+							<a href="module-request.html">request</a>
+						</li>
+						
+						<li>
+							<a href="module-tasks.html">tasks</a>
+						</li>
+						
+						<li>
+							<a href="module-tileInstances.html">tileInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-tilesDefinitions.html">tilesDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-webhooks.html">webhooks</a>
+						</li>
+						
+
+					</ul>
+				</li>
 				
 				<li class="dropdown">
 					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
@@ -29,43 +91,11 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="abstractDefinitions.html">abstractDefinitions</a>
-						</li>
-						
-						<li>
-							<a href="abstractInstances.html">abstractInstances</a>
-						</li>
-						
-						<li>
-							<a href="api.html">api</a>
-						</li>
-						
-						<li>
-							<a href="community.html">community</a>
-						</li>
-						
-						<li>
-							<a href="constants.html">constants</a>
-						</li>
-						
-						<li>
-							<a href="events.html">events</a>
-						</li>
-						
-						<li>
 							<a href="extstreamsDefinitions.html">extstreamsDefinitions</a>
 						</li>
 						
 						<li>
-							<a href="extstreamsInstances.html">extstreamsInstances</a>
-						</li>
-						
-						<li>
 							<a href="filePersistence.html">filePersistence</a>
-						</li>
-						
-						<li>
-							<a href="jiveutil.html">jiveutil</a>
 						</li>
 						
 						<li>
@@ -78,26 +108,6 @@
 						
 						<li>
 							<a href="oauthHandler.html">oauthHandler</a>
-						</li>
-						
-						<li>
-							<a href="request.html">request</a>
-						</li>
-						
-						<li>
-							<a href="tasks.html">tasks</a>
-						</li>
-						
-						<li>
-							<a href="tileInstances.html">tileInstances</a>
-						</li>
-						
-						<li>
-							<a href="tilesDefinitions.html">tilesDefinitions</a>
-						</li>
-						
-						<li>
-							<a href="webhooks.html">webhooks</a>
 						</li>
 						
 
@@ -121,7 +131,7 @@
     
     <section>
         <article>
-            <pre class="sunlight-highlight-javascript ">/*
+            <pre class="sunlight-highlight-javascript linenums">/*
  * Copyright 2013 Jive Software
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -136,6 +146,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
+
+/**
+ * API for interacting with Jive communities.
+ * @module community
+ */
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var jive = require('../../api');
 var q = require('q');
@@ -152,15 +170,8 @@ var returnOne = function(found ) {
 
 
 /**
- * API for interacting with Jive communities.
- * @class community
- */
-
-
-/**
  * Saves the given community object into persistence. Will throw an Error if the community object
  * does not contain a 'jiveUrl' property.
- * @memberof community
  * @param {Object} community Community object, which must specify a jiveUrl property at minimum.
  * @returns {Promise} Promise
  */
@@ -186,10 +197,18 @@ var find = function( filter, expectOne ) {
 };
 
 /**
- * Searches persistence for community that matches the given jiveUrl. \
+ * Searches persistence for communities that matches the given criteria filter object.
+ * @param filter
+ * @returns {Promise} Promise
+ */
+exports.find = function(filter) {
+    return find( filter );
+};
+
+/**
+ * Searches persistence for community that matches the given jiveUrl.
  * If one is not fond,
  * the promise will resolve with a null (undefined) value.
- * @memberof community
  * @param jiveUrl
  * @returns {Promise} Promise
  */
@@ -202,7 +221,6 @@ exports.findByJiveURL = function( jiveUrl ) {
 /**
  * Searches persistence for a community that matches the name of the given jive community.
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof community
  * @param jiveCommunity
  * @returns {Promise} Promise
  */
@@ -215,7 +233,6 @@ exports.findByCommunity = function( jiveCommunity ) {
 /**
  * Searches persistence for a community that matches the tenantID of the given jive community.
  * If one is not found, the promise will resovle a null (undefined) value.
- * @memberof community
  * @param tenantID
  * @returns {Promise} Promise
  */
@@ -227,7 +244,6 @@ exports.findByTenantID = function( tenantID ) {
 
 /**
  * Parses the given jiveUrl for the name of the community.
- * @memberof community
  * @param jiveUrl
  * @returns Name of the community based on the jiveUrl.
  */
@@ -238,7 +254,6 @@ exports.parseJiveCommunity = function( jiveUrl ) {
 
 /**
  * Requests an access token by oauth access code (oauth access code is given in registration requests and valid for few minutes).
- * @memberof community
  * @param jiveUrl - the url of the jive community. this function will use this url to find the community in the persistence and get the client id and secret.
  * @param oauthCode - the code needed to be use to get access to a specific registration scope (usually a group).
  * @returns {Promise} Promise A promise for success and failure [use .then(...) and .catch(...)]
@@ -329,7 +344,6 @@ var getOAuthHandler = function() {
 /**
  * Make a request to the current community.
  * Automatically handle access token refresh flow if failure.
- * @memberof community
  * @param community
  * @param {Object} options Request options.
  * @param {String} options.path Path relative to given community's jiveURL; used if options.url doesn't exist.
@@ -466,7 +480,6 @@ function validateRegistration(registration) {
  * Upon successful registration, a community object will be persisted or updated (if one already exists) based on the
  * contents of the registration object.
  *
- * @memberof community
  * @param {Object} registration Community addon registration object.
  * @param {String} registration.jiveSignature Signature provided by Jive used for registration validation.
  * @param {String} registration.clientSecret Secret provided by the addon service.
@@ -602,9 +615,14 @@ exports.register = function( registration ) {
 				<footer>
 					
 					
+		<span class="copyright">
+		Jive Software, Inc
+		</span>
+					<br />
+					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Mon Dec 23 2013 19:18:44 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Dec 30 2013 19:51:18 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -626,7 +644,7 @@ exports.register = function( registration ) {
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers:,  showMenu: true, enableDoclinks :true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
 
 	<script>
 		$( function () {

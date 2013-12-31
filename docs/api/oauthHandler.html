@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Documentation Class: oauthHandler</title>
+	<title>Jive SDK Class: oauthHandler</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -17,10 +17,72 @@
 
 <body>
 <div class="container-fluid">
-	<div class="navbar navbar-fixed-top ">
+	<div class="navbar navbar-fixed-top navbar-inverse">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">Documentation</a>
+			<a class="brand" href="index.html">Jive SDK</a>
 			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="module-abstractDefinitions.html">abstractDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-abstractInstances.html">abstractInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-api.html">api</a>
+						</li>
+						
+						<li>
+							<a href="module-community.html">community</a>
+						</li>
+						
+						<li>
+							<a href="module-constants.html">constants</a>
+						</li>
+						
+						<li>
+							<a href="module-events.html">events</a>
+						</li>
+						
+						<li>
+							<a href="module-extstreamsInstances.html">extstreamsInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-jiveutil.html">jiveutil</a>
+						</li>
+						
+						<li>
+							<a href="module-request.html">request</a>
+						</li>
+						
+						<li>
+							<a href="module-tasks.html">tasks</a>
+						</li>
+						
+						<li>
+							<a href="module-tileInstances.html">tileInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-tilesDefinitions.html">tilesDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-webhooks.html">webhooks</a>
+						</li>
+						
+
+					</ul>
+				</li>
 				
 				<li class="dropdown">
 					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
@@ -29,43 +91,11 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="abstractDefinitions.html">abstractDefinitions</a>
-						</li>
-						
-						<li>
-							<a href="abstractInstances.html">abstractInstances</a>
-						</li>
-						
-						<li>
-							<a href="api.html">api</a>
-						</li>
-						
-						<li>
-							<a href="community.html">community</a>
-						</li>
-						
-						<li>
-							<a href="constants.html">constants</a>
-						</li>
-						
-						<li>
-							<a href="events.html">events</a>
-						</li>
-						
-						<li>
 							<a href="extstreamsDefinitions.html">extstreamsDefinitions</a>
 						</li>
 						
 						<li>
-							<a href="extstreamsInstances.html">extstreamsInstances</a>
-						</li>
-						
-						<li>
 							<a href="filePersistence.html">filePersistence</a>
-						</li>
-						
-						<li>
-							<a href="jiveutil.html">jiveutil</a>
 						</li>
 						
 						<li>
@@ -78,26 +108,6 @@
 						
 						<li>
 							<a href="oauthHandler.html">oauthHandler</a>
-						</li>
-						
-						<li>
-							<a href="request.html">request</a>
-						</li>
-						
-						<li>
-							<a href="tasks.html">tasks</a>
-						</li>
-						
-						<li>
-							<a href="tileInstances.html">tileInstances</a>
-						</li>
-						
-						<li>
-							<a href="tilesDefinitions.html">tilesDefinitions</a>
-						</li>
-						
-						<li>
-							<a href="webhooks.html">webhooks</a>
 						</li>
 						
 
@@ -142,13 +152,13 @@
     
     
     <div class="description">
-        An abstract class encapsulating the access token refresh flow.
-<ol>
+        <p>An abstract class encapsulating the access token refresh flow.</p>
+<p><ol>
     <li>Attempt an operation.</li>
     <li>If the operation does not suceed due to 401, then attempt an OAuth2 access token refresh exchange.</li>
     <li>If the refresh is successful, retry the operation.</li>
 </ol>
-Override the accessTokenRefresher member function, to handle the request logic specific to the target OAuth2 provider.
+Override the accessTokenRefresher member function, to handle the request logic specific to the target OAuth2 provider.</p>
     </div>
     
 
@@ -181,7 +191,7 @@ Override the accessTokenRefresher member function, to handle the request logic s
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="oauthHandler.js.html">lib/util/oauthHandler.js</a>
+        <a href="oauthHandler.js.html">lib/util/oauthHandler.js</a>, <a href="oauthHandler.js.html#sunlight-1-line-4">line 4</a>
     </li></ul></dd>
     
 
@@ -235,9 +245,9 @@ Override the accessTokenRefresher member function, to handle the request logic s
     
     
     <div class="description">
-        The default implementation of access token refresh.  If you
+        <p>The default implementation of access token refresh.  If you
 use oauth.js buildOAuthHandler, you will be required to provide
-your own implementation of this function.
+your own implementation of this function.</p>
     </div>
     
 
@@ -314,7 +324,7 @@ your own implementation of this function.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="oauthHandler.js.html">lib/util/oauthHandler.js</a>
+        <a href="oauthHandler.js.html">lib/util/oauthHandler.js</a>, <a href="oauthHandler.js.html#sunlight-1-line-50">line 50</a>
     </li></ul></dd>
     
 
@@ -365,9 +375,14 @@ your own implementation of this function.
 				<footer>
 					
 					
+		<span class="copyright">
+		Jive Software, Inc
+		</span>
+					<br />
+					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Mon Dec 23 2013 19:18:45 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Dec 30 2013 19:51:20 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -393,7 +408,7 @@ your own implementation of this function.
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers:,  showMenu: true, enableDoclinks :true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
 
 	<script>
 		$( function () {

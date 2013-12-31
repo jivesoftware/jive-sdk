@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Documentation Source: lib/webhook/webhooks.js</title>
+	<title>Jive SDK Source: lib/webhook/webhooks.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -17,10 +17,72 @@
 
 <body>
 <div class="container-fluid">
-	<div class="navbar navbar-fixed-top ">
+	<div class="navbar navbar-fixed-top navbar-inverse">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">Documentation</a>
+			<a class="brand" href="index.html">Jive SDK</a>
 			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="module-abstractDefinitions.html">abstractDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-abstractInstances.html">abstractInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-api.html">api</a>
+						</li>
+						
+						<li>
+							<a href="module-community.html">community</a>
+						</li>
+						
+						<li>
+							<a href="module-constants.html">constants</a>
+						</li>
+						
+						<li>
+							<a href="module-events.html">events</a>
+						</li>
+						
+						<li>
+							<a href="module-extstreamsInstances.html">extstreamsInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-jiveutil.html">jiveutil</a>
+						</li>
+						
+						<li>
+							<a href="module-request.html">request</a>
+						</li>
+						
+						<li>
+							<a href="module-tasks.html">tasks</a>
+						</li>
+						
+						<li>
+							<a href="module-tileInstances.html">tileInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-tilesDefinitions.html">tilesDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-webhooks.html">webhooks</a>
+						</li>
+						
+
+					</ul>
+				</li>
 				
 				<li class="dropdown">
 					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
@@ -29,43 +91,11 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="abstractDefinitions.html">abstractDefinitions</a>
-						</li>
-						
-						<li>
-							<a href="abstractInstances.html">abstractInstances</a>
-						</li>
-						
-						<li>
-							<a href="api.html">api</a>
-						</li>
-						
-						<li>
-							<a href="community.html">community</a>
-						</li>
-						
-						<li>
-							<a href="constants.html">constants</a>
-						</li>
-						
-						<li>
-							<a href="events.html">events</a>
-						</li>
-						
-						<li>
 							<a href="extstreamsDefinitions.html">extstreamsDefinitions</a>
 						</li>
 						
 						<li>
-							<a href="extstreamsInstances.html">extstreamsInstances</a>
-						</li>
-						
-						<li>
 							<a href="filePersistence.html">filePersistence</a>
-						</li>
-						
-						<li>
-							<a href="jiveutil.html">jiveutil</a>
 						</li>
 						
 						<li>
@@ -78,26 +108,6 @@
 						
 						<li>
 							<a href="oauthHandler.html">oauthHandler</a>
-						</li>
-						
-						<li>
-							<a href="request.html">request</a>
-						</li>
-						
-						<li>
-							<a href="tasks.html">tasks</a>
-						</li>
-						
-						<li>
-							<a href="tileInstances.html">tileInstances</a>
-						</li>
-						
-						<li>
-							<a href="tilesDefinitions.html">tilesDefinitions</a>
-						</li>
-						
-						<li>
-							<a href="webhooks.html">webhooks</a>
 						</li>
 						
 
@@ -121,7 +131,7 @@
     
     <section>
         <article>
-            <pre class="sunlight-highlight-javascript ">/*
+            <pre class="sunlight-highlight-javascript linenums">/*
  * Copyright 2013 Jive Software
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -142,12 +152,11 @@ var q = require('q');
 
 /**
  * API for interacting with Jive communities.
- * @class webhooks
+ * @module webhooks
  */
 
 /**
  * Saves the given webhook into persistence.
- * @memberof webhooks
  * @param webhook
  * @returns {Promise} Promise
  */
@@ -158,7 +167,6 @@ exports.save = function( webhook ) {
 /**
  * Looks through persistence for a webhook object with the provided id.
  * If no object is found with that id, a null object is resolved to the returned promise.
- * @memberof webhooks
  * @param webhookId
  * @returns {Promise} Promise
  */
@@ -177,7 +185,6 @@ exports.findByTenantID = function( webhookId ) {
  *     &lt;li>Community argument is not an object&lt;/li>
  *     &lt;li>Community object does not contain a tenantId&lt;/li>
  * &lt;/ul>
- * @memberof webhooks
  * @param community
  * @returns {Promise} Promise
  */
@@ -209,7 +216,6 @@ exports.findByCommunity = function(community) {
 /**
  * Register a webhook for the named jive community. Uses either the registered community access token for your
  * service, or the supplied access token.
- * @memberof webhooks
  * @param {String} jiveCommunity Required. Name of the jive community.
  * @param {Array} events Required. Array of String. Elements may be system webhooks (user_account, user_membership, user_session, social_group)
  * or content events (document, discussion, blogpost, .. )
@@ -298,9 +304,14 @@ exports.register = function( jiveCommunity, events, object, webhookCallbackURL,
 				<footer>
 					
 					
+		<span class="copyright">
+		Jive Software, Inc
+		</span>
+					<br />
+					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Mon Dec 23 2013 19:18:44 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Dec 30 2013 19:51:18 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -322,7 +333,7 @@ exports.register = function( jiveCommunity, events, object, webhookCallbackURL,
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers:,  showMenu: true, enableDoclinks :true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
 
 	<script>
 		$( function () {

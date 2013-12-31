@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Documentation Class: abstractDefinitions</title>
+	<title>Jive SDK Class: abstractDefinitions</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -17,10 +17,32 @@
 
 <body>
 <div class="container-fluid">
-	<div class="navbar navbar-fixed-top ">
+	<div class="navbar navbar-fixed-top navbar-inverse">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">Documentation</a>
+			<a class="brand" href="index.html">Jive SDK</a>
 			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="module-api.html">api</a>
+						</li>
+						
+						<li>
+							<a href="module-community.html">community</a>
+						</li>
+						
+						<li>
+							<a href="module-events.html">events</a>
+						</li>
+						
+
+					</ul>
+				</li>
 				
 				<li class="dropdown">
 					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
@@ -37,19 +59,7 @@
 						</li>
 						
 						<li>
-							<a href="api.html">api</a>
-						</li>
-						
-						<li>
-							<a href="community.html">community</a>
-						</li>
-						
-						<li>
 							<a href="constants.html">constants</a>
-						</li>
-						
-						<li>
-							<a href="events.html">events</a>
 						</li>
 						
 						<li>
@@ -81,7 +91,7 @@
 						</li>
 						
 						<li>
-							<a href="request.html">request</a>
+							<a href="global.html#request">request</a>
 						</li>
 						
 						<li>
@@ -142,7 +152,7 @@
     
     
     <div class="description">
-        Library of common methods for manipulating definitions (tiles and extstreams).
+        <p>Library of common methods for manipulating definitions (tiles and extstreams).</p>
     </div>
     
 
@@ -175,7 +185,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="definitions.js.html">lib/tile/definitions.js</a>
+        <a href="definitions.js.html">lib/tile/definitions.js</a>, <a href="definitions.js.html#sunlight-1-line-17">line 17</a>
     </li></ul></dd>
     
 
@@ -229,7 +239,7 @@
     
     
     <div class="description">
-        Adds a listener to the named definition, for the named event.
+        <p>Adds a listener to the named definition, for the named event.</p>
     </div>
     
 
@@ -380,7 +390,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="definitions.js.html">lib/tile/definitions.js</a>
+        <a href="definitions.js.html">lib/tile/definitions.js</a>, <a href="definitions.js.html#sunlight-1-line-166">line 166</a>
     </li></ul></dd>
     
 
@@ -405,7 +415,7 @@
     
             
 <div class="param-desc">
-    Promise
+    <p>Promise</p>
 </div>
 
 
@@ -439,8 +449,8 @@
     
     
     <div class="description">
-        Find definitions in persistence using the provided key-value criteria map. For example:
-<pre>
+        <p>Find definitions in persistence using the provided key-value criteria map. For example:</p>
+<p><pre>
  {
      'name': 'samplelist'
  }
@@ -448,7 +458,7 @@
 <br>
 On success, the returned promise will be resolved with an array of the located objects (which may be
 empty if none is found matching the criteria). If failure,
-the promise will be rejected with an error.
+the promise will be rejected with an error.</p>
     </div>
     
 
@@ -521,7 +531,7 @@ the promise will be rejected with an error.
 
             
 
-            <td class="description last">If true, the promise will be resolved with at most 1 found item, or null (if none are found).</td>
+            <td class="description last"><p>If true, the promise will be resolved with at most 1 found item, or null (if none are found).</p></td>
         </tr>
 
 	
@@ -553,7 +563,7 @@ the promise will be rejected with an error.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="definitions.js.html">lib/tile/definitions.js</a>
+        <a href="definitions.js.html">lib/tile/definitions.js</a>, <a href="definitions.js.html#sunlight-1-line-103">line 103</a>
     </li></ul></dd>
     
 
@@ -578,7 +588,7 @@ the promise will be rejected with an error.
     
             
 <div class="param-desc">
-    Promise
+    <p>Promise</p>
 </div>
 
 
@@ -612,9 +622,9 @@ the promise will be rejected with an error.
     
     
     <div class="description">
-        Searches persistence for definitions.
+        <p>Searches persistence for definitions.
 The collection that is searched is defined in subclasses of this class (@see abstractDefinitions:getCollection).
-The promise will resolve with an empty array, or populated array, depending on whether any definitions exist.
+The promise will resolve with an empty array, or populated array, depending on whether any definitions exist.</p>
     </div>
     
 
@@ -647,7 +657,7 @@ The promise will resolve with an empty array, or populated array, depending on w
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="definitions.js.html">lib/tile/definitions.js</a>
+        <a href="definitions.js.html">lib/tile/definitions.js</a>, <a href="definitions.js.html#sunlight-1-line-142">line 142</a>
     </li></ul></dd>
     
 
@@ -672,7 +682,7 @@ The promise will resolve with an empty array, or populated array, depending on w
     
             
 <div class="param-desc">
-    Promise
+    <p>Promise</p>
 </div>
 
 
@@ -706,9 +716,9 @@ The promise will resolve with an empty array, or populated array, depending on w
     
     
     <div class="description">
-        Searches persistence for a definition that matches the given ID (the 'id' attribute).
+        <p>Searches persistence for a definition that matches the given ID (the 'id' attribute).
 The collection that is searched is defined in subclasses of this class (@see abstractDefinitions:getCollection).
-If one is not found, the promise will resolve a null (undefined) value.
+If one is not found, the promise will resolve a null (undefined) value.</p>
     </div>
     
 
@@ -758,7 +768,7 @@ If one is not found, the promise will resolve a null (undefined) value.
 
             
 
-            <td class="description last">Id of the definition to be retrieved.</td>
+            <td class="description last"><p>Id of the definition to be retrieved.</p></td>
         </tr>
 
 	
@@ -790,7 +800,7 @@ If one is not found, the promise will resolve a null (undefined) value.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="definitions.js.html">lib/tile/definitions.js</a>
+        <a href="definitions.js.html">lib/tile/definitions.js</a>, <a href="definitions.js.html#sunlight-1-line-119">line 119</a>
     </li></ul></dd>
     
 
@@ -815,7 +825,7 @@ If one is not found, the promise will resolve a null (undefined) value.
     
             
 <div class="param-desc">
-    Promise
+    <p>Promise</p>
 </div>
 
 
@@ -849,9 +859,9 @@ If one is not found, the promise will resolve a null (undefined) value.
     
     
     <div class="description">
-        Searches persistence for a definition that matches the given name (the 'name' attribute).
+        <p>Searches persistence for a definition that matches the given name (the 'name' attribute).
 The collection that is searched is defined in subclasses of this class (@see abstractDefinitions:getCollection).
-If one is not found, the promise will resolve a null (undefined) value.
+If one is not found, the promise will resolve a null (undefined) value.</p>
     </div>
     
 
@@ -901,7 +911,7 @@ If one is not found, the promise will resolve a null (undefined) value.
 
             
 
-            <td class="description last">Name of the definition to be retrieved.</td>
+            <td class="description last"><p>Name of the definition to be retrieved.</p></td>
         </tr>
 
 	
@@ -933,7 +943,7 @@ If one is not found, the promise will resolve a null (undefined) value.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="definitions.js.html">lib/tile/definitions.js</a>
+        <a href="definitions.js.html">lib/tile/definitions.js</a>, <a href="definitions.js.html#sunlight-1-line-131">line 131</a>
     </li></ul></dd>
     
 
@@ -958,7 +968,7 @@ If one is not found, the promise will resolve a null (undefined) value.
     
             
 <div class="param-desc">
-    Promise
+    <p>Promise</p>
 </div>
 
 
@@ -992,8 +1002,8 @@ If one is not found, the promise will resolve a null (undefined) value.
     
     
     <div class="description">
-        Removes a definition from persistence with the specified id (attribute 'id').
-The collection that is searched is defined in subclasses of this class (@see abstractDefinitions:getCollection).
+        <p>Removes a definition from persistence with the specified id (attribute 'id').
+The collection that is searched is defined in subclasses of this class (@see abstractDefinitions:getCollection).</p>
     </div>
     
 
@@ -1075,7 +1085,7 @@ The collection that is searched is defined in subclasses of this class (@see abs
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="definitions.js.html">lib/tile/definitions.js</a>
+        <a href="definitions.js.html">lib/tile/definitions.js</a>, <a href="definitions.js.html#sunlight-1-line-153">line 153</a>
     </li></ul></dd>
     
 
@@ -1100,7 +1110,7 @@ The collection that is searched is defined in subclasses of this class (@see abs
     
             
 <div class="param-desc">
-    Promise
+    <p>Promise</p>
 </div>
 
 
@@ -1134,10 +1144,10 @@ The collection that is searched is defined in subclasses of this class (@see abs
     
     
     <div class="description">
-        Save a definition to persistence. If the object does not have an id attribute, a random String is assigned.
+        <p>Save a definition to persistence. If the object does not have an id attribute, a random String is assigned.
 If the object is already present in persistence, it will be updated; otherwise it will be inserted.
 On success, the returned promise will be resolved with the inserted or updated object; if failure,
-the promise will be rejected with an error.
+the promise will be rejected with an error.</p>
     </div>
     
 
@@ -1219,7 +1229,7 @@ the promise will be rejected with an error.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="definitions.js.html">lib/tile/definitions.js</a>
+        <a href="definitions.js.html">lib/tile/definitions.js</a>, <a href="definitions.js.html#sunlight-1-line-55">line 55</a>
     </li></ul></dd>
     
 
@@ -1244,7 +1254,7 @@ the promise will be rejected with an error.
     
             
 <div class="param-desc">
-    Promise
+    <p>Promise</p>
 </div>
 
 
@@ -1286,9 +1296,14 @@ the promise will be rejected with an error.
 				<footer>
 					
 					
+		<span class="copyright">
+		Jive Software, Inc
+		</span>
+					<br />
+					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Mon Dec 23 2013 19:18:44 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Dec 30 2013 19:40:31 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -1314,7 +1329,7 @@ the promise will be rejected with an error.
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers:,  showMenu: true, enableDoclinks :true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
 
 	<script>
 		$( function () {

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Documentation Class: webhooks</title>
+	<title>Jive SDK Class: webhooks</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -17,10 +17,32 @@
 
 <body>
 <div class="container-fluid">
-	<div class="navbar navbar-fixed-top ">
+	<div class="navbar navbar-fixed-top navbar-inverse">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">Documentation</a>
+			<a class="brand" href="index.html">Jive SDK</a>
 			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="module-api.html">api</a>
+						</li>
+						
+						<li>
+							<a href="module-community.html">community</a>
+						</li>
+						
+						<li>
+							<a href="module-events.html">events</a>
+						</li>
+						
+
+					</ul>
+				</li>
 				
 				<li class="dropdown">
 					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
@@ -37,19 +59,7 @@
 						</li>
 						
 						<li>
-							<a href="api.html">api</a>
-						</li>
-						
-						<li>
-							<a href="community.html">community</a>
-						</li>
-						
-						<li>
 							<a href="constants.html">constants</a>
-						</li>
-						
-						<li>
-							<a href="events.html">events</a>
 						</li>
 						
 						<li>
@@ -81,7 +91,7 @@
 						</li>
 						
 						<li>
-							<a href="request.html">request</a>
+							<a href="global.html#request">request</a>
 						</li>
 						
 						<li>
@@ -142,7 +152,7 @@
     
     
     <div class="description">
-        API for interacting with Jive communities.
+        <p>API for interacting with Jive communities.</p>
     </div>
     
 
@@ -175,7 +185,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>
+        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-20">line 20</a>
     </li></ul></dd>
     
 
@@ -229,11 +239,11 @@
     
     
     <div class="description">
-        Looks through persistence for all webhooks associated with the provided community object.
+        <p>Looks through persistence for all webhooks associated with the provided community object.
 If no objects are found with that id, an empty array is resolved to the returned promise; otherwise an
 array of objects is resolved.
 <br><br>
-An error will be thrown if:
+An error will be thrown if:</p>
 <ul>
     <li>No community argument is passed</li>
     <li>Community argument is not an object</li>
@@ -315,7 +325,7 @@ An error will be thrown if:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>
+        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-61">line 61</a>
     </li></ul></dd>
     
 
@@ -340,7 +350,7 @@ An error will be thrown if:
     
             
 <div class="param-desc">
-    Promise
+    <p>Promise</p>
 </div>
 
 
@@ -374,8 +384,8 @@ An error will be thrown if:
     
     
     <div class="description">
-        Looks through persistence for a webhook object with the provided id.
-If no object is found with that id, a null object is resolved to the returned promise.
+        <p>Looks through persistence for a webhook object with the provided id.
+If no object is found with that id, a null object is resolved to the returned promise.</p>
     </div>
     
 
@@ -452,7 +462,7 @@ If no object is found with that id, a null object is resolved to the returned pr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>
+        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-42">line 42</a>
     </li></ul></dd>
     
 
@@ -477,7 +487,7 @@ If no object is found with that id, a null object is resolved to the returned pr
     
             
 <div class="param-desc">
-    Promise
+    <p>Promise</p>
 </div>
 
 
@@ -511,8 +521,8 @@ If no object is found with that id, a null object is resolved to the returned pr
     
     
     <div class="description">
-        Register a webhook for the named jive community. Uses either the registered community access token for your
-service, or the supplied access token.
+        <p>Register a webhook for the named jive community. Uses either the registered community access token for your
+service, or the supplied access token.</p>
     </div>
     
 
@@ -562,7 +572,7 @@ service, or the supplied access token.
 
             
 
-            <td class="description last">Required. Name of the jive community.</td>
+            <td class="description last"><p>Required. Name of the jive community.</p></td>
         </tr>
 
 	
@@ -585,8 +595,8 @@ service, or the supplied access token.
 
             
 
-            <td class="description last">Required. Array of String. Elements may be system webhooks (user_account, user_membership, user_session, social_group)
-or content events (document, discussion, blogpost, .. )</td>
+            <td class="description last"><p>Required. Array of String. Elements may be system webhooks (user_account, user_membership, user_session, social_group)
+or content events (document, discussion, blogpost, .. )</p></td>
         </tr>
 
 	
@@ -609,7 +619,7 @@ or content events (document, discussion, blogpost, .. )</td>
 
             
 
-            <td class="description last">Optional, if events are system webhooks.</td>
+            <td class="description last"><p>Optional, if events are system webhooks.</p></td>
         </tr>
 
 	
@@ -632,7 +642,7 @@ or content events (document, discussion, blogpost, .. )</td>
 
             
 
-            <td class="description last">Required. URL of the postback that Jive will contact when the conditions of the hook are met.</td>
+            <td class="description last"><p>Required. URL of the postback that Jive will contact when the conditions of the hook are met.</p></td>
         </tr>
 
 	
@@ -655,7 +665,7 @@ or content events (document, discussion, blogpost, .. )</td>
 
             
 
-            <td class="description last">Optional. If omitted, will registration will use community oauth</td>
+            <td class="description last"><p>Optional. If omitted, will registration will use community oauth</p></td>
         </tr>
 
 	
@@ -678,7 +688,7 @@ or content events (document, discussion, blogpost, .. )</td>
 
             
 
-            <td class="description last">Optional. If omitted, will registration will use community oauth</td>
+            <td class="description last"><p>Optional. If omitted, will registration will use community oauth</p></td>
         </tr>
 
 	
@@ -701,8 +711,8 @@ or content events (document, discussion, blogpost, .. )</td>
 
             
 
-            <td class="description last">Optional. Callback function that will be invoked with new oauth access and refresh
-tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, the community will be updated with the new access tokens.</td>
+            <td class="description last"><p>Optional. Callback function that will be invoked with new oauth access and refresh
+tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, the community will be updated with the new access tokens.</p></td>
         </tr>
 
 	
@@ -734,7 +744,7 @@ tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, th
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>
+        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-101">line 101</a>
     </li></ul></dd>
     
 
@@ -759,7 +769,7 @@ tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, th
     
             
 <div class="param-desc">
-    Promise
+    <p>Promise</p>
 </div>
 
 
@@ -793,7 +803,7 @@ tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, th
     
     
     <div class="description">
-        Saves the given webhook into persistence.
+        <p>Saves the given webhook into persistence.</p>
     </div>
     
 
@@ -870,7 +880,7 @@ tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, th
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>
+        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-31">line 31</a>
     </li></ul></dd>
     
 
@@ -895,7 +905,7 @@ tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, th
     
             
 <div class="param-desc">
-    Promise
+    <p>Promise</p>
 </div>
 
 
@@ -937,9 +947,14 @@ tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, th
 				<footer>
 					
 					
+		<span class="copyright">
+		Jive Software, Inc
+		</span>
+					<br />
+					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Mon Dec 23 2013 19:18:45 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Dec 30 2013 19:40:32 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -965,7 +980,7 @@ tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, th
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers:,  showMenu: true, enableDoclinks :true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
 
 	<script>
 		$( function () {

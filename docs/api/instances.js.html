@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Documentation Source: lib/tile/instances.js</title>
+	<title>Jive SDK Source: lib/tile/instances.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -17,10 +17,72 @@
 
 <body>
 <div class="container-fluid">
-	<div class="navbar navbar-fixed-top ">
+	<div class="navbar navbar-fixed-top navbar-inverse">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">Documentation</a>
+			<a class="brand" href="index.html">Jive SDK</a>
 			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="module-abstractDefinitions.html">abstractDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-abstractInstances.html">abstractInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-api.html">api</a>
+						</li>
+						
+						<li>
+							<a href="module-community.html">community</a>
+						</li>
+						
+						<li>
+							<a href="module-constants.html">constants</a>
+						</li>
+						
+						<li>
+							<a href="module-events.html">events</a>
+						</li>
+						
+						<li>
+							<a href="module-extstreamsInstances.html">extstreamsInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-jiveutil.html">jiveutil</a>
+						</li>
+						
+						<li>
+							<a href="module-request.html">request</a>
+						</li>
+						
+						<li>
+							<a href="module-tasks.html">tasks</a>
+						</li>
+						
+						<li>
+							<a href="module-tileInstances.html">tileInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-tilesDefinitions.html">tilesDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-webhooks.html">webhooks</a>
+						</li>
+						
+
+					</ul>
+				</li>
 				
 				<li class="dropdown">
 					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
@@ -29,43 +91,11 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="abstractDefinitions.html">abstractDefinitions</a>
-						</li>
-						
-						<li>
-							<a href="abstractInstances.html">abstractInstances</a>
-						</li>
-						
-						<li>
-							<a href="api.html">api</a>
-						</li>
-						
-						<li>
-							<a href="community.html">community</a>
-						</li>
-						
-						<li>
-							<a href="constants.html">constants</a>
-						</li>
-						
-						<li>
-							<a href="events.html">events</a>
-						</li>
-						
-						<li>
 							<a href="extstreamsDefinitions.html">extstreamsDefinitions</a>
 						</li>
 						
 						<li>
-							<a href="extstreamsInstances.html">extstreamsInstances</a>
-						</li>
-						
-						<li>
 							<a href="filePersistence.html">filePersistence</a>
-						</li>
-						
-						<li>
-							<a href="jiveutil.html">jiveutil</a>
 						</li>
 						
 						<li>
@@ -78,26 +108,6 @@
 						
 						<li>
 							<a href="oauthHandler.html">oauthHandler</a>
-						</li>
-						
-						<li>
-							<a href="request.html">request</a>
-						</li>
-						
-						<li>
-							<a href="tasks.html">tasks</a>
-						</li>
-						
-						<li>
-							<a href="tileInstances.html">tileInstances</a>
-						</li>
-						
-						<li>
-							<a href="tilesDefinitions.html">tilesDefinitions</a>
-						</li>
-						
-						<li>
-							<a href="webhooks.html">webhooks</a>
 						</li>
 						
 
@@ -121,7 +131,7 @@
     
     <section>
         <article>
-            <pre class="sunlight-highlight-javascript ">/*
+            <pre class="sunlight-highlight-javascript linenums">/*
  * Copyright 2013 Jive Software
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,7 +149,7 @@
 
 /**
  * Library of common methods for manipulating instances (tiles and extstreams).
- * @class abstractInstances
+ * @module abstractInstances
  * @abstract
  */
 
@@ -175,7 +185,6 @@ exports.getCollection = function() {
  * If the object is already present in persistence, it will be updated; otherwise it will be inserted.
  * On success, the returned promise will be resolved with the inserted or updated object; if failure,
  * the promise will be rejected with an error.
- * @memberof abstractInstances
  * @param {Object} instance
  * @returns {Promise} Promise 
  */
@@ -199,7 +208,6 @@ exports.save = function (instance) {
  * On success, the returned promise will be resolved with an array of the located objects (which may be
  * empty if none is found matching the criteria). If failure,
  * the promise will be rejected with an error.
- * @memberof abstractInstances
  * @param {Object} keyValues
  * @param {Boolean} expectOne If true, the promise will be resolved with at most 1 found item, or null (if none are found).
  * @param {Boolean} cursor If true, the promise will be resolved with a collection cursor object.
@@ -215,7 +223,6 @@ exports.find = function ( keyValues, expectOne, cursor ) {
  * Searches persistence for an instance that matches the given ID (the 'id' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractInstances
  * @param {String} instanceID Id of the instance to be retrieved.
  * @returns {Promise} Promise 
  */
@@ -227,7 +234,6 @@ exports.findByID = function (instanceID) {
  * Searches persistence for instances that matches the given definition name (the 'name' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * The promise will resolve with an empty array, or populated array, depending on whether any instances matched the search criteria.
- * @memberof abstractInstances
  * @param {String} definitionName
  * @param {Boolean} cursor If true, the promise will be resolved with a collection cursor object.
  * @returns {Promise} Promise 
@@ -240,7 +246,6 @@ exports.findByDefinitionName = function (definitionName, cursor) {
  * Searches persistence for an instance that matches the given scope (the 'scope' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractInstances
  * @param {String} scope
  * @returns {Promise} Promise 
  */
@@ -252,7 +257,6 @@ exports.findByScope = function (scope) {
  * Searches persistence for an instance that matches the given guid (the 'guid' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractInstances
  * @param {String} guid
  * @returns {Promise} Promise 
  */
@@ -264,7 +268,6 @@ exports.findByGuid = function (guid) {
  * Searches persistence for an instance that matches the given push URL (the 'url' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractInstances
  * @param {String} url
  * @returns {Promise} Promise 
  */
@@ -276,7 +279,6 @@ exports.findByURL = function (url) {
  * Searches persistence for an instance that matches the given community name (the 'community' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractInstances
  * @param {String} communityName
  * @returns {Promise} Promise 
  */
@@ -288,7 +290,6 @@ exports.findByCommunity = function (communityName) {
  * Searches persistence for instances.
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * The promise will resolve with an empty array, or populated array, depending on whether any instances exist.
- * @memberof abstractInstances
  * @param {Boolean} cursor If true, the promise will be resolved with a collection cursor object.
  * @returns {Promise} Promise 
  */
@@ -299,7 +300,6 @@ exports.findAll = function (cursor) {
 /**
  * Removes an instance from persistence with the specified id (attribute 'id').
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
- * @memberof abstractInstances
  * @param {String} instanceID
  * @returns {Promise} Promise 
  */
@@ -371,7 +371,6 @@ var doRegister = function(options, pushUrl, config, name, jiveUrl, guid, deferre
  *     &lt;li>A tile or extstream instance is created (or updated, if it already exists) using the oauth credentials and register parameters,
  *     and resolved on the returned promise.&lt;/li>
  * &lt;/ol>
- * @memberof abstractInstances
  * @param {String} jiveUrl
  * @param {String} pushUrl
  * @param {Object} config
@@ -430,7 +429,6 @@ function doRefreshAccessToken(options, instance, deferred) {
  * Performs an OAuth2 access token refresh with the jive community associated with the passed in instance.
  * If successful, the promise is resolved with the instance object containing the new access token (accessToken). Note
  * that the changes to the instance is not actually saved into persistence at this point.
- * @memberof abstractInstances
  * @param {Object} instance Must contain the following fields:
  * @param {String} instance.jiveCommunity Points to an existing community
  * @param {String} instance.refreshToken Refresh token used for acquiring a new access token
@@ -461,7 +459,6 @@ exports.refreshAccessToken = function (instance) {
 
 /**
  * Retrieves a map of extended properties set on the instance, in the remote jive community.
- * @memberof abstractInstances
  * @param {Object} instance
  * @returns {Promise} Promise 
  */
@@ -473,7 +470,6 @@ exports.getExternalProps = function( instance ) {
 
 /**
  * Sets a map of extended properties on the instance, in the remote jive community.
- * @memberof abstractInstances
  * @param {Object} instance
  * @param {Object} props
  * @returns {Promise} Promise 
@@ -487,7 +483,6 @@ exports.setExternalProps = function( instance, props ) {
 
 /**
  * Removes the map of extended properties on the instance, in the remote community.
- * @memberof abstractInstances
  * @param {Object} instance
  * @returns {Promise} Promise 
  */
@@ -510,9 +505,14 @@ exports.deleteExternalProps = function( instance ){
 				<footer>
 					
 					
+		<span class="copyright">
+		Jive Software, Inc
+		</span>
+					<br />
+					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Mon Dec 23 2013 19:18:44 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Dec 30 2013 19:51:18 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -534,7 +534,7 @@ exports.deleteExternalProps = function( instance ){
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers:,  showMenu: true, enableDoclinks :true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
 
 	<script>
 		$( function () {

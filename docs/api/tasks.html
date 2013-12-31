@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Documentation Class: tasks</title>
+	<title>Jive SDK Class: tasks</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -17,10 +17,32 @@
 
 <body>
 <div class="container-fluid">
-	<div class="navbar navbar-fixed-top ">
+	<div class="navbar navbar-fixed-top navbar-inverse">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">Documentation</a>
+			<a class="brand" href="index.html">Jive SDK</a>
 			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="module-api.html">api</a>
+						</li>
+						
+						<li>
+							<a href="module-community.html">community</a>
+						</li>
+						
+						<li>
+							<a href="module-events.html">events</a>
+						</li>
+						
+
+					</ul>
+				</li>
 				
 				<li class="dropdown">
 					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
@@ -37,19 +59,7 @@
 						</li>
 						
 						<li>
-							<a href="api.html">api</a>
-						</li>
-						
-						<li>
-							<a href="community.html">community</a>
-						</li>
-						
-						<li>
 							<a href="constants.html">constants</a>
-						</li>
-						
-						<li>
-							<a href="events.html">events</a>
 						</li>
 						
 						<li>
@@ -81,7 +91,7 @@
 						</li>
 						
 						<li>
-							<a href="request.html">request</a>
+							<a href="global.html#request">request</a>
 						</li>
 						
 						<li>
@@ -142,7 +152,7 @@
     
     
     <div class="description">
-        API for managing recurrent tasks.
+        <p>API for managing recurrent tasks.</p>
     </div>
     
 
@@ -175,7 +185,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="tasks.js.html">lib/task/tasks.js</a>
+        <a href="tasks.js.html">lib/task/tasks.js</a>, <a href="tasks.js.html#sunlight-1-line-31">line 31</a>
     </li></ul></dd>
     
 
@@ -229,7 +239,7 @@
     
     
     <div class="description">
-        Schedules a recurrent task.
+        <p>Schedules a recurrent task.</p>
     </div>
     
 
@@ -279,7 +289,7 @@
 
             
 
-            <td class="description last">Required. This function is invoked when the task scheduling condtions are met.</td>
+            <td class="description last"><p>Required. This function is invoked when the task scheduling condtions are met.</p></td>
         </tr>
 
 	
@@ -302,7 +312,7 @@
 
             
 
-            <td class="description last">Optional. Number of milliseconds in between recurrences of the handler being invoked.</td>
+            <td class="description last"><p>Optional. Number of milliseconds in between recurrences of the handler being invoked.</p></td>
         </tr>
 
 	
@@ -325,7 +335,7 @@
 
             
 
-            <td class="description last">Optional. Unique identifier for the task.</td>
+            <td class="description last"><p>Optional. Unique identifier for the task.</p></td>
         </tr>
 
 	
@@ -357,7 +367,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="tasks.js.html">lib/task/tasks.js</a>
+        <a href="tasks.js.html">lib/task/tasks.js</a>, <a href="tasks.js.html#sunlight-1-line-44">line 44</a>
     </li></ul></dd>
     
 
@@ -382,7 +392,7 @@
     
             
 <div class="param-desc">
-    a task object wrapping the provided parameters (handler, interval, id).
+    <p>a task object wrapping the provided parameters (handler, interval, id).</p>
 </div>
 
 
@@ -462,7 +472,7 @@
 
             
 
-            <td class="description last">Required. Wrapper object for task characteristics.
+            <td class="description last"><p>Required. Wrapper object for task characteristics.</p>
                 <h6>Properties</h6>
                 
 
@@ -504,7 +514,7 @@
 
             
 
-            <td class="description last">Required. This function is invoked when the task scheduling conditions are met.</td>
+            <td class="description last"><p>Required. This function is invoked when the task scheduling conditions are met.</p></td>
         </tr>
 
 	
@@ -527,7 +537,7 @@
 
             
 
-            <td class="description last">Optional. Number of milliseconds in between recurrences of the handler being invoked.</td>
+            <td class="description last"><p>Optional. Number of milliseconds in between recurrences of the handler being invoked.</p></td>
         </tr>
 
 	
@@ -550,7 +560,7 @@
 
             
 
-            <td class="description last">Optional. Unique identifier for the task.</td>
+            <td class="description last"><p>Optional. Unique identifier for the task.</p></td>
         </tr>
 
 	
@@ -580,7 +590,7 @@
 
             
 
-            <td class="description last">Required. A scheduler strategy, similar to @see <a href="memoryScheduler.html">memoryScheduler</a>.</td>
+            <td class="description last"><p>Required. A scheduler strategy, similar to @see <a href="memoryScheduler.html">memoryScheduler</a>.</p></td>
         </tr>
 
 	
@@ -612,7 +622,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="tasks.js.html">lib/task/tasks.js</a>
+        <a href="tasks.js.html">lib/task/tasks.js</a>, <a href="tasks.js.html#sunlight-1-line-58">line 58</a>
     </li></ul></dd>
     
 
@@ -637,8 +647,8 @@
     
             
 <div class="param-desc">
-    Promise Promise .resolve and .reject handlers will be called depending on the success or failure of the handler
-function when it is invoked.
+    <p>Promise Promise .resolve and .reject handlers will be called depending on the success or failure of the handler
+function when it is invoked.</p>
 </div>
 
 
@@ -680,9 +690,14 @@ function when it is invoked.
 				<footer>
 					
 					
+		<span class="copyright">
+		Jive Software, Inc
+		</span>
+					<br />
+					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Mon Dec 23 2013 19:18:45 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Dec 30 2013 19:40:32 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -708,7 +723,7 @@ function when it is invoked.
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers:,  showMenu: true, enableDoclinks :true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
 
 	<script>
 		$( function () {

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Jive SDK Class: memoryPersistence</title>
+	<title>Jive SDK Module: webhooks</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -127,12 +127,12 @@
 					
 
 
-	<h1 class="page-title">Class: memoryPersistence</h1>
+	<h1 class="page-title">Module: webhooks</h1>
 <section>
 
 <header>
     <h2>
-    memoryPersistence
+    webhooks
     </h2>
     
 </header>
@@ -143,26 +143,10 @@
 
     
         
-<dt>
-    <h4 class="name" id="memoryPersistence"><span class="type-signature"></span>new memoryPersistence<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>An in-memory implementation of persistence.</p>
-    </div>
-    
+            <div class="description"><p>API for interacting with Jive communities.</p></div>
+        
 
-    
-    
-    
-    
-    
-    
-    
+        
 <dl class="details">
     
 
@@ -185,7 +169,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-21">line 21</a>
+        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-20">line 20</a>
     </li></ul></dd>
     
 
@@ -196,20 +180,8 @@
     
 </dl>
 
-    
-    
 
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
+        
     
     </div>
 
@@ -231,7 +203,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="close"><span class="type-signature">&lt;static> </span>close<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="findByCommunity"><span class="type-signature">&lt;static> </span>findByCommunity<span class="signature">(community)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
     
 </dt>
@@ -239,100 +211,16 @@
     
     
     <div class="description">
-        <p>Close it down</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-231">line 231</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Object</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="find"><span class="type-signature">&lt;static> </span>find<span class="signature">(collectionID, keyValues, cursor)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Retrieve a piece of data from a named collection, based on the criteria, and returns a promise
-that contains found items when done.</p>
+        <p>Looks through persistence for all webhooks associated with the provided community object.
+If no objects are found with that id, an empty array is resolved to the returned promise; otherwise an
+array of objects is resolved.
+<br><br>
+An error will be thrown if:</p>
+<ul>
+    <li>No community argument is passed</li>
+    <li>Community argument is not an object</li>
+    <li>Community object does not contain a tenantId</li>
+</ul>
     </div>
     
 
@@ -366,212 +254,7 @@ that contains found items when done.</p>
 
         <tr>
             
-                <td class="name"><code>collectionID</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>keyValues</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>cursor</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>If true, returns an iterable cursor.</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-111">line 111</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Object</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="findByID"><span class="type-signature">&lt;static> </span>findByID<span class="signature">(collectionID, key)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Retrieve a piece of data from a named collection whose key is the one provided.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>collectionID</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>key</code></td>
+                <td class="name"><code>community</code></td>
             
 
             <td class="type">
@@ -614,7 +297,7 @@ that contains found items when done.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-219">line 219</a>
+        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-58">line 58</a>
     </li></ul></dd>
     
 
@@ -639,7 +322,7 @@ that contains found items when done.</p>
     
             
 <div class="param-desc">
-    <p>promise</p>
+    <p>Promise</p>
 </div>
 
 
@@ -650,7 +333,7 @@ that contains found items when done.</p>
 	</dt>
 	<dd>
 		
-<span class="param-type">Object</span>
+<span class="param-type">Promise</span>
 
 
 	</dd>
@@ -665,7 +348,7 @@ that contains found items when done.</p>
         
             
 <dt>
-    <h4 class="name" id="remove"><span class="type-signature">&lt;static> </span>remove<span class="signature">(collectionID, key)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="findByTenantID"><span class="type-signature">&lt;static> </span>findByTenantID<span class="signature">(webhookId)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
     
 </dt>
@@ -673,8 +356,8 @@ that contains found items when done.</p>
     
     
     <div class="description">
-        <p>Remove a piece of data from a name collection, based to the provided key and return a promise
-that returns removed items when done.</p>
+        <p>Looks through persistence for a webhook object with the provided id.
+If no object is found with that id, a null object is resolved to the returned promise.</p>
     </div>
     
 
@@ -708,38 +391,10 @@ that returns removed items when done.</p>
 
         <tr>
             
-                <td class="name"><code>collectionID</code></td>
+                <td class="name"><code>webhookId</code></td>
             
 
             <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>key</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
             
             </td>
 
@@ -779,7 +434,7 @@ that returns removed items when done.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-91">line 91</a>
+        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-40">line 40</a>
     </li></ul></dd>
     
 
@@ -804,7 +459,7 @@ that returns removed items when done.</p>
     
             
 <div class="param-desc">
-    <p>promise</p>
+    <p>Promise</p>
 </div>
 
 
@@ -815,7 +470,7 @@ that returns removed items when done.</p>
 	</dt>
 	<dd>
 		
-<span class="param-type">Object</span>
+<span class="param-type">Promise</span>
 
 
 	</dd>
@@ -830,7 +485,7 @@ that returns removed items when done.</p>
         
             
 <dt>
-    <h4 class="name" id="save"><span class="type-signature">&lt;static> </span>save<span class="signature">(collectionID, key, data)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="register"><span class="type-signature">&lt;static> </span>register<span class="signature">(jiveCommunity, events, object, webhookCallbackURL, accessToken, refreshToken, tokenPersistenceFunction)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
     
 </dt>
@@ -838,7 +493,8 @@ that returns removed items when done.</p>
     
     
     <div class="description">
-        <p>Save the provided data in a named collection</p>
+        <p>Register a webhook for the named jive community. Uses either the registered community access token for your
+service, or the supplied access token.</p>
     </div>
     
 
@@ -872,7 +528,7 @@ that returns removed items when done.</p>
 
         <tr>
             
-                <td class="name"><code>collectionID</code></td>
+                <td class="name"><code>jiveCommunity</code></td>
             
 
             <td class="type">
@@ -888,14 +544,38 @@ that returns removed items when done.</p>
 
             
 
-            <td class="description last"></td>
+            <td class="description last"><p>Required. Name of the jive community.</p></td>
         </tr>
 
 	
 
         <tr>
             
-                <td class="name"><code>key</code></td>
+                <td class="name"><code>events</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Required. Array of String. Elements may be system webhooks (user_account, user_membership, user_session, social_group)
+or content events (document, discussion, blogpost, .. )</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>object</code></td>
             
 
             <td class="type">
@@ -911,22 +591,228 @@ that returns removed items when done.</p>
 
             
 
-            <td class="description last"></td>
+            <td class="description last"><p>Optional, if events are system webhooks.</p></td>
         </tr>
 
 	
 
         <tr>
             
-                <td class="name"><code>data</code></td>
+                <td class="name"><code>webhookCallbackURL</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">String</span>
 
 
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Required. URL of the postback that Jive will contact when the conditions of the hook are met.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>accessToken</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Optional. If omitted, will registration will use community oauth</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>refreshToken</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Optional. If omitted, will registration will use community oauth</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>tokenPersistenceFunction</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Optional. Callback function that will be invoked with new oauth access and refresh
+tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, the community will be updated with the new access tokens.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-97">line 97</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Promise</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Promise</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="save"><span class="type-signature">&lt;static> </span>save<span class="signature">(webhook)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Saves the given webhook into persistence.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>webhook</code></td>
+            
+
+            <td class="type">
             
             </td>
 
@@ -966,7 +852,7 @@ that returns removed items when done.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-75">line 75</a>
+        <a href="webhooks.js.html">lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-30">line 30</a>
     </li></ul></dd>
     
 
@@ -991,7 +877,7 @@ that returns removed items when done.</p>
     
             
 <div class="param-desc">
-    <p>promise</p>
+    <p>Promise</p>
 </div>
 
 
@@ -1002,7 +888,7 @@ that returns removed items when done.</p>
 	</dt>
 	<dd>
 		
-<span class="param-type">Object</span>
+<span class="param-type">Promise</span>
 
 
 	</dd>
@@ -1040,7 +926,7 @@ that returns removed items when done.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Mon Dec 30 2013 19:51:19 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Dec 30 2013 19:51:20 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

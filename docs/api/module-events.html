@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Jive SDK Class: memoryPersistence</title>
+	<title>Jive SDK Module: events</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -127,12 +127,12 @@
 					
 
 
-	<h1 class="page-title">Class: memoryPersistence</h1>
+	<h1 class="page-title">Module: events</h1>
 <section>
 
 <header>
     <h2>
-    memoryPersistence
+    events
     </h2>
     
 </header>
@@ -143,25 +143,87 @@
 
     
         
+            <div class="description"><p>API for managing system events.</p></div>
+        
+
+        
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="events.js.html">lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-17">line 17</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        <dl>
+            
 <dt>
-    <h4 class="name" id="memoryPersistence"><span class="type-signature"></span>new memoryPersistence<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="baseEvents"><span class="type-signature">&lt;static> </span>baseEvents<span class="type-signature"> :Array</span></h4>
     
     
 </dt>
 <dd>
     
-    
     <div class="description">
-        <p>An in-memory implementation of persistence.</p>
+        <p>This is an array of system defined events</p>
     </div>
     
+    
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Array</span>
 
+
+            </li>
+        </ul>
     
-    
-    
-    
-    
-    
+
     
 <dl class="details">
     
@@ -185,7 +247,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-21">line 21</a>
+        <a href="events.js.html">lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-138">line 138</a>
     </li></ul></dd>
     
 
@@ -198,21 +260,100 @@
 
     
     
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="globalEvents"><span class="type-signature">&lt;static> </span>globalEvents<span class="type-signature"> :Array</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Array of system defined events.</p>
+    </div>
+    
+    
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Array</span>
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
 
     
 
     
+
     
+
     
+
     
+
     
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="events.js.html">lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-123">line 123</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
     
     
 </dd>
 
+        
+            
+<dt>
+    <h4 class="name" id="pushQueueEvents"><span class="type-signature">&lt;static> </span>pushQueueEvents<span class="type-signature"> :Array</span></h4>
     
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>There are events that pusher nodes are allowed to handle.</p>
     </div>
+    
+    
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Array</span>
 
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
     
 
     
@@ -223,6 +364,33 @@
 
     
 
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="events.js.html">lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-113">line 113</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+</dd>
+
+        </dl>
     
 
     
@@ -231,7 +399,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="close"><span class="type-signature">&lt;static> </span>close<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="addDefinitionEventListener"><span class="type-signature">&lt;static> </span>addDefinitionEventListener<span class="signature">(event, eventListener, handler, description)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -239,100 +407,8 @@
     
     
     <div class="description">
-        <p>Close it down</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-231">line 231</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Object</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="find"><span class="type-signature">&lt;static> </span>find<span class="signature">(collectionID, keyValues, cursor)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Retrieve a piece of data from a named collection, based on the criteria, and returns a promise
-that contains found items when done.</p>
+        <p>Add a user contributed event handler. The handler is added to an array of handler functions assigned for the
+event listener. Only one function per event listener per event is permitted.</p>
     </div>
     
 
@@ -366,7 +442,7 @@ that contains found items when done.</p>
 
         <tr>
             
-                <td class="name"><code>collectionID</code></td>
+                <td class="name"><code>event</code></td>
             
 
             <td class="type">
@@ -382,333 +458,14 @@ that contains found items when done.</p>
 
             
 
-            <td class="description last"></td>
+            <td class="description last"><p>the event id</p></td>
         </tr>
 
 	
 
         <tr>
             
-                <td class="name"><code>keyValues</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>cursor</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>If true, returns an iterable cursor.</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-111">line 111</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Object</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="findByID"><span class="type-signature">&lt;static> </span>findByID<span class="signature">(collectionID, key)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Retrieve a piece of data from a named collection whose key is the one provided.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>collectionID</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>key</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-219">line 219</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Object</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="remove"><span class="type-signature">&lt;static> </span>remove<span class="signature">(collectionID, key)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Remove a piece of data from a name collection, based to the provided key and return a promise
-that returns removed items when done.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>collectionID</code></td>
+                <td class="name"><code>eventListener</code></td>
             
 
             <td class="type">
@@ -724,14 +481,37 @@ that returns removed items when done.</p>
 
             
 
-            <td class="description last"></td>
+            <td class="description last"><p>the name of the listener</p></td>
         </tr>
 
 	
 
         <tr>
             
-                <td class="name"><code>key</code></td>
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the function to call</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>description</code></td>
             
 
             <td class="type">
@@ -779,7 +559,7 @@ that returns removed items when done.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-91">line 91</a>
+        <a href="events.js.html">lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-46">line 46</a>
     </li></ul></dd>
     
 
@@ -800,29 +580,6 @@ that returns removed items when done.</p>
     
     
     
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Object</span>
-
-
-	</dd>
-</dl>
-
-
-        
     
     
 </dd>
@@ -830,7 +587,7 @@ that returns removed items when done.</p>
         
             
 <dt>
-    <h4 class="name" id="save"><span class="type-signature">&lt;static> </span>save<span class="signature">(collectionID, key, data)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="addLocalEventListener"><span class="type-signature">&lt;static> </span>addLocalEventListener<span class="signature">(event, handler)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -838,7 +595,7 @@ that returns removed items when done.</p>
     
     
     <div class="description">
-        <p>Save the provided data in a named collection</p>
+        <p>Adds a local event handler.</p>
     </div>
     
 
@@ -872,7 +629,7 @@ that returns removed items when done.</p>
 
         <tr>
             
-                <td class="name"><code>collectionID</code></td>
+                <td class="name"><code>event</code></td>
             
 
             <td class="type">
@@ -895,36 +652,13 @@ that returns removed items when done.</p>
 
         <tr>
             
-                <td class="name"><code>key</code></td>
+                <td class="name"><code>handler</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
+<span class="param-type">function</span>
 
 
             
@@ -966,7 +700,308 @@ that returns removed items when done.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="memory.js.html">lib/persistence/memory.js</a>, <a href="memory.js.html#sunlight-1-line-75">line 75</a>
+        <a href="events.js.html">lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-103">line 103</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addSystemEventListener"><span class="type-signature">&lt;static> </span>addSystemEventListener<span class="signature">(event, handler, description)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Adds a system-level event listener.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>description</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="events.js.html">lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-86">line 86</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getDefinitionEventListenerFor"><span class="type-signature">&lt;static> </span>getDefinitionEventListenerFor<span class="signature">(eventListener, event)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Returns array of event handling functions for the given eventListener and event, if at least one was registered.
+Otherwise returns undefined.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>eventListener</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="events.js.html">lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-72">line 72</a>
     </li></ul></dd>
     
 
@@ -990,10 +1025,6 @@ that returns removed items when done.</p>
     <h5>Returns:</h5>
     
             
-<div class="param-desc">
-    <p>promise</p>
-</div>
-
 
 
 <dl>
@@ -1002,7 +1033,7 @@ that returns removed items when done.</p>
 	</dt>
 	<dd>
 		
-<span class="param-type">Object</span>
+<span class="param-type">Array</span>
 
 
 	</dd>
@@ -1010,6 +1041,75 @@ that returns removed items when done.</p>
 
 
         
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="reset"><span class="type-signature">&lt;static> </span>reset<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Removes all event handlers.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="events.js.html">lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-302">line 302</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
     
     
 </dd>
