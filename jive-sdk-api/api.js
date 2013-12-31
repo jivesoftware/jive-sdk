@@ -21,7 +21,7 @@
  *      var jive = require('jive-sdk');
  *      jive.logger.info('Welcome!');
  * </pre>
- * @class api
+ * @module api
  */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,6 @@ logger.setLevel(process.env['jive_logging_level'] || 'INFO');
 
 /**
  * Instance of the default logger.
- * @memberof api
  * @property {function} debug example: require('jive-sdk').logger.debug('Debug message');
  * @property {function} info  example: require('jive-sdk').logger.debug('Info message');
  * @property {function} warn  example: require('jive-sdk').logger.debug('Warn message');
@@ -50,7 +49,6 @@ exports.logger = logger;
  *     var persistence = new jive.persistence.memory();
  *     persistence.save( ... );
  * </pre>
- * @memberof api
  * @type {Object}
  * @property {filePersistence} file - File based persistence. @see {@link filePersistence} persistence.
  * @property {memoryPersistence} memory - Memory based persistence @see {@link memoryPersistence} persistence.
@@ -71,7 +69,6 @@ exports.persistence = {
  *     ...
  *     scheduler.schedule( ... );
  * </pre>
- * @memberof api
  * @type {memoryScheduler}
  */
 exports.scheduler = {
@@ -80,8 +77,7 @@ exports.scheduler = {
 
 /**
  * An object containing constant string values. @see {@link constants}.
- * @memberof api
- * @type {constants}
+ * @type module:constants
  */
 exports.constants = require('./lib/util/constants.js');
 
@@ -94,8 +90,7 @@ exports.constants = require('./lib/util/constants.js');
  *     jive.extstreams.findByID( ... );
  *     jive.extstreams.definitions.findByID( ... );
  * </pre>
- * @memberof api
- * @type {extstreamsInstances}
+ * @type module:extstreamsInstances
  * @property {extstreamsDefinitions} definitions - Stream definitions API.
  */
 exports.extstreams = require('./lib/tile/extstreams');
@@ -110,16 +105,14 @@ exports.extstreams['definitions'] = require('./lib/tile/extstreamsDefinitions');
  *     jive.tiles.findByID( ... );
  *     jive.tiles.definitions.findByID( ... );
  * </pre>
- * @memberof api
- * @type {tileInstances}
+ * @type module:tileInstances
  * @property {tilesDefinitions} definitions - Tiles definitions API.
  */
 exports.tiles = tiles = require('./lib/tile/tiles');
 exports.tiles['definitions'] = require('./lib/tile/tilesDefinitions');
 
 /**
- * @memberof api
- * @type {Object}
+ * @type module:events
  */
 exports.events = require( './lib/event/events');
 
@@ -131,14 +124,12 @@ exports.events = require( './lib/event/events');
  *     var jive = require('jive-sdk');
  *     var guid = jive.util.guid();
  * </pre>
- * @memberof api
- * @type {jiveutil}
+ * @type module:jiveutil
  */
 exports.util = require('./lib/util/jiveutil');
 
 /**
  * @deprecated
- * @memberof api
  * @type {Object}
  */
 exports.oauthUtil = require('./lib/util/oauth');
@@ -153,22 +144,19 @@ exports.oauthUtil = require('./lib/util/oauth');
  *          jive.logger.info('Found',JSON.stringify(community));
  *     });
  * </pre>
- * @memberof api
- * @type {community}
+ * @type module:community
  */
 exports.community = require('./lib/community/community');
 
 /**
  * API For managing service webhooks
- * @memberof api
- * @type {webhooks}
+ * @type module:webhooks
  */
 exports.webhooks = require('./lib/webhook/webhooks');
 
 /**
  * API for managing tasks.
- * @memberof api
- * @type {tasks}
+ * @type module:tasks
  */
 exports.tasks = require('./lib/task/tasks');
 
@@ -185,7 +173,6 @@ var createDefaultMethods = function( methods, message ) {
 
 /**
  * Object that contains nominal API configuration state.
- * @memberof api
  * @type {Object}
  * @property {object} persistence - Configured persistence strategy.
  * @property {object} scheduler - Configured scheduler strategy.
