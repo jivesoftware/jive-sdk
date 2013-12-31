@@ -16,7 +16,7 @@
 
 /**
  * Library for manipulating external stream definitions.
- * @extends abstractDefinitions
+ * @extends module:abstractDefinitions
  * @class extstreamsDefinitions
  */
 

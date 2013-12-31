@@ -15,12 +15,11 @@
  */
 
 /**
- * @class constants
+ * @module constants
  */
 
 /**
  * @static
- * @memberof constants
  * @type {{PUSH_DATA_TO_JIVE: string, PUSH_ACTIVITY_TO_JIVE: string, PUSH_COMMENT_TO_JIVE: string, COMMENT_ON_ACTIVITY: string, COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID: string, FETCH_COMMENTS_ON_ACTIVITY: string, FETCH_ALL_COMMENTS_FOR_EXT_STREAM: string, INSTANCE_REGISTRATION: string, INSTANCE_UNREGISTRATION: string, CLIENT_APP_REGISTRATION: string, GET_PAGINATED_RESULTS: string, GET_EXTERNAL_PROPS: string, SET_EXTERNAL_PROPS: string, DELETE_EXTERNAL_PROPS: string}}
  */
 exports.tileEventNames = {
@@ -41,7 +40,6 @@ exports.tileEventNames = {
 };
 
 /**
- * @memberof constants
  * @type {{NEW_INSTANCE: string, INSTANCE_UPDATED: string, INSTANCE_REMOVED: string, DATA_PUSHED: string, ACTIVITY_PUSHED: string, COMMENT_PUSHED: string, CLIENT_APP_REGISTRATION_SUCCESS: string, CLIENT_APP_REGISTRATION_FAILED: string}}
  */
 exports.globalEventNames = {
@@ -56,7 +54,6 @@ exports.globalEventNames = {
 };
 
 /**
- * @memberof constants
  * @type {{WORKER: string, PUSHER: string, HTTP_HANDLER: string}}
  */
 exports.roles = {
@@ -66,7 +63,6 @@ exports.roles = {
 };
 
 /**
- * @memberof constants
  * @type {string}
  */
 exports.SECURITY_STRING = "throw 'allowIllegalResourceCall is false.';\n";

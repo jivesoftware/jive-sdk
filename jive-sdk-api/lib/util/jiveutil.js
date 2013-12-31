@@ -16,7 +16,7 @@
 
 /**
  * Library of useful functions.
- * @class jiveutil
+ * @module jiveutil
  */
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,6 @@ var hex_high_10 = { // set the highest bit and clear the next highest
 
 /**
  * Useful general utility functions.
- * @memberof jiveutil
  * @returns {String} guid
  */
 
@@ -89,7 +88,6 @@ exports.guid = function (src) {
 /**
  * By default this will build a request of type 'application/json'. Set a Content-Type header
  * explicitly if its supposed to be a different type.
- * @memberof request
  * @param {String} url
  * @param {String} method
  * @param {Object} postBody leave null unless PUT or POST
@@ -103,13 +101,12 @@ exports.buildRequest = function (url, method, postBody, headers, requestOptions)
 
 /**
  * Useful request related utilities
- * @type {jiveRequest}
+ * @type module:jiveRequest
  */
 exports.request = jiveRequest;
 
 /**
  * Gets the file size in bytes.
- * @memberof jiveutil
  * @param filename - the path to the file.
  * @return {Promise} Promise
  */
@@ -127,7 +124,6 @@ exports.fsGetSize = function (filename) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -142,7 +138,6 @@ exports.fsexists = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param source
  * @param target
  * @return {Promise} Promise
@@ -180,7 +175,6 @@ var fsSimpleRename = function (source, target) {
 };
 
 /**
- * @memberof jiveutil
  * @param source
  * @param target
  * @param force
@@ -208,7 +202,6 @@ exports.fsrename = function (source, target, force) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -229,7 +222,6 @@ exports.fsmkdir = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -243,7 +235,6 @@ exports.fsread = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -254,7 +245,6 @@ exports.fsreadJson = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -343,7 +333,6 @@ var removeRecursive = function (path, cb) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -362,7 +351,6 @@ exports.fsrmdir = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param path
  * @return {Promise} Promise
  */
@@ -382,7 +370,6 @@ exports.fsisdir = function (path) {
 };
 
 /**
- * @memberof jiveutil
  * @param data
  * @param path
  * @return {Promise} Promise
@@ -412,7 +399,6 @@ function getExtension(filename) {
 }
 
 /**
- * @memberof jiveutil
  * @param source
  * @param target
  * @param substitutions
@@ -434,7 +420,6 @@ exports.fsTemplateCopy = function (source, target, substitutions) {
 };
 
 /**
- * @memberof jiveutil
  * @param data
  * @param target
  * @param substitutions
@@ -453,7 +438,6 @@ exports.fsTemplateWrite = function (data, target, substitutions) {
 };
 
 /**
- * @memberof jiveutil
  * @param source
  * @param substitutions
  * @return {Promise} Promise
@@ -466,7 +450,6 @@ exports.fsTemplateRead = function (source, substitutions) {
 };
 
 /**
- * @memberof jiveutil
  * @param object
  * @returns {*|string}
  */
@@ -475,7 +458,6 @@ exports.base64Encode = function (object) {
 };
 
 /**
- * @memberof jiveutil
  * @param str
  * @returns {*|string}
  */
@@ -484,7 +466,6 @@ exports.base64Decode = function (str) {
 };
 
 /**
- * @memberof jiveutil
  * @param auth
  * @param clientId
  * @param clientSecret
@@ -513,7 +494,6 @@ exports.basicAuthorizationHeaderValid = function (auth, clientId, clientSecret, 
 };
 
 /**
- * @memberof jiveutil
  * @param auth
  * @param clientId
  * @param clientSecret
@@ -555,7 +535,6 @@ exports.jiveAuthorizationHeaderValid = function (auth, clientId, clientSecret, a
 };
 
 /**
- * @memberof jiveutil
  * @param o
  * @returns {{}}
  */
@@ -578,7 +557,6 @@ exports.sortObject = function (o) {
 };
 
 /**
- * @memberof jiveutil
  * @param currentFsItem
  * @param root
  * @param targetRoot
@@ -642,7 +620,6 @@ var copyFileProcessor = function (type, currentFsItem, targetPath, substitutions
 };
 
 /**
- * @memberof jiveutil
  * @param root
  * @param target
  * @param force
@@ -671,7 +648,6 @@ exports.recursiveCopy = function (root, target, force, substitutions, file) {
 };
 
 /**
- * @memberof jiveutil
  * @param root
  * @param targetZip
  * @param flatten
@@ -713,13 +689,11 @@ exports.zipFolder = function (root, targetZip, flatten) {
 };
 
 /**
- * @memberof jiveutil
  * @type {*}
  */
 exports.oauth = oauth;
 
 /**
- * @memberof jiveutil
  * @type {*}
  */
 exports.iterator = iterator;

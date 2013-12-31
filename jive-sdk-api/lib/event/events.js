@@ -16,7 +16,7 @@
 
 /**
  * API for managing system events.
- * @class events
+ * @module events
  */
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +38,6 @@ exports.eventHandlerMap = {};
 /**
  * Add a user contributed event handler. The handler is added to an array of handler functions assigned for the
  * event listener. Only one function per event listener per event is permitted.
- * @memberof events
  * @param {String} event - the event id
  * @param {String} eventListener - the name of the listener
  * @param {function} handler - the function to call
@@ -66,7 +65,6 @@ exports.addDefinitionEventListener = function( event, eventListener, handler, de
 /**
  * Returns array of event handling functions for the given eventListener and event, if at least one was registered.
  * Otherwise returns undefined.
- * @memberof events
  * @param {String} eventListener
  * @param {String} event
  * @returns {Array}
@@ -81,7 +79,6 @@ exports.getDefinitionEventListenerFor = function( eventListener, event ) {
 
 /**
  * Adds a system-level event listener.
- * @memberof events
  * @param {String} event
  * @param {function} handler
  * @param description
@@ -100,7 +97,6 @@ exports.addSystemEventListener = function(event, handler, description) {
 
 /**
  * Adds a local event handler.
- * @memberof events
  * @param {String} event
  * @param {function} handler
  */
@@ -112,7 +108,6 @@ exports.addLocalEventListener = function( event, handler ) {
 
 /**
  * There are events that pusher nodes are allowed to handle.
- * @memberof events
  * @type {Array}
  */
 exports.pushQueueEvents = [
@@ -123,7 +118,6 @@ exports.pushQueueEvents = [
 
 /**
  * Array of system defined events.
- * @memberof events
  * @type {Array}
  */
 exports.globalEvents = [
@@ -139,7 +133,6 @@ exports.globalEvents = [
 
 /**
  * This is an array of system defined events
- * @memberof events
  * @type {Array}
  */
 exports.baseEvents = [
@@ -305,7 +298,6 @@ exports.baseEvents = [
 
 /**
  * Removes all event handlers.
- * @memberof events
  */
 exports.reset = function() {
     exports.eventHandlerMap = {};

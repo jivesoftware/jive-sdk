@@ -16,7 +16,7 @@
 
 /**
  * Library of common methods for manipulating instances (tiles and extstreams).
- * @class abstractInstances
+ * @module abstractInstances
  * @abstract
  */
 
@@ -52,7 +52,6 @@ exports.getCollection = function() {
  * If the object is already present in persistence, it will be updated; otherwise it will be inserted.
  * On success, the returned promise will be resolved with the inserted or updated object; if failure,
  * the promise will be rejected with an error.
- * @memberof abstractInstances
  * @param {Object} instance
  * @returns {Promise} Promise 
  */
@@ -76,7 +75,6 @@ exports.save = function (instance) {
  * On success, the returned promise will be resolved with an array of the located objects (which may be
  * empty if none is found matching the criteria). If failure,
  * the promise will be rejected with an error.
- * @memberof abstractInstances
  * @param {Object} keyValues
  * @param {Boolean} expectOne If true, the promise will be resolved with at most 1 found item, or null (if none are found).
  * @param {Boolean} cursor If true, the promise will be resolved with a collection cursor object.
@@ -92,7 +90,6 @@ exports.find = function ( keyValues, expectOne, cursor ) {
  * Searches persistence for an instance that matches the given ID (the 'id' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractInstances
  * @param {String} instanceID Id of the instance to be retrieved.
  * @returns {Promise} Promise 
  */
@@ -104,7 +101,6 @@ exports.findByID = function (instanceID) {
  * Searches persistence for instances that matches the given definition name (the 'name' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * The promise will resolve with an empty array, or populated array, depending on whether any instances matched the search criteria.
- * @memberof abstractInstances
  * @param {String} definitionName
  * @param {Boolean} cursor If true, the promise will be resolved with a collection cursor object.
  * @returns {Promise} Promise 
@@ -117,7 +113,6 @@ exports.findByDefinitionName = function (definitionName, cursor) {
  * Searches persistence for an instance that matches the given scope (the 'scope' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractInstances
  * @param {String} scope
  * @returns {Promise} Promise 
  */
@@ -129,7 +124,6 @@ exports.findByScope = function (scope) {
  * Searches persistence for an instance that matches the given guid (the 'guid' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractInstances
  * @param {String} guid
  * @returns {Promise} Promise 
  */
@@ -141,7 +135,6 @@ exports.findByGuid = function (guid) {
  * Searches persistence for an instance that matches the given push URL (the 'url' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractInstances
  * @param {String} url
  * @returns {Promise} Promise 
  */
@@ -153,7 +146,6 @@ exports.findByURL = function (url) {
  * Searches persistence for an instance that matches the given community name (the 'community' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractInstances
  * @param {String} communityName
  * @returns {Promise} Promise 
  */
@@ -165,7 +157,6 @@ exports.findByCommunity = function (communityName) {
  * Searches persistence for instances.
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * The promise will resolve with an empty array, or populated array, depending on whether any instances exist.
- * @memberof abstractInstances
  * @param {Boolean} cursor If true, the promise will be resolved with a collection cursor object.
  * @returns {Promise} Promise 
  */
@@ -176,7 +167,6 @@ exports.findAll = function (cursor) {
 /**
  * Removes an instance from persistence with the specified id (attribute 'id').
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
- * @memberof abstractInstances
  * @param {String} instanceID
  * @returns {Promise} Promise 
  */
@@ -248,7 +238,6 @@ var doRegister = function(options, pushUrl, config, name, jiveUrl, guid, deferre
  *     <li>A tile or extstream instance is created (or updated, if it already exists) using the oauth credentials and register parameters,
  *     and resolved on the returned promise.</li>
  * </ol>
- * @memberof abstractInstances
  * @param {String} jiveUrl
  * @param {String} pushUrl
  * @param {Object} config
@@ -307,7 +296,6 @@ function doRefreshAccessToken(options, instance, deferred) {
  * Performs an OAuth2 access token refresh with the jive community associated with the passed in instance.
  * If successful, the promise is resolved with the instance object containing the new access token (accessToken). Note
  * that the changes to the instance is not actually saved into persistence at this point.
- * @memberof abstractInstances
  * @param {Object} instance Must contain the following fields:
  * @param {String} instance.jiveCommunity Points to an existing community
  * @param {String} instance.refreshToken Refresh token used for acquiring a new access token
@@ -338,7 +326,6 @@ exports.refreshAccessToken = function (instance) {
 
 /**
  * Retrieves a map of extended properties set on the instance, in the remote jive community.
- * @memberof abstractInstances
  * @param {Object} instance
  * @returns {Promise} Promise 
  */
@@ -350,7 +337,6 @@ exports.getExternalProps = function( instance ) {
 
 /**
  * Sets a map of extended properties on the instance, in the remote jive community.
- * @memberof abstractInstances
  * @param {Object} instance
  * @param {Object} props
  * @returns {Promise} Promise 
@@ -364,7 +350,6 @@ exports.setExternalProps = function( instance, props ) {
 
 /**
  * Removes the map of extended properties on the instance, in the remote community.
- * @memberof abstractInstances
  * @param {Object} instance
  * @returns {Promise} Promise 
  */

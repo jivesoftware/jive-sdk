@@ -16,7 +16,7 @@
 
 /**
  * Library of common methods for manipulating definitions (tiles and extstreams).
- * @class abstractDefinitions
+ * @module abstractDefinitions
  * @abstract
  */
 
@@ -48,7 +48,6 @@ exports.persistence = function() {
  * If the object is already present in persistence, it will be updated; otherwise it will be inserted.
  * On success, the returned promise will be resolved with the inserted or updated object; if failure,
  * the promise will be rejected with an error.
- * @memberof abstractDefinitions
  * @param {Object} definition
  * @returns {Promise} Promise
  */
@@ -76,10 +75,16 @@ exports.save = function (definition) {
     });
 };
 
+/**
+ * @private
+ */
 exports.filterResults = function( results ) {
     return results;
 };
 
+/**
+ * @private
+ */
 exports.getCollection = function() {
     throw 'Must be subclassed';
 };
@@ -95,7 +100,6 @@ exports.getCollection = function() {
  * On success, the returned promise will be resolved with an array of the located objects (which may be
  * empty if none is found matching the criteria). If failure,
  * the promise will be rejected with an error.
- * @memberof abstractDefinitions
  * @param {Object} criteria
  * @param {Boolean} expectOne If true, the promise will be resolved with at most 1 found item, or null (if none are found).
  * @returns {Promise} Promise
@@ -112,7 +116,6 @@ exports.find = function ( criteria, expectOne ) {
  * Searches persistence for a definition that matches the given ID (the 'id' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractDefinitions:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractDefinitions
  * @param {String} definitionID Id of the definition to be retrieved.
  * @returns {Promise} Promise
  */
@@ -124,7 +127,6 @@ exports.findByID = function (definitionID) {
  * Searches persistence for a definition that matches the given name (the 'name' attribute).
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractDefinitions:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof abstractDefinitions
  * @param {String} definitionName Name of the definition to be retrieved.
  * @returns {Promise} Promise
  */
@@ -136,7 +138,6 @@ exports.findByTileName = function (definitionName) {
  * Searches persistence for definitions.
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractDefinitions:getCollection}).
  * The promise will resolve with an empty array, or populated array, depending on whether any definitions exist.
- * @memberof abstractDefinitions
  * @returns {Promise} Promise
  */
 exports.findAll = function () {
@@ -146,7 +147,6 @@ exports.findAll = function () {
 /**
  * Removes a definition from persistence with the specified id (attribute 'id').
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractDefinitions:getCollection}).
- * @memberof abstractDefinitions
  * @param {String} definitionID
  * @returns {Promise} Promise
  */
@@ -156,7 +156,6 @@ exports.remove = function (definitionID) {
 
 /**
  * Adds a listener to the named definition, for the named event.
- * @memberof abstractDefinitions
  * @param {String} definitionName
  * @param {String} eventName
  * @param {function} handler

@@ -16,7 +16,7 @@
 
 /**
  * Library of methods for making requests.
- * @class request
+ * @module request
  * @abstract
  */
 
@@ -32,7 +32,6 @@ var constants = require("./constants");
 /**
  * By default this will build a request of type 'application/json'. Set a Content-Type header
  * explicitly if its supposed to be a different type.
- * @memberof request
  * @param {String} url
  * @param {String} method
  * @param {Object} postBody leave null unless PUT or POST

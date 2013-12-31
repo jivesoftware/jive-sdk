@@ -30,12 +30,11 @@ var task = function( _runnable, _interval, _id ) {
 
 /**
  * API for managing recurrent tasks.
- * @class tasks
+ * @module tasks
  */
 
 /**
  * Schedules a recurrent task.
- * @memberof tasks
  * @param {function} handler Required. This function is invoked when the task scheduling condtions are met.
  * @param {number} interval Optional. Number of milliseconds in between recurrences of the handler being invoked.
  * @param {String} id Optional. Unique identifier for the task.
@@ -46,7 +45,6 @@ exports.build = function(handler, interval, id) {
 };
 
 /**
- * @memberof tasks
  * @param {Object} task Required. Wrapper object for task characteristics.
  * @param {function} task.handler Required. This function is invoked when the task scheduling conditions are met.
  * @param {number} task.interval Optional. Number of milliseconds in between recurrences of the handler being invoked.

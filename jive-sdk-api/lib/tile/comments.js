@@ -16,7 +16,7 @@
 
 /**
  * Private library for comments management.
- * @class comments
+ * @module comments
  * @private
  */
 
@@ -25,7 +25,6 @@ var q = require('q');
 
 /**
  * Comment on a jive activity.
- * @memberof comments
  * @param jiveActivity
  * @param comment
  * @return {Promise} Promise
@@ -58,7 +57,6 @@ exports.commentOnActivity = function(jiveActivity, comment) {
 /**
  * Comment on jive activity via its external activity ID, eg. the ID by which that jive activity
  * is known in an external system such as salesforce.
- * @memberof comments
  * @param extstream
  * @param externalActivityID
  * @param comment
@@ -83,7 +81,6 @@ exports.commentOnActivityByExternalID = function(extstream, externalActivityID, 
 /**
  * Fetches all comments associated with a jive activity item. Can be filtered for only Jive originated comments,
  * or for those originating outside of Jive (external comments).
- * @memberof comments
  * @param jiveActivity
  * @param opts commentSourceType can be JIVE or EXTERNAL.
  * @return {Promise} Promise
@@ -114,7 +111,6 @@ exports.fetchCommentsOnActivity = function(jiveActivity, opts) {
 };
 
 /**
- * @memberof comments
  * @param extstream
  * @param opts
  * @return {Promise} Promise

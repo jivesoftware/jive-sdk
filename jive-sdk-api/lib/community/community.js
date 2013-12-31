@@ -14,6 +14,14 @@
  *    limitations under the License.
  */
 
+
+/**
+ * API for interacting with Jive communities.
+ * @module community
+ */
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 var jive = require('../../api');
 var q = require('q');
 var jiveClient = require('./../client/jive');
@@ -29,15 +37,8 @@ var returnOne = function(found ) {
 
 
 /**
- * API for interacting with Jive communities.
- * @class community
- */
-
-
-/**
  * Saves the given community object into persistence. Will throw an Error if the community object
  * does not contain a 'jiveUrl' property.
- * @memberof community
  * @param {Object} community Community object, which must specify a jiveUrl property at minimum.
  * @returns {Promise} Promise
  */
@@ -64,7 +65,6 @@ var find = function( filter, expectOne ) {
 
 /**
  * Searches persistence for communities that matches the given criteria filter object.
- * @memberof community
  * @param filter
  * @returns {Promise} Promise
  */
@@ -76,7 +76,6 @@ exports.find = function(filter) {
  * Searches persistence for community that matches the given jiveUrl.
  * If one is not fond,
  * the promise will resolve with a null (undefined) value.
- * @memberof community
  * @param jiveUrl
  * @returns {Promise} Promise
  */
@@ -89,7 +88,6 @@ exports.findByJiveURL = function( jiveUrl ) {
 /**
  * Searches persistence for a community that matches the name of the given jive community.
  * If one is not found, the promise will resolve a null (undefined) value.
- * @memberof community
  * @param jiveCommunity
  * @returns {Promise} Promise
  */
@@ -102,7 +100,6 @@ exports.findByCommunity = function( jiveCommunity ) {
 /**
  * Searches persistence for a community that matches the tenantID of the given jive community.
  * If one is not found, the promise will resovle a null (undefined) value.
- * @memberof community
  * @param tenantID
  * @returns {Promise} Promise
  */
@@ -114,7 +111,6 @@ exports.findByTenantID = function( tenantID ) {
 
 /**
  * Parses the given jiveUrl for the name of the community.
- * @memberof community
  * @param jiveUrl
  * @returns Name of the community based on the jiveUrl.
  */
@@ -125,7 +121,6 @@ exports.parseJiveCommunity = function( jiveUrl ) {
 
 /**
  * Requests an access token by oauth access code (oauth access code is given in registration requests and valid for few minutes).
- * @memberof community
  * @param jiveUrl - the url of the jive community. this function will use this url to find the community in the persistence and get the client id and secret.
  * @param oauthCode - the code needed to be use to get access to a specific registration scope (usually a group).
  * @returns {Promise} Promise A promise for success and failure [use .then(...) and .catch(...)]
@@ -216,7 +211,6 @@ var getOAuthHandler = function() {
 /**
  * Make a request to the current community.
  * Automatically handle access token refresh flow if failure.
- * @memberof community
  * @param community
  * @param {Object} options Request options.
  * @param {String} options.path Path relative to given community's jiveURL; used if options.url doesn't exist.
@@ -353,7 +347,6 @@ function validateRegistration(registration) {
  * Upon successful registration, a community object will be persisted or updated (if one already exists) based on the
  * contents of the registration object.
  *
- * @memberof community
  * @param {Object} registration Community addon registration object.
  * @param {String} registration.jiveSignature Signature provided by Jive used for registration validation.
  * @param {String} registration.clientSecret Secret provided by the addon service.

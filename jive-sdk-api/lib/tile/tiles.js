@@ -16,8 +16,8 @@
 
 /**
  * Library for manipulating tile instances.
- * @extends abstractInstances
- * @class tileInstances
+ * @extends module:abstractInstances
+ * @module tileInstances
  */
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +40,6 @@ tiles.getCollection = function() {
 };
 
 /**
- * @memberof tileInstances
  * @param tileInstance
  * @param data
  * @returns {Promise} Promise 

@@ -16,8 +16,8 @@
 
 /**
  * Library for manipulating tile definitions.
- * @extends abstractDefinitions
- * @class tilesDefinitions
+ * @extends module:abstractDefinitions
+ * @module tilesDefinitions
  */
 
 ///////////////////////////////////////////////////////////////////////////////////
