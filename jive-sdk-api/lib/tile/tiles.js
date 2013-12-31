@@ -40,6 +40,7 @@ tiles.getCollection = function() {
 };
 
 /**
+ * @memberof module:tileInstances
  * @param tileInstance
  * @param data
  * @returns {Promise} Promise 
