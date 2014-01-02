@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Jive SDK Source: jive-sdk-api/lib/util/constants.js</title>
+	<title>Jive SDK Module: devRoutes</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -149,87 +149,227 @@
 	<div class="row-fluid">
 
 		
-			<div class="span12">
-				
+		<div class="span8">
+			
 				<div id="main">
 					
 
 
-		<h1 class="page-title">Source: jive-sdk-api/lib/util/constants.js</h1>
+	<h1 class="page-title">Module: devRoutes</h1>
+<section>
+
+<header>
+    <h2>
+    devRoutes
+    </h2>
     
-    <section>
-        <article>
-            <pre class="sunlight-highlight-javascript linenums">/*
- * Copyright 2013 Jive Software
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
+</header>
 
-/**
- * @module constants
- */
+<article>
+    <div class="container-overview">
+    
 
-/**
- * @static
- * @type {{PUSH_DATA_TO_JIVE: string, PUSH_ACTIVITY_TO_JIVE: string, PUSH_COMMENT_TO_JIVE: string, COMMENT_ON_ACTIVITY: string, COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID: string, FETCH_COMMENTS_ON_ACTIVITY: string, FETCH_ALL_COMMENTS_FOR_EXT_STREAM: string, INSTANCE_REGISTRATION: string, INSTANCE_UNREGISTRATION: string, CLIENT_APP_REGISTRATION: string, GET_PAGINATED_RESULTS: string, GET_EXTERNAL_PROPS: string, SET_EXTERNAL_PROPS: string, DELETE_EXTERNAL_PROPS: string}}
- */
-exports.tileEventNames = {
-    'PUSH_DATA_TO_JIVE':'pushDataToJive',
-    'PUSH_ACTIVITY_TO_JIVE':'pushActivityToJive',
-    'PUSH_COMMENT_TO_JIVE':'pushCommentToJive',
-    'COMMENT_ON_ACTIVITY':'commentOnActivity',
-    'COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID':'commentOnActivityByExternalID',
-    'FETCH_COMMENTS_ON_ACTIVITY':'fetchCommentsOnActivity',
-    'FETCH_ALL_COMMENTS_FOR_EXT_STREAM':'fetchAllCommentsForExtstream',
-    'INSTANCE_REGISTRATION':'registration',
-    'INSTANCE_UNREGISTRATION':'unregistration',
-    'CLIENT_APP_REGISTRATION':'clientAppRegistration',
-    'GET_PAGINATED_RESULTS':'getPaginatedResults',
-    'GET_EXTERNAL_PROPS':'getExternalProps',
-    'SET_EXTERNAL_PROPS':'setExternalProps',
-    'DELETE_EXTERNAL_PROPS':'deleteExternalProps'
-};
+    
+        
 
-/**
- * @type {{NEW_INSTANCE: string, INSTANCE_UPDATED: string, INSTANCE_REMOVED: string, DATA_PUSHED: string, ACTIVITY_PUSHED: string, COMMENT_PUSHED: string, CLIENT_APP_REGISTRATION_SUCCESS: string, CLIENT_APP_REGISTRATION_FAILED: string}}
- */
-exports.globalEventNames = {
-    'NEW_INSTANCE':'newInstance',
-    'INSTANCE_UPDATED':'updateInstance',
-    'INSTANCE_REMOVED':'destroyedInstance',
-    'DATA_PUSHED':'dataPushed',
-    'ACTIVITY_PUSHED':'activityPushed',
-    'COMMENT_PUSHED':'commentPushed',
-    'CLIENT_APP_REGISTRATION_SUCCESS' : 'registeredJiveInstanceSuccess',
-    'CLIENT_APP_REGISTRATION_FAILED' : 'registeredJiveInstanceFailed'
-};
+        
+<dl class="details">
+    
 
-/**
- * @type {{WORKER: string, PUSHER: string, HTTP_HANDLER: string}}
- */
-exports.roles = {
-    'WORKER':'worker',
-    'PUSHER':'pusher',
-    'HTTP_HANDLER':'http'
-};
+    
 
-/**
- * @type {string}
- */
-exports.SECURITY_STRING = "throw 'allowIllegalResourceCall is false.';\n";</pre>
-        </article>
-    </section>
+    
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dev.js.html">jive-sdk-service/routes/dev.js</a>, <a href="dev.js.html#sunlight-1-line-17">line 17</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<dt>
+    <h4 class="name" id="tiles"><span class="type-signature">&lt;static> </span>tiles<span class="signature">(req, res)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p><b>GET /tiles</b>
+<br>
+Endpoint for development only.
+Calling GET on this endpoint returns JSON describing all the tile definitions available on this service.</p>
+<p>Takes no URL parameters.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="dev.js.html">jive-sdk-service/routes/dev.js</a>, <a href="dev.js.html#sunlight-1-line-40">line 40</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        </dl>
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 
@@ -247,11 +387,15 @@ exports.SECURITY_STRING = "throw 'allowIllegalResourceCall is false.';\n";</pre>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Thu Jan 02 2014 14:05:13 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Thu Jan 02 2014 14:05:14 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
 
+			
+			<div class="span3">
+				<div id="toc"></div>
+			</div>
 			
 			<br clear="both">
 		</div>

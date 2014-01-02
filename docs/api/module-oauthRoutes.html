@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Jive SDK Module: webhooks</title>
+	<title>Jive SDK Module: oauthRoutes</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -155,12 +155,12 @@
 					
 
 
-	<h1 class="page-title">Module: webhooks</h1>
+	<h1 class="page-title">Module: oauthRoutes</h1>
 <section>
 
 <header>
     <h2>
-    webhooks
+    oauthRoutes
     </h2>
     
 </header>
@@ -170,8 +170,6 @@
     
 
     
-        
-            <div class="description"><p>API for interacting with Jive communities.</p></div>
         
 
         
@@ -197,7 +195,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-20">line 20</a>
+        <a href="oauth.js.html">jive-sdk-service/routes/oauth.js</a>, <a href="oauth.js.html#sunlight-1-line-17">line 17</a>
     </li></ul></dd>
     
 
@@ -231,7 +229,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="findByCommunity"><span class="type-signature">&lt;static> </span>findByCommunity<span class="signature">(community)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="authorizeUrl"><span class="type-signature">&lt;static> </span>authorizeUrl<span class="signature">(req, res)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -239,16 +237,13 @@
     
     
     <div class="description">
-        <p>Looks through persistence for all webhooks associated with the provided community object.
-If no objects are found with that id, an empty array is resolved to the returned promise; otherwise an
-array of objects is resolved.
+        <p><h5>Route:</h5>
+<i>GET /authorizeUrl</i>
 <br><br>
-An error will be thrown if:</p>
-<ul>
-    <li>No community argument is passed</li>
-    <li>Community argument is not an object</li>
-    <li>Community object does not contain a tenantId</li>
-</ul>
+Expects:
+- viewerID
+- callback
+- base64 encoded Authorization header</p>
     </div>
     
 
@@ -282,7 +277,25 @@ An error will be thrown if:</p>
 
         <tr>
             
-                <td class="name"><code>community</code></td>
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
             
 
             <td class="type">
@@ -325,7 +338,7 @@ An error will be thrown if:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-58">line 58</a>
+        <a href="oauth.js.html">jive-sdk-service/routes/oauth.js</a>, <a href="oauth.js.html#sunlight-1-line-84">line 84</a>
     </li></ul></dd>
     
 
@@ -346,29 +359,6 @@ An error will be thrown if:</p>
     
     
     
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>Promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Promise</span>
-
-
-	</dd>
-</dl>
-
-
-        
     
     
 </dd>
@@ -376,7 +366,7 @@ An error will be thrown if:</p>
         
             
 <dt>
-    <h4 class="name" id="findByTenantID"><span class="type-signature">&lt;static> </span>findByTenantID<span class="signature">(webhookId)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="oauth2Callback"><span class="type-signature">&lt;static> </span>oauth2Callback<span class="signature">(req, res)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -384,8 +374,11 @@ An error will be thrown if:</p>
     
     
     <div class="description">
-        <p>Looks through persistence for a webhook object with the provided id.
-If no object is found with that id, a null object is resolved to the returned promise.</p>
+        <p><h4><i>POST /oauth2Callback</i></h4>
+<br>
+Expects:
+- code
+- state, which is a base64 encoded JSON structure containing at minimum jiveRedirectUrl attribute</p>
     </div>
     
 
@@ -419,7 +412,25 @@ If no object is found with that id, a null object is resolved to the returned pr
 
         <tr>
             
-                <td class="name"><code>webhookId</code></td>
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
             
 
             <td class="type">
@@ -462,7 +473,7 @@ If no object is found with that id, a null object is resolved to the returned pr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-40">line 40</a>
+        <a href="oauth.js.html">jive-sdk-service/routes/oauth.js</a>, <a href="oauth.js.html#sunlight-1-line-172">line 172</a>
     </li></ul></dd>
     
 
@@ -483,29 +494,6 @@ If no object is found with that id, a null object is resolved to the returned pr
     
     
     
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>Promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Promise</span>
-
-
-	</dd>
-</dl>
-
-
-        
     
     
 </dd>
@@ -513,7 +501,7 @@ If no object is found with that id, a null object is resolved to the returned pr
         
             
 <dt>
-    <h4 class="name" id="register"><span class="type-signature">&lt;static> </span>register<span class="signature">(jiveCommunity, events, object, webhookCallbackURL, accessToken, refreshToken, tokenPersistenceFunction)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="oauth2SuccessCallback"><span class="type-signature">&lt;static> </span>oauth2SuccessCallback<span class="signature">(oauth2CallbackRequest, originServerAccessTokenResponse, callback)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -521,8 +509,7 @@ If no object is found with that id, a null object is resolved to the returned pr
     
     
     <div class="description">
-        <p>Register a webhook for the named jive community. Uses either the registered community access token for your
-service, or the supplied access token.</p>
+        <p>Override this in a subclass!</p>
     </div>
     
 
@@ -556,15 +543,10 @@ service, or the supplied access token.</p>
 
         <tr>
             
-                <td class="name"><code>jiveCommunity</code></td>
+                <td class="name"><code>oauth2CallbackRequest</code></td>
             
 
             <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
             
             </td>
 
@@ -572,22 +554,17 @@ service, or the supplied access token.</p>
 
             
 
-            <td class="description last"><p>Required. Name of the jive community.</p></td>
+            <td class="description last"></td>
         </tr>
 
 	
 
         <tr>
             
-                <td class="name"><code>events</code></td>
+                <td class="name"><code>originServerAccessTokenResponse</code></td>
             
 
             <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
             
             </td>
 
@@ -595,249 +572,14 @@ service, or the supplied access token.</p>
 
             
 
-            <td class="description last"><p>Required. Array of String. Elements may be system webhooks (user_account, user_membership, user_session, social_group)
-or content events (document, discussion, blogpost, .. )</p></td>
+            <td class="description last"></td>
         </tr>
 
 	
 
         <tr>
             
-                <td class="name"><code>object</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Optional, if events are system webhooks.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>webhookCallbackURL</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Required. URL of the postback that Jive will contact when the conditions of the hook are met.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>accessToken</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Optional. If omitted, will registration will use community oauth</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>refreshToken</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Optional. If omitted, will registration will use community oauth</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>tokenPersistenceFunction</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Optional. Callback function that will be invoked with new oauth access and refresh
-tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, the community will be updated with the new access tokens.</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-97">line 97</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>Promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Promise</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="save"><span class="type-signature">&lt;static> </span>save<span class="signature">(webhook)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Saves the given webhook into persistence.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>webhook</code></td>
+                <td class="name"><code>callback</code></td>
             
 
             <td class="type">
@@ -880,7 +622,7 @@ tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, th
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-30">line 30</a>
+        <a href="oauth.js.html">jive-sdk-service/routes/oauth.js</a>, <a href="oauth.js.html#sunlight-1-line-149">line 149</a>
     </li></ul></dd>
     
 
@@ -901,29 +643,6 @@ tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, th
     
     
     
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>Promise</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Promise</span>
-
-
-	</dd>
-</dl>
-
-
-        
     
     
 </dd>

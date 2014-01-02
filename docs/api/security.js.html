@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Jive SDK Source: jive-sdk-api/lib/scheduler/scheduler.js</title>
+	<title>Jive SDK Source: jive-sdk-service/lib/security.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -155,7 +155,7 @@
 					
 
 
-		<h1 class="page-title">Source: jive-sdk-api/lib/scheduler/scheduler.js</h1>
+		<h1 class="page-title">Source: jive-sdk-service/lib/security.js</h1>
     
     <section>
         <article>
@@ -175,205 +175,182 @@
  *    limitations under the License.
  */
 
-var q = require('q');
-var jive = require('../../api');
-
-function Scheduler() {
-    return this;
-}
-
 /**
- * An in-memory implementation of scheduler.
- * @class memoryScheduler
+ * @module security
  */
-module.exports = Scheduler;
 
-var tasks = {};
-var running = {};
-var lastRunTs = {};
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Private
 
-var eventHandlerMap = {};
+var express = require('express'),
+    service = require('./service'),
+    jive = require('../api'),
+    q = require('q');
 
-
-/**
- * @memberof memoryScheduler
- * @param _eventHandlerMap
- */
-function init( _eventHandlerMap ) {
-    eventHandlerMap = _eventHandlerMap || jive.events.eventHandlerMap;
-
-    // setup listeners
-    jive.events.globalEvents.forEach( function(event) {
-        var handlers = eventHandlerMap[event];
-
-        if ( handlers ) {
-            if ( typeof handlers === 'function' ) {
-                // normalize single handler into an array
-                handlers = [ handlers ];
-            }
-
-            handlers.forEach( function( handler ) {
-                jive.events.addLocalEventListener( event, handler );
-            });
-        }
-
-    });
-
-    return this;
-}
-Scheduler.prototype.init = init;
-
-/**
- * Schedule a task.
- * @memberof memoryScheduler
- * @param eventID which event to fire
- * @param context what to pass to the event
- * @param interval The interval to invoke the callback
- * @param delay The number of milliseconds after which the event will be fired for the first time.
- * @param exclusive If true, then will not execute if another event named with the same eventID is already executing.
- * @param timeout The number of milliseconds, after which the schedule will declare the event has timed out, and will fire the reject on any promise that was returned.
- * @returns {Object} Promise
- */
-function schedule(eventID, context, interval, delay, exclusive, timeout) {
-    eventID = eventID || jive.util.guid();
-
-    context = context || {};
+var findCredentials = function(req) {
     var deferred = q.defer();
-    var handlers;
-    if (context['eventListener']) {
-        if ( eventHandlerMap[context['eventListener']] ) {
-            handlers = eventHandlerMap[context['eventListener']][eventID];
-        }
-    } else {
-        handlers = eventHandlerMap[eventID];
-    }
+    var conf = jive.service.options;
 
-    handlers = handlers || [];
+    // try to get it from body
+    var jiveUrl = req.body['jiveUrl'];
 
-    var next = function(timer, eventID) {
-        var promises = [];
-        running[eventID] = true;
-        lastRunTs[eventID] = new Date().getTime();
-
-        handlers.forEach( function(handler) {
-            var p = handler(context);
-            if ( p &amp;&amp; p['then'] ) {
-                promises.push(p);
-            }
-        });
-
-        q.all( promises).then(
-            // success
-            function(result ) {
-                result = result['forEach'] &amp;&amp; result.length == 1 ? result[0] : result;
-                // nuke self, if no longer scheduled
-                if ( timer &amp;&amp; eventID &amp;&amp; !tasks[eventID] ) {
-                    clearInterval(timer);
-                }
-                delete running[eventID];
-                deferred.resolve(result);
-            },
-
-            // fail
-            function(e) {
-                if ( timer &amp;&amp; eventID &amp;&amp; !tasks[eventID] ) {
-                    clearInterval(timer);
-                }
-                delete running[eventID];
-                deferred.reject(e);
-            }
-        );
+    // default to system credentials
+    var credentials = {
+        'clientId': conf.clientId,
+        'clientSecret': conf.clientSecret
     };
 
-    if (interval) {
-        if ( !running[eventID] ) {
-            var d = delay || 1;
-            setTimeout( function() {
-                var timer = tasks[eventID] = setInterval(function() {
-                    var hasTimedOut = timeout ? new Date().getTime() - (lastRunTs[eventID] || 0) > timeout : false;
-                    if ( !running[eventID] || hasTimedOut ) {
-                        if (hasTimedOut ) {
-                            jive.logger.debug(eventID,'timed out!');
-                        }
-                        next(timer, eventID);
-                    }
-                }, interval);
-            }, delay - interval > 0 ? (delay - interval) : delay );
+    var authorization = req.headers['authorization'];
+    var tenantID;
+
+    if ( !jiveUrl &amp;&amp; authorization ) {
+        jive.logger.debug("Trying to parse jiveURL/tenantID from JiveEXTN authorization header...");
+
+        // check authorization header
+        var authVars = authorization.split(' ');
+        req['jive'] = {};
+        if ( authVars[0] == 'JiveEXTN') {
+            // try to parse out jiveURL
+            var authParams = authVars[1].split('&amp;');
+            authParams.forEach( function(p) {
+                if (p.indexOf('jive_url') == 0 ) {
+                    jiveUrl = decodeURIComponent( p.split("=")[1] );
+                    req['jive']['jiveURL'] = jiveUrl;
+                }
+                if (p.indexOf('tenant_id') == 0 ) {
+                    tenantID = decodeURIComponent( p.split("=")[1] );
+                    req['jive']['tenantID'] = tenantID;
+                }
+            });
         } else {
-            jive.logger.debug("Skipping", eventID, "already running.");
+            jive.logger.debug("JiveEXTN authorization header not present, could not find jiveURL that way.");
         }
     }
-    else {
-        setTimeout( function() {
-            var hasTimedOut = timeout ? new Date().getTime() - (lastRunTs[eventID] || 0) > timeout : false;
-            if ( !exclusive || !running[eventID] || hasTimedOut ) {
-                if (hasTimedOut ) {
-                    jive.logger.debug(eventID,'timed out!');
-                }
-                next(undefined, eventID);
+
+    if ( !jiveUrl ) {
+        // default to service credentials -- cannot look it up by community
+        deferred.resolve( credentials );
+    } else {
+        // try to resolve trust by jiveUrl
+        jive.community.findByJiveURL(jiveUrl).then(function (community) {
+            if (community) {
+                credentials['clientId'] = community['clientId'];
+                credentials['clientSecret'] = community['clientSecret'];
+            } else {
+                jive.logger.debug("Could not look up security credentials by community jiveURL " + jiveUrl + " -- using service credentials " +
+                    "from service configuration file (usually jiveclientconfiguration.json).");
             }
-        }, delay || 1);
+            deferred.resolve(credentials);
+        });
     }
-    jive.logger.debug("Scheduled task: " + eventID, interval || "immediate");
 
     return deferred.promise;
-}
-Scheduler.prototype.schedule = schedule;
+};
+
+var lockedRoutes = {};
 
 /**
- * @memberof memoryScheduler
- * @param eventID
- * @returns {Object} Promise
+ * Any routes passed into this method will become locked: e.g the service will validate security headers.
+ * @param routePath
  */
-function unschedule(eventID){
-    clearInterval(tasks[eventID]);
-    delete tasks[eventID];
-    return q.resolve();
+exports.lockRoute = function( routePath ) {
+    // pre
+    if ( !routePath) {
+        return;
+    }
+
+    if ( !routePath['verb'] ) {
+        throw new Error('Invalid route, cannot lock: missing verb');
+    }
+
+    if ( !routePath['path'] ) {
+        throw new Error('Invalid route, cannot lock: missing path');
+    }
+
+    var key = routePath['verb'] + '.' + routePath['path'];
+    lockedRoutes[key] = routePath;
+};
+
+exports.getLockedRoutes = function() {
+    // return immutable copy
+    return JSON.parse( JSON.stringify( lockedRoutes ) );
+};
+
+exports.isLocked = function( req ) {
+    // in development, we're not locked down
+    if ( jive.service.isDevelopment() ) {
+        return false;
+    }
+
+    var key = req.method.toLowerCase() + '.' + req.path;
+    return lockedRoutes[key];
+};
+
+function invalidAuthResponse(res) {
+    if ( !res ) {
+        return;
+    }
+
+    // bad
+    res.writeHead(403, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ 'status': 403, 'error': 'Invalid or missing authorization headers.' }));
 }
-Scheduler.prototype.unschedule = unschedule;
 
 /**
- * @memberof memoryScheduler
- * @returns {Object} Promise
+ * General purpose utility that checks the request for security headers and validates them.
+ * If error, a 403 response will be added to the passed in res object (if available)
+ * @param req
+ * @param res optional
  */
-function getTasks(){
-    return Object.keys(tasks);
-}
-Scheduler.prototype.getTasks = getTasks;
-
-/**
- * @memberof memoryScheduler
- * @param eventID
- * @returns {Object} Promise
- */
-function isScheduled( eventID ) {
+exports.checkAuthHeaders = function(req, res) {
     var deferred = q.defer();
-    if (tasks[eventID]) {
+
+    if ( !exports.isLocked(req) ) {
+        // we're ok
         deferred.resolve(true);
     } else {
-        deferred.resolve(false);
+        findCredentials(req).then( function(credentials) {
+            if ( credentials ) {
+                var clientId = credentials['clientId'];
+                var secret = credentials['clientSecret'];
+                var auth = req.headers['authorization'];
+
+                if ( !auth ) {
+                    jive.logger.debug("No security headers found, even though security credentials were required.");
+                    invalidAuthResponse(res);
+                    deferred.reject(false);
+                    return;
+                }
+
+                var passedBasic  =  jive.util.basicAuthorizationHeaderValid(auth, clientId, secret, true );
+                var passedJiveEXTN = jive.util.jiveAuthorizationHeaderValid(auth, clientId, secret, true );
+
+                if ( !passedBasic &amp;&amp; !passedJiveEXTN ) {
+                    jive.logger.debug("Unauthorized access. Failed basic auth, and jiveEXTN header checks.");
+                    invalidAuthResponse(res);
+                    deferred.reject(false);
+                    return;
+                }
+
+                // we're ok
+                deferred.resolve(true);
+            } else {
+                jive.logger.debug("No credentials were found to check against.");
+                deferred.resolve(true);
+            }
+        });
     }
 
     return deferred.promise;
-}
-Scheduler.prototype.isScheduled = isScheduled;
+};
 
-/**
- * @memberof memoryScheduler
- * @returns {Object} Promise
- */
-function shutdown(){
-    var scheduler = this;
-    eventHandlerMap = {};
-    running = {};
-    lastRunTs = {};
-    this.getTasks().forEach(function(taskKey){
-        scheduler.unschedule(taskKey);
+exports.checkAuthHeadersMiddleware = function (req, res, next ) {
+    return exports.checkAuthHeaders( req, res ).finally( function() {
+        if ( next ) {
+            next();
+        }
     });
-
-    return q.resolve();
-}
-Scheduler.prototype.shutdown =  shutdown;</pre>
+};</pre>
         </article>
     </section>
 

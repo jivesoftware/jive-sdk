@@ -184,3 +184,12 @@ exports.context = {
         'Undefined scheduler'),
     'config' : {}
 };
+
+//// this is PURELY for documentation purposes! we might need to reorganize this in the near future
+/**
+ * API for managing an SDK service.
+ * @name service
+ * @memberof module:api
+ * @type module:service
+ */
+

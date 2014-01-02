@@ -1,4 +1,165 @@
-/*
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Jive SDK Source: jive-sdk-service/lib/service.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	
+	<link type="text/css" rel="stylesheet" href="styles/site.spacelab.css">
+	
+</head>
+
+<body>
+<div class="container-fluid">
+	<div class="navbar navbar-fixed-top navbar-inverse">
+		<div class="navbar-inner">
+			<a class="brand" href="index.html">Jive SDK</a>
+			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="module-abstractDefinitions.html">abstractDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-abstractInstances.html">abstractInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-addOnRoutes.html">addOnRoutes</a>
+						</li>
+						
+						<li>
+							<a href="module-api.html">api</a>
+						</li>
+						
+						<li>
+							<a href="module-community.html">community</a>
+						</li>
+						
+						<li>
+							<a href="module-constants.html">constants</a>
+						</li>
+						
+						<li>
+							<a href="module-devRoutes.html">devRoutes</a>
+						</li>
+						
+						<li>
+							<a href="module-events.html">events</a>
+						</li>
+						
+						<li>
+							<a href="module-extensions.html">extensions</a>
+						</li>
+						
+						<li>
+							<a href="module-extstreamsInstances.html">extstreamsInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-jiveutil.html">jiveutil</a>
+						</li>
+						
+						<li>
+							<a href="module-oauthRoutes.html">oauthRoutes</a>
+						</li>
+						
+						<li>
+							<a href="module-request.html">request</a>
+						</li>
+						
+						<li>
+							<a href="module-security.html">security</a>
+						</li>
+						
+						<li>
+							<a href="module-service.html">service</a>
+						</li>
+						
+						<li>
+							<a href="module-tasks.html">tasks</a>
+						</li>
+						
+						<li>
+							<a href="module-tileInstances.html">tileInstances</a>
+						</li>
+						
+						<li>
+							<a href="module-tileRoutes.html">tileRoutes</a>
+						</li>
+						
+						<li>
+							<a href="module-tilesDefinitions.html">tilesDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="module-webhooks.html">webhooks</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="extstreamsDefinitions.html">extstreamsDefinitions</a>
+						</li>
+						
+						<li>
+							<a href="filePersistence.html">filePersistence</a>
+						</li>
+						
+						<li>
+							<a href="memoryPersistence.html">memoryPersistence</a>
+						</li>
+						
+						<li>
+							<a href="memoryScheduler.html">memoryScheduler</a>
+						</li>
+						
+						<li>
+							<a href="oauthHandler.html">oauthHandler</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+			</ul>
+		</div>
+	</div>
+
+	<div class="row-fluid">
+
+		
+			<div class="span12">
+				
+				<div id="main">
+					
+
+
+		<h1 class="page-title">Source: jive-sdk-service/lib/service.js</h1>
+    
+    <section>
+        <article>
+            <pre class="sunlight-highlight-javascript linenums">/*
  * Copyright 2013 Jive Software
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -191,19 +352,19 @@ exports.scheduler = function( schedulerStrategy ) {
 /**
  * Initializes the service based on the passed-in express app, and any configuration options.
  * If an express app isn't provided, one is created.
- * <ul>
- *      <li>Applies globally applicable middleware to the express app</li>
- *      <li>Configures service role based on options</li>
- *      <li>Sets up service logging based on options</li>
- *      <li>Sets up service persistence based on options</li>
- *      <li>Sets up service scheduler based on options</li>
- * </ul>
+ * &lt;ul>
+ *      &lt;li>Applies globally applicable middleware to the express app&lt;/li>
+ *      &lt;li>Configures service role based on options&lt;/li>
+ *      &lt;li>Sets up service logging based on options&lt;/li>
+ *      &lt;li>Sets up service persistence based on options&lt;/li>
+ *      &lt;li>Sets up service scheduler based on options&lt;/li>
+ * &lt;/ul>
  *
  * Environment variable overrides:
- * <ul>
- *     <li>jive_sdk_service_role: optional, one of http, worker, pusher.</li>
- *     <li>jive_sdk_config_file: optional, if set, JSON options will be loaded from this path.</li>
- * </ul>
+ * &lt;ul>
+ *     &lt;li>jive_sdk_service_role: optional, one of http, worker, pusher.&lt;/li>
+ *     &lt;li>jive_sdk_config_file: optional, if set, JSON options will be loaded from this path.&lt;/li>
+ * &lt;/ul>
  * @param expressApp
  * @param {Object} options JSON, or path to the options file.
  */
@@ -213,12 +374,12 @@ exports.init = function(expressApp, options ) {
     } else {
         app = express();
     }
-    rootDir =  (options && options['svcRootDir']) || rootDir || process.cwd();
+    rootDir =  (options &amp;&amp; options['svcRootDir']) || rootDir || process.cwd();
     tilesDir = rootDir + '/tiles';
 
     // for some reason this needs to be configured earlier than later
     app.use(express.bodyParser());
-    if ( options && !options['suppressHttpLogging'] ) {
+    if ( options &amp;&amp; !options['suppressHttpLogging'] ) {
         app.use(express.logger('dev'));
     }
     app.use(express.methodOverride());
@@ -240,7 +401,7 @@ exports.init = function(expressApp, options ) {
         if ( roleFromEnv ) {
             config['role'] = roleFromEnv;
         }
-        if (process && process.env && process.env.PORT) {
+        if (process &amp;&amp; process.env &amp;&amp; process.env.PORT) {
             config['port'] = process.env.PORT;
         }
     };
@@ -436,18 +597,18 @@ function initScheduler(options) {
 
 /**
  * Autowires the entire service. Service autowiring will setup:
- * <ul>
- *     <li>Public web assets such as html, javascript, and images available from the /public directory</li>
- *     <li>Public endpoints ('routes') shared by all components</li>
- *     <li>Public endpoints ('routes') for each service subcomponent</li>
- *     <li>Event listeners</li>
- *     <li>Recurrent tasks</li>
- *     <li>Execute serivce component bootstrap code</li>
- * </ul>
+ * &lt;ul>
+ *     &lt;li>Public web assets such as html, javascript, and images available from the /public directory&lt;/li>
+ *     &lt;li>Public endpoints ('routes') shared by all components&lt;/li>
+ *     &lt;li>Public endpoints ('routes') for each service subcomponent&lt;/li>
+ *     &lt;li>Event listeners&lt;/li>
+ *     &lt;li>Recurrent tasks&lt;/li>
+ *     &lt;li>Execute serivce component bootstrap code&lt;/li>
+ * &lt;/ul>
  * @param {Object} options Autowiring options. If not present, all service components (tiles, apps, services, storage frameworks, etc.) will
  * be autowired.
  * @param {String} options.componentsToWire Polymorphic, optional field. If present and value is 'all', then all service components will be autowired.
- * Otherwise, if present and value is list of one or more of <b>tiles</b>, <b>apps</b>, <b>services</b>, and <b>storages</b>, the specified components are autowired.
+ * Otherwise, if present and value is list of one or more of &lt;b>tiles&lt;/b>, &lt;b>apps&lt;/b>, &lt;b>services&lt;/b>, and &lt;b>storages&lt;/b>, the specified components are autowired.
  * @returns {Promise} Promise
  */
 exports.autowire = function(options) {
@@ -459,7 +620,7 @@ exports.autowire = function(options) {
     if ( options ) {
         var componentsToWire = options['componentsToWire'];
         if ( componentsToWire ) {
-            if ( componentsToWire !== 'all' && componentsToWire['indexOf'] ) {
+            if ( componentsToWire !== 'all' &amp;&amp; componentsToWire['indexOf'] ) {
                 if ( !componentsToWire.indexOf['tiles'] ) {
                     doTiles = false;
                 }
@@ -495,7 +656,7 @@ exports.autowire = function(options) {
 exports.start = function() {
     serviceState = 'starting';
     return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir, cartridgesDir, storagesDir).then( function() {
-        if (app['settings'] && app['settings']['env']) {
+        if (app['settings'] &amp;&amp; app['settings']['env']) {
             jive.logger.info("Service started in " + app['settings']['env'] + " mode");
             serviceState = 'started';
         }
@@ -516,14 +677,14 @@ exports.stop = function() {
 
 /**
  * Computes the full service URL for this service, taking into account
- * jiveclientconfiguration.json (clientUrl & port)
+ * jiveclientconfiguration.json (clientUrl &amp; port)
  */
 exports.serviceURL = function() {
     var conf = jive.service.options;
     var clientUrlExcludesPort = conf['clientUrlExcludesPort'];
     var clientUrl = conf['clientUrl'];
     var port = conf['port'];
-    if ( !clientUrlExcludesPort && port && port != 443 && port != 80 ) {
+    if ( !clientUrlExcludesPort &amp;&amp; port &amp;&amp; port != 443 &amp;&amp; port != 80 ) {
         var urlParts = url.parse(clientUrl);
         urlParts['port'] = port;
         urlParts['host'] = null;
@@ -636,7 +797,7 @@ exports.getExpandedTileDefinitions = function(all) {
                 processedTile['register'] = host + ( processedTile['register'].indexOf('/') == 0 ? "" : "/" ) + processedTile['register'];
             }
         }
-        if ( processedTile['unregister'] && processedTile['unregister'].indexOf('http') != 0 ) {
+        if ( processedTile['unregister'] &amp;&amp; processedTile['unregister'].indexOf('http') != 0 ) {
             // assume its relative to host then
             processedTile['unregister'] = host + ( processedTile['unregister'].indexOf('/') == 0 ? "" : "/" ) + processedTile['unregister'];
         }
@@ -676,3 +837,65 @@ exports.isDevelopment = function() {
 exports.serviceStatus = function() {
     return serviceState;
 };
+</pre>
+        </article>
+    </section>
+
+
+
+
+
+				</div>
+
+				<div class="clearfix"></div>
+				<footer>
+					
+					
+		<span class="copyright">
+		Jive Software, Inc
+		</span>
+					<br />
+					
+		<span class="jsdoc-message">
+		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
+		on Thu Jan 02 2014 14:05:13 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		</span>
+				</footer>
+			</div>
+
+			
+			<br clear="both">
+		</div>
+
+	</div>
+	<script src="scripts/sunlight.js"></script>
+	<script src="scripts/sunlight.javascript.js"></script>
+	<script src="scripts/sunlight-plugin.doclinks.js"></script>
+	<script src="scripts/sunlight-plugin.linenumbers.js"></script>
+	<script src="scripts/sunlight-plugin.menu.js"></script>
+	<script src="scripts/jquery.min.js"></script>
+	<script src="scripts/jquery.scrollTo.js"></script>
+	<script src="scripts/jquery.localScroll.js"></script>
+	<script src="scripts/bootstrap-dropdown.js"></script>
+	<script src="scripts/toc.js"></script>
+
+
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
+
+	<script>
+		$( function () {
+			$( "#toc" ).toc( {
+				selectors   : "h1,h2,h3,h4",
+				showAndHide : false,
+				scrollTo    : 60
+			} );
+			$( "#toc>ul" ).addClass( "nav nav-pills nav-stacked" );
+			$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+
+		} );
+	</script>
+
+	
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Jive SDK Source: jive-sdk-api/lib/util/constants.js</title>
+	<title>Jive SDK Source: jive-sdk-service/routes/dev.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -155,7 +155,7 @@
 					
 
 
-		<h1 class="page-title">Source: jive-sdk-api/lib/util/constants.js</h1>
+		<h1 class="page-title">Source: jive-sdk-service/routes/dev.js</h1>
     
     <section>
         <article>
@@ -176,57 +176,71 @@
  */
 
 /**
- * @module constants
+ * @module devRoutes
  */
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var url = require('url');
+var http = require('http');
+var q = require('q');
+var jive = require("../api");
+var mustache = require('mustache');
+
 /**
- * @static
- * @type {{PUSH_DATA_TO_JIVE: string, PUSH_ACTIVITY_TO_JIVE: string, PUSH_COMMENT_TO_JIVE: string, COMMENT_ON_ACTIVITY: string, COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID: string, FETCH_COMMENTS_ON_ACTIVITY: string, FETCH_ALL_COMMENTS_FOR_EXT_STREAM: string, INSTANCE_REGISTRATION: string, INSTANCE_UNREGISTRATION: string, CLIENT_APP_REGISTRATION: string, GET_PAGINATED_RESULTS: string, GET_EXTERNAL_PROPS: string, SET_EXTERNAL_PROPS: string, DELETE_EXTERNAL_PROPS: string}}
+ * &lt;b>GET /tiles&lt;/b>
+ * &lt;br>
+ * Endpoint for development only.
+ * Calling GET on this endpoint returns JSON describing all the tile definitions available on this service.
+ *
+ * Takes no URL parameters.
+ *
+ * @param req
+ * @param res
  */
-exports.tileEventNames = {
-    'PUSH_DATA_TO_JIVE':'pushDataToJive',
-    'PUSH_ACTIVITY_TO_JIVE':'pushActivityToJive',
-    'PUSH_COMMENT_TO_JIVE':'pushCommentToJive',
-    'COMMENT_ON_ACTIVITY':'commentOnActivity',
-    'COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID':'commentOnActivityByExternalID',
-    'FETCH_COMMENTS_ON_ACTIVITY':'fetchCommentsOnActivity',
-    'FETCH_ALL_COMMENTS_FOR_EXT_STREAM':'fetchAllCommentsForExtstream',
-    'INSTANCE_REGISTRATION':'registration',
-    'INSTANCE_UNREGISTRATION':'unregistration',
-    'CLIENT_APP_REGISTRATION':'clientAppRegistration',
-    'GET_PAGINATED_RESULTS':'getPaginatedResults',
-    'GET_EXTERNAL_PROPS':'getExternalProps',
-    'SET_EXTERNAL_PROPS':'setExternalProps',
-    'DELETE_EXTERNAL_PROPS':'deleteExternalProps'
+exports.tiles = function(req, res){
+    var finalizeRequest = function(allDefinitions) {
+        var toReturn = [];
+        allDefinitions.forEach( function(batch) {
+            toReturn = toReturn.concat( batch );
+        });
+
+        var conf = jive.service.options;
+        var processed = jive.service.getExpandedTileDefinitions(toReturn);
+        var body = JSON.stringify(processed, null, 4);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(body);
+    };
+
+    q.all( [ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ] )
+        .then( finalizeRequest );
 };
 
 /**
- * @type {{NEW_INSTANCE: string, INSTANCE_UPDATED: string, INSTANCE_REMOVED: string, DATA_PUSHED: string, ACTIVITY_PUSHED: string, COMMENT_PUSHED: string, CLIENT_APP_REGISTRATION_SUCCESS: string, CLIENT_APP_REGISTRATION_FAILED: string}}
+ * Endpoint for development only.
+ *
+ * Given a target jive host, calling GET on this endpoint will install any
+ * tile definitions available on this service onto that jive host.
+ *
+ * If the jive host rejects the install POST, and returns a location header for a prexisting tile, this utility
+ * attempts to update that tile with a PUT.
+ *
+ * Takes the following URL parameters:
+ * - jiveHost: required target Jive host
+ * - jivePort: optional target Jive Port, defaults to 80 if not specified
+ * - context: optional non-root context path (eg. /sbs)
+ * @deprecated
+ * @private
+ * @param req
+ * @param res
  */
-exports.globalEventNames = {
-    'NEW_INSTANCE':'newInstance',
-    'INSTANCE_UPDATED':'updateInstance',
-    'INSTANCE_REMOVED':'destroyedInstance',
-    'DATA_PUSHED':'dataPushed',
-    'ACTIVITY_PUSHED':'activityPushed',
-    'COMMENT_PUSHED':'commentPushed',
-    'CLIENT_APP_REGISTRATION_SUCCESS' : 'registeredJiveInstanceSuccess',
-    'CLIENT_APP_REGISTRATION_FAILED' : 'registeredJiveInstanceFailed'
+exports.installTiles = function( req, res ) {
+    req.writeHead( 400 );
+    req.end('Deprecated');
 };
 
-/**
- * @type {{WORKER: string, PUSHER: string, HTTP_HANDLER: string}}
- */
-exports.roles = {
-    'WORKER':'worker',
-    'PUSHER':'pusher',
-    'HTTP_HANDLER':'http'
-};
-
-/**
- * @type {string}
- */
-exports.SECURITY_STRING = "throw 'allowIllegalResourceCall is false.';\n";</pre>
+</pre>
         </article>
     </section>
 
