@@ -14,6 +14,12 @@
  *    limitations under the License.
  */
 
+/**
+ * @module devRoutes
+ */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 var url = require('url');
 var http = require('http');
 var q = require('q');
@@ -21,8 +27,9 @@ var jive = require("../api");
 var mustache = require('mustache');
 
 /**
+ * <b>GET /tiles</b>
+ * <br>
  * Endpoint for development only.
- *
  * Calling GET on this endpoint returns JSON describing all the tile definitions available on this service.
  *
  * Takes no URL parameters.
@@ -62,6 +69,8 @@ exports.tiles = function(req, res){
  * - jiveHost: required target Jive host
  * - jivePort: optional target Jive Port, defaults to 80 if not specified
  * - context: optional non-root context path (eg. /sbs)
+ * @deprecated
+ * @private
  * @param req
  * @param res
  */

@@ -14,6 +14,12 @@
  *    limitations under the License.
  */
 
+/**
+ * @module oauthRoutes
+ */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 var http = require('http');
 var url = require('url');
 var jive = require('../api');
@@ -65,6 +71,9 @@ function getOAuth2Conf(targetJiveTenantID, originJiveTenantID, self) {
 }
 
 /**
+ * <h5>Route:</h5>
+ * <i>GET /authorizeUrl</i>
+ * <br><br>
  * Expects:
  * - viewerID
  * - callback
@@ -152,6 +161,8 @@ var errorResponse = function( res, code, error ){
 };
 
 /**
+ * <h4><i>POST /oauth2Callback</i></h4>
+ * <br>
  * Expects:
  * - code
  * - state, which is a base64 encoded JSON structure containing at minimum jiveRedirectUrl attribute

@@ -26,6 +26,7 @@ var express = require('express'),
 var alreadyBootstrapped = false;
 
 /**
+ * @private
  * @param options
  */
 var validateServiceOptions = function (options) {
@@ -168,6 +169,7 @@ var setupExtension = function(options, tilesDir, appsDir, cartridgesDir, storage
 };
 
 /**
+ * @private
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
  */

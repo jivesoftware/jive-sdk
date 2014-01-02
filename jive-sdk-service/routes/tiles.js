@@ -17,7 +17,10 @@
 /**
  * These are global, publically available endpoints useful in the administration of the service
  * tiles, tile definitions, and other concerns.
+ * @module tileRoutes
  */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var url = require('url');
 var q = require('q');

@@ -1,6 +1,18 @@
 var url = require('url');
 var jive = require("../api");
 
+/**
+ * @module addOnRoutes
+ */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * <b>POST /oauthRegister</b>
+ * <br>
+ * @param req
+ * @param res
+ */
 exports.oauthRegister = function(req, res ) {
     var registration = req.body;
 

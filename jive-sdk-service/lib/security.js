@@ -14,6 +14,13 @@
  *    limitations under the License.
  */
 
+/**
+ * @module security
+ */
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Private
+
 var express = require('express'),
     service = require('./service'),
     jive = require('../api'),
