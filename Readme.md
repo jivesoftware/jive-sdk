@@ -1,7 +1,7 @@
 # Jive Purposeful Places Framework
  Purposeful Places are a brand new integration framework for Jive that allows you to quickly and easily create external activity streams and content from virtually any system. Here's [a high level overview of Purposeful Places](https://github.com/jivesoftware/jive-sdk/blob/master/docs/overview.md). If you'd like to skip ahead, then jump right to the [Master Reference Doc](https://github.com/jivesoftware/jive-sdk/blob/master/docs/masterreferencedoc.md). Please make sure to post your feedback and comments in the [Jive Developer Community](https://community.jivesoftware.com/community/developer).
 
- This repository contains the node.js library to help you get started building purposeful places!
+ This repository contains the node.js library to help you get started building purposeful places! Also, make sure to check out the [API documentation](https://rawgithub.com/jivesoftware/jive-sdk/master/docs/api/index.html) as well!
 
 ## Let's get started
 Make sure you have [node.js](http://nodejs.org) installed. We're going to assume that you are at least a bit familiar with node.js and that you understand the basics, e.g. installing packages. We're also going to assume that you understand the basics of Purposeful Places and are familiar with the concepts of tiles and stream integrations.
