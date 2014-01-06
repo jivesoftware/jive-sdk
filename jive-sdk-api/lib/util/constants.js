@@ -19,8 +19,20 @@
  */
 
 /**
- * @static
- * @type {{PUSH_DATA_TO_JIVE: string, PUSH_ACTIVITY_TO_JIVE: string, PUSH_COMMENT_TO_JIVE: string, COMMENT_ON_ACTIVITY: string, COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID: string, FETCH_COMMENTS_ON_ACTIVITY: string, FETCH_ALL_COMMENTS_FOR_EXT_STREAM: string, INSTANCE_REGISTRATION: string, INSTANCE_UNREGISTRATION: string, CLIENT_APP_REGISTRATION: string, GET_PAGINATED_RESULTS: string, GET_EXTERNAL_PROPS: string, SET_EXTERNAL_PROPS: string, DELETE_EXTERNAL_PROPS: string}}
+ * @property {String} PUSH_DATA_TO_JIVE <b>pushDataToJive</b> Fired on request to push tile data update to Jive.
+ * @property {String} PUSH_ACTIVITY_TO_JIVE Fired on request to push externatstream activity to Jive.
+ * @property {String} PUSH_COMMENT_TO_JIVE Fired on request to push a comment into Jive.
+ * @property {String} COMMENT_ON_ACTIVITY Fired on request to push a comment on an activity entry into Jive.
+ * @property {String} COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID Fired on request to push a comment on an activity entry into Jive.
+ * @property {String} FETCH_COMMENTS_ON_ACTIVITY Fired on request for activity comments from Jive.
+ * @property {String} FETCH_ALL_COMMENTS_FOR_EXT_STREAM Fired on request for activity comments from Jive.
+ * @property {String} INSTANCE_REGISTRATION Fired on request to register a new tile or externalstream instance.
+ * @property {String} INSTANCE_UNREGISTRATION Fired on request to destroy a tile or externalstream instance.
+ * @property {String} CLIENT_APP_REGISTRATION Fired on request to register a Jive instance on the service.
+ * @property {String} GET_PAGINATED_RESULTS Fired on request for paginated results from a Jive service.
+ * @property {String} GET_EXTERNAL_PROPS Fired on request for retrieving external props on a tile or externalstream instance.
+ * @property {String} SET_EXTERNAL_PROPS Fired on request for setting external props on a tile or externalstream instance.
+ * @property {String} DELETE_EXTERNAL_PROPS  Fired on request for deleting external props on a tile or externalstream instance.
  */
 exports.tileEventNames = {
     'PUSH_DATA_TO_JIVE':'pushDataToJive',
@@ -40,7 +52,14 @@ exports.tileEventNames = {
 };
 
 /**
- * @type {{NEW_INSTANCE: string, INSTANCE_UPDATED: string, INSTANCE_REMOVED: string, DATA_PUSHED: string, ACTIVITY_PUSHED: string, COMMENT_PUSHED: string, CLIENT_APP_REGISTRATION_SUCCESS: string, CLIENT_APP_REGISTRATION_FAILED: string}}
+ * @property {String} NEW_INSTANCE Fired when a new tile or externalstream instance is created.
+ * @property {String} INSTANCE_UPDATED Fired when a tile or externalstream instance is updated.
+ * @property {String} INSTANCE_REMOVED Fired when a tile or externalstream instance is destroyed.
+ * @property {String} DATA_PUSHED Fired when a tile instance updated is pushed into Jive.
+ * @property {String} ACTIVITY_PUSHED Fired when an externalstream instance is pushed into Jive.
+ * @property {String} COMMENT_PUSHED Fired when an externalstream instance comment is pushed into Jive.
+ * @property {String} CLIENT_APP_REGISTRATION_SUCCESS Fired when a community registers itself with the addon service successfully.
+ * @property {String} CLIENT_APP_REGISTRATION_FAILED Fired when a community registers itself with the addon service unsuccessfully.
  */
 exports.globalEventNames = {
     'NEW_INSTANCE':'newInstance',
@@ -54,7 +73,9 @@ exports.globalEventNames = {
 };
 
 /**
- * @type {{WORKER: string, PUSHER: string, HTTP_HANDLER: string}}
+ * @property {String} WORKER Worker nodes typically do not handle HTTP requests, and are concerned mostly with background tasks.
+ * @property {String} PUSHER A subspecies of WORKER node, specializing in making HTTP requests.
+ * @property {String} HTTP_HANDLER HTTP handler nodes specialize in accepting incoming requests, and possibly forwarding them for further processing.
  */
 exports.roles = {
     'WORKER':'worker',
@@ -63,6 +84,8 @@ exports.roles = {
 };
 
 /**
+ * This is the string normally appended to incoming v3 entities, for the purpose of thwarting security threats: <br>
+ *     throw 'allowIllegalResourceCall is false.';
  * @type {string}
  */
 exports.SECURITY_STRING = "throw 'allowIllegalResourceCall is false.';\n";

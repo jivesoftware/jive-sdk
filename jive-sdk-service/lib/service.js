@@ -61,6 +61,13 @@ var _dir = function(theDir, defaultDir ) {
  */
 exports.options = {};
 
+
+/**
+ * @deprecated This is just a symlink to jive.community (use that instead). To be removed in next major version.
+ * @type {module:community}
+ */
+exports.community = jive.community;
+
 var persistence;
 /**
  * Retrieves or sets current persistence strategy, defaults to file.

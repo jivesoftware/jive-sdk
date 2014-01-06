@@ -112,6 +112,7 @@ exports.tiles = tiles = require('./lib/tile/tiles');
 exports.tiles['definitions'] = require('./lib/tile/tilesDefinitions');
 
 /**
+ * API for managing events.
  * @type module:events
  */
 exports.events = require( './lib/event/events');

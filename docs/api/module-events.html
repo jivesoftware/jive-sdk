@@ -171,7 +171,8 @@
 
     
         
-            <div class="description"><p>API for managing system events.</p></div>
+            <div class="description"><p>API for managing events. Use this to register event handlers for the various types of events emitted by the system,
+and also for definining your custom events and handlers. @see <a href="module-constants.html">module:constants</a> for a list of emitted system events.</p></div>
         
 
         
@@ -229,31 +230,234 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="baseEvents"><span class="type-signature">&lt;static> </span>baseEvents<span class="type-signature"> :Array</span></h4>
+    <h4 class="name" id="globalEvents"><span class="type-signature">&lt;static> </span>globalEvents<span class="type-signature"></span></h4>
     
     
 </dt>
 <dd>
     
     <div class="description">
-        <p>This is an array of system defined events</p>
+        <p>Array of system defined events. See <a href="module-constants.html#globalEventNames">module:constants.globalEventNames</a>.</p>
     </div>
     
     
     
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Array</span>
-
-
-            </li>
-        </ul>
-    
 
     
 <dl class="details">
+    
+
+        <h5 class="subsection-title">Properties:</h5>
+
+        <dl>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>NEW_INSTANCE</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired when a new tile or externalstream instance is created.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>INSTANCE_UPDATED</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired when a tile or externalstream instance is updated.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>INSTANCE_REMOVED</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired when a tile or externalstream instance is destroyed.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>DATA_PUSHED</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired when a tile instance updated is pushed into Jive.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>ACTIVITY_PUSHED</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired when an externalstream instance is pushed into Jive.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>COMMENT_PUSHED</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired when an externalstream instance comment is pushed into Jive.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>CLIENT_APP_REGISTRATION_SUCCESS</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired when a community registers itself with the addon service successfully.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>CLIENT_APP_REGISTRATION_FAILED</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired when a community registers itself with the addon service unsuccessfully.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+</dl>
+
     
 
     
@@ -275,7 +479,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-138">line 138</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-133">line 133</a>
     </li></ul></dd>
     
 
@@ -293,31 +497,119 @@
         
             
 <dt>
-    <h4 class="name" id="globalEvents"><span class="type-signature">&lt;static> </span>globalEvents<span class="type-signature"> :Array</span></h4>
+    <h4 class="name" id="pushQueueEvents"><span class="type-signature">&lt;static> </span>pushQueueEvents<span class="type-signature"></span></h4>
     
     
 </dt>
 <dd>
     
     <div class="description">
-        <p>Array of system defined events.</p>
+        <p>There are events that pusher nodes are allowed to handle.  See <a href="module-constants.html#tileEventNames">module:constants.tileEventNames</a>.</p>
     </div>
     
     
     
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Array</span>
-
-
-            </li>
-        </ul>
-    
 
     
 <dl class="details">
+    
+
+        <h5 class="subsection-title">Properties:</h5>
+
+        <dl>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>PUSH_DATA_TO_JIVE</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to push tile data update to Jive.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>PUSH_ACTIVITY_TO_JIVE</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to push externatstream activity to Jive.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>PUSH_COMMENT_TO_JIVE</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to push a comment into Jive.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+</dl>
+
     
 
     
@@ -339,7 +631,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-123">line 123</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-116">line 116</a>
     </li></ul></dd>
     
 
@@ -357,31 +649,1259 @@
         
             
 <dt>
-    <h4 class="name" id="pushQueueEvents"><span class="type-signature">&lt;static> </span>pushQueueEvents<span class="type-signature"> :Array</span></h4>
+    <h4 class="name" id="systemEvents"><span class="type-signature">&lt;static> </span>systemEvents<span class="type-signature"></span></h4>
     
     
 </dt>
 <dd>
     
     <div class="description">
-        <p>There are events that pusher nodes are allowed to handle.</p>
+        <p>This is a map of system defined events to their respective event handlers.</p>
     </div>
     
     
     
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Array</span>
-
-
-            </li>
-        </ul>
-    
 
     
 <dl class="details">
+    
+
+        <h5 class="subsection-title">Properties:</h5>
+
+        <dl>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>NEW_INSTANCE</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to push tile data update to Jive.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Logs the request context</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>INSTANCE_UPDATED</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to push tile data update to Jive.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Logs the request context</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>INSTANCE_REMOVED</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to push tile data update to Jive.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Logs the request context</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>PUSH_DATA_TO_JIVE</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to push tile data update to Jive.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Passed <b>context</b> contains <i>theInstance</i> and <i>data</i> attributes. These are used
+to push a tile update into Jive.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>PUSH_ACTIVITY_TO_JIVE</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to push externatstream activity to Jive.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Passed <b>context</b> contains <i>theInstance</i> and <i>activity</i> attributes. These are used
+to push an extstreamstream activity entry into Jive.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>PUSH_COMMENT_TO_JIVE</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to push a comment into Jive.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Logs the request context</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>COMMENT_ON_ACTIVITY</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to push a comment on an activity entry into Jive.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to push a comment on an activity entry into Jive.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>FETCH_COMMENTS_ON_ACTIVITY</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request for activity comments from Jive.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>FETCH_ALL_COMMENTS_FOR_EXT_STREAM</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request for activity comments from Jive.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>INSTANCE_REGISTRATION</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to register a new tile or externalstream instance.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>INSTANCE_UNREGISTRATION</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to destroy a tile or externalstream instance.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>CLIENT_APP_REGISTRATION</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request to register a Jive instance on the service.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>GET_PAGINATED_RESULTS</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request for paginated results from a Jive service.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>GET_EXTERNAL_PROPS</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request for retrieving external props on a tile or externalstream instance.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>SET_EXTERNAL_PROPS</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request for setting external props on a tile or externalstream instance.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>DELETE_EXTERNAL_PROPS</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Fired on request for deleting external props on a tile or externalstream instance.</p>
+                <h6>Properties</h6>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+	</tbody>
+</table>
+</dl>
+
     
 
     
@@ -403,7 +1923,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-113">line 113</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-183">line 183</a>
     </li></ul></dd>
     
 
@@ -587,7 +2107,7 @@ event listener. Only one function per event listener per event is permitted.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-46">line 46</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-47">line 47</a>
     </li></ul></dd>
     
 
@@ -728,7 +2248,7 @@ event listener. Only one function per event listener per event is permitted.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-103">line 103</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-104">line 104</a>
     </li></ul></dd>
     
 
@@ -887,7 +2407,7 @@ event listener. Only one function per event listener per event is permitted.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-86">line 86</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-87">line 87</a>
     </li></ul></dd>
     
 
@@ -1029,7 +2549,7 @@ Otherwise returns undefined.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-72">line 72</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-73">line 73</a>
     </li></ul></dd>
     
 
@@ -1117,7 +2637,7 @@ Otherwise returns undefined.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-302">line 302</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-347">line 347</a>
     </li></ul></dd>
     
 
@@ -1168,7 +2688,7 @@ Otherwise returns undefined.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Thu Jan 02 2014 14:05:14 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Jan 06 2014 11:08:58 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

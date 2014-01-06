@@ -176,7 +176,8 @@
  */
 
 /**
- * API for managing system events.
+ * API for managing events. Use this to register event handlers for the various types of events emitted by the system,
+ * and also for definining your custom events and handlers. @see {@link module:constants} for a list of emitted system events.
  * @module events
  */
 
@@ -268,8 +269,10 @@ exports.addLocalEventListener = function( event, handler ) {
 };
 
 /**
- * There are events that pusher nodes are allowed to handle.
- * @type {Array}
+ * There are events that pusher nodes are allowed to handle.  See {@link module:constants.tileEventNames}.
+ * @property {String} PUSH_DATA_TO_JIVE Fired on request to push tile data update to Jive.
+ * @property {String} PUSH_ACTIVITY_TO_JIVE Fired on request to push externatstream activity to Jive.
+ * @property {String} PUSH_COMMENT_TO_JIVE Fired on request to push a comment into Jive.
  */
 exports.pushQueueEvents = [
     jive.constants.tileEventNames.PUSH_DATA_TO_JIVE,
@@ -278,8 +281,15 @@ exports.pushQueueEvents = [
 ];
 
 /**
- * Array of system defined events.
- * @type {Array}
+ * Array of system defined events. See {@link module:constants.globalEventNames}.
+ * @property {String} NEW_INSTANCE Fired when a new tile or externalstream instance is created.
+ * @property {String} INSTANCE_UPDATED Fired when a tile or externalstream instance is updated.
+ * @property {String} INSTANCE_REMOVED Fired when a tile or externalstream instance is destroyed.
+ * @property {String} DATA_PUSHED Fired when a tile instance updated is pushed into Jive.
+ * @property {String} ACTIVITY_PUSHED Fired when an externalstream instance is pushed into Jive.
+ * @property {String} COMMENT_PUSHED Fired when an externalstream instance comment is pushed into Jive.
+ * @property {String} CLIENT_APP_REGISTRATION_SUCCESS Fired when a community registers itself with the addon service successfully.
+ * @property {String} CLIENT_APP_REGISTRATION_FAILED Fired when a community registers itself with the addon service unsuccessfully.
  */
 exports.globalEvents = [
     jive.constants.globalEventNames.NEW_INSTANCE,
@@ -293,10 +303,45 @@ exports.globalEvents = [
 ];
 
 /**
- * This is an array of system defined events
- * @type {Array}
+ * This is a map of system defined events to their respective event handlers.
+ * @property {Object} NEW_INSTANCE Fired on request to push tile data update to Jive.
+ * @property {function} NEW_INSTANCE.handler Logs the request context
+ * @property {Object} INSTANCE_UPDATED Fired on request to push tile data update to Jive.
+ * @property {function} INSTANCE_UPDATED.handler Logs the request context
+ * @property {Object} INSTANCE_REMOVED Fired on request to push tile data update to Jive.
+ * @property {function} INSTANCE_REMOVED.handler Logs the request context
+ * @property {Object} PUSH_DATA_TO_JIVE Fired on request to push tile data update to Jive.
+ * @property {function} PUSH_DATA_TO_JIVE.handler Passed &lt;b>context&lt;/b> contains &lt;i>theInstance&lt;/i> and &lt;i>data&lt;/i> attributes. These are used
+ * to push a tile update into Jive.
+ * @property {Object} PUSH_ACTIVITY_TO_JIVE Fired on request to push externatstream activity to Jive.
+ * @property {function} PUSH_ACTIVITY_TO_JIVE.handler Passed &lt;b>context&lt;/b> contains &lt;i>theInstance&lt;/i> and &lt;i>activity&lt;/i> attributes. These are used
+ * to push an extstreamstream activity entry into Jive.
+ * @property {Object} PUSH_COMMENT_TO_JIVE Fired on request to push a comment into Jive.
+ * @property {function} PUSH_COMMENT_TO_JIVE.handler Logs the request context
+ * @property {Object} COMMENT_ON_ACTIVITY Fired on request to push a comment on an activity entry into Jive.
+ * @property {function} COMMENT_ON_ACTIVITY.handler
+ * @property {Object} COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID Fired on request to push a comment on an activity entry into Jive.
+ * @property {function} COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID.handler
+ * @property {Object} FETCH_COMMENTS_ON_ACTIVITY  Fired on request for activity comments from Jive.
+ * @property {function} FETCH_COMMENTS_ON_ACTIVITY.handler
+ * @property {Object} FETCH_ALL_COMMENTS_FOR_EXT_STREAM Fired on request for activity comments from Jive.
+ * @property {function} FETCH_ALL_COMMENTS_FOR_EXT_STREAM.handler
+ * @property {Object} INSTANCE_REGISTRATION Fired on request to register a new tile or externalstream instance.
+ * @property {function} INSTANCE_REGISTRATION.handler
+ * @property {Object} INSTANCE_UNREGISTRATION Fired on request to destroy a tile or externalstream instance.
+ * @property {function} INSTANCE_UNREGISTRATION.handler
+ * @property {Object} CLIENT_APP_REGISTRATION Fired on request to register a Jive instance on the service.
+ * @property {function} CLIENT_APP_REGISTRATION.handler
+ * @property {Object} GET_PAGINATED_RESULTS Fired on request for paginated results from a Jive service.
+ * @property {function} GET_PAGINATED_RESULTS.handler
+ * @property {Object} GET_EXTERNAL_PROPS Fired on request for retrieving external props on a tile or externalstream instance.
+ * @property {function} GET_EXTERNAL_PROPS.handler
+ * @property {Object} SET_EXTERNAL_PROPS Fired on request for setting external props on a tile or externalstream instance.
+ * @property {function} SET_EXTERNAL_PROPS.handler
+ * @property {Object} DELETE_EXTERNAL_PROPS  Fired on request for deleting external props on a tile or externalstream instance.
+ * @property {function} DELETE_EXTERNAL_PROPS.handler
  */
-exports.baseEvents = [
+exports.systemEvents = [
     {
         'event': jive.constants.globalEventNames.NEW_INSTANCE,
         'handler' : function(context){
@@ -485,7 +530,7 @@ exports.reset = function() {
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Thu Jan 02 2014 14:05:13 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Jan 06 2014 11:08:57 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

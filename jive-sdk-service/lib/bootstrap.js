@@ -114,7 +114,7 @@ var setupScheduler = function() {
     var deferred = q.defer();
 
     // add base events
-    jive.events.baseEvents.forEach(function(handlerInfo) {
+    jive.events.systemEvents.forEach(function(handlerInfo) {
         jive.events.addSystemEventListener(
             handlerInfo['event'],
             handlerInfo['handler'],
