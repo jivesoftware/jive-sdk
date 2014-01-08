@@ -6,7 +6,6 @@ var host, url, setHost = function( newHost ) {
 
 (function() {
     jive.tile.onOpen(function(config, options, other, container ) {
-        gadgets.window.adjustHeight();
 
         if ( typeof config === "string" ) {
             config = JSON.parse(config);
@@ -18,9 +17,14 @@ var host, url, setHost = function( newHost ) {
             'authz': "signed",
             'format': 'json',
             "noCache": true
-        }
+        };
+
         osapi.http.get(getParams).execute(function (resp) {
             $("#clientid").val(resp.content.clientid);
+            $("#licenseKey").text(resp.content.licenseKey);
+            $("#licenseKeyField").val(resp.content.licenseKey);
+
+            gadgets.window.adjustHeight(300);
         });
 
 
@@ -33,15 +37,20 @@ var host, url, setHost = function( newHost ) {
                 "noCache": true,
                 "headers": {"content-type": ["application/json"]},
                 "body": {
-                    "clientid": $("#clientid").val()
+                    "clientid": $("#clientid").val(),
+                    "licenseKeyField": $("#licenseKeyField").val()
                 }
             };
             osapi.http.post(params).execute(function (response) {
                 if(response.content) {
-                    $("#message").text("Saved...");
-                    setTimeout(function() {
-                        jive.tile.close(config, {} );
-                    }, 1000);
+                    if ( response.status !== 200 ) {
+                        $("#message").text(response.content.reason);
+                    } else {
+                        $("#message").text("Saved...");
+                        setTimeout(function() {
+                            jive.tile.close(config, {} );
+                        }, 1000);
+                    }
                 } else {
                     $("#message").text(response.error && response.error.message);
                 }

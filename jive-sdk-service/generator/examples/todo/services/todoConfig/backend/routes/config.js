@@ -45,20 +45,54 @@ var setConfig = function(req, res) {
     }
 };
 
+var postConfig = function(req,res) {
+    var requestInfo = jive.util.request.parseJiveExtensionHeaders(req);
+    var tenantID = requestInfo['tenantID'];
+    var submittedLicense = req.body.licenseKeyField;
+
+    db.findByID( 'licenseKey', tenantID).then( function(licenseKey) {
+        var license = licenseKey ? licenseKey.licenseKey : undefined;
+        if ( (!license && !submittedLicense) || license === submittedLicense ) {
+            setConfig(req,res);
+        } else {
+            // license mismatch
+            res.status(403);
+            res.end( JSON.stringify(
+                {
+                    "reason": "Invalid license"
+                }
+            ) );
+        }
+    });
+};
+
 var getConfig = function(req, res) {
-    shared.getClientIDForRequest(req).then(function(clientid) {
-        res.status(200);
-        res.set({'Content-Type': 'application/json'});
-        res.send( JSON.stringify(
-            {"clientid":  clientid || ""}));
+    var requestInfo = jive.util.request.parseJiveExtensionHeaders(req);
+    var tenantID = requestInfo['tenantID'];
+
+    db.findByID( 'licenseKey', tenantID).then( function(licenseKey) {
+
+        var license = licenseKey ? licenseKey.licenseKey : undefined;
+        shared.getClientIDForRequest(req).then(function(clientid) {
+            res.status(200);
+            res.set({'Content-Type': 'application/json'});
+            res.send( JSON.stringify(
+                {
+                    "clientid":  clientid || "",
+                    "licenseKey" : license || ""
+                }
+            ));
+
+        });
 
     });
+
 };
 
 exports.postConfig = {
     'path' : 'config',
     'verb' : 'post',
-    'route': setConfig
+    'route': postConfig
 };
 
 exports.getConfig = {
