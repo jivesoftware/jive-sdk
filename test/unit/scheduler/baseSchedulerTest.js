@@ -27,6 +27,125 @@ exports.testSimpleSingleEvent = function( jive, testUtils, scheduler ) {
     return deferred.promise;
 };
 
+exports.testSimpleSingleEventGlobalFireUntargeted = function( jive, testUtils, scheduler ) {
+    var deferred = q.defer();
+
+    var count = 0;
+    var event1 = jive.util.guid();
+    jive.events.registerEventListener( event1,
+        function() {
+            count++;
+        }
+    );
+
+    scheduler.init();
+    scheduler.schedule( event1 );
+
+    // immediate
+    setTimeout( function() {
+        if ( count == 1 ) {
+            deferred.resolve();
+        } else {
+            deferred.reject();
+        }
+    }, 250);
+
+    return deferred.promise;
+};
+
+exports.testSimpleSingleEventGlobalFireTargeted = function( jive, testUtils, scheduler ) {
+    var deferred = q.defer();
+
+    var count = 0;
+    var event1 = jive.util.guid();
+    jive.events.registerEventListener( event1,
+        function() {
+            count++;
+        }
+    );
+
+    scheduler.init();
+    scheduler.schedule( event1, { eventListener: 'event1Listener' } );
+
+    // immediate
+    setTimeout( function() {
+        if ( count == 0 ) {
+            deferred.resolve();
+        } else {
+            deferred.reject();
+        }
+    }, 250);
+
+    return deferred.promise;
+};
+
+exports.testSimpleSingleEventMixedFireUntargeted = function( jive, testUtils, scheduler ) {
+    var deferred = q.defer();
+
+    var count = 0;
+    var event1 = jive.util.guid();
+    jive.events.registerEventListener( event1,
+        function() {
+            count++;
+        }
+    );
+
+    jive.events.registerEventListener( event1,
+        function() {
+            count++;
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
+
+
+    scheduler.init();
+    scheduler.schedule( event1 );
+
+    // immediate
+    setTimeout( function() {
+        if ( count == 1 ) {
+            deferred.resolve();
+        } else {
+            deferred.reject();
+        }
+    }, 250);
+
+    return deferred.promise;
+};
+
+exports.testSimpleSingleEventMixedFireTargeted = function( jive, testUtils, scheduler ) {
+    var deferred = q.defer();
+
+    var count = 0;
+    var event1 = jive.util.guid();
+    jive.events.registerEventListener( event1,
+        function() {
+            count++;
+        }
+    );
+
+    jive.events.registerEventListener( event1,
+        function() {
+            count++;
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
+
+    scheduler.init();
+    scheduler.schedule( event1, { eventListener: 'event1Listener' } );
+
+    // immediate
+    setTimeout( function() {
+        if ( count == 1 ) {
+            deferred.resolve();
+        } else {
+            deferred.reject();
+        }
+    }, 250);
+
+    return deferred.promise;
+};
+
 exports.testSimpleIntervalEvent = function( jive, testUtils, scheduler ) {
     var deferred = q.defer();
 
