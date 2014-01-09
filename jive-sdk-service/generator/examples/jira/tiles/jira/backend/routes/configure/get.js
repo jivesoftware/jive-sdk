@@ -18,5 +18,5 @@ var jive = require('jive-sdk');
 
 exports.route = function(req, res) {
     var conf = jive.service.options;
-    res.render('configuration.html', {  jira_host: conf.jiraHost, host: conf.clientUrl + ':' + conf.port });
+    res.render('configuration.html', {  jira_host: conf.jiraHost, host: jive.service.serviceURL() });
 };

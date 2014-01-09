@@ -19,5 +19,5 @@ var util = require('util');
 
 exports.route = function(req, res) {
     var conf = jive.service.options;
-    res.render('action.html', { jira_host: conf.jiraHost,  host: conf.clientUrl + ':' + conf.port });
+    res.render('action.html', { jira_host: conf.jiraHost, host: jive.service.serviceURL() });
 };
