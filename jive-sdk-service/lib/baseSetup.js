@@ -149,14 +149,12 @@ function defaultSetupEventListener(handlerInfo, definitionName) {
     var eventListener = handlerInfo['eventListener'] || definitionName;
 
     if (jive.events.globalEvents.indexOf(handlerInfo['event']) != -1) {
-        jive.events.addSystemEventListener(handlerInfo['event'], handlerInfo['handler']);
+        jive.events.registerEventListener(handlerInfo['event'], handlerInfo['handler']);
     } else {
-        jive.events.addDefinitionEventListener(
-            handlerInfo['event'],
-            eventListener,
-            handlerInfo['handler'],
-            handlerInfo['description'] || 'Unique to definition'
-        );
+        jive.events.registerEventListener(handlerInfo['event'], handlerInfo['handler'], {
+            'description' : handlerInfo['description'] || 'Unique to definition',
+            'eventListener' :  eventListener
+        });
     }
 }
 
@@ -236,7 +234,7 @@ exports.setupServices = function( app, definitionName, svcDir, setupEventListene
                     if ( !handler ) {
                         // task did not come with an inline handler;
                         // try to resolve one from listeners on the named event for the task
-                        handler = jive.events.getDefinitionEventListenerFor(definitionName, event );
+                        handler = jive.events.getEventListeners(event, definitionName );
                         if ( handler && handler['forEach'] ) {
                             handler = handler[0]; // get only the first one
                         }

@@ -106,14 +106,12 @@ function tileDefinitionStupEventListener(handlerInfo, _definitionName, setupCont
 
     var eventListener = handlerInfo['eventListener'] || definitionName;
     if (jive.events.globalEvents.indexOf(handlerInfo['event']) != -1) {
-        jive.events.addSystemEventListener(handlerInfo['event'], buildHandlerFunction(handlerInfo) );
+        jive.events.registerEventListener(handlerInfo['event'], buildHandlerFunction(handlerInfo) );
     } else {
-        jive.events.addDefinitionEventListener(
-            handlerInfo['event'],
-            eventListener,
-            buildHandlerFunction(handlerInfo),
-            handlerInfo['description'] || 'Unique to definition'
-        );
+        jive.events.registerEventListener( handlerInfo['event'], buildHandlerFunction(handlerInfo), {
+            'eventListener' : eventListener,
+            'description' : handlerInfo['description'] || 'Unique to definition'
+        });
     }
 }
 

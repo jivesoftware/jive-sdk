@@ -164,5 +164,13 @@ exports.remove = function (definitionID) {
  */
 exports.addEventHandler = function(definitionName, eventName, handler, description) {
     // register event listeners
-    jive.events.addDefinitionEventListener(eventName, definitionName, handler, description);
+
+    jive.events.registerEventListener( event, handler,
+        {
+            'eventListener' : definitionName,
+            'description' : description
+        }
+    );
+
+    jive.events.registerEventListener(eventName, definitionName, handler, description);
 };

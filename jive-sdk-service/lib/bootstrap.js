@@ -115,11 +115,9 @@ var setupScheduler = function() {
 
     // add base events
     jive.events.systemEvents.forEach(function(handlerInfo) {
-        jive.events.addSystemEventListener(
-            handlerInfo['event'],
-            handlerInfo['handler'],
-            handlerInfo['description']
-        );
+        jive.events.registerEventListener(handlerInfo['event'], handlerInfo['handler'], {
+            'description' : handlerInfo['description']
+        });
     });
 
     service.scheduler().init(jive.events.eventHandlerMap, service.options, jive);

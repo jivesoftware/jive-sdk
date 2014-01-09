@@ -5,9 +5,12 @@ exports.testSimpleSingleEvent = function( jive, testUtils, scheduler ) {
 
     var count = 0;
     var event1 = jive.util.guid();
-    jive.events.addDefinitionEventListener(event1, 'event1Listener', function() {
-        count++;
-    });
+    jive.events.registerEventListener( event1,
+        function() {
+            count++;
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
 
     scheduler.init();
     scheduler.schedule( event1, { eventListener: 'event1Listener' } );
@@ -29,9 +32,12 @@ exports.testSimpleIntervalEvent = function( jive, testUtils, scheduler ) {
 
     var count = 0;
     var event1 = jive.util.guid();
-    jive.events.addDefinitionEventListener(event1, 'event1Listener', function() {
-        count++;
-    });
+    jive.events.registerEventListener( event1,
+        function() {
+            count++;
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
 
     scheduler.init( jive.events.eventHandlerMap, {}, jive );
     scheduler.schedule( event1, { eventListener: 'event1Listener' }, 500 );
@@ -53,9 +59,13 @@ exports.testSingleEventWithDelay = function( jive, testUtils, scheduler ) {
 
     var count = 0;
     var event1 = jive.util.guid();
-    jive.events.addDefinitionEventListener(event1, 'event1Listener', function() {
-        count++;
-    });
+    jive.events.registerEventListener( event1,
+        function() {
+            count++;
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
+
 
     scheduler.init();
     scheduler.schedule( event1, { eventListener: 'event1Listener' }, undefined, 500 );
@@ -78,13 +88,17 @@ exports.testIntervalEventWithDelay = function( jive, testUtils, scheduler ) {
     var count = 0;
     var event1 = jive.util.guid();
     var elapsed;
-    jive.events.addDefinitionEventListener(event1, 'event1Listener', function() {
-        if ( !elapsed ) {
-            elapsed = new Date().getTime() - now;
-        }
-        console.log(elapsed);
-        count++;
-    });
+
+    jive.events.registerEventListener( event1,
+        function() {
+            if ( !elapsed ) {
+                elapsed = new Date().getTime() - now;
+            }
+            console.log(elapsed);
+            count++;
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
 
     scheduler.init();
     var now = new Date().getTime();
@@ -106,9 +120,12 @@ exports.testSingleEventTimeout = function( jive, testUtils, scheduler ) {
     var deferred = q.defer();
 
     var event = jive.util.guid();
-    jive.events.addDefinitionEventListener(event, 'event1Listener', function() {
-        return q.defer();
-    });
+    jive.events.registerEventListener( event,
+        function() {
+            return q.defer();
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
 
     scheduler.init();
     scheduler.schedule( event, { eventListener: 'event1Listener' }, undefined, undefined, undefined, 200).then( function() {
@@ -125,10 +142,14 @@ exports.testIntervalEventTimeout = function( jive, testUtils, scheduler ) {
 
     var event = jive.util.guid();
     var count = 0;
-    jive.events.addDefinitionEventListener(event, 'event1Listener', function() {
-        count++;
-        return q.defer();
-    });
+
+    jive.events.registerEventListener( event,
+        function() {
+            count++;
+            return q.defer();
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
 
     scheduler.init();
     scheduler.schedule( event, { eventListener: 'event1Listener' }, undefined, undefined, undefined, 200);
@@ -150,15 +171,20 @@ exports.testOverlappingIntervalEvents = function( jive, testUtils, scheduler ) {
 
     var count = 0;
     var event = jive.util.guid();
-    jive.events.addDefinitionEventListener(event, 'event1Listener', function() {
-        var p = q.defer();
-        setTimeout( function() {
-            count++;
-            p.resolve();
-        }, 500);
 
-        return p.promise;
-    });
+    jive.events.registerEventListener( event,
+        function() {
+            var p = q.defer();
+            setTimeout( function() {
+                count++;
+                p.resolve();
+            }, 500);
+
+            return p.promise;
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
+
 
     scheduler.init();
     scheduler.schedule( event, { eventListener: 'event1Listener' }, 10 );
@@ -182,9 +208,12 @@ exports.testOverlappingSingleNonExclusiveEvent = function( jive, testUtils, sche
 
     var count = 0;
     var event = jive.util.guid();
-    jive.events.addDefinitionEventListener(event, 'event1Listener', function() {
-        count++;
-    });
+    jive.events.registerEventListener( event,
+        function() {
+            count++;
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
 
     scheduler.init();
     scheduler.schedule( event, { eventListener: 'event1Listener' } );
@@ -207,10 +236,13 @@ exports.testOverlappingSingleExclusiveEvent = function( jive, testUtils, schedul
 
     var count = 0;
     var event = jive.util.guid();
-    jive.events.addDefinitionEventListener(event, 'event1Listener', function() {
-        count++;
-        return q.resolve();
-    });
+    jive.events.registerEventListener( event,
+        function() {
+            count++;
+            return q.resolve();
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
 
     scheduler.init();
     scheduler.schedule( event, { eventListener: 'event1Listener' }, undefined, undefined, true );
@@ -233,17 +265,24 @@ exports.testConcurrentIntervalEvents = function( jive, testUtils, scheduler ) {
 
     var count1 = 0;
     var event = jive.util.guid();
-    jive.events.addDefinitionEventListener(event, 'event1Listener', function() {
-        count1++;
-        return q.resolve();
-    });
+
+    jive.events.registerEventListener( event,
+        function() {
+            count1++;
+            return q.resolve();
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
 
     var count2 = 0;
     var event2 = jive.util.guid();
-    jive.events.addDefinitionEventListener(event2, 'event1Listener', function() {
-        count2++;
-        return q.resolve();
-    });
+    jive.events.registerEventListener( event2,
+        function() {
+            count2++;
+            return q.resolve();
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
 
     scheduler.init();
     scheduler.schedule( event, { eventListener: 'event1Listener' }, 500 );
@@ -266,9 +305,14 @@ exports.testFailedEvent = function( jive, testUtils, scheduler ) {
     var deferred = q.defer();
 
     var event = jive.util.guid();
-    jive.events.addDefinitionEventListener(event, 'event1Listener', function() {
-        return q.reject();
-    });
+    jive.events.registerEventListener( event,
+        function() {
+            return q.reject();
+
+        },
+        { 'eventListener' : 'event1Listener'}
+    );
+
 
     scheduler.init();
     scheduler.schedule( event, { eventListener: 'event1Listener' }).then( function(r) {

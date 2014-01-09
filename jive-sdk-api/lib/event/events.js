@@ -29,25 +29,11 @@ var pusher = require('../tile/dataPusher');
 var comments = require('../tile/comments');
 var regHandler = require('../tile/registration.js');
 
-///////////////////////////////////////////////////////////////////////////////////
-// public
 
-exports = module.exports = new events.EventEmitter();
+function addTargetedEventListener(eventListener, event, description, handler) {
+    jive.logger.debug("Registered event for", eventListener, ": '" + event + "' ", description || '');
 
-exports.eventHandlerMap = {};
-
-/**
- * Add a user contributed event handler. The handler is added to an array of handler functions assigned for the
- * event listener. Only one function per event listener per event is permitted.
- * @param {String} event - the event id
- * @param {String} eventListener - the name of the listener
- * @param {function} handler - the function to call
- * @param {String} description
- */
-exports.addDefinitionEventListener = function( event, eventListener, handler, description ) {
-    jive.logger.debug("Registered event for", eventListener,": '" + event + "' ", description ||'' );
-
-    if ( !exports.eventHandlerMap[eventListener] ) {
+    if (!exports.eventHandlerMap[eventListener]) {
         exports.eventHandlerMap[eventListener] = {};
     }
 
@@ -56,36 +42,16 @@ exports.addDefinitionEventListener = function( event, eventListener, handler, de
     }
 
     // duplicate definition event listeners aren't permitted
-    if ( exports.eventHandlerMap[eventListener][event].indexOf(handler) == - 1 ) {
-        exports.eventHandlerMap[eventListener][event].push( handler );
+    if (exports.eventHandlerMap[eventListener][event].indexOf(handler) == -1) {
+        exports.eventHandlerMap[eventListener][event].push(handler);
     } else {
-        jive.logger.warn("Event",event,"eventListener",eventListener,"already exists; ignoring event listener add.");
+        jive.logger.warn("Event", event, "eventListener", eventListener, "already exists; ignoring event listener add.");
     }
-};
+}
 
-/**
- * Returns array of event handling functions for the given eventListener and event, if at least one was registered.
- * Otherwise returns undefined.
- * @param {String} eventListener
- * @param {String} event
- * @returns {Array}
- */
-exports.getDefinitionEventListenerFor = function( eventListener, event ) {
-    if ( !exports.eventHandlerMap[eventListener] || !exports.eventHandlerMap[eventListener][event] ) {
-        return null;
-    }
 
-    return exports.eventHandlerMap[eventListener][event];
-};
-
-/**
- * Adds a system-level event listener.
- * @param {String} event
- * @param {function} handler
- * @param description
- */
-exports.addSystemEventListener = function(event, handler, description) {
-    jive.logger.debug("Registered system event ", event,": ", description || 'no description');
+function addUntargetedEventListener(event, description, handler) {
+    jive.logger.debug("Registered system event ", event, ": ", description || 'no description');
 
     if (!exports.eventHandlerMap[event]) {
         exports.eventHandlerMap[event] = [];
@@ -93,7 +59,112 @@ exports.addSystemEventListener = function(event, handler, description) {
 
     // duplicate system event listeners are permitted, tile-contributed
     // system event handlers
-    exports.eventHandlerMap[event].push( handler );
+    exports.eventHandlerMap[event].push(handler);
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// public
+
+exports = module.exports = new events.EventEmitter();
+
+exports.eventHandlerMap = {};
+
+/**
+ * Add an event handler. The handler is invoked when an event is fired which
+ * specifies the target event listener and event type, if both are specified in the event firing.
+ * If only event is specified, then the handler will be invoked whenever that event is fired.
+ * <br><br>
+ * The handler is added to an array of handler functions assigned for the
+ * event listener. Only one function per event listener per event is permitted.
+ * @param {String} event - the event id
+ * @param {function} handler - the function to call
+ * @param {object} options
+ * @param {String} options.eventListener the name of the listener
+ * @param {String} options.description
+ *
+ */
+exports.registerEventListener = function( event, handler, options) {
+    if ( !event ) {
+        throw new Error("Must specify a target event.");
+    }
+
+    if ( !handler ) {
+        throw new Error("Must specify an event handler function.");
+    }
+
+    if ( typeof handler !== 'function' ) {
+        throw new Error("Event handler must be a function.");
+    }
+
+    var targetListener;
+    var description;
+
+    if ( options ) {
+        targetListener = options['eventListener'];
+        description = options['description'];
+    }
+
+    if ( targetListener ) {
+        addTargetedEventListener(targetListener, event, description, handler);
+    } else {
+        addUntargetedEventListener(event, description, handler );
+    }
+};
+
+/**
+ * Returns array of registered event handling functions for the given event listener and event.
+ * Otherwise returns undefined.
+ * @param {String} event
+ * @param {String} eventListener
+ * @returns {Array}
+ */
+exports.getEventListeners = function(event, eventListener) {
+    if ( eventListener && event ) {
+        if ( !exports.eventHandlerMap[eventListener] || !exports.eventHandlerMap[eventListener][event] ) {
+            return null;
+        }
+
+        return exports.eventHandlerMap[eventListener][event];
+    } else {
+        if ( eventListener && !event ) {
+            var events = exports.eventHandlerMap[eventListener];
+            if ( !events ) {
+                return null;
+            }
+
+            if ( events['indexOf'] ) {
+                return events;
+            }
+
+            var handlers = [];
+            for (var key in events) {
+                if (events.hasOwnProperty(key)) {
+                    handlers.push(events[key]);
+                }
+            }
+
+            return handlers;
+        } else if ( !eventListener && event ) {
+            var events = exports.eventHandlerMap;
+            var handlers = [];
+
+            for (var key in events) {
+                if (events.hasOwnProperty(key)) {
+                    var listeners = events[key];
+                    if ( listeners && !listeners['indexOf'] ) {
+                        var handler = listeners[event];
+                        if ( handler ) {
+                            handlers.push(handler)
+                        }
+                    }
+                }
+            }
+
+            return handlers;
+        } else {
+            return null;
+        }
+    }
 };
 
 /**
@@ -109,6 +180,7 @@ exports.addLocalEventListener = function( event, handler ) {
 
 /**
  * There are events that pusher nodes are allowed to handle.  See {@link module:constants.tileEventNames}.
+ * @private
  * @property {String} PUSH_DATA_TO_JIVE Fired on request to push tile data update to Jive.
  * @property {String} PUSH_ACTIVITY_TO_JIVE Fired on request to push externatstream activity to Jive.
  * @property {String} PUSH_COMMENT_TO_JIVE Fired on request to push a comment into Jive.
@@ -121,6 +193,7 @@ exports.pushQueueEvents = [
 
 /**
  * Array of system defined events. See {@link module:constants.globalEventNames}.
+ * @private
  * @property {String} NEW_INSTANCE Fired when a new tile or externalstream instance is created.
  * @property {String} INSTANCE_UPDATED Fired when a tile or externalstream instance is updated.
  * @property {String} INSTANCE_REMOVED Fired when a tile or externalstream instance is destroyed.

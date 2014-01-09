@@ -230,425 +230,6 @@ and also for definining your custom events and handlers. @see <a href="module-co
         <dl>
             
 <dt>
-    <h4 class="name" id="globalEvents"><span class="type-signature">&lt;static> </span>globalEvents<span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Array of system defined events. See <a href="module-constants.html#globalEventNames">module:constants.globalEventNames</a>.</p>
-    </div>
-    
-    
-    
-
-    
-<dl class="details">
-    
-
-        <h5 class="subsection-title">Properties:</h5>
-
-        <dl>
-
-<table class="props table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>NEW_INSTANCE</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Fired when a new tile or externalstream instance is created.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>INSTANCE_UPDATED</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Fired when a tile or externalstream instance is updated.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>INSTANCE_REMOVED</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Fired when a tile or externalstream instance is destroyed.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>DATA_PUSHED</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Fired when a tile instance updated is pushed into Jive.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>ACTIVITY_PUSHED</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Fired when an externalstream instance is pushed into Jive.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>COMMENT_PUSHED</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Fired when an externalstream instance comment is pushed into Jive.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>CLIENT_APP_REGISTRATION_SUCCESS</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Fired when a community registers itself with the addon service successfully.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>CLIENT_APP_REGISTRATION_FAILED</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Fired when a community registers itself with the addon service unsuccessfully.</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-</dl>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-133">line 133</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="pushQueueEvents"><span class="type-signature">&lt;static> </span>pushQueueEvents<span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>There are events that pusher nodes are allowed to handle.  See <a href="module-constants.html#tileEventNames">module:constants.tileEventNames</a>.</p>
-    </div>
-    
-    
-    
-
-    
-<dl class="details">
-    
-
-        <h5 class="subsection-title">Properties:</h5>
-
-        <dl>
-
-<table class="props table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>PUSH_DATA_TO_JIVE</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Fired on request to push tile data update to Jive.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>PUSH_ACTIVITY_TO_JIVE</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Fired on request to push externatstream activity to Jive.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>PUSH_COMMENT_TO_JIVE</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Fired on request to push a comment into Jive.</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-</dl>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-116">line 116</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
     <h4 class="name" id="systemEvents"><span class="type-signature">&lt;static> </span>systemEvents<span class="type-signature"></span></h4>
     
     
@@ -692,7 +273,7 @@ and also for definining your custom events and handlers. @see <a href="module-co
 
         <tr>
             
-                <td class="name"><code>NEW_INSTANCE</code></td>
+                <td class="name"><code>jive.util.constants.NEW_INSTANCE</code></td>
             
 
             <td class="type">
@@ -708,32 +289,14 @@ and also for definining your custom events and handlers. @see <a href="module-co
 
             
 
-            <td class="description last"><p>Fired on request to push tile data update to Jive.</p>
-                <h6>Properties</h6>
+            <td class="description last"><p>Fired on request to push tile data update to Jive.</p></td>
+        </tr>
 
-<table class="props table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
 	
 
         <tr>
             
-                <td class="name"><code>handler</code></td>
+                <td class="name"><code>NEW_INSTANCE.handler</code></td>
             
 
             <td class="type">
@@ -750,13 +313,6 @@ and also for definining your custom events and handlers. @see <a href="module-co
             
 
             <td class="description last"><p>Logs the request context</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-            </td>
         </tr>
 
 	
@@ -1923,7 +1479,7 @@ to push an extstreamstream activity entry into Jive.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-183">line 183</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-256">line 256</a>
     </li></ul></dd>
     
 
@@ -1945,194 +1501,6 @@ to push an extstreamstream activity entry into Jive.</p></td>
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
-            
-<dt>
-    <h4 class="name" id="addDefinitionEventListener"><span class="type-signature">&lt;static> </span>addDefinitionEventListener<span class="signature">(event, eventListener, handler, description)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add a user contributed event handler. The handler is added to an array of handler functions assigned for the
-event listener. Only one function per event listener per event is permitted.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>event</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the event id</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>eventListener</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the name of the listener</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>handler</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the function to call</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>description</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-47">line 47</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
             
 <dt>
     <h4 class="name" id="addLocalEventListener"><span class="type-signature">&lt;static> </span>addLocalEventListener<span class="signature">(event, handler)</span><span class="type-signature"></span></h4>
@@ -2248,7 +1616,7 @@ event listener. Only one function per event listener per event is permitted.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-104">line 104</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-175">line 175</a>
     </li></ul></dd>
     
 
@@ -2276,7 +1644,7 @@ event listener. Only one function per event listener per event is permitted.</p>
         
             
 <dt>
-    <h4 class="name" id="addSystemEventListener"><span class="type-signature">&lt;static> </span>addSystemEventListener<span class="signature">(event, handler, description)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getEventListeners"><span class="type-signature">&lt;static> </span>getEventListeners<span class="signature">(event, eventListener)</span><span class="type-signature"> &rarr; {Array}</span></h4>
     
     
 </dt>
@@ -2284,166 +1652,7 @@ event listener. Only one function per event listener per event is permitted.</p>
     
     
     <div class="description">
-        <p>Adds a system-level event listener.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>event</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>handler</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>description</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-87">line 87</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getDefinitionEventListenerFor"><span class="type-signature">&lt;static> </span>getDefinitionEventListenerFor<span class="signature">(eventListener, event)</span><span class="type-signature"> &rarr; {Array}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Returns array of event handling functions for the given eventListener and event, if at least one was registered.
+        <p>Returns array of registered event handling functions for the given event listener and event.
 Otherwise returns undefined.</p>
     </div>
     
@@ -2478,7 +1687,7 @@ Otherwise returns undefined.</p>
 
         <tr>
             
-                <td class="name"><code>eventListener</code></td>
+                <td class="name"><code>event</code></td>
             
 
             <td class="type">
@@ -2501,7 +1710,7 @@ Otherwise returns undefined.</p>
 
         <tr>
             
-                <td class="name"><code>event</code></td>
+                <td class="name"><code>eventListener</code></td>
             
 
             <td class="type">
@@ -2549,7 +1758,7 @@ Otherwise returns undefined.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-73">line 73</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-121">line 121</a>
     </li></ul></dd>
     
 
@@ -2589,6 +1798,247 @@ Otherwise returns undefined.</p>
 
 
         
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="registerEventListener"><span class="type-signature">&lt;static> </span>registerEventListener<span class="signature">(event, handler, options)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add an event handler. The handler is invoked when an event is fired which
+specifies the target event listener and event type, if both are specified in the event firing.
+If only event is specified, then the handler will be invoked whenever that event is fired.
+<br><br>
+The handler is added to an array of handler functions assigned for the
+event listener. Only one function per event listener per event is permitted.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the event id</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>handler</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the function to call</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>eventListener</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the name of the listener</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>description</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+            </td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-86">line 86</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
     
     
 </dd>
@@ -2637,7 +2087,7 @@ Otherwise returns undefined.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-347">line 347</a>
+        <a href="events.js.html">jive-sdk-api/lib/event/events.js</a>, <a href="events.js.html#sunlight-1-line-420">line 420</a>
     </li></ul></dd>
     
 
@@ -2688,7 +2138,7 @@ Otherwise returns undefined.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Mon Jan 06 2014 11:08:58 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Wed Jan 08 2014 16:17:28 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
