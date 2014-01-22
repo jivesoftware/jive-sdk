@@ -37,9 +37,73 @@ exports.save = function( webhook ) {
  * @param webhookId
  * @returns {Promise} Promise
  */
-exports.findByTenantID = function( webhookId ) {
+exports.findByID = function( webhookId ) {
     return jive.context.persistence.findByID( 'webhook', webhookId );
 };
+
+/**
+ * Looks through persistence for any webhook objects related to the provided tenantId.
+ * <br><br>
+ * An error will be thrown if, tenantId is not found in the webhook persistence store.
+ * <br><br>
+ * @param tenantId
+ * @returns {Promise} Promise (webhook)
+ */
+exports.findByTenantID = function (tenantId) {
+    var deferred = q.defer();
+
+    jive.context.persistence.find( 'webhook', { 'tenantId' : tenantId } ).then( function(found) {
+        deferred.resolve(found);
+    }, function(error) {
+        deferred.reject(error);
+    });
+
+    return deferred.promise;
+};
+
+/**
+ * Looks through persistence for a webhook object with the provided webhookURL.
+ * <br><br>
+ * An error will be thrown if, webhookURL is not found in the webhook persistence store.
+ * <br><br>
+ * @param webhookURL
+ * @returns {Promise} Promise (webhook)
+ */
+exports.findByWebhookURL = function (webhookURL) {
+    var deferred = q.defer();
+
+    jive.context.persistence.find( 'webhook', { 'entity' : { 'resources' : { 'self' : { 'ref' : webhookURL }}}}).then( function(found) {
+        deferred.resolve(found);
+    }, function(error) {
+        deferred.reject(error);
+    });
+
+    return deferred.promise;
+};
+
+/**
+ * Uses a webhook object to resolve reference to its parent community.  This is a convenience method for webhook processing.
+ * <br><br>
+ * An error will be thrown if, community tenantId is not found in the community persistence store.
+ * <br><br>
+ * @param webhook object
+ * @returns {Promise} Promise (community)
+ */
+exports.findWebhookCommunity = function (webhook) {
+    var deferred = q.defer();
+
+    jive.community.findByTenantID(webhook['tenantId']).then(
+        function(community) {
+            deferred.resolve(community);
+        },
+        function(error) {
+            deferred.reject(error);
+        }
+    );
+
+    return deferred.promise;
+};
+
 
 /**
  * Looks through persistence for all webhooks associated with the provided community object.
