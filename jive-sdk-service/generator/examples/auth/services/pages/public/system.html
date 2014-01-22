@@ -1,0 +1,69 @@
+<html>
+<head>
+    <title>System-Level Integration Example</title>
+    <style type="text/css">
+        .page-section { border: 1px solid black; border-radius: 4px; background-color: #efefef; padding: 8px; }
+    </style>
+</head>
+<body>
+    <a style="float: right;" href="/index.html">home</a>
+
+    <div align="center">
+        <span class="current">{{context.jiveUrl}}</span>
+        <br/>
+        <form method="GET" action="./system">
+        <select id="communitySelector" name="tenantId" size="1">
+            <option value="">---</option>
+            {{#community}}
+            <option value="{{tenantId}}">{{jiveUrl}}</option>
+            {{/community}}
+        </select>
+        <input type="submit" value="Change">
+        </form>
+    </div>
+
+    <hr/>
+
+    <h1>Send Update</h1>
+    <p>This interface allows you to create status updates to the designated community.</p>
+    <div id="status-form" class="page-section">
+        <form method="POST" action="./system" enctype="multipart/form-data">
+            <input type="hidden" value="{{context.tenantId}}" name="tenantId" />
+            <div>
+                <select name="userId" size="1">
+                    <option value="">--- Select Run-As ---</option>
+                    {{#user}}
+                    <option value="{{id}}">{{displayName}} ({{jive.username}})</option>
+                    {{/user}}
+                </select>
+            </div>
+            <div>
+                <label>Message:</label><br/>
+                <textarea class="span6" rows=3 name="message" id="message" style="resize:none"></textarea>
+            </div>
+            <div>
+                <input type="submit" class="btn btn-primary" id="create-update" value="Create Update" />
+            </div>
+        </form>
+    </div>
+    <hr/>
+
+    <h1>Current Activity</h1>
+    <p>This is the activity from the current place above.</p>
+
+    <div id="activity-stream" class="page-section">
+        {{#activity}}
+            <div class="activityEntry">
+                <div class="header">
+                        <a href="{{url}}">{{title}}</a>
+                        <span class="activityVerb">{{verb}}</span> by
+                        <span class="activityActor">{{actor.displayName}}</span>
+                </div>
+                <div class="summary">
+                    <p>{{summary}}</p>
+                </div>
+            </div>
+        {{/activity}}
+    </div>
+</body>
+</html>

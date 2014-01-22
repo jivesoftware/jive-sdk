@@ -1,0 +1,20 @@
+{
+    "sampleData" : {
+        "title" : "{{{TILE_NAME}}}",
+        "contents" : [ {
+            "text" : "Initial text to be replaced"
+        } ],
+        "config" : {
+               "listStyle" : "contentList"
+        }
+    },
+	"displayName" : "{{{TILE_NAME}}}",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "{{{TILE_NAME}}}",
+    "style" : "LIST",
+    "icons" : {
+        "16" : "{{{host}}}/images/extension-16.png",
+        "48" : "{{{host}}}/images/extension-48.png",
+        "128" : "{{{host}}}/images/extension-128.png"
+    }
+}
