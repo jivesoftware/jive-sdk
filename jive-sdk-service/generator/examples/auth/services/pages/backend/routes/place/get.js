@@ -14,7 +14,7 @@ exports.route = function(req, res) {
     function loadTiles() {
         var deferred = q.defer();
 
-        jive.tiles.findByDefinitionName('auth-list').then(
+        jive.tiles.findByDefinitionName('{{{TILE_NAME}}}').then(
             function(instances) {
                 if (instances) {
                     data['instance'] = instances;
