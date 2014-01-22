@@ -72,7 +72,7 @@ exports.findByTenantID = function (tenantId) {
 exports.findByWebhookURL = function (webhookURL) {
     var deferred = q.defer();
 
-    jive.context.persistence.find( 'webhook', { 'entity' : { 'resources' : { 'self' : { 'ref' : webhookURL }}}}).then( function(found) {
+    jive.context.persistence.find( 'webhook', { 'entity.resources.self.ref' : webhookURL }).then( function(found) {
         deferred.resolve(found);
     }, function(error) {
         deferred.reject(error);
