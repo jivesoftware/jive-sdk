@@ -1,0 +1,39 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{{host}}}/stylesheets/style.css">
+    <script src="{{{host}}}/javascripts/jquery-1.8.3.js"></script>
+
+    <script type="text/javascript">
+
+        $(function() {
+            $('#btnStart').click(function() {
+                $('#frmStart').submit();
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <strong>Select Your Instance</strong>
+    <p>To setup this example, you will need to have Admin access to your Jive Cloud instance.  Simply click on the Add-Ons action
+       in the Satellite Navigation in the Upper-Right Hand Corner.</p>
+       <p>Then click on <strong>Analytics Services</strong>.  Generate a
+       Client ID and Secret, and then copy those values into the <strong>jiveclientconfiguration.json</strong></p>
+       </p>
+    <p>For more information about the CloudAlytics API, please see the <a target="_blank" href="https://community.jivesoftware.com/docs/DOC-99916">documentation</a></p>
+
+    <hr/>
+
+    <form id="frmStart" method="POST" action="./start">
+        <select id="profile" name="profile">
+            {{#profile}}
+            <option value="{{id}}">{{name}}</option>
+            {{/profile}}
+        </select>
+        <input type="button" id="btnStart" value="Start"/>
+    </form>
+
+
+</ul>
+</body>
+</html>

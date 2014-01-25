@@ -1,0 +1,69 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{{host}}}/stylesheets/style.css">
+    <script src="{{{host}}}/javascripts/jquery-1.8.3.js"></script>
+
+    <script type="text/javascript">
+
+        $(function() {
+            $('.btnReport').click(function() {
+                $('#call').val($(this).attr('data'));
+                $('#frmReportRun').submit();
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <a style="float: right;" href="./start">Start Over</a>
+    <strong>Run Report</strong>
+
+    <form id="frmReportRun" method="POST" action="./reports" enctype="multipart/form-data">
+        <input name="profile" value="{{profile}}" type="hidden" />
+        <input name="call" id="call" value="" type="hidden" />
+
+        <!--
+        <h3>Fields</h3>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Action"><label>Action</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="ActivityTime"><label>ActivityTime</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Actor.Name"><label>Actor.Name</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Actor.Status"><label>Actor.Status</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Actor.ObjectType"><label>Actor.ObjectType</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Actor.Url"><label>Actor.Url</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Actor.Email"><label>Actor.Email</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Actor.Profile"><label>Actor.Profile</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Actor.Username"><label>Actor.Username</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Actor.FirstName"><label>Actor.FirstName</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Actor.CreationDate"><label>Actor.CreationDate</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Actor.LastName"><label>Actor.LastName</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="ContentActionObject.Owner"><label>ContentActionObject.Owner</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="ContentActionObject.Subject"><label>ContentActionObject.Subject</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="ContentActionObject.CreationDate"><label>ContentActionObject.CreationDate</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="ContentActionObject.AuthorId"><label>ContentActionObject.AuthorId</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="ContentActionObject.Status"><label>ContentActionObject.Status</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="ContentActionObject.ObjectType"><label>ContentActionObject.ObjectType</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="ContentActionObject.Url"><label>ContentActionObject.Url</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="ContentActionObject.ContainerType"><label>ContentActionObject.ContainerType</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="ContentActionObject.ContainerId"><label>ContentActionObject.ContainerId</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Destination.Name"><label>Destination.Name</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Destination.Status"><label>Destination.Status</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Destination.ObjectType"><label>Destination.ObjectType</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Destination.Url"><label>Destination.Url</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Destination.CreationDate"><label>Destination.CreationDate</label></div>
+        <div class="fieldWrapper"><input type="checkbox" name="fields" value="Destination.DisplayName"><label>Destination.DisplayName</label></div>
+        -->
+        <div>
+        <h1>JSON</h1>
+        <input type="button" class="btnReport"  id="btnGetYesterdayFieldsJSON" data="/activity/lastday?count=5&friendly=true&?friendly=true&fields=Action,Actor.Url,Actor.Email" value="Get Yesterday Activity - Specific Fields - 5 Records (JSON)" />
+        <input type="button" class="btnReport"  id="btnGetYesterday1RowJSON" data="/activity/lastday?friendly=true&count=5" value="Get Yesterday Activity - 5 Records (JSON)" />
+        </div>
+        <div>
+        <h1>CSV</h1>
+        <input type="button" class="btnReport"  id="btnGetYesterdayAllCSV" data="/activity/csv/place?count=5&" value="Get Place Activity - 5 Records (CSV)" />
+        <input type="button" class="btnReport"  id="btnGetYesterdayFieldsCSV" data="/activity/csv/user?count=5&friendly=true&?friendly=true&fields=Action,Actor.Url,Actor.Email" value="Get User Activity - Specific Fields - 5 Records (CSV)" />
+        <input type="button" class="btnReport"  id="btnGetYesterday1RowCSV" data="/activity/csv/content?count=5&friendly=true" value="Get Content Activity - 5 Records (CSV)" />
+        </div>
+    </form>
+</ul>
+</body>
+</html>

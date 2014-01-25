@@ -1,0 +1,19 @@
+{
+    "clientUrl": "http://localhost",
+    "port": "8090",
+    "cloudalytics" : {
+        "servers" : {
+            "us" : "api.jivesoftware.com",
+            "eu" : "api-eu.jivesoftware.com"
+        },
+        "profiles" : {
+                "default" : {
+                    "id" : "default",
+                    "name" : "YOURCLOUDNAME.jiveon.com",
+                    "server" : "us",
+                    "clientID" : "SEE_INSTRUCTIONS_TO_GET_PROPER_CLIENT_ID",
+                    "clientSecret" : "SEE_INSTRUCTIONS_TO_GET_PROPER_CLIENT_SECRET"
+                }
+        }
+    }
+}
