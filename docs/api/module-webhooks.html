@@ -325,7 +325,7 @@ An error will be thrown if:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-58">line 58</a>
+        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-122">line 122</a>
     </li></ul></dd>
     
 
@@ -376,7 +376,7 @@ An error will be thrown if:</p>
         
             
 <dt>
-    <h4 class="name" id="findByTenantID"><span class="type-signature">&lt;static> </span>findByTenantID<span class="signature">(webhookId)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="findByID"><span class="type-signature">&lt;static> </span>findByID<span class="signature">(webhookId)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
     
 </dt>
@@ -488,6 +488,423 @@ If no object is found with that id, a null object is resolved to the returned pr
             
 <div class="param-desc">
     <p>Promise</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Promise</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByTenantID"><span class="type-signature">&lt;static> </span>findByTenantID<span class="signature">(tenantId)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Looks through persistence for any webhook objects related to the provided tenantId.
+<br><br>
+An error will be thrown if, tenantId is not found in the webhook persistence store.
+<br><br></p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>tenantId</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-52">line 52</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Promise (webhook)</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Promise</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByWebhookURL"><span class="type-signature">&lt;static> </span>findByWebhookURL<span class="signature">(webhookURL)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Looks through persistence for a webhook object with the provided webhookURL.
+<br><br>
+An error will be thrown if, webhookURL is not found in the webhook persistence store.
+<br><br></p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>webhookURL</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-72">line 72</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Promise (webhook)</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Promise</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findWebhookCommunity"><span class="type-signature">&lt;static> </span>findWebhookCommunity<span class="signature">(webhook)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Uses a webhook object to resolve reference to its parent community.  This is a convenience method for webhook processing.
+<br><br>
+An error will be thrown if, community tenantId is not found in the community persistence store.
+<br><br></p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>webhook</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>object</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-92">line 92</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Promise (community)</p>
 </div>
 
 
@@ -744,7 +1161,7 @@ tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, th
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-97">line 97</a>
+        <a href="webhooks.js.html">jive-sdk-api/lib/webhook/webhooks.js</a>, <a href="webhooks.js.html#sunlight-1-line-161">line 161</a>
     </li></ul></dd>
     
 
@@ -954,7 +1371,7 @@ tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, th
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-dev</a>
-		on Wed Jan 08 2014 16:17:29 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Wed Jan 22 2014 12:29:39 GMT-0800 (PST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
