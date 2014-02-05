@@ -184,11 +184,11 @@ var findCredentials = function(jiveUrl) {
                 deferred.resolve( credentials );
             } else {
                 // could not find community trust
-                deferred.resolve( serviceCredentials );
+                deferred.reject(new Error("Could not find community with jiveUrl " + jiveUrl));
             }
         });
     } else {
-        deferred.reject(new Error("Could not find community with jiveUrl " + jiveUrl));
+        deferred.reject(new Error("Invalid jiveUrl ["+jiveUrl+"]"));
     }
 
     return deferred.promise;
