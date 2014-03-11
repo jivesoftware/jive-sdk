@@ -16,6 +16,8 @@ function OAuth2ServerFlow( options ) {
     var authz = options['authz'] || 'signed';
     var context = options['context'];
     var extraAuthParams = options['extraAuthParams'];
+    var popupWindowHeight = options['popupWindowHeight'] || '600';
+    var popupWindowWidth = options['popupWindowWidth'] || '310';
 
     var doOAuthDance = function(viewerID, oauth2CallbackUrl, jiveTenantID) {
         // do any preparation things necessary
@@ -67,7 +69,7 @@ function OAuth2ServerFlow( options ) {
             $(grantDOMElementID).click(
                 jive.tile.openOAuthPopup(
                     JSON.parse(data).url,
-                    'width=310,height=600,scrollbars=yes',
+                    'width='+popupWindowWidth+',height='+popupWindowHeight+',scrollbars=yes',
                     openCallback, closeCallback
                 ).createOpenerOnClick()
             );
