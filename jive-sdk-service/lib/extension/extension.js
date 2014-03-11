@@ -191,10 +191,10 @@ function fillExtensionMetadata(extensionInfo, definitions) {
         "icon_48": "extension-48.png",
         "icon_128": "extension-128.png",
         "status": "available",
-        "released_on": "2013-03-08T19:11:11.234Z", // xxx todo
-        "register_url": jive.service.serviceURL() + "/jive/oauth/register",
+        "released_on": extensionInfo['releasedOn'] || "2013-03-08T19:11:11.234Z",
+        "register_url": extensionInfo['registerURL'] || "%serviceURL%/jive/oauth/register",
         "service_url": jive.service.serviceURL(),
-        "redirect_url": extensionInfo['redirectURL'] || jive.service.serviceURL()
+        "redirect_url": extensionInfo['redirectURL'] || "%serviceURL%"
     }, jive.service.options['extensionInfo']);
 }
 
