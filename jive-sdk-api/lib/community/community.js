@@ -299,8 +299,12 @@ exports.doRequest = function( community, options ) {
 
 function validateRegistration(registration) {
 
-    if ( jive.context.config['development'] == true ) {
-        jive.logger.warn("Warning - development mode is on. Accepting extension registration request regardless of source!");
+    if ( jive.context.config['development'] == true || jive.context.config['ignoreExtensionRegistrationSource'] == true ) {
+        if (jive.context.config['development'] == true) {
+            jive.logger.warn("Warning - development mode is on. Accepting extension registration request regardless of source!");
+        } else if ( jive.context.config['ignoreExtensionRegistrationSource'] == true ) {
+            jive.logger.warn("Warning - ignoreExtensionRegistrationSource is set to true. Accepting extension registration request regardless of source!");
+        }
         return q.resolve(true);
     }
 
