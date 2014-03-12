@@ -193,6 +193,7 @@ function fillExtensionMetadata(extensionInfo, definitions) {
         "status": "available",
         "released_on": extensionInfo['releasedOn'] || "2013-03-08T19:11:11.234Z",
         "register_url": extensionInfo['registerURL'] || "%serviceURL%/jive/oauth/register",
+        "unregister_url": extensionInfo['unregisterURL'] || "%serviceURL%/jive/oauth/unregister",
         "service_url": jive.service.serviceURL(),
         "redirect_url": extensionInfo['redirectURL'] || "%serviceURL%"
     }, jive.service.options['extensionInfo']);

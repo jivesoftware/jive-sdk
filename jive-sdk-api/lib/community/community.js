@@ -310,14 +310,16 @@ function validateRegistration(registration) {
 
     var validationBlock = JSON.parse( JSON.stringify(registration) );
     var jiveSignature = validationBlock['jiveSignature'];
-    var clientSecret = validationBlock['clientSecret'];
     var jiveSignatureUrl = validationBlock['jiveSignatureURL'];
     delete validationBlock['jiveSignature'];
 
-    var crypto = require("crypto");
-    var sha256 = crypto.createHash("sha256");
-    sha256.update(clientSecret, "utf8");
-    validationBlock['clientSecret'] = sha256.digest("hex");
+    if (validationBlock['clientSecret']) { // The unregister packet won't contain a client secret
+        var clientSecret = validationBlock['clientSecret'];
+        var crypto = require("crypto");
+        var sha256 = crypto.createHash("sha256");
+        sha256.update(clientSecret, "utf8");
+        validationBlock['clientSecret'] = sha256.digest("hex");
+    }
 
     var buffer = '';
 
@@ -338,6 +340,54 @@ function validateRegistration(registration) {
 
     return jive.util.buildRequest(jiveSignatureUrl, 'POST', buffer, headers);
 }
+
+exports.remove = function(community) {
+    var deferred = q.defer();
+
+    if (community) {
+        jive.context.persistence.remove("community", community['jiveUrl']).then(function(removed) {
+            if (removed) {
+                jive.events.emit("unregisterJiveInstanceSuccess", community);
+                deferred.resolve();
+            } else {
+                var error = new Error("Could not find jive instance: "+ community);
+                jive.logger.debug("Unsuccessful unregistration request. Community not found ", community);
+                jive.events.emit("unregisterJiveInstanceFailed", error );
+                deferred.reject(error);
+            }
+        });
+    } else {
+        var error = new Error("No community provided");
+        jive.logger.debug("Unsuccessful unregistration request. Community not provided ");
+        jive.events.emit("unregisterJiveInstanceFailed", error);
+        deferred.reject(error);
+    }
+
+    return deferred.promise;
+}
+
+exports.unregister = function(packet) {
+    var deferred = q.defer();
+
+    var jiveUrl = packet['jiveUrl'];
+
+    validateRegistration(packet).then(function() {
+        exports.findByJiveURL(jiveUrl).then(function(community) {
+            exports.remove(community).then(function() {
+                deferred.resolve();
+            }).fail(function(err) {
+                deferred.reject(new Error("Community could not be unregistered: "+ JSON.stringify(err)));
+            });
+        });
+
+    }).fail(function(err) {
+        jive.logger.debug("Unsuccessful unregistration request: " + err? JSON.stringify(err) : '');
+        jive.events.emit("unregisterJiveInstanceFailed", err );
+        deferred.reject(new Error("Failed jive signature validation: "+ JSON.stringify(err)));
+    });
+
+    return deferred.promise;
+};
 
 /**
  * Processes the incoming community addon registration request object.

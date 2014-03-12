@@ -244,6 +244,8 @@ exports.globalEvents = [
  * @property {function} INSTANCE_UNREGISTRATION.handler
  * @property {Object} CLIENT_APP_REGISTRATION Fired on request to register a Jive instance on the service.
  * @property {function} CLIENT_APP_REGISTRATION.handler
+ * @property {Object} CLIENT_APP_UNREGISTRATION Fired on request to unregister a Jive instance on the service.
+ * @property {function} CLIENT_APP_UNREGISTRATION.handler
  * @property {Object} GET_PAGINATED_RESULTS Fired on request for paginated results from a Jive service.
  * @property {function} GET_PAGINATED_RESULTS.handler
  * @property {Object} GET_EXTERNAL_PROPS Fired on request for retrieving external props on a tile or externalstream instance.
@@ -381,6 +383,13 @@ exports.systemEvents = [
         'event':jive.constants.tileEventNames.CLIENT_APP_REGISTRATION,
         'handler':function(context) {
             return jive.community.register(context);
+        },
+        'description' : 'Framework handler'
+    },
+    {
+        'event':jive.constants.tileEventNames.CLIENT_APP_UNREGISTRATION,
+        'handler':function(context) {
+            return jive.community.unregister(context);
         },
         'description' : 'Framework handler'
     },

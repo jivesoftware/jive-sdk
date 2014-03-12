@@ -74,6 +74,7 @@ var setupExpressApp = function (app, rootDir, config) {
         app.post('/unregister', service.routes.tiles.unregister);
         service.security().lockRoute({ 'verb' : 'post', 'path' : '/unregister' });
         app.post('/jive/oauth/register', service.routes.jive.oauthRegister);
+        app.post('/jive/oauth/unregister', service.routes.jive.oauthUnregister);
 
         jive.logger.debug("/registration");
         jive.logger.debug("/unregister");

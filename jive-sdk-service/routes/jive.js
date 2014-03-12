@@ -16,13 +16,27 @@ var jive = require("../api");
 exports.oauthRegister = function(req, res ) {
     var registration = req.body;
 
-    jive.logger.debug('Recieved client app registration', registration );
+    jive.logger.debug('Received client app registration', registration );
 
-    schedule(registration, res);
+    schedule(jive.constants.tileEventNames.CLIENT_APP_REGISTRATION, registration, res);
 };
 
-function schedule(registration, res) {
-    var promise =  jive.context.scheduler.schedule(jive.constants.tileEventNames.CLIENT_APP_REGISTRATION, registration);
+/**
+ * <b>POST /oauthUnregister</b>
+ * <br>
+ * @param req
+ * @param res
+ */
+exports.oauthUnregister = function(req, res ) {
+    var data = req.body;
+
+    jive.logger.debug('Received client app unregistration', data );
+
+    schedule(jive.constants.tileEventNames.CLIENT_APP_UNREGISTRATION, data, res);
+};
+
+function schedule(event, data, res) {
+    var promise =  jive.context.scheduler.schedule(event, data);
     var success = function() {
         // success
         res.writeHead(200, { 'Content-Type': 'application/json' });

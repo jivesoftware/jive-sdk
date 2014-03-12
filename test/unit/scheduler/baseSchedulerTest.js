@@ -213,7 +213,6 @@ exports.testIntervalEventWithDelay = function( jive, testUtils, scheduler ) {
             if ( !elapsed ) {
                 elapsed = new Date().getTime() - now;
             }
-            console.log(elapsed);
             count++;
         },
         { 'eventListener' : 'event1Listener'}

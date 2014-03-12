@@ -29,6 +29,7 @@
  * @property {String} INSTANCE_REGISTRATION Fired on request to register a new tile or externalstream instance.
  * @property {String} INSTANCE_UNREGISTRATION Fired on request to destroy a tile or externalstream instance.
  * @property {String} CLIENT_APP_REGISTRATION Fired on request to register a Jive instance on the service.
+ * @property {String} CLIENT_APP_UNREGISTRATION Fired on request to unregister a Jive instance on the service.
  * @property {String} GET_PAGINATED_RESULTS Fired on request for paginated results from a Jive service.
  * @property {String} GET_EXTERNAL_PROPS Fired on request for retrieving external props on a tile or externalstream instance.
  * @property {String} SET_EXTERNAL_PROPS Fired on request for setting external props on a tile or externalstream instance.
@@ -45,6 +46,7 @@ exports.tileEventNames = {
     'INSTANCE_REGISTRATION':'registration',
     'INSTANCE_UNREGISTRATION':'unregistration',
     'CLIENT_APP_REGISTRATION':'clientAppRegistration',
+    'CLIENT_APP_UNREGISTRATION':'clientAppUnregistration',
     'GET_PAGINATED_RESULTS':'getPaginatedResults',
     'GET_EXTERNAL_PROPS':'getExternalProps',
     'SET_EXTERNAL_PROPS':'setExternalProps',
@@ -60,6 +62,8 @@ exports.tileEventNames = {
  * @property {String} COMMENT_PUSHED Fired when an externalstream instance comment is pushed into Jive.
  * @property {String} CLIENT_APP_REGISTRATION_SUCCESS Fired when a community registers itself with the addon service successfully.
  * @property {String} CLIENT_APP_REGISTRATION_FAILED Fired when a community registers itself with the addon service unsuccessfully.
+ * @property {String} CLIENT_APP_UNREGISTRATION_SUCCESS Fired when a community unregisters itself with the addon service successfully.
+ * @property {String} CLIENT_APP_UNREGISTRATION_FAILED Fired when a community unregisters itself with the addon service unsuccessfully.
  */
 exports.globalEventNames = {
     'NEW_INSTANCE':'newInstance',
@@ -69,7 +73,9 @@ exports.globalEventNames = {
     'ACTIVITY_PUSHED':'activityPushed',
     'COMMENT_PUSHED':'commentPushed',
     'CLIENT_APP_REGISTRATION_SUCCESS' : 'registeredJiveInstanceSuccess',
-    'CLIENT_APP_REGISTRATION_FAILED' : 'registeredJiveInstanceFailed'
+    'CLIENT_APP_REGISTRATION_FAILED' : 'registeredJiveInstanceFailed',
+    'CLIENT_APP_UNREGISTRATION_SUCCESS' : 'unregisterJiveInstanceSuccess',
+    'CLIENT_APP_UNREGISTRATION_FAILED' : 'unregisterJiveInstanceFailed'
 };
 
 /**
