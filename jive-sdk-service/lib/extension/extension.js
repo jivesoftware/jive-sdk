@@ -295,7 +295,7 @@ function getApps(appsRootDir, extensionInfo) {
                                 app['appPath'] = temp;
                             }
 
-                            app['url'] = jive.service.serviceURL() + '/osapp/' + item + '/app.xml';
+                            app['url'] = '%serviceURL%/osapp/' + item + '/app.xml';
                             return app;
                         }) );
                     }
