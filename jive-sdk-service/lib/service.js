@@ -322,8 +322,13 @@ function initLogger(options) {
                 fs.mkdirSync('logs');
             }
         }
+
+        var logFileSize = options['logFileSize'] || undefined;
+        var logFileNumBackups = options['logFileNumBackups'] || undefined;
+        var logFileLayout = undefined; // Force default layout
+
         log4js.loadAppender('file');
-        log4js.addAppender(log4js.appenders.file(logfile), 'jive-sdk');
+        log4js.addAppender(log4js.appenders.file(logfile, logFileLayout, logFileSize, logFileNumBackups), 'jive-sdk');
     }
 
     jive.logger.setLevel(logLevel);
