@@ -26,11 +26,15 @@ var _ = require("underscore");
 
 var argv = require('optimist').argv;
 
-var validCommands = ['create','help','list', 'createExtension'];
-var groups = ['tiles', "apps", 'services', 'storages', 'cartridges'];
+var validCommands = ['create','help','list', 'createExtension', 'version'];
+var groups = ['tiles', 'apps', 'services', 'storages', 'cartridges'];
 
 var styles = [];
 var examples = [];
+
+var deprecatedNames = ['list',      'gauge',      'gallery',      'table',      'activity',      'github',         'sfdc',               'bitcoin',         'todo',         'auth',         'basecamp',         'jenkins',         'jira',         'newrelic',         'podio',         'stock-price',         'wikibang',         'sampleapps',         'samplegoogle',         'albums',         'samplewebhooks',   'analytics',         'sampleservice',   'samplecartridges',   'sampleFilesStorage'];
+var refactoredNames = ['tile-list', 'tile-gauge', 'tile-gallery', 'tile-table', 'tile-activity', 'example-github', 'example-salesforce', 'example-bitcoin', 'example-todo', 'example-auth', 'example-basecamp', 'example-jenkins', 'example-jira', 'example-newrelic', 'example-podio', 'example-stockprice', 'example-wikibang', 'example-sampleapps', 'example-samplegoogle', 'example-albums', 'example-webhooks', 'example-analytics', 'example-service', 'example-cartridges', 'example-filestorage'];
+
 var groupedExamples = {};
 _.each(groups, function(group) { groupedExamples[group] = [] });
 
@@ -39,13 +43,13 @@ function validate(options) {
     var err = [];
 
     if ( validCommands.indexOf(options['cmd']) < 0 ) {
-        err.push('Invalid comamnd ' + options['cmd'] + ', must be one of ' + validCommands );
+        err.push('Invalid command ' + options['cmd'] + '.\nMust be one of ' + validCommands );
     }
 
     if ( options['cmd'] === 'create' ) {
-        if ( styles.concat(examples).indexOf(options['subject']) < 0 &&  options['subject']  != 'all' ) {
+        if ( styles.concat(examples).concat(deprecatedNames).indexOf(options['subject']) < 0 &&  options['subject']  != 'all' ) {
             if ( options['subject'] ) {
-                err.push('Invalid item ' + options['subject'] + ', must be one of ' + styles.concat(examples) + ", or 'all'.");
+                err.push('Invalid item ' + options['subject'] + '.\nMust be one of ' + styles.concat(examples) + ", or 'all'.");
             } else {
                 err.push('You must create one of ' + styles.concat(examples) + ", or 'all'.");
             }
@@ -55,7 +59,7 @@ function validate(options) {
     if ( options.cmd === 'list' ) {
         if( options.subject ) {
             if(groups.indexOf( options.subject ) == -1) {
-                err.push('Invalid list type ' + options.subject + ', must be one of ' + groups + ", empty, or 'all'");
+                err.push('Invalid list type ' + options.subject + '.\nMust be one of ' + groups + ", empty, or 'all'");
             }
         }
     }
@@ -139,7 +143,7 @@ function processExample(target, example, name, force) {
                                 'host': '{{{host}}}'
                             };
                             promises.push(
-                               jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions )
+                                jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions )
                             );
                         });
                     }
@@ -181,7 +185,7 @@ function processExample(target, example, name, force) {
     return jive.util.recursiveCopy(root + '/base', target, force, baseSubstitutions).then( function() {
         var promises = [];
         var sourceRootDir = root + '/examples/' + example;
-            return jive.util.fsreaddir(sourceRootDir).then( function(subDirs) {
+        return jive.util.fsreaddir(sourceRootDir).then( function(subDirs) {
             subDirs.forEach(function(subDir) {
                 var sourceSubRoot = sourceRootDir + '/' + subDir;
                 var targetSubRoot = target + '/' + subDir;
@@ -367,29 +371,80 @@ function doAll( options ) {
     });
 }
 
-function doHelp() {
-    console.log('Usage: jive-sdk [cmd] [item] [--options ...]\n');
-    console.log('where cmd include:');
-    console.log('   help');
-    console.log('   create');
-    console.log('   list\n');
+function sortItems(itemArray) {
+    var simpleItems = [];
+    var exampleItems = [];
+    var specialItems = ['all'];
 
-    console.log('where item for create include:');
-    examples.concat(styles).forEach( function(item) {
-        console.log('   ' + item );
+    itemArray.sort().forEach( function(item) {
+
+        // put examples in a separate array
+        if (item.indexOf('example-') == 0) {
+            exampleItems.push(item);
+        } else {
+            simpleItems.push(item);
+        }
     });
+    // put the simple items first, examples next, special last
+    return simpleItems.concat(exampleItems).concat(specialItems);
+}
 
-    console.log('');
-    console.log('where item for list include:');
+function displayItemsInColumns(itemArray, numColumns, columnLength) {
+
+    // Always start line with some spaces
+    process.stdout.write('   ');
+
+    // Loop through all the items
+    for (var itemIndex in itemArray) {
+
+        // Print the item
+        process.stdout.write(itemArray[itemIndex]);
+
+        // If it's not the last item...
+        if (itemIndex < itemArray.length-1) {
+
+            // Always display at least two spaces
+            process.stdout.write('  ');
+
+            // Add more spaces so that columns line up (except when item name too long)
+            for (var spaceIndex = 0; spaceIndex < (columnLength-itemArray[itemIndex].length); spaceIndex++) {
+                process.stdout.write(' ');
+            }
+
+            // Add new line after numColumns have been reached
+            if (itemIndex % numColumns == (numColumns-1)) {
+                console.log();
+                process.stdout.write('   ');
+            }
+        }
+    }
+    console.log();
+}
+
+function doHelp() {
+    console.log('usage: jive-sdk <command> <item> [--options]\n');
+    console.log('Available commands:');
+    console.log('   help                  Display this help page');
+    console.log('   list                  List all the existing examples for a category');
+    console.log('   create                Create a jive-sdk example\n');
+
+    // Display list items
+    console.log('Available items for list command:');
     _.each(groups, function(group) {
         console.log('   ' + group);
     });
 
-
+    // Display create items
     console.log();
-    console.log('where options include:');
-    console.log('   --force=<one of [true,false]>           Defaults to false, overrwrites existing if true');
-    console.log('   --name=<string>                         Defaults to [item]');
+    console.log('Available items for create command:');
+    // Display items (in columns, sorted, with examples at the end)
+    displayItemsInColumns(sortItems(examples.concat(styles)),3,20);
+
+    // Display options
+    console.log();
+    console.log('Available options:');
+    console.log('   --force=<true/false>  Whether to overwrite existing data; defaults to false');
+    console.log('   --name="<string>"     Use the specified string for the new item name');
 }
 
 function execute(options) {
@@ -406,6 +461,13 @@ function execute(options) {
         if ( subject == 'all' ) {
             doAll( options );
             return;
+        }
+
+        // Deprecated items are automatically changed to the new names
+        if (_.contains(deprecatedNames,subject)) {
+            var refactoredName = refactoredNames[deprecatedNames.indexOf(subject)];
+            console.log("WARNING: Item name "+subject+" has changed. Using "+refactoredName+" instead.");
+            options['subject'] = subject = refactoredName;
         }
 
         if ( styles.indexOf( subject ) > -1 ) {
@@ -475,24 +537,24 @@ function prepare() {
             groupedExamples['tiles'].push(item);
         });
     }).then( function() {
-            return jive.util.fsreaddir( root + '/examples').then(function(items) {
-                var deferreds = [];
-                examples = examples.concat( items );
-                _.each(examples, function( item ) {
-                    _.each(groups, function( group ) {
-                        var deferred = q.defer();
-                        deferreds.push(deferred);
-                        jive.util.fsexists( root + '/examples/' + item + "/" + group).then(function(exists) {
-                            if(exists) {
-                                groupedExamples[group].push(item);
-                            }
-                            deferred.resolve();
-                        });
+        return jive.util.fsreaddir( root + '/examples').then(function(items) {
+            var deferreds = [];
+            examples = examples.concat( items );
+            _.each(examples, function( item ) {
+                _.each(groups, function( group ) {
+                    var deferred = q.defer();
+                    deferreds.push(deferred);
+                    jive.util.fsexists( root + '/examples/' + item + "/" + group).then(function(exists) {
+                        if(exists) {
+                            groupedExamples[group].push(item);
+                        }
+                        deferred.resolve();
                     });
                 });
-                return q.allResolved(deferreds);
-            } );
-        });
+            });
+            return q.allResolved(deferreds);
+        } );
+    });
 }
 
 var getSDKVersion = function() {
@@ -503,7 +565,7 @@ var getSDKVersion = function() {
                 if ( packageContents ) {
                     return packageContents['version'];
                 } else {
-                    return nul;
+                    return null;
                 }
             });
         } else {
@@ -512,11 +574,10 @@ var getSDKVersion = function() {
     });
 };
 
-
 exports.init = function(target) {
     getSDKVersion().then( function(version ) {
         if ( version ) {
-            console.log("Jive SDK version version " + version);
+            console.log("Jive Node SDK version " + version);
         }
     }).then( function() {
         // init lists
@@ -546,7 +607,7 @@ exports.init = function(target) {
             if ( err.length > 0 ) {
                 console.log('Could not execute command, errors were found:');
                 err.forEach( function(err) {
-                    console.log('   ', err);
+                    console.log(err);
                 });
 
                 console.log();
