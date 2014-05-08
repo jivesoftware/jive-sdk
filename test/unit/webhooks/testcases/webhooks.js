@@ -163,6 +163,115 @@ describe('jive', function () {
                 '/services/tile_activity_push');
         });
 
+        it('unregister - community oauth', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            testUtils.runServerTest(testUtils, jive, done, {
+                    'port' : 5556,
+                    'routes' : [
+                        {
+                            'method'        : 'delete',
+                            'statusCode'    : '204',
+                            'path'          : '/api/core/v3/webhooks/1000',
+                            'handler'       : function(req, res, body) {
+                                if ( req.headers['authorization'] !== 'Bearer __authorization_header__' ) {
+                                    res.writeHead(500, {} );
+                                    res.end('bad authorization header');
+                                    return true;
+                                }
+
+                            }
+                        }
+                    ]
+                },
+                function(testUtils, jive, community) {
+                    var p = q.defer();
+
+                    var webhook = {
+                        'id' : jive.util.guid(),
+                        'tenantId' : community['tenantId'],
+                        'entity' : {
+                            'id': '1000'
+                        }
+                    };
+
+                    community['oauth'] = {
+                        'access_token': '__authorization_header__'
+                    };
+
+                    jive.webhooks.save( webhook ).then( function() {
+                        jive.webhooks.unregister(webhook).then(
+                            function(r) {
+                                p.resolve(r);
+                            },
+                            function(e) {
+                                p.reject(e);
+                            }
+                        );
+
+                    }, function(error) {
+                        p.reject(error);
+                    });
+
+                    return p.promise;
+                },
+                '/services/tile_activity_push');
+        });
+
+        it('unregister - supplied oauth', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            testUtils.runServerTest(testUtils, jive, done, {
+                    'port' : 5556,
+                    'routes' : [
+                        {
+                            'method'        : 'delete',
+                            'statusCode'    : '204',
+                            'path'          : '/api/core/v3/webhooks/1000',
+                            'handler'       : function(req, res, body) {
+                                if ( req.headers['authorization'] !== 'Bearer supplied__authorization_header__' ) {
+                                    res.writeHead(500, {} );
+                                    res.end('bad authorization header');
+                                    return true;
+                                }
+
+                            }
+                        }
+                    ]
+                },
+                function(testUtils, jive, community) {
+                    var p = q.defer();
+
+                    var webhook = {
+                        'id' : jive.util.guid(),
+                        'tenantId' : community['tenantId'],
+                        'entity' : {
+                            'id': '1000'
+                        }
+                    };
+
+
+                    jive.webhooks.save( webhook ).then( function() {
+                        jive.webhooks.unregister(webhook, 'supplied__authorization_header__').then(
+                            function(r) {
+                                p.resolve(r);
+                            },
+                            function(e) {
+                                p.reject(e);
+                            }
+                        );
+
+                    }, function(error) {
+                        p.reject(error);
+                    });
+
+                    return p.promise;
+                },
+                '/services/tile_activity_push');
+        });
+
     });
 
 });

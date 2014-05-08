@@ -221,3 +221,63 @@ exports.register = function( jiveCommunity, events, object, webhookCallbackURL,
 
     return deferred.promise;
 };
+
+/**
+ * Unregisters a webhook . Uses either the registered  access token for the community associated with the webhook or the supplied access token.
+ *
+ * @param {Object} webhook Required.
+ * @param {String} accessToken Optional. If omitted, will registration will use community oauth
+ * @param {String} refreshToken Optional. If omitted, will registration will use community oauth
+ * @param {function} tokenPersistenceFunction Optional. Callback function that will be invoked with new oauth access and refresh
+ * tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, the community will be updated with the new access tokens.
+ * @returns {Promise} Promise
+ */
+exports.unregister = function(webhook, accessToken, refreshToken, tokenPersistenceFunction) {
+    var deferred = q.defer();
+
+    jive.community.findByTenantID(webhook.tenantId).then(function(community) {
+        if (!community) {
+            deferred.reject( { "error" : "Cannot find jive community associated with webhook " + webhook.tenantId} );
+            return;
+        }
+
+        if ( (!community['oauth'] || !community['oauth']['access_token']) && !accessToken ) {
+            deferred.reject(new Error("Failed to create community webhook. " +
+                "No access token associated with community, and none provided explicitly."));
+            return;
+        }
+
+        var oauth;
+        if ( accessToken ) {
+            oauth = {};
+            oauth['access_token'] = accessToken;
+            oauth['refresh_token'] = refreshToken;
+        }
+
+        jive.community.doRequest( community, {
+            'path' : '/api/core/v3/webhooks/'+webhook.entity.id,
+            'oauth' : oauth,
+            'tokenPersistenceFunction' : tokenPersistenceFunction,
+            'method' : 'DELETE'
+        }).then(
+            function(result) {
+
+                jive.context.persistence.remove('webhook', webhook['id']).then(function(removed) {
+                    if (removed) {
+                        deferred.resolve();
+                    } else {
+                        deferred.reject(new Error('Could not remove webhook'+webhook));
+                    }
+                });
+
+            },
+            function(error) {
+                // failed webhook request
+                deferred.reject( error );
+            }
+        );
+
+    });
+
+    return deferred.promise;
+};
