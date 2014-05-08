@@ -679,7 +679,7 @@ exports.zipFolder = function (root, targetZip, flatten) {
             }
         })
     }).then(function () {
-            archive.finalize(function (err, written) {
+            return archive.finalize(function (err, written) {
                 if (err) {
                     throw err;
                 }
