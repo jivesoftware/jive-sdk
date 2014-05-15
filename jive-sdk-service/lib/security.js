@@ -185,7 +185,7 @@ exports.checkAuthHeaders = function(req, res) {
 
 exports.checkAuthHeadersMiddleware = function (req, res, next ) {
     return exports.checkAuthHeaders( req, res ).finally( function() {
-        if ( next ) {
+        if ( next && !res.headersSent) {
             next();
         }
     });
