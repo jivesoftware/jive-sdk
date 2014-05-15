@@ -127,7 +127,6 @@ exports.authorizeUrl = function(req, res ) {
     }
     var self = this;
     getOAuth2Conf(targetJiveTargetID, originJiveTenantID, this ).then( function(oauth2Conf) {
-        jive.logger.info(JSON.stringify(oauth2Conf, null, 4));
         var responseMap = self.buildAuthorizeUrlResponseMap(
             oauth2Conf, callback, { 'viewerID': viewerID, 'context': context}, extraAuthParams );
 
