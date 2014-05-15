@@ -55,6 +55,8 @@ exports.buildRequest = function (url, method, postBody, headers, requestOptions)
         }
     }
 
+    requestOptions['jar'] = false;
+
     requestMaker(
         method,
         { host: host, port: port },
@@ -62,7 +64,7 @@ exports.buildRequest = function (url, method, postBody, headers, requestOptions)
         headers || {},
         postBody,
         protocol && protocol.indexOf('https') == 0,
-        requestOptions || {}
+        requestOptions
     ).execute(
         // success
         function (response) {
