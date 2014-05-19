@@ -1,0 +1,6 @@
+{
+    "name": "google_search_results_cartridge",
+    "displayName": "Google Search Results",
+    "patterns": ["www.google.com"],
+    "zipFileName":"google-search-results.zip"
+}
