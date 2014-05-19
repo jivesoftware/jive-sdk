@@ -16,7 +16,7 @@ this.init = function () {
 
 // Display the defect ID of the site in the community tab
 this.onGetModuleUI = function (callback) {
-    var moduleUiInfo = { defaultTabId: 0, tabs: [{ title: "Google Search Results - term on timestamp" }, {}] };
+    var moduleUiInfo = { defaultTabId: 0, tabs: [{ title: "Google Search Results" }, {}] };
     callback(moduleUiInfo);
 };
 
@@ -34,3 +34,9 @@ this.onGetPreviewData = function (openGraphMetadata, isFinal, customValues, call
       callback(html);
    });
 };
+
+//// Normalizes the URL to include the search term
+//this.onGetNormalizedSearchUrl = function(url) {
+//	console.log(url);
+//	return document.location.href;
+//};

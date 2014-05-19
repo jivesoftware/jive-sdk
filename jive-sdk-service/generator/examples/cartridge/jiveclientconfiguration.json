@@ -1,4 +1,4 @@
 {
-    "clientUrl": "http://localhost",
+    "clientUrl": "http:",
     "port": "8090"
 }
