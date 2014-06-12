@@ -1,0 +1,26 @@
+<div style="display: inline-block; background-color: white; padding: 7px; border: 1px solid gray; box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.18);">
+    <div style="margin-bottom: 10px;">
+        <h3><a href="{{>url}}" target="_blank">Google Search Results - [<strong>{{>searchTerm}}</strong>] on [{{>searchTimestamp}}]</a></h3>
+    </div>
+    <table style="border: 1px solid #CCC; border-collapse: collapse;">
+    	<thead>
+    		<tr>
+    			<th width="5%" style="text-align: center"><strong>Rank</strong></th>
+    			<th width="95%" style="text-align: center"><strong>Page Details</strong></th>
+    		</tr>
+    	</thead>
+    	<tbody>
+		{{for results}}
+			<tr>
+				<td style="text-align: center; vertical-align: top;">
+					<strong>{{>#index + 1}}</strong>
+				</td>
+				<td style="text-align: left; vertical-align: top;">
+					<a href="{{:url}}" target="googleSearchResult">{{>title}}</a><br/>
+					<p>{{>description}}</p>
+				</td>           
+			</tr>
+		{{/for}}
+    	</tbody>
+    </table>
+</div>
