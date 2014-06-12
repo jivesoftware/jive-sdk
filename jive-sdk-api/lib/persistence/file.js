@@ -139,6 +139,83 @@ module.exports = function(serviceConfig) {
         }
     }
 
+    function findMatchingKeys(collection, keyValues) {
+        var result = [];
+        var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
+
+        for (var colKey in collection) {
+            if (collection.hasOwnProperty(colKey)) {
+
+                var entryToInspect = collection[colKey];
+                var match = true;
+                if ( findKeys ) {
+                    for ( var i in findKeys ) {
+                        var findKey = findKeys[i];
+                        var keyParts = findKey.split('.');
+                        var entryObj = entryToInspect;
+                        for ( var k = 0; k < keyParts.length; k++ ) {
+                            var keyPart = keyParts[k];
+                            if ( typeof entryObj == 'object' ) {
+                                entryObj = entryObj[keyPart];
+                            }
+                        }
+
+                        var keyValue = keyValues[ findKey ];
+                        if ( typeof keyValue == 'object' ) {
+
+                            if ( keyValue['$gt'] ) {
+                                if ( entryObj <= keyValue['$gt'] ) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                            if ( keyValue['$gte'] ) {
+                                if ( entryObj < keyValue['$gte'] ) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                            if ( keyValue['$lt'] ) {
+                                if ( entryObj >= keyValue['$lt'] ) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                            if ( keyValue['$lte'] ) {
+                                if ( entryObj > keyValue['$lte'] ) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                            if ( keyValue['$in'] ) {
+                                if ( keyValue['$in'].indexOf(entryObj) < 0 ) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                        } else {
+                            if ( entryObj !== keyValue ) {
+                                match = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if ( match ) {
+                    result.push( colKey );
+                }
+            }
+        }
+
+        return result;
+    }
+
     function CacheEntry(collectionID, collection) {
         this.collectionID = collectionID;
         this.collection = collection;
@@ -240,17 +317,31 @@ module.exports = function(serviceConfig) {
          * that returns removed items when done.
          * @memberof filePersistence
          * @param {String} collectionID
-         * @param {String} key
+         * @param {String} keyValues
          * @returns {Object} promise
          */
-        remove : function( collectionID, key ) {
+        remove : function( collectionID, keyValues ) {
             var deferred = q.defer();
 
             getCacheEntry(collectionID, function(collection, entry) {
-                var removed = collection[key];
-                delete collection[key];
+                var removed = null;
+
+                if (typeof keyValues == 'object') {
+                    removed = [];
+
+                    findMatchingKeys(collection, keyValues).forEach(function(key) {
+                        removed.push(collection[key]);
+                        delete collection[key];
+                    });
+                } else {
+                    removed = collection[keyValues];
+                    delete collection[keyValues];
+
+                }
+
                 entry.setDirty(true);
                 entry.add(); // set as most recently used
+
                 deferred.resolve(removed);
             });
 
@@ -290,77 +381,10 @@ module.exports = function(serviceConfig) {
 
             getCacheEntry(collectionID, function(collection) {
                 var collectionItems = [];
-                var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
 
-                for (var colKey in collection) {
-                    if (collection.hasOwnProperty(colKey)) {
-
-                        var entryToInspect = collection[colKey];
-                        var match = true;
-                        if ( findKeys ) {
-                            for ( var i in findKeys ) {
-                                var findKey = findKeys[i];
-                                var keyParts = findKey.split('.');
-                                var entryObj = entryToInspect;
-                                for ( var k = 0; k < keyParts.length; k++ ) {
-                                    var keyPart = keyParts[k];
-                                    if ( typeof entryObj == 'object' ) {
-                                        entryObj = entryObj[keyPart];
-                                    }
-                                }
-
-                                var keyValue = keyValues[ findKey ];
-                                if ( typeof keyValue == 'object' ) {
-
-                                    if ( keyValue['$gt'] ) {
-                                        if ( entryObj <= keyValue['$gt'] ) {
-                                            match = false;
-                                            break;
-                                        }
-                                    }
-
-                                    if ( keyValue['$gte'] ) {
-                                        if ( entryObj < keyValue['$gte'] ) {
-                                            match = false;
-                                            break;
-                                        }
-                                    }
-
-                                    if ( keyValue['$lt'] ) {
-                                        if ( entryObj >= keyValue['$lt'] ) {
-                                            match = false;
-                                            break;
-                                        }
-                                    }
-
-                                    if ( keyValue['$lte'] ) {
-                                        if ( entryObj > keyValue['$lte'] ) {
-                                            match = false;
-                                            break;
-                                        }
-                                    }
-
-                                    if ( keyValue['$in'] ) {
-                                        if ( keyValue['$in'].indexOf(entryObj) < 0 ) {
-                                            match = false;
-                                            break;
-                                        }
-                                    }
-
-                                } else {
-                                    if ( entryObj !== keyValue ) {
-                                        match = false;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        if ( match ) {
-                            collectionItems.push( collection[colKey] );
-                        }
-                    }
-                }
+                findMatchingKeys(collection, keyValues).forEach(function(key) {
+                    collectionItems.push(collection[key]);
+                });
 
                 if ( cursor ) {
                     var stream = ArrayStream(collectionItems);

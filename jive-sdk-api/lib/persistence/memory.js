@@ -56,6 +56,83 @@ module.exports = function() {
         }
     };
 
+    var findMatchingKeys = function(collection, keyValues) {
+        var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
+        var result = [];
+
+        for (var colKey in collection) {
+            if (collection.hasOwnProperty(colKey)) {
+
+                var entryToInspect = collection[colKey];
+                var match = true;
+                if ( findKeys ) {
+                    for ( var i in findKeys ) {
+                        var findKey = findKeys[i];
+                        var keyParts = findKey.split('.');
+                        var entryObj = entryToInspect;
+                        for ( var k = 0; k < keyParts.length; k++ ) {
+                            var keyPart = keyParts[k];
+                            if ( typeof entryObj == 'object' ) {
+                                entryObj = entryObj[keyPart];
+                            }
+                        }
+
+                        var keyValue = keyValues[ findKey ];
+                        if ( typeof keyValue == 'object' ) {
+
+                            if ( keyValue['$gt'] ) {
+                                if ( entryObj <= keyValue['$gt'] ) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                            if ( keyValue['$gte'] ) {
+                                if ( entryObj < keyValue['$gte'] ) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                            if ( keyValue['$lt'] ) {
+                                if ( entryObj >= keyValue['$lt'] ) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                            if ( keyValue['$lte'] ) {
+                                if ( entryObj > keyValue['$lte'] ) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                            if ( keyValue['$in'] ) {
+                                if ( keyValue['$in'].indexOf(entryObj) < 0 ) {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                        } else {
+                            if ( entryObj !== keyValue ) {
+                                match = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if ( match ) {
+                    result.push( colKey );
+                }
+            }
+        }
+
+        return result;
+    };
+
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Public
 
@@ -85,15 +162,30 @@ module.exports = function() {
          * that returns removed items when done.
          * @memberof memoryPersistence
          * @param {String} collectionID
-         * @param {String} key
+         * @param {String} keyValues
          * @returns {Object} promise
          */
-        remove: function( collectionID, key ) {
+        remove: function( collectionID, keyValues ) {
+            var that = this;
+
             return q.fcall( function () {
-                var collection = getCollection(collectionID );
-                var removed = collection[key];
-                delete collection[key];
-                return removed;
+                var collection = getCollection(collectionID);
+
+                if (typeof keyValues == 'object') {
+                    var removedItems = [];
+
+                    findMatchingKeys(collection, keyValues).forEach(function(key) {
+                        var removed = collection[key];
+                        removedItems.push(removed);
+                        delete collection[key];
+                    });
+
+                    return removedItems;
+                } else {
+                    var removed = collection[keyValues];
+                    delete collection[keyValues];
+                    return removed;
+                }
             });
         },
 
@@ -113,77 +205,10 @@ module.exports = function() {
 
                 var collectionItems = [];
                 var collection = getCollection(collectionID );
-                var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
 
-                for (var colKey in collection) {
-                    if (collection.hasOwnProperty(colKey)) {
-
-                        var entryToInspect = collection[colKey];
-                        var match = true;
-                        if ( findKeys ) {
-                            for ( var i in findKeys ) {
-                                var findKey = findKeys[i];
-                                var keyParts = findKey.split('.');
-                                var entryObj = entryToInspect;
-                                for ( var k = 0; k < keyParts.length; k++ ) {
-                                    var keyPart = keyParts[k];
-                                    if ( typeof entryObj == 'object' ) {
-                                        entryObj = entryObj[keyPart];
-                                    }
-                                }
-
-                                var keyValue = keyValues[ findKey ];
-                                if ( typeof keyValue == 'object' ) {
-
-                                    if ( keyValue['$gt'] ) {
-                                        if ( entryObj <= keyValue['$gt'] ) {
-                                            match = false;
-                                            break;
-                                        }
-                                    }
-
-                                    if ( keyValue['$gte'] ) {
-                                        if ( entryObj < keyValue['$gte'] ) {
-                                            match = false;
-                                            break;
-                                        }
-                                    }
-
-                                    if ( keyValue['$lt'] ) {
-                                        if ( entryObj >= keyValue['$lt'] ) {
-                                            match = false;
-                                            break;
-                                        }
-                                    }
-
-                                    if ( keyValue['$lte'] ) {
-                                        if ( entryObj > keyValue['$lte'] ) {
-                                            match = false;
-                                            break;
-                                        }
-                                    }
-
-                                    if ( keyValue['$in'] ) {
-                                        if ( keyValue['$in'].indexOf(entryObj) < 0 ) {
-                                            match = false;
-                                            break;
-                                        }
-                                    }
-
-                                } else {
-                                    if ( entryObj !== keyValue ) {
-                                        match = false;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        if ( match ) {
-                            collectionItems.push( collection[colKey] );
-                        }
-                    }
-                }
+                findMatchingKeys(collection, keyValues).forEach(function(key) {
+                    collectionItems.push(collection[key]);
+                });
 
                 if ( !cursor ) {
                     p.resolve( collectionItems );
