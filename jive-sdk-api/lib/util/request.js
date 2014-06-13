@@ -28,6 +28,7 @@ var request = require('request');
 var q = require('q');
 var jive = require('../../api');
 var constants = require("./constants");
+var zlib = require('zlib');
 
 /**
  * By default this will build a request of type 'application/json'. Set a Content-Type header
@@ -64,7 +65,7 @@ exports.buildRequest = function (url, method, postBody, headers, requestOptions)
         headers || {},
         postBody,
         protocol && protocol.indexOf('https') == 0,
-        requestOptions
+        requestOptions || {}
     ).execute(
         // success
         function (response) {
@@ -212,16 +213,34 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
             delete options['host'];
             delete options['path'];
 
+            options['encoding'] = null;
             jive.logger.debug("Request: " + url + ", body: " + postBodyStr);
             request(options, function (error, response, body) {
-                if (error) {
-                    jive.logger.warn("Error making request: %s", JSON.stringify(error));
-                    jive.logger.debug("response body: ", response ? (response.statusCode || "no status code") : "no response", body || "no body");
-                    jive.logger.debug("Options: %s", JSON.stringify(options));
-                    errCallback(error);
-                }
-                else {
-                    jsonResponseCallbackWrapper(response, body, successCallback, errCallback);
+                if (body
+                 && response
+                 && response.headers
+                 && response.headers['content-encoding'] == 'gzip') {
+
+                    zlib.gunzip( body, function(err, dezipped) {
+                        body = dezipped.toString();
+                        if (error) {
+                            jive.logger.warn("Error making request: %s", JSON.stringify(error));
+                            jive.logger.debug("response body: ", response ? (response.statusCode || "no status code") : "no response", body || "no body");
+                            jive.logger.debug("Options: %s", JSON.stringify(options));
+                            errCallback(error);
+                        } else {
+                            jsonResponseCallbackWrapper(response, body, successCallback, errCallback);
+                        }
+                    });
+                } else {
+                    if (error) {
+                        jive.logger.warn("Error making request: %s", JSON.stringify(error));
+                        jive.logger.debug("response body: ", response ? (response.statusCode || "no status code") : "no response", body || "no body");
+                        jive.logger.debug("Options: %s", JSON.stringify(options));
+                        errCallback(error);
+                    } else {
+                        jsonResponseCallbackWrapper(response, body, successCallback, errCallback);
+                    }
                 }
             });
         }
