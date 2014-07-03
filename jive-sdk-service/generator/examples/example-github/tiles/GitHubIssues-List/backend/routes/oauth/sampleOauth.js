@@ -26,8 +26,7 @@ myOauth.oauth2SuccessCallback = function( state, originServerAccessTokenResponse
     var body=originServerAccessTokenResponse.entity.body.toString();
     var idx=body.search("&") ;
     var accessToken = body.substring(13,idx)  ; // just grab the access_token part of the the response
-    //return promise to propagate error to global handler
-    return tokenStore.save('tokens', state['viewerID'], {
+    tokenStore.save('tokens', state['viewerID'], {
         ticket : state['viewerID'],
         accessToken: accessToken
     }).then( function() {
