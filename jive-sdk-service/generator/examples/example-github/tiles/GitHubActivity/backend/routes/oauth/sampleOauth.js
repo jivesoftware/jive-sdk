@@ -23,10 +23,11 @@ myOauth.oauth2SuccessCallback = function( state, originServerAccessTokenResponse
     console.log('originServerAccessTokenResponse', originServerAccessTokenResponse);
 
     // response from GITHUB is  'access_token=XXXXXXXXX&token_type=bearer'
-    var body=originServerAccessTokenResponse.entity.body;
+    var body=originServerAccessTokenResponse.entity.body.toString();
     var idx=body.search("&") ;
     var accessToken = body.substring(13,idx)  ; // just grab the access_token part of the the response
-    tokenStore.save('tokens', state['viewerID'], {
+    //return promise to propagate error to global handler
+    return tokenStore.save('tokens', state['viewerID'], {
         ticket : state['viewerID'],
         accessToken: accessToken
     }).then( function() {

@@ -242,7 +242,8 @@ exports.oauth2Callback = function(req, res ) {
                     // success
                     if ( response.statusCode >= 200 && response.statusCode < 299 ) {
                         if (oauth2SuccessCallback) {
-                            oauth2SuccessCallback( state, response, proceed );
+                            //return promise from inner callback to propagate any errors that may happen.
+                            return oauth2SuccessCallback( state, response, proceed );
                         } else {
                             proceed();
                         }
@@ -256,7 +257,9 @@ exports.oauth2Callback = function(req, res ) {
                     // failure
                     errorResponse( res, 500, e);
                 }
-            );
+            ).catch(function(e){
+                errorResponse(res,500,e);
+            });
 
 
         },
