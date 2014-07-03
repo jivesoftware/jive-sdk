@@ -152,16 +152,13 @@ exports.oauth2SuccessCallback = function( state, originServerAccessTokenResponse
 };
 
 
-var responseSent = false;
 var errorResponse = function( res, code, error ){
-    if(!responseSent) {
-        res.status(code);
-        res.set({'Content-Type': 'application/json'});
-        var err = {'error': error};
-        res.send(JSON.stringify(err));
-        responseSent = true;
-        jive.logger.debug(err);
-    }
+    res.status(code);
+    res.set({'Content-Type': 'application/json'});
+    var err = {'error': error};
+    res.send(JSON.stringify(err));
+    responseSent = true;
+    jive.logger.debug(err);
 };
 
 /**
@@ -219,34 +216,31 @@ exports.oauth2Callback = function(req, res ) {
             var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
 
             var proceed = function(context, error) {
-                if(!responseSent) {
-                    if (error) {
-                        errorResponse(res, 500, error);
-                        return;
-                    }
+                if (error) {
+                    errorResponse(res, 500, error);
+                    return;
+                }
 
-                    var redirectParams = '';
+                var redirectParams = '';
 
-                    if (context && typeof context === 'object') {
-                        for (var key in context) {
-                            if (context.hasOwnProperty(key)) {
-                                if (redirectParams.length > 0) {
-                                    redirectParams += '&';
-                                }
-                                redirectParams += encodeURIComponent(key) + '=' + encodeURIComponent(context[key]);
+                if (context && typeof context === 'object') {
+                    for (var key in context) {
+                        if (context.hasOwnProperty(key)) {
+                            if (redirectParams.length > 0) {
+                                redirectParams += '&';
                             }
+                            redirectParams += encodeURIComponent(key) + '=' + encodeURIComponent(context[key]);
                         }
                     }
-
-                    var redirect = decodeURIComponent(jiveRedirectUrl) + ( redirectParams ? '?' : '') +
-                        redirectParams;
-                    var redirectHtml = mustache.render(self.redirectHtmlTxt, { 'redirect': redirect });
-
-                    res.status(200);
-                    res.set({'Content-Type': 'text/html'});
-                    res.send(redirectHtml);
-                    responseSent = true;
                 }
+
+                var redirect = decodeURIComponent(jiveRedirectUrl) + ( redirectParams ? '?' : '') +
+                    redirectParams;
+                var redirectHtml = mustache.render(self.redirectHtmlTxt, { 'redirect': redirect });
+
+                res.status(200);
+                res.set({'Content-Type': 'text/html'});
+                res.send(redirectHtml);
             };
 
             var oauth2SuccessCallback = self.oauth2SuccessCallback;
