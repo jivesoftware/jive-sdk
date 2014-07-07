@@ -1,7 +1,7 @@
 {
     "sampleData" : {},
     "displayName" : "GitHubActivity ({{{TILE_NAME}}})",
-    "name" : "{{{TILE_NAME}}}-activity",
+    "name" : "{{{TILE_NAME}}}",
     "description" : "GitHubActivity",
     "style" : "ACTIVITY",
     "icons" : {

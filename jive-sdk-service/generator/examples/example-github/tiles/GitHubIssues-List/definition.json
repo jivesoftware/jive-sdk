@@ -14,7 +14,7 @@
 
     },
     "displayName" : "GitHubIssues-List ({{{TILE_NAME}}})",
-    "name" : "{{{TILE_NAME}}}-issues-list",
+    "name" : "{{{TILE_NAME}}}",
     "description" : "GitHubIssues-List",
     "style" : "LIST",
     "icons" : {
