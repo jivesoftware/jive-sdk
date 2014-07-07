@@ -222,7 +222,8 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
                     var definitionsJson = {
                         'integrationUser': {
                             'systemAdmin': extensionInfo['jiveServiceSignature'] ? true : false,
-                            'jiveServiceSignature': extensionInfo['jiveServiceSignature']
+                            'jiveServiceSignature': extensionInfo['jiveServiceSignature'],
+                            'runAsStrategy': extensionInfo['runAsStrategy']
                         },
                         'tiles': (definitions && definitions.length > 0) ? definitions : undefined,
                         'templates': templates,
