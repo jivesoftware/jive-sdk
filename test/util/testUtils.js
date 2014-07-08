@@ -190,7 +190,7 @@ sdkUtils.persistExampleCommunities = function(jive, quantity,jiveUrl) {
 sdkUtils.setupService = function(jive, config) {
     var p = q.defer();
     var startHttp = config && (!config['role'] || config['role'] == 'http');
-    var app = startHttp ? require('express')() : {use: function() {}};
+    var app = startHttp ? require('express')() : {use: function() {}, all: function() {}};
     jive.service.init( app, config).then(function() {
         return jive.service.autowire();
     }).then( function() {
