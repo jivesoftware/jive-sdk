@@ -213,7 +213,7 @@ describe('jive', function () {
             var jive = this['jive'];
             var mockery = this['mockery'];
             var response = {
-                'headers' : {},
+                'headers' : {'content-type': 'application/json'},
                 'statusCode' : 400
 
             };

@@ -69,10 +69,6 @@ exports.buildRequest = function (url, method, postBody, headers, requestOptions)
     ).execute(
         // success
         function (response) {
-            var body = response && response.entity && response.entity.body;
-            if (body && body.indexOf && body.indexOf(constants.SECURITY_STRING) === 0) {
-                response.entity.body = body.substring(constants.SECURITY_STRING.length);
-            }
             deferred.resolve(response);
         },
 
@@ -93,14 +89,28 @@ var jsonResponseCallbackWrapper = function (response, body, successCallback, err
 
     var resp = {
         'statusCode': statusCode,
-        'headers': responseHeaders
+        'headers': responseHeaders,
+        'entity': {status: statusCode, body: body }
     };
 
-    if (body && body.length > 0) {
-        try {
-            resp['entity'] = JSON.parse(body);
-        } catch (e) {
-            resp['entity'] = {status: statusCode, body: body }
+    var contentType = responseHeaders['content-type'];
+
+    // If there is no content type, try to parse it anyway
+    if ((!contentType || (contentType && contentType.indexOf('json') !== -1)) && body) {
+        if (body instanceof Buffer) {
+            body = body.toString();
+        }
+
+        if (body.indexOf && body.indexOf(constants.SECURITY_STRING) === 0) {
+            body = body.substring(constants.SECURITY_STRING.length);
+        }
+
+        if (body.length > 0) {
+            try {
+                resp['entity'] = JSON.parse(body);
+            } catch (e) {
+                jive.logger.error('Error parsing json body', e);
+            }
         }
     }
 

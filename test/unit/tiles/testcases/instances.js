@@ -354,7 +354,8 @@ describe('jive', function () {
 
             mockery.registerMock('request', function (options, cb) {
                 var response  = {
-                    'statusCode' : 200
+                    'statusCode' : 200,
+                    'headers' : {'content-type': 'application/json'}
                 };
                 var body = JSON.stringify({
                     'scope' : instance['scope'],
@@ -428,7 +429,8 @@ describe('jive', function () {
 
             mockery.registerMock('request', function (options, cb) {
                 var response  = {
-                    'statusCode' : 200
+                    'statusCode' : 200,
+                    'headers' : {'content-type': 'application/json'}
                 };
                 cb( undefined, response, body );
             });
@@ -459,7 +461,8 @@ describe('jive', function () {
 
             mockery.registerMock('request', function (options, cb) {
                 var response  = {
-                    'statusCode' : 200
+                    'statusCode' : 200,
+                    'headers' : {'content-type': 'application/json'}
                 };
                 var body = JSON.stringify({
                     'access_token' : testUtils.guid(),
