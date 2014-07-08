@@ -232,6 +232,9 @@ exports.init = function(expressApp, options ) {
     app.use(app.router);
     app.use(express.errorHandler());
 
+    // attach security middleware
+    app.all( '*', security.checkAuthHeadersMiddleware );
+
     var applyDefaults = function(config) {
         if ( !config['persistence'] ) {
             config['persistence'] = 'file';

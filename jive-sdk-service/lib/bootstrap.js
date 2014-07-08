@@ -65,9 +65,6 @@ var setupExpressApp = function (app, rootDir, config) {
 
         app.set('port', config['port']);
 
-        // attach security middleware
-        app.all( '*', security.checkAuthHeadersMiddleware );
-
         jive.logger.debug('Global framework routes:');
         app.post('/registration', service.routes.tiles.registration);
         service.security().lockRoute({ 'verb' : 'post', 'path' : '/registration' });
