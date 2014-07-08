@@ -655,6 +655,7 @@ exports.recursiveCopy = function (root, target, force, substitutions, file) {
  */
 exports.zipFolder = function (root, targetZip, flatten) {
     var fs = require('fs');
+    var deferred = q.defer();
 
     var archiver = require('archiver');
 
@@ -662,12 +663,12 @@ exports.zipFolder = function (root, targetZip, flatten) {
     var archive = archiver('zip');
 
     archive.on('error', function (err) {
-        throw err;
+        deferred.reject(err);
     });
 
     archive.pipe(output);
 
-    return exports.recursiveDirectoryProcessor(root, root, '/tmp', true,function (type, currentFsItem, targetPath, substitutions) {
+    exports.recursiveDirectoryProcessor(root, root, '/tmp', true,function (type, currentFsItem, targetPath, substitutions) {
         return q.fcall(function () {
             if (type === 'file') {
                 var target = currentFsItem.substring(currentFsItem.indexOf('/') + 1, currentFsItem.length);
@@ -677,15 +678,19 @@ exports.zipFolder = function (root, targetZip, flatten) {
                 jive.logger.debug('Zipping', currentFsItem, 'to', targetZip, ' : ', target);
                 archive.append(fs.createReadStream(currentFsItem), { name: target })
             }
-        })
-    }).then(function () {
-            return archive.finalize(function (err, written) {
-                if (err) {
-                    throw err;
-                }
-                jive.logger.info(written + ' total bytes written to extension archive ', targetZip);
-            });
         });
+    }).then(function () {
+        archive.finalize(function (err, written) {
+            if (err) {
+                deferred.reject(err);
+            }
+            jive.logger.info(written + ' total bytes written to extension archive ', targetZip);
+
+            deferred.resolve();
+        });
+    });
+
+    return deferred.promise;
 };
 
 /**
