@@ -295,6 +295,10 @@ exports.buildAuthorizeUrlResponseMap = function (oauth2Conf, callback, context, 
         "&redirect_uri=" + encodeURIComponent(redirectUri) +
         "&client_id=" + oauth2Conf['oauth2ConsumerKey'] +
         "&response_type=" + "code";
+        
+    if (oauth2Conf['oauth2Scope']) {
+        url += "&scope=" + encodeURIComponent(oauth2Conf['oauth2Scope']);
+    } // end if
 
     if (extraAuthParams) {
         var extraAuthStr = '';
