@@ -22,7 +22,8 @@
     "xmlhttprequest": "~1.5.0",
     "archiver" : "0.4.9",
     "http-proxy" : "*",
-    "stream-array" : "*"
+    "stream-array" : "*",
+    "traverse" : "0.6.6"
   },
   "devDependencies": {},
   "optionalDependencies": {},

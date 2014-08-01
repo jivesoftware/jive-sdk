@@ -33,6 +33,7 @@ var jive = require('../api');
 var log4js = require('log4js');
 var mustache = require('mustache');
 var url = require('url');
+var traverse = require('traverse');
 
 var app;
 var rootDir = process.cwd();
@@ -294,6 +295,13 @@ exports.init = function(expressApp, options ) {
 
         initialPromise = q.nfcall( fs.readFile, options, 'utf8').then( function (data) {
             var jiveConfig = JSON.parse(data);
+
+            traverse(jiveConfig).forEach(function(value) {
+                if (typeof (value) === 'string') {
+                    this.update(mustache.render(value, process.env));
+                }
+            });
+
             applyDefaults(jiveConfig);
             applyOverrides(jiveConfig);
 
