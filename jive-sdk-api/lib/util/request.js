@@ -51,7 +51,7 @@ exports.buildRequest = function (url, method, postBody, headers, requestOptions)
 
     requestOptions = requestOptions || {};
     if ( jive.context && jive.context.config ) {
-        if ( jive.context.config['development'] == true ) {
+        if (jive.context.config['development'] == true || jive.context.config['strictSSL'] === false) {
             requestOptions['rejectUnauthorized']  = false;
         }
     }

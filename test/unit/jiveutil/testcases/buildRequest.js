@@ -4,11 +4,27 @@ describe('jive', function () {
 
     describe('#util.buildRequest()', function () {
 
-        it('test rejectUnauthorized option is added', function (done) {
+        it('test rejectUnauthorized option is added in development mode', function (done) {
             var jive = this['jive'];
             var mockery = this['mockery'];
 
             jive.context['config']['development'] = true;
+
+            mockery.registerMock('request', function (options, cb) {
+                if ( options['rejectUnauthorized'] ) {
+                    assert.fail( options['rejectUnauthorized'],  false );
+                }
+                done();
+            });
+            jive.util.buildRequest( 'http://www.yahoo.com', 'GET');
+        });
+
+        it('test rejectUnauthorized option is added with strictSSL', function (done) {
+            var jive = this['jive'];
+            var mockery = this['mockery'];
+
+            jive.context['config']['development'] = false;
+            jive.context['config']['strictSSL'] = false;
 
             mockery.registerMock('request', function (options, cb) {
                 if ( options['rejectUnauthorized'] ) {
