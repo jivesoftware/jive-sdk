@@ -107,7 +107,7 @@ exports.authorizeUrl = function(req, res ) {
     // encode the target jiveTenantID in the context
     if ( targetJiveTargetID ) {
         context = context || {};
-        context = { 'jiveTenantID' : targetJiveTargetID };
+        context['jiveTenantID'] = targetJiveTargetID ;
     }
 
     // encode the origin jiveTenantID in the context
