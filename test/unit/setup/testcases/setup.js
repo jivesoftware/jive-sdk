@@ -84,7 +84,56 @@ describe('jive', function () {
                     jive.service.stop().then( function() {
                         delete process.env['jive_sdk_config_file'];
                         delete process.env['jive_sdk_service_role'];
+                        console.log('e is', e);
                         assert.fail(e[0], e[1]);
+                    });
+                }
+            );
+        });
+
+        it('specify envvars in config', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            process.env['jive_sdk_config_file'] = testUtils.getResourceFilePath('/setup/envvars.json');
+            process.env['PORT'] = '1234';
+            process.env['EXT_NAME'] = 'testing';
+            process.env['DB_URI'] = 'mongodb://user:password@localhost/db';
+
+            testUtils.setupService(jive, undefined).then( function() {
+                return testUtils.waitSec(0.3);
+            }).then(
+                function() {
+                    var p = q.defer();
+
+                    assert.equal(jive.service.options['port'], '1234');
+                    assert.equal(jive.service.options['databaseUrl'], 'mongodb://user:password@localhost/db');
+                    assert.equal(jive.service.options['extensionInfo'].name, 'testing');
+
+                    p.resolve();
+
+                    return p.promise;
+                },
+
+                function(e) {
+                    return q.reject(e);
+                }
+
+            ).then(
+                function() {
+                    jive.service.stop().then( function() {
+                        delete process.env['PORT'];
+                        delete process.env['EXT_NAME'];
+                        delete process.env['DB_URI'];
+                        done();
+                    });
+                },
+                function (e) {
+                    jive.service.stop().then( function() {
+                        delete process.env['PORT'];
+                        delete process.env['EXT_NAME'];
+                        delete process.env['DB_URI'];
+                        done(new Error(JSON.stringify(e)));
                     });
                 }
             );

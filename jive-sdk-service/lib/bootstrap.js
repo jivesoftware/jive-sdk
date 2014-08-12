@@ -64,6 +64,7 @@ var setupExpressApp = function (app, rootDir, config) {
         app.use(express.static(path.join(rootDir, 'public')));
 
         app.set('port', config['port']);
+        app.set('hostname', config['hostname']);
 
         jive.logger.debug('Global framework routes:');
         app.post('/registration', service.routes.tiles.registration);

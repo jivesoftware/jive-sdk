@@ -16,7 +16,7 @@
 
 var q = require('q');
 var jive = require('../../api');
-var ArrayStream = require('stream-array');
+var persistenceBase = require('./persistence-base');
 
 /**
  * An in-memory implementation of persistence.
@@ -54,83 +54,6 @@ module.exports = function() {
             db[collectionID] = collection;
             return collection;
         }
-    };
-
-    var findMatchingKeys = function(collection, keyValues) {
-        var findKeys = keyValues ? Object.keys( keyValues ) : undefined;
-        var result = [];
-
-        for (var colKey in collection) {
-            if (collection.hasOwnProperty(colKey)) {
-
-                var entryToInspect = collection[colKey];
-                var match = true;
-                if ( findKeys ) {
-                    for ( var i in findKeys ) {
-                        var findKey = findKeys[i];
-                        var keyParts = findKey.split('.');
-                        var entryObj = entryToInspect;
-                        for ( var k = 0; k < keyParts.length; k++ ) {
-                            var keyPart = keyParts[k];
-                            if ( typeof entryObj == 'object' ) {
-                                entryObj = entryObj[keyPart];
-                            }
-                        }
-
-                        var keyValue = keyValues[ findKey ];
-                        if ( typeof keyValue == 'object' ) {
-
-                            if ( keyValue['$gt'] ) {
-                                if ( entryObj <= keyValue['$gt'] ) {
-                                    match = false;
-                                    break;
-                                }
-                            }
-
-                            if ( keyValue['$gte'] ) {
-                                if ( entryObj < keyValue['$gte'] ) {
-                                    match = false;
-                                    break;
-                                }
-                            }
-
-                            if ( keyValue['$lt'] ) {
-                                if ( entryObj >= keyValue['$lt'] ) {
-                                    match = false;
-                                    break;
-                                }
-                            }
-
-                            if ( keyValue['$lte'] ) {
-                                if ( entryObj > keyValue['$lte'] ) {
-                                    match = false;
-                                    break;
-                                }
-                            }
-
-                            if ( keyValue['$in'] ) {
-                                if ( keyValue['$in'].indexOf(entryObj) < 0 ) {
-                                    match = false;
-                                    break;
-                                }
-                            }
-
-                        } else {
-                            if ( entryObj !== keyValue ) {
-                                match = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if ( match ) {
-                    result.push( colKey );
-                }
-            }
-        }
-
-        return result;
     };
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +97,7 @@ module.exports = function() {
                 if (typeof keyValues == 'object') {
                     var removedItems = [];
 
-                    findMatchingKeys(collection, keyValues).forEach(function(key) {
+                    persistenceBase.findMatchingKeys(collection, keyValues).forEach(function(key) {
                         var removed = collection[key];
                         removedItems.push(removed);
                         delete collection[key];
@@ -206,30 +129,14 @@ module.exports = function() {
                 var collectionItems = [];
                 var collection = getCollection(collectionID );
 
-                findMatchingKeys(collection, keyValues).forEach(function(key) {
+                persistenceBase.findMatchingKeys(collection, keyValues).forEach(function(key) {
                     collectionItems.push(collection[key]);
                 });
 
                 if ( !cursor ) {
                     p.resolve( collectionItems );
                 } else {
-                    var stream = ArrayStream(collectionItems);
-                    // graft next method
-                    stream.nextCtr = 0;
-                    stream.fullCollection = collectionItems;
-                    stream.next = function(processorFunction) {
-                        if ( !processorFunction ) {
-                            return null;
-                        }
-                        this.nextCtr++;
-                        if ( this.nextCtr > this.fullCollection.length - 1 ) {
-                            processorFunction(null, null);
-                        } else {
-                            processorFunction(null, this.fullCollection[this.nextCtr]);
-                        }
-                    };
-
-                    p.resolve(stream );
+                    p.resolve(persistenceBase.createCursor(collectionItems));
                 }
             return p.promise;
         },

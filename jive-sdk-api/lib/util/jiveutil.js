@@ -658,9 +658,13 @@ exports.zipFolder = function (root, targetZip, flatten) {
     var deferred = q.defer();
 
     var archiver = require('archiver');
+    var archive = archiver('zip');
 
     var output = fs.createWriteStream(targetZip);
-    var archive = archiver('zip');
+
+    output.on('close', function(arguments) {
+        deferred.resolve();
+    });
 
     archive.on('error', function (err) {
         deferred.reject(err);
@@ -685,8 +689,6 @@ exports.zipFolder = function (root, targetZip, flatten) {
                 deferred.reject(err);
             }
             jive.logger.info(written + ' total bytes written to extension archive ', targetZip);
-
-            deferred.resolve();
         });
     });
 

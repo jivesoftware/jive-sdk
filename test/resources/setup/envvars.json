@@ -1,0 +1,15 @@
+{
+    "clientUrl": "http://localhost",
+    "port": "{{{PORT}}}",
+    "logLevel" : "FATAL",
+    "persistence" : "memory",
+    "databaseUrl": "{{{DB_URI}}}",
+    "role" : "worker",
+    "skipCreateExtension" : true,
+    "suppressHttpLoggin" : true,
+    "xyz" : "123",
+    "extensionInfo": {
+        "name": "{{{EXT_NAME}}}"
+    }
+
+}

@@ -284,12 +284,21 @@ exports.buildAuthorizeUrlResponseMap = function (oauth2Conf, callback, context, 
     if (context) {
         stateToEncode = util._extend(stateToEncode, context);
     }
+    
+    var redirectUri = oauth2Conf['clientOAuth2CallbackUrl'];
+    if (redirectUri.substring(0,1) == "/") {
+       redirectUri = jive.service.serviceURL() + redirectUri;
+    } // end if
 
     var url = oauth2Conf['originServerAuthorizationUrl'] + "?" +
         "state=" + jive.util.base64Encode(JSON.stringify(stateToEncode)) +
-        "&redirect_uri=" + oauth2Conf['clientOAuth2CallbackUrl'] +
+        "&redirect_uri=" + encodeURIComponent(redirectUri) +
         "&client_id=" + oauth2Conf['oauth2ConsumerKey'] +
         "&response_type=" + "code";
+        
+    if (oauth2Conf['oauth2Scope']) {
+        url += "&scope=" + encodeURIComponent(oauth2Conf['oauth2Scope']);
+    } // end if
 
     if (extraAuthParams) {
         var extraAuthStr = '';
@@ -308,9 +317,15 @@ exports.buildAuthorizeUrlResponseMap = function (oauth2Conf, callback, context, 
 };
 
 exports.buildOauth2CallbackObject = function (oauth2Conf, code, extraParams) {
+    
+    var redirectUri = oauth2Conf['clientOAuth2CallbackUrl'];
+    if (redirectUri.substring(0,1) == "/") {
+       redirectUri = jive.service.serviceURL() + redirectUri;
+    } // end if
+    
     var postObject = {
         'grant_type': 'authorization_code',
-        'redirect_uri': oauth2Conf['clientOAuth2CallbackUrl'],
+        'redirect_uri': redirectUri,
         'client_id': oauth2Conf['oauth2ConsumerKey'],
         'client_secret': oauth2Conf['oauth2ConsumerSecret'],
         'code': code

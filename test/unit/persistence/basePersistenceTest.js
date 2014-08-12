@@ -1,4 +1,5 @@
 var q = require('q');
+var assert = require('assert');
 
 exports.testSave = function(testUtils, persistence ) {
     var deferred = q.defer();
@@ -38,13 +39,13 @@ exports.testFind = function( testUtils, persistence ) {
         }
 
         // setup some data
-        persistence.save(               'myCollection', '123', { 'key': '1', 'data': { 'name': 'aron', 'age': '6' } } )
+        persistence.save(               'myCollection', '123', { 'key': '1', 'sortme': 'foo', 'data': { 'name': 'aron', 'age': '6' } } )
 
             .then( function( ) {
-                return persistence.save('myCollection', '456', { 'key': '2', 'data': { 'name': 'allen' } });
+                return persistence.save('myCollection', '456', { 'key': '2', 'sortme': 'bar', 'data': { 'name': 'allen' } });
             })
             .then( function( ) {
-                return persistence.save('myCollection', '789', { 'key': '3', 'data': { 'name': 'abbey', 'age' : '6' } });
+                return persistence.save('myCollection', '789', { 'key': '3', 'sortme': 'baz', 'data': { 'name': 'abbey', 'age' : '6' } });
             })
             .then( function( ) {
                 return persistence.save('myOtherCollection', '1', { 'data' : { 'number' : 1 } } );
@@ -209,6 +210,66 @@ exports.testFind = function( testUtils, persistence ) {
                     cursor.on('error', function(e) {
                         p.reject(e);
                     });
+                });
+            })
+
+            // sort cursor asc
+            .then(function() {
+
+                return persistence.find('myCollection',{}, true).then( function(cursor) {
+                    var p = q.defer();
+
+                    var c = cursor.sort({'sortme': 1}, function(err, items) {
+                        assert.equal(items[0].sortme, 'bar');
+                        assert.equal(items[1].sortme, 'baz');
+                        assert.equal(items[2].sortme, 'foo');
+
+                        p.resolve();
+                    });
+
+                    assert.equal(c, cursor);
+
+                    return p;
+                });
+            })
+
+            // sort cursor desc
+            .then(function() {
+
+                return persistence.find('myCollection',{}, true).then( function(cursor) {
+                    var p = q.defer();
+
+                    var c = cursor.sort({'sortme': -1}, function(err, items) {
+                        assert.equal(items[0].sortme, 'foo');
+                        assert.equal(items[1].sortme, 'baz');
+                        assert.equal(items[2].sortme, 'bar');
+
+                        p.resolve();
+                    });
+
+                    assert.equal(c, cursor);
+
+                    return p;
+                });
+            })
+
+            // sort cursor desc limit
+            .then(function() {
+
+                return persistence.find('myCollection',{}, true).then( function(cursor) {
+                    var p = q.defer();
+
+                    var c = cursor.sort({'sortme': -1}).limit(2, function(err, items) {
+                        assert.equal(items.length, 2);
+                        assert.equal(items[0].sortme, 'foo');
+                        assert.equal(items[1].sortme, 'baz');
+
+                        p.resolve();
+                    });
+
+                    assert.equal(c, cursor);
+
+                    return p;
                 });
             })
 
