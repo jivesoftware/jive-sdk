@@ -1,0 +1,44 @@
+{
+    "sampleData" :
+    {
+     "title": "{{{TILE_NAME}}}",
+     "contents": [
+     {
+        "titleText": "Jive Software - Carousel 1",
+        "titleLink": "http://developer.jivesoftware.com",
+        "image": "http://www.easternct.edu/ctreview/connections/stories/images/carousel_1.jpg",
+        "imageURI": "http://www.easternct.edu/ctreview/connections/stories/images/carousel_1.jpg",
+        "description": "Carousel Horse"
+     },
+     {
+         "titleText": "Jive Software - Carousel 2",
+         "titleLink": "https://community.jivesoftware.com/community/developer",
+         "image": "http://thispublicaddress.com/tPA4/images/06_06/carousel.jpg",
+         "imageURI": "http://thispublicaddress.com/tPA4/images/06_06/carousel.jpg",
+         "description": "Old School Carousel"
+     },
+     {
+         "titleText": "Jive Software - Carousel 3",
+         "titleLink": "https://community.jivesoftware.com/community/developer",
+         "image": "http://upload.wikimedia.org/wikipedia/en/9/9e/Carousel_1945_Bdwy.jpg",
+         "imageURI": "http://upload.wikimedia.org/wikipedia/en/9/9e/Carousel_1945_Bdwy.jpg",
+         "description": "On Broadway"
+     }
+     ],
+     "config": {
+        "autoplay": true,
+        "speed": "medium",
+        "previewPane": true,
+        "transition": "fade"
+     }
+    },
+    "displayName" : "{{{TILE_NAME}}}",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "{{{TILE_NAME}}}",
+    "style" : "CAROUSEL",
+    "icons" : {
+        "16" : "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
+        "48" : "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
+        "128" : "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png"
+    }
+}
