@@ -391,7 +391,7 @@ function getApps(appsRootDir, extensionPublicDir, extensionInfo, packageApps) {
                             }
 
                             if ( packageApps ) {
-                                app['url'] = '/apps/' + item  + '/app.xml';
+                                app['url'] = '/public/apps/' + item  + '/app.xml';
                             } else {
                                 app['url'] = '%serviceURL%/osapp/' + item + '/app.xml';
                             }
