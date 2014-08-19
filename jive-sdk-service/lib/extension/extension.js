@@ -218,7 +218,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
         defaultMinimumVersion = '0080300000';
     }
 
-    return _.defaults({
+    var extensionMeta = _.defaults({
         "package_version": extensionInfo['packageVersion'] || '1.0',
         "id": id,
         "type": type,
@@ -235,6 +235,14 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
         "service_url": jive.service.serviceURL(),
         "redirect_url": extensionInfo['redirectURL'] || "%serviceURL%"
     }, jive.service.options['extensionInfo']);
+
+    // suppress the register and unregister URLs if configured to do so
+    if ( jive.service.options['suppressAddonRegistration'] == true ) {
+        delete extensionMeta['register_url'];
+        delete extensionMeta['unregister_url'];
+    }
+
+    return extensionMeta;
 }
 
 function getTileDefinitions() {
