@@ -36,6 +36,12 @@
 		            label="Drop JSON"
 		            view="embedded.json"
 				    icon="images/dropper-16x16.png"/>
+
+            <action id="com.jivesoftware.rte.dropper.actionMenu.places"
+		            path="jive/actions/places/*"
+		            label="Drop JSON"
+		            view="embedded.json"
+				    icon="images/dropper-16x16.png"/>
             ]]>
         </Param>
     </Require>
