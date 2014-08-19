@@ -26,7 +26,7 @@ var _ = require("underscore");
 
 var argv = require('optimist').argv;
 
-var validCommands = ['create','help','list', 'createExtension', 'version'];
+var validCommands = ['create','help','list', 'createExtension', 'build', 'version'];
 var groups = ['tiles', 'apps', 'services', 'storages', 'cartridges'];
 
 var styles = [];
@@ -426,7 +426,8 @@ function doHelp() {
     console.log('Available commands:');
     console.log('   help                  Display this help page');
     console.log('   list                  List all the existing examples for a category');
-    console.log('   create                Create a jive-sdk example\n');
+    console.log('   create                Create a jive-sdk example');
+    console.log('   build                 Build an addon package\n');
 
     // Display list items
     console.log('Available items for list command:');
@@ -439,12 +440,17 @@ function doHelp() {
     console.log('Available items for create command:');
     // Display items (in columns, sorted, with examples at the end)
     displayItemsInColumns(sortItems(examples.concat(styles)),3,20);
+    console.log();
+
+    console.log('Available items for build command:');
+    console.log('   ' + 'add-on');
 
     // Display options
     console.log();
     console.log('Available options:');
-    console.log('   --force=<true/false>  Whether to overwrite existing data; defaults to false');
-    console.log('   --name="<string>"     Use the specified string for the new item name');
+    console.log('   --force=<true/false>           Whether to overwrite existing data; defaults to false');
+    console.log('   --name="<string>"              Use the specified string for the new item name');
+    console.log('   --apphosting="<self|jive>"     jive=apps are packaged in the add-on, self=apps are hosted externally; defaults to jive');
 }
 
 function execute(options) {
@@ -503,20 +509,27 @@ function execute(options) {
         }
     }
 
-    if ( cmd === 'createExtension' ) {
+    if ( cmd === 'createExtension' || cmd === 'build' ) {
         doCreateExtension( options );
     }
 }
 
 function doCreateExtension( options ) {
-    jive.service.init({use: function() {}})
+    jive.service.init({use: function() {}, all: function() {}})
         .then(function() {
             return jive.service.autowire();
         } )
         .then(function() {
             var extension = require("../lib/extension/extension.js");
 
-            extension.prepare('', options.target + "/tiles", options.target + "/apps", options.target + "/cartridges", options.target + "/storages").then(function(){
+            extension.prepare(
+                    '',
+                    options.target + "/tiles",
+                    options.target + "/apps",
+                    options.target + "/cartridges",
+                    options.target + "/storages",
+                    options.apphosting === 'jive'
+                ).then(function(){
                 var persistence = jive.service.persistence();
 
                 persistence.close().then(function() {
@@ -588,6 +601,7 @@ exports.init = function(target) {
             var subject = argv._[1];
 
             var name = argv['name'];
+            var apphosting = argv['apphosting'];
             var force = argv['force'] || false;
 
             if (name) {
@@ -597,6 +611,7 @@ exports.init = function(target) {
 
             var options = {
                 'name'      : name,
+                'apphosting': apphosting,
                 'cmd'       : cmd,
                 'subject'   : subject,
                 'force'     : force,
