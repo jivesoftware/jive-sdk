@@ -111,7 +111,7 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                     packageApps
                 ).then( function(definitionsJson) {
                     // persist the extension metadata
-                    var meta = fillExtensionMetadata(extensionInfo, definitionsJson);
+                    var meta = fillExtensionMetadata(extensionInfo, definitionsJson, packageApps);
                         var stringifiedMeta = JSON.stringify(meta, null, 4);
                         jive.logger.debug("Extension meta: \n" + stringifiedMeta);
                         return jive.util.fswrite( stringifiedMeta, extensionSrcDir  + '/meta.json' );
@@ -139,7 +139,7 @@ function limit(str, chars) {
     return str.substring(0, str.length > chars ? chars : str.length );
 }
 
-function fillExtensionMetadata(extensionInfo, definitions) {
+function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
 
     var description = extensionInfo['description'];
     var name = extensionInfo['name'];
@@ -212,13 +212,19 @@ function fillExtensionMetadata(extensionInfo, definitions) {
         description = limit(description, 255);
     }
 
+    var defaultMinimumVersion = '0000';
+    if ( packageApps ) {
+        // minimum version is 8c4
+        defaultMinimumVersion = '0080300000';
+    }
+
     return _.defaults({
         "package_version": extensionInfo['packageVersion'] || '1.0',
         "id": id,
         "type": type,
         "name": name,
         "description": description,
-        "minimum_version": extensionInfo['minJiveVersion'] || '0000',
+        "minimum_version": extensionInfo['minJiveVersion'] || defaultMinimumVersion,
         "icon_16": "extension-16.png",
         "icon_48": "extension-48.png",
         "icon_128": "extension-128.png",
