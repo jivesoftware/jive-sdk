@@ -62,6 +62,8 @@ var setupExpressApp = function (app, rootDir, config) {
         app.set('views', rootDir + '/public/tiles');
         app.use(express.favicon());
         app.use(express.static(path.join(rootDir, 'public')));
+        // alias /__public__ to the public directory in the service
+        app.use( '/__public__', express.static(path.join(rootDir, 'public')) );
 
         app.set('port', config['port']);
         app.set('hostname', config['hostname']);
@@ -162,7 +164,7 @@ var setupExtension = function(options, tilesDir, appsDir, cartridgesDir, storage
     if ( options['skipCreateExtension'] ) {
         return q.resolve();
     }
-    return extension.prepare('', tilesDir, appsDir, cartridgesDir, storagesDir);
+    return extension.prepare('', tilesDir, appsDir, cartridgesDir, storagesDir, options['packageApps'] === true );
 };
 
 /**

@@ -32,7 +32,7 @@ gadgets.util.registerOnLoadHandler(function () {
         $("#outgoing_selection").val(JSON.stringify(outgoing, null, 2));
     };
 
-    // register update actions event, that will execute when the app loads
+    // register update actions event, that will execute when the app loads (selection context)
     gadgets.actions.updateAction({
         id:"com.jivesoftware.rte.dropper.json",
         callback:loadContent
@@ -45,8 +45,12 @@ gadgets.util.registerOnLoadHandler(function () {
         id:"com.jivesoftware.rte.dropper.actionMenu",
         callback:loadContent
     });
+    gadgets.actions.updateAction({
+        id:"com.jivesoftware.rte.dropper.actionMenu.places",
+        callback:loadContent
+    });
 
-    // register a listener for embedded experience context
+    // register a listener for embedded experience context (embedded context)
     opensocial.data.getDataContext().registerListener('org.opensocial.ee.context', function (key) {
         var data = opensocial.data.getDataContext().getDataSet(key);
 

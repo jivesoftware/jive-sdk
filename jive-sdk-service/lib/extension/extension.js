@@ -54,14 +54,44 @@ exports.save = function(record) {
  * @param appsDir
  * @param cartridgesDir
  * @param storagesDir
+ * @param packageApps
  * @returns {Promise} Promise
  */
-exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesDir) {
+exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesDir, packageApps) {
     var extensionSrcDir = ( rootDir ? rootDir + '/' : '' ) + 'extension_src';
+    var extensionPublicDir = extensionSrcDir + '/public';
+    var svrPublicDir = ( rootDir ? rootDir + '/' : '' )  + 'public';
     var extensionZipDir = ( rootDir ? rootDir + '/' : '' ) + 'extension.zip';
 
     return jive.util.fsexists(extensionSrcDir).then(function( exists ) {
         if ( !exists ) jive.util.fsmkdir( extensionSrcDir)
+    }).then( function() {
+        if ( packageApps ) {
+            // create the public directory if doesn't exist, since we're packaging apps
+            return jive.util.fsexists(extensionPublicDir).then( function(exists ) {
+                return !exists ? jive.util.fsmkdir( extensionPublicDir) : q.resolve();
+            }).then( function() {
+                // create the public/apps directory if doesn't exist
+                return jive.util.fsexists(svrPublicDir + '/apps').then( function(exists ) {
+                    return !exists ? jive.util.fsmkdir( extensionPublicDir + '/apps') : q.resolve();
+                }).then( function () {
+                    // recursively copy the server's public directory
+                    return jive.util.fscopy(svrPublicDir, extensionPublicDir );
+                })
+            }).then( function() {
+                // copy over the server public directory TODO - should this be configurable? or done based on dependency analysis?
+                return jive.util.fsexists(svrPublicDir).then( function(exists ) {
+                    return !exists ? jive.util.fsmkdir( extensionPublicDir) : q.resolve();
+                }).then( function () {
+                    return jive.util.fscopy(svrPublicDir, extensionPublicDir );
+                })
+            });
+        } else {
+            // destroy the extension public directory if it exists since we're not packaging apps
+            return jive.util.fsexists(extensionPublicDir).then( function(exists ) {
+                return exists ? jive.util.fsrmdir( extensionPublicDir) : q.resolve();
+            });
+        }
     }).then( function() {
         return getPersistedExtensionInfo(jive.service.options['extensionInfo'] || {});
     }).then( function(extensionInfo) {
@@ -75,11 +105,13 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                     cartridgesDir,
                     storagesDir,
                     extensionSrcDir,
+                    extensionPublicDir,
                     extensionInfo,
-                    definitions
+                    definitions,
+                    packageApps
                 ).then( function(definitionsJson) {
                     // persist the extension metadata
-                    var meta = fillExtensionMetadata(extensionInfo, definitionsJson);
+                    var meta = fillExtensionMetadata(extensionInfo, definitionsJson, packageApps);
                         var stringifiedMeta = JSON.stringify(meta, null, 4);
                         jive.logger.debug("Extension meta: \n" + stringifiedMeta);
                         return jive.util.fswrite( stringifiedMeta, extensionSrcDir  + '/meta.json' );
@@ -107,7 +139,7 @@ function limit(str, chars) {
     return str.substring(0, str.length > chars ? chars : str.length );
 }
 
-function fillExtensionMetadata(extensionInfo, definitions) {
+function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
 
     var description = extensionInfo['description'];
     var name = extensionInfo['name'];
@@ -180,13 +212,19 @@ function fillExtensionMetadata(extensionInfo, definitions) {
         description = limit(description, 255);
     }
 
-    return _.defaults({
+    var defaultMinimumVersion = '0000';
+    if ( packageApps ) {
+        // minimum version is 8c4
+        defaultMinimumVersion = '0080300000';
+    }
+
+    var extensionMeta = _.defaults({
         "package_version": extensionInfo['packageVersion'] || '1.0',
         "id": id,
         "type": type,
         "name": name,
         "description": description,
-        "minimum_version": extensionInfo['minJiveVersion'] || '0000',
+        "minimum_version": extensionInfo['minJiveVersion'] || defaultMinimumVersion,
         "icon_16": "extension-16.png",
         "icon_48": "extension-48.png",
         "icon_128": "extension-128.png",
@@ -197,6 +235,14 @@ function fillExtensionMetadata(extensionInfo, definitions) {
         "service_url": jive.service.serviceURL(),
         "redirect_url": extensionInfo['redirectURL'] || "%serviceURL%"
     }, jive.service.options['extensionInfo']);
+
+    // suppress the register and unregister URLs if configured to do so
+    if ( jive.service.options['suppressAddonRegistration'] == true ) {
+        delete extensionMeta['register_url'];
+        delete extensionMeta['unregister_url'];
+    }
+
+    return extensionMeta;
 }
 
 function getTileDefinitions() {
@@ -210,9 +256,10 @@ function getTileDefinitions() {
     return q.all([ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ]).then(finalizeRequest);
 }
 
-function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, extensionSrcDir, extensionInfo, definitions) {
+function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, extensionSrcDir, extensionPublicDir,
+                                      extensionInfo, definitions, packageApps) {
     return getTemplates(tilesDir).then(function (templates) {
-        return getApps(appsDir, extensionInfo).then(function (apps) {
+        return getApps(appsDir, extensionPublicDir, extensionInfo, packageApps).then(function (apps) {
             return getStorages(storagesDir, extensionInfo).then(function (storages) {
                 return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
 
@@ -271,7 +318,7 @@ function getStorages(storagesDir, extensionInfo) {
     });
 }
 
-function getApps(appsRootDir, extensionInfo) {
+function getApps(appsRootDir, extensionPublicDir, extensionInfo, packageApps) {
     var apps = [];
     return jive.util.fsexists( appsRootDir).then( function(exists) {
         if ( exists ) {
@@ -279,7 +326,54 @@ function getApps(appsRootDir, extensionInfo) {
                 var proms = [];
                 dirContents.forEach(function(item) {
                     if ( isValid(item) ) {
-                        var definitionDir = appsRootDir + '/' + item + '/definition.json';
+                        var appDir = appsRootDir + '/' + item;
+
+                        var copyAppDirToPublic = function(app) {
+                            return packageApps ? jive.util.fscopy(appDir + '/public', extensionPublicDir + '/apps/' + item).then( function() {
+                                return sanitizeAppPublicDirReferences(app);
+                            }) : q.resolve(app);
+                        };
+
+                        var replacePublicReferences = function(target) {
+                            var deferred = q.defer();
+                            var t = target.replace( 'public' + '/', '');
+                            var depth = (t.split("/").length - 1);
+                            var replacement = '';
+                            for ( var i = 0; i < depth; i++ ) {
+                                replacement += '../';
+                            }
+
+                            jive.util.fsread( extensionPublicDir + '/' + t).then( function(data) {
+                                var raw = data.toString();
+                                var processed = raw.replace('/__public__/', replacement);
+                                jive.util.fswrite( processed, extensionPublicDir + '/' + t).then( function() {
+                                    deferred.resolve();
+                                });
+                            });
+
+                            return deferred.promise;
+                        };
+
+                        var sanitizeAppPublicDirReferences = function(app) {
+                            var root = extensionPublicDir + '/apps/' + item;
+                            return jive.util.recursiveDirectoryProcessor(root, root, '/tmp', true,function (type, currentFsItem) {
+                                return q.fcall(function () {
+                                    var proms = [];
+                                    var lowercased = currentFsItem.toLowerCase();
+                                    var ext = lowercased.substring(currentFsItem.lastIndexOf('.') + 1, lowercased.length);
+                                    var validType = ext === 'xml'  || ext === 'html' || ext === 'css' || ext === 'js';
+                                    if (type === 'file' && validType) {
+                                        var target = currentFsItem.substring(currentFsItem.indexOf('/') + 1, currentFsItem.length);
+                                        proms.push(replacePublicReferences(target));
+                                    }
+                                    return q.all(proms);
+                                })
+                            }).then(function () {
+                                return q.resolve(app);
+                            });
+                        };
+
+                        var definitionDir = appDir + '/definition.json';
                         proms.push( jive.util.fsreadJson(definitionDir).then(function(app) {
                             if ( !app['name'] ) {
                                 app['name'] = item;
@@ -296,8 +390,13 @@ function getApps(appsRootDir, extensionInfo) {
                                 app['appPath'] = temp;
                             }
 
-                            app['url'] = '%serviceURL%/osapp/' + item + '/app.xml';
-                            return app;
+                            if ( packageApps ) {
+                                app['url'] = '/public/apps/' + item  + '/app.xml';
+                            } else {
+                                app['url'] = '%serviceURL%/osapp/' + item + '/app.xml';
+                            }
+
+                            return copyAppDirToPublic(app);
                         }) );
                     }
                 });

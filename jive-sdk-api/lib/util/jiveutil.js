@@ -155,7 +155,7 @@ exports.fscopy = function (source, target) {
         }
     });
 
-    return q.promise;
+    return deferred.promise;
 };
 
 
