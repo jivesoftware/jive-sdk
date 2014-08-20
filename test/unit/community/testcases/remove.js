@@ -1,7 +1,6 @@
 var assert = require('assert');
 var q = require('q');
 var sinon = require('sinon');
-var jiveClient = require(process.cwd() + '/../jive-sdk-api/lib/client/jive');
 
 describe('jive', function () {
     beforeEach(function() {

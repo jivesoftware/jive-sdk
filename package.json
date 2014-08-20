@@ -25,10 +25,22 @@
     "stream-array" : "*",
     "traverse" : "0.6.6"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "jive-testing-framework" : "*",
+    "mockery" : "*",
+    "jscoverage" : "*",
+    "temp" : "*",
+    "funcster" : "*",
+    "q-io" : "*",
+    "sinon" : "*"
+  },
   "optionalDependencies": {},
   "engines": {
     "node": "*"
+  },
+  "scripts": {
+    "test": "grunt test"
   },
   "contributors": [
     {

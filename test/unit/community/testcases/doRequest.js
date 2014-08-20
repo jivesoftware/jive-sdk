@@ -1,7 +1,7 @@
 var assert = require('assert');
 var q = require('q');
 var sinon = require('sinon');
-var jiveClient = require(process.cwd() + '/../jive-sdk-api/lib/client/jive');
+var jiveClient = require(process.cwd() + '/jive-sdk-api/lib/client/jive');
 
 describe('jive', function () {
     beforeEach(function() {
@@ -17,6 +17,7 @@ describe('jive', function () {
         it('doRequest with access token refresh', function (done) {
             var jive = this.jive;
             jive.context.persistence =  new jive.persistence.memory();
+
             var needsRefresh = q.defer();
             var ok = q.defer();
             var current = needsRefresh;
@@ -92,8 +93,7 @@ describe('jive', function () {
                         done();
                     });
             } catch (e) {
-                assert.fail(e);
-                done();
+                done(new Error(JSON.stringify(e)));
             }
         });
     });

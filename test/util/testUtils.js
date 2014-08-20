@@ -224,6 +224,10 @@ sdkUtils.setupService = function(jive, config) {
     return p.promise;
 };
 
+sdkUtils.getResourceFilePath = function(filename) {
+    return process.cwd() + '/test/resources/' + filename;
+};
+
 sdkUtils.createBaseServiceOptions = function(sourceDir) {
     return {
         'svcRootDir' : sdkUtils.getResourceFilePath(sourceDir),
