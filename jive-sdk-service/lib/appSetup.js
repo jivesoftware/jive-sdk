@@ -20,6 +20,7 @@ var fs = require('fs'),
     service = require('./service');
 
 var express = require('express');
+var consolidate = require('consolidate');
 var baseSetup = require('./baseSetup');
 var appSetup = Object.create(baseSetup);
 module.exports = appSetup;
@@ -45,12 +46,19 @@ appSetup.setupOneApp = function( app, osAppDir, osAppID ) {
     var routesPath = osAppDir + '/backend/routes';
 
     return setupAppPublicRoutes(osAppDir, app, osAppID).then( function() {
+        var appApp = express();
+
+        appApp.engine('html', consolidate.mustache);
+        appApp.set('view engine', 'html');
+        appApp.set('views', osAppDir + '/public');
+        app.use( appApp );
+
         return jive.util.fsexists(svcDir).then( function(exists) {
-            return !exists ? q.resolve() : appSetup.setupServices(app, 'app.' + osAppID, svcDir);
+            return !exists ? q.resolve() : appSetup.setupServices(appApp, 'app.' + osAppID, svcDir);
         }).then( function() {
             return jive.util.fsexists(routesPath);
         }).then( function(exists) {
-            return !exists ? q.resolve() : appSetup.setupRoutes(app, osAppID, routesPath);
+            return !exists ? q.resolve() : appSetup.setupRoutes(appApp, osAppID, routesPath);
         })
     });
 };
