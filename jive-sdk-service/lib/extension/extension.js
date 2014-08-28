@@ -228,7 +228,6 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
         "icon_16": "extension-16.png",
         "icon_48": "extension-48.png",
         "icon_128": "extension-128.png",
-        "status": "available",
         "released_on": extensionInfo['releasedOn'] || "2013-03-08T19:11:11.234Z",
         "register_url": extensionInfo['registerURL'] || "%serviceURL%/jive/oauth/register",
         "unregister_url": extensionInfo['unregisterURL'] || "%serviceURL%/jive/oauth/unregister",
