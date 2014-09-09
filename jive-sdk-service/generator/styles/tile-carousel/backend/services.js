@@ -102,7 +102,7 @@ var pushData = function() {
  */
 exports.task = [
     {
-        'interval' : 10000,
+        'interval' : 60000,
         'handler' : pushData
     }
 ];
