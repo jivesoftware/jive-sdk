@@ -110,12 +110,12 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                     definitions,
                     packageApps
                 ).then( function(definitionsJson) {
-                    // persist the extension metadata
-                    var meta = fillExtensionMetadata(extensionInfo, definitionsJson, packageApps);
+                        // persist the extension metadata
+                        var meta = fillExtensionMetadata(extensionInfo, definitionsJson, packageApps);
                         var stringifiedMeta = JSON.stringify(meta, null, 4);
                         jive.logger.debug("Extension meta: \n" + stringifiedMeta);
                         return jive.util.fswrite( stringifiedMeta, extensionSrcDir  + '/meta.json' );
-                });
+                    });
             });
     }).then( function() {
         // zip it all
@@ -330,7 +330,7 @@ function getApps(appsRootDir, extensionPublicDir, extensionInfo, packageApps) {
                 dirContents.forEach(function(item) {
                     var appDir = appsRootDir + '/' + item;
                     if ( isDirectory(appDir) ) {
-                        
+
 
                         var copyAppDirToPublic = function(app) {
                             return packageApps ? jive.util.fscopy(appDir + '/public', extensionPublicDir + '/apps/' + item).then( function() {
@@ -420,8 +420,9 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
             return q.nfcall(fs.readdir, cartridgesRootDir).then(function(dirContents){
                 var proms = [];
                 dirContents.forEach(function(item) {
-                    if ( isValid(item) ) {
-                        var definitionDir = cartridgesRootDir + '/' + item + '/definition.json';
+                    var appDir = cartridgesRootDir + '/' + item;
+                    if ( isDirectory(appDir) ) {
+                        var definitionDir = appDir + '/definition.json';
                         var contentDir = cartridgesRootDir + '/' + item + '/content';
                         proms.push( jive.util.fsreadJson(definitionDir).then(function(cartridge) {
                             if ( !cartridge['name'] ) {
@@ -534,8 +535,8 @@ function getAllDefinitions() {
                 });
             });
 
-        return tiles;
-    });
+            return tiles;
+        });
 }
 
 function buildDefaultTemplate(allDefinitions, extension) {
