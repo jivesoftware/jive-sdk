@@ -317,6 +317,10 @@ function getStorages(storagesDir, extensionInfo) {
     });
 }
 
+function isDirectory(path){
+    return fs.statSync(path).isDirectory();
+}
+
 function getApps(appsRootDir, extensionPublicDir, extensionInfo, packageApps) {
     var apps = [];
     return jive.util.fsexists( appsRootDir).then( function(exists) {
@@ -324,8 +328,9 @@ function getApps(appsRootDir, extensionPublicDir, extensionInfo, packageApps) {
             return q.nfcall(fs.readdir, appsRootDir).then(function(dirContents){
                 var proms = [];
                 dirContents.forEach(function(item) {
-                    if ( isValid(item) ) {
-                        var appDir = appsRootDir + '/' + item;
+                    var appDir = appsRootDir + '/' + item;
+                    if ( isDirectory(appDir) ) {
+                        
 
                         var copyAppDirToPublic = function(app) {
                             return packageApps ? jive.util.fscopy(appDir + '/public', extensionPublicDir + '/apps/' + item).then( function() {
