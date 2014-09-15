@@ -143,7 +143,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
 
     var description = extensionInfo['description'];
     var name = extensionInfo['name'];
-    var type = 'client-app'; // by default
+    var type = extensionInfo['type'] || 'client-app'; // by default
     var id = extensionInfo['uuid'];
 
     var hasCartridges = definitions['jabCartridges'] && definitions['jabCartridges'].length > 0;
@@ -151,12 +151,8 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
     var hasTiles = definitions['tiles'] && definitions['tiles'].length > 0;
     var hasTemplates = definitions['templates'] && definitions['templates'].length > 0;
 
-    if ( hasCartridges && (hasOsapps || hasTiles || hasTemplates ) ) {
-        throw Error("Extension cannot contain Jive Anywhere cartridges and other types.");
-    }
-
-    if ( hasCartridges ) {
-        type = 'jab-cartridges-app';
+    if (type != 'jab-cartridges-app' && ( hasCartridges && (hasOsapps || hasTiles || hasTemplates ) )) {
+        throw Error("Extensions cannot contain Jive Anywhere cartridges and other types unless type is specified as jab-cartridges-app");
     }
 
     if (!name) {
