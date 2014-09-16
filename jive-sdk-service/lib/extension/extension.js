@@ -111,10 +111,13 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                     packageApps
                 ).then( function(definitionsJson) {
                         // persist the extension metadata
-                        var meta = fillExtensionMetadata(extensionInfo, definitionsJson, packageApps);
-                        var stringifiedMeta = JSON.stringify(meta, null, 4);
-                        jive.logger.debug("Extension meta: \n" + stringifiedMeta);
-                        return jive.util.fswrite( stringifiedMeta, extensionSrcDir  + '/meta.json' );
+                        return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
+                            var meta = fillExtensionMetadata(extensionInfo, definitionsJson, packageApps, cartridges);
+                            var stringifiedMeta = JSON.stringify(meta, null, 4);
+                            jive.logger.debug("Extension meta: \n" + stringifiedMeta);
+                            return jive.util.fswrite( stringifiedMeta, extensionSrcDir  + '/meta.json' );
+                        })
+
                     });
             });
     }).then( function() {
@@ -139,20 +142,28 @@ function limit(str, chars) {
     return str.substring(0, str.length > chars ? chars : str.length );
 }
 
-function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
+function cartridgeIsNotConfigured(type) {
+    return type != 'jab-cartridges-app';
+}
+function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridges) {
 
     var description = extensionInfo['description'];
     var name = extensionInfo['name'];
     var type = extensionInfo['type'] || 'client-app'; // by default
     var id = extensionInfo['uuid'];
 
-    var hasCartridges = definitions['jabCartridges'] && definitions['jabCartridges'].length > 0;
+    var hasCartridges = cartridges && cartridges.length > 0;
     var hasOsapps = definitions['osapps'] && definitions['osapps'].length > 0;
     var hasTiles = definitions['tiles'] && definitions['tiles'].length > 0;
     var hasTemplates = definitions['templates'] && definitions['templates'].length > 0;
 
-    if (type != 'jab-cartridges-app' && ( hasCartridges && (hasOsapps || hasTiles || hasTemplates ) )) {
-        throw Error("Extensions cannot contain Jive Anywhere cartridges and other types unless type is specified as jab-cartridges-app");
+    if (hasCartridges && cartridgeIsNotConfigured(type)) {
+        jive.logger.warn('***********************\n' +
+            'This add-on contains cartridges,  ' +
+            'but it is not configured to package them. '+
+            'To enable this, add "type": "jab-cartridges-app" ' +
+            'to the extensionInfo field of jiveclientconfiguration.json\n' +
+            '**********************');
     }
 
     if (!name) {
@@ -258,8 +269,19 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
             return getStorages(storagesDir, extensionInfo).then(function (storages) {
                 return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
 
+
+                    if(cartridgeIsNotConfigured(extensionInfo["type"])){
+                        cartridges = [];
+                    }
+                    cartridges.forEach(function (cartridge) {
+                        cartridge.zipUp().then(function () {
+                            delete cartridge.zipUp;
+                        });
+                    });
+
+
                     jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
-                    jive.logger.debug("cartridges:\n" + JSON.stringify(cartridges, null, 4));
+                    jive.logger.debug("packaged cartridges:\n" + JSON.stringify(cartridges, null, 4));
 
                     var definitionsJson = {
                         'integrationUser': {
@@ -408,7 +430,6 @@ function getApps(appsRootDir, extensionPublicDir, extensionInfo, packageApps) {
     });
 }
 
-
 function getCartridges(cartridgesRootDir, extensionSrcDir) {
     var cartridges = [];
     return jive.util.fsexists( cartridgesRootDir).then( function(exists) {
@@ -426,18 +447,21 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
                                 cartridge['name'] = jive.util.guid(item);
                             }
 
-                            var zipFileName = cartridge['zipFileName'];
-                            if ( !zipFileName ) {
-                                zipFileName = cartridge['name'];
-                                zipFileName = zipFileName.replace(/[^\S]+/, '');
-                                zipFileName = zipFileName.replace(/[^a-zA-Z0-9]/, '-');
-                                zipFileName += '.zip';
-                            }
+                            cartridge.zipUp = function(){
+                                var zipFileName = cartridge['zipFileName'];
+                                if ( !zipFileName ) {
+                                    zipFileName = cartridge['name'];
+                                    zipFileName = zipFileName.replace(/[^\S]+/, '');
+                                    zipFileName = zipFileName.replace(/[^a-zA-Z0-9]/, '-');
+                                    zipFileName += '.zip';
+                                }
 
-                            var zipFile = extensionSrcDir + '/data/' + zipFileName;
-                            return jive.util.zipFolder( contentDir, zipFile, true).then( function() {
-                                return q.resolve(cartridge);
-                            })
+                                var zipFile = extensionSrcDir + '/data/' + zipFileName;
+                                return jive.util.zipFolder( contentDir, zipFile, true).then( function() {
+                                    return q.resolve(cartridge);
+                                });
+                            };
+                           return cartridge;
                         }) );
                     }
                 });
