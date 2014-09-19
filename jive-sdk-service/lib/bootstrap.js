@@ -15,6 +15,7 @@
  */
 
 var express = require('express'),
+    favicon = require("serve-favicon"),
     path = require('path'),
     service = require('./service'),
     jive = require('../api'),
@@ -56,11 +57,11 @@ var setupExpressApp = function (app, rootDir, config) {
     var p1 = q.defer();
     var p2 = q.defer();
 
-    app.configure(function () {
+
         app.engine('html', consolidate.mustache);
         app.set('view engine', 'html');
         app.set('views', rootDir + '/public/tiles');
-        app.use(express.favicon());
+        //app.use(favicon(rootDir + '/public/favicon.ico'));
         app.use(express.static(path.join(rootDir, 'public')));
         // alias /__public__ to the public directory in the service
         app.use( '/__public__', express.static(path.join(rootDir, 'public')) );
@@ -96,9 +97,8 @@ var setupExpressApp = function (app, rootDir, config) {
         });
 
         p1.resolve();
-    });
-
-    app.configure( 'development', function () {
+    var env = process.env.NODE_ENV || "development";
+    if(env == 'development') {
         jive.logger.debug('Global dev framework routes:');
 
         app.get('/tiles', service.routes.dev.tiles);
@@ -106,7 +106,7 @@ var setupExpressApp = function (app, rootDir, config) {
         jive.logger.debug("/dev/tiles");
 
         p2.resolve();
-    });
+    }
 
     return q.all( [ p1, p2 ] );
 };

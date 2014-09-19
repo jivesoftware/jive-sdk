@@ -24,6 +24,10 @@
 var fs = require('fs');
 var path = require('path');
 var express = require('express');
+var logger = require("morgan");
+var bodyParser = require("body-parser");
+var methodOverride = require("method-override");
+var errorHandler = require("errorhandler");
 var q = require('q');
 var bootstrap = require('./bootstrap');
 var definitionConfigurator = require('./definitionSetup');
@@ -225,13 +229,13 @@ exports.init = function(expressApp, options ) {
     tilesDir = rootDir + '/tiles';
 
     // for some reason this needs to be configured earlier than later
-    app.use(express.bodyParser());
+    app.use(bodyParser());
     if ( options && !options['suppressHttpLogging'] ) {
-        app.use(express.logger('dev'));
+        app.use(logger('dev'));
     }
-    app.use(express.methodOverride());
-    app.use(app.router);
-    app.use(express.errorHandler());
+    app.use(methodOverride());
+    //app.use(app.router);
+    app.use(errorHandler());
 
     // attach security middleware
     app.all( '*', security.checkAuthHeadersMiddleware );
