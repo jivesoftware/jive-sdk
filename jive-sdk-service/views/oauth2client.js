@@ -3,9 +3,9 @@ jive.tile = jive.tile || {};//if is not defined then define it so that callback 
 var OAuth2ServerFlow = null;//defined here so it is visible in other files.
 
 
-if(!gadgets.oauth || !gadgets.oauth.Popup){
+if (!gadgets.oauth || !gadgets.oauth.Popup) {
     osapi.jive.core.container.sendNotification({message: 'Use of oauth2client.js requires the oauthpopup feature to be in app.xml. ( &lt;Require feature="oauthpopup"/&gt; )', severity: 'error'});
-}else {
+} else {
 
     OAuth2ServerFlow = function(options) {
 
