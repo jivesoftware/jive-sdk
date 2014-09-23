@@ -450,7 +450,7 @@ function doHelp() {
     console.log('Available options:');
     console.log('   --force=<true/false>           Whether to overwrite existing data; defaults to false');
     console.log('   --name="<string>"              Use the specified string for the new item name');
-    console.log('   --apphosting="<self|jive>"     jive=apps are packaged in the add-on, self=apps are hosted externally; defaults to jive');
+    console.log('   --apphosting="<self|jive>"     jive=apps are packaged in the add-on, self=apps are hosted externally; defaults to self');
 }
 
 function execute(options) {
