@@ -78,7 +78,7 @@ required to start the service (clientUrl, port), or the location of a JSON
 file containing those setup options.
 
 If no 2nd argument is provided, then the system will try to locate a command line parameter to
-node called config (eg. config=/path/to/my.json), or an environment variable (eg. CONFIG_FILE=/path/to/my.json).
+node called config (eg. configFile=/path/to/my.json), or an environment variable (eg. CONFIG_FILE=/path/to/my.json).
 
 If neither are present, the system will assume that a file [app root]/jiveclientconfiguration.json] exists, and
 will try to parse that file for options.
