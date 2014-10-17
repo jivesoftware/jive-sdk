@@ -1,0 +1,21 @@
+<html>
+
+    <body>
+
+        <div id="j-content"></div>
+
+        <script>
+            gadgets.util.registerOnLoadHandler(function() {
+
+                osapi.jive.core.container.getLaunchContext(function(ctx){
+                    console.log('Context: ',ctx);
+
+                    $("#j-content").html('The associated place for this action is '+ctx.jive.content.type + ' / ' + ctx.jive.content.id);
+
+                });
+
+            });
+        </script>
+    </body>
+
+</html>

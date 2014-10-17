@@ -1,0 +1,29 @@
+<html>
+
+    <body>
+
+        <p>
+            Saved context for <span id="j-content-type"></span> / <span id="j-content-id"></span>:
+        </p>
+
+        <blockquote id="j-ctx">
+
+        </blockquote>
+
+        <script>
+            gadgets.util.registerOnLoadHandler(function() {
+
+                opensocial.data.getDataContext().registerListener('org.opensocial.ee.context', function(key) {
+                    var dataSet = opensocial.data.getDataContext().getDataSet(key);
+
+                    $("#j-content-type").html(JSON.stringify(dataSet.jive.content.type));
+                    $("#j-content-id").html(JSON.stringify(dataSet.jive.content.id));
+                    $("#j-ctx").html(JSON.stringify(dataSet.target.context));
+                });
+
+            });
+        </script>
+
+    </body>
+
+</html>

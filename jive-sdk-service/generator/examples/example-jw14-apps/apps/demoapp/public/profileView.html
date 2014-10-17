@@ -1,0 +1,24 @@
+<html>
+    <body>
+
+        <div id="j-content"></div>
+
+        <script>
+            gadgets.util.registerOnLoadHandler(function() {
+                osapi.jive.core.container.getLaunchContext(function(ctx) {
+                    console.log('Context: ',ctx);
+
+                    osapi.jive.corev3.resolveContext(ctx, function(resolved){
+                        var person = resolved.content;
+
+                        console.log('Resolved person', person);
+
+                       $("#j-content").html('The associated person for this action is '+person.displayName);
+                    });
+
+                });
+            });
+    </script>
+
+    </body>
+</html>

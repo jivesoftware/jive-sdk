@@ -1,0 +1,24 @@
+<html>
+
+    <body>
+
+    <div id="j-content"></div>
+
+        <script>
+
+            gadgets.util.registerOnLoadHandler(function () {
+                gadgets.actions.updateAction({
+                    id: "com.jivesoftware.jwdemo.filter.placeAction", // Same action id from app.xml
+                    callback: init
+                });
+            });
+
+            function init(ctx) {
+                console.log('Context: ',ctx);
+
+                $("#j-content").html('The associated place for this (filtered) action is '+ctx.jive.content.type + ' / ' + ctx.jive.content.id);
+            }
+        </script>
+    </body>
+
+</html>
