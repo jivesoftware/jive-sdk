@@ -1,0 +1,10 @@
+{
+    "clientUrl": "http://localhost",
+    "port": "3000",
+    "development" : true,
+    "fileFlushInterval": 2000,
+    "uuid" : "975e3675-3d2d-4631-a2d3-2fefeeb566fb",
+    "name": "JiveWorld Purposeful Places Add-on",
+    "description": "JiveWorld14 Demo"
+    
+}

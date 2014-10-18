@@ -1,0 +1,35 @@
+{
+    "sampleData" : {
+        "message": "Remote Service Performance",
+        "sections": [
+            {
+                "color": "#021677",
+                "label": "Trouble!"
+            },
+            {
+                "color": "#5a2bac",
+                "label": "Slow!"
+            },
+            {
+                "color": "#0088e1",
+                "label": "Good"
+            },
+            {
+                "color": "#00c4dc",
+                "label": "Fast"
+            }
+        ],
+        "activeIndex": 3,
+        "status": "Fast"
+    },
+    "displayName": "Remote Performance",
+    "name": "performance-tile",
+    "description": "Shows performance indicators of a remote service",
+    "action": "/performance-tile/action",
+    "style" : "GAUGE",
+    "icons" : {
+        "16" : "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
+        "48" : "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
+        "128" : "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png"
+    }
+}
