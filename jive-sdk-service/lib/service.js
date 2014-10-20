@@ -629,7 +629,7 @@ exports.getExpandedTileDefinitions = function(all) {
             processedTile['updated'] = "2013-02-28T15:12:16.768-0800";
         }
         if ( processedTile['action'] ) {
-            if ( processedTile['action'].indexOf('http') != 0 ) {
+            if ( processedTile['action'].indexOf('http') != 0 && processedTile['action'].indexOf('%serviceURL%') === -1) {
                 // assume its relative to host then
                 processedTile['action'] = host + ( processedTile['action'].indexOf('/') == 0 ? "" : "/" ) + processedTile['action'];
             }
@@ -637,7 +637,7 @@ exports.getExpandedTileDefinitions = function(all) {
         if ( !processedTile['config'] ) {
             processedTile['config'] = host + '/' + processedTile['definitionDirName'] + '/configure';
         } else {
-            if ( processedTile['config'].indexOf('http') != 0 ) {
+            if ( processedTile['config'].indexOf('http') != 0 && processedTile['config'].indexOf('%serviceURL%') === -1) {
                 // assume its relative to host then
                 processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];
             }
@@ -645,7 +645,7 @@ exports.getExpandedTileDefinitions = function(all) {
         if ( !processedTile['unregister']) {
             processedTile['unregister'] = host + '/unregister';
         } else {
-            if ( processedTile['unregister'].indexOf('http') != 0 ) {
+            if ( processedTile['unregister'].indexOf('http') != 0 && processedTile['unregister'].indexOf('%serviceURL%') === -1 ) {
                 // assume its relative to host then
                 processedTile['unregister'] = host + ( processedTile['unregister'].indexOf('/') == 0 ? "" : "/" ) + processedTile['unregister'];
             }
@@ -654,14 +654,10 @@ exports.getExpandedTileDefinitions = function(all) {
         if ( !processedTile['register'] ) {
             processedTile['register'] = host + '/registration';
         } else {
-            if ( processedTile['register'].indexOf('http') != 0 ) {
+            if ( processedTile['register'].indexOf('http') != 0 && processedTile['register'].indexOf('%serviceURL%') === -1 ) {
                 // assume its relative to host then
                 processedTile['register'] = host + ( processedTile['register'].indexOf('/') == 0 ? "" : "/" ) + processedTile['register'];
             }
-        }
-        if ( processedTile['unregister'] && processedTile['unregister'].indexOf('http') != 0 ) {
-            // assume its relative to host then
-            processedTile['unregister'] = host + ( processedTile['unregister'].indexOf('/') == 0 ? "" : "/" ) + processedTile['unregister'];
         }
         if ( !processedTile['client_id'] ) {
             processedTile['client_id'] = conf.clientId;

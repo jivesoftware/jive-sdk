@@ -1,0 +1,47 @@
+<html>
+    <body>
+        <div>
+            <button id="j-button" class="btn btn-primary">...</button>
+        </div>
+
+        <script type="text/javascript">
+
+            gadgets.actions.updateAction({
+                id: "com.jivesoftware.jwdemo.filter.placeSettings",
+                callback: init
+            });
+
+            function init(ctx) {
+                osapi.jive.corev3.resolveContext(ctx, function(place) {
+
+                    place.content.getExtProps().execute(function(props) {
+                        var enabled = ("true" ===  props.content.showCustomAction);
+                        showButtonState(enabled);
+
+                        $("#j-button").click(function() {
+                            updateButtonState(place);
+                        })
+                    });
+
+                });
+            }
+
+            function updateButtonState(place) {
+                var currentState = $("#j-button").data('enabled');
+                var newState = currentState === true ? "false" : "true";
+
+                place.content.createExtProps({
+                    showCustomAction: newState
+                }).execute(function() {
+                    osapi.jive.core.container.closeApp();
+                });
+            }
+
+            function showButtonState(enabled) {
+                $("#j-button").html(enabled === "true" ? 'Hide Filtered Action' : 'Show Filtered Action');
+                $("#j-button").data('enabled', enabled);
+            }
+        </script>
+    </body>
+</html>
+

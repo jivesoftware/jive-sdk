@@ -55,6 +55,7 @@ exports.task = function() {
                     'key':'count'
                 }).then(function(count) {
                     count = count.length > 0 ? count[0].count : parseInt(instance.config.startSequence, 10);
+		    count = count || 0;
                     store.save('exampleStore', 'count', {
                         'key':'count',
                         'count':count+1

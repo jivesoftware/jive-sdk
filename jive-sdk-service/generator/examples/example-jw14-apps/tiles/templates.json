@@ -1,0 +1,10 @@
+{
+    "default": {
+        "name": "defaultTemplate",
+        "displayName": "JiveWorld '14 Demo",
+        "description": "JiveWorld '14 Demo",
+        "tiles": [
+            "demo-activity"
+        ]
+    }
+}

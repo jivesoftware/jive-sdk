@@ -1,0 +1,8 @@
+{
+    "clientUrl": "tenancy://jive!services.jwdemo.serviceURL",
+    "extensionInfo" : {
+        "uuid" : "4ff946ab-b5f5-43be-86b9-70135e072ddd",
+        "name": "JiveWorld14 Demo",
+        "description": "JiveWorld14 Demo"
+    }
+}
