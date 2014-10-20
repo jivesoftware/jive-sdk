@@ -123,6 +123,31 @@ extstreams.fetchCommentsOnActivity = function(activity, opts) {
 };
 
 /**
+ *
+ * Options for the following methods look like:
+ * var opts = {
+ *      "fieldList": ["content", "parent", "resources" ], // list of fields to be returned on Jive entity
+ *      "itemsPerPage": 100,              // for paginated requests, the no. of items to return per request
+ *      "commentSourceType": "JIVE",     // Must be "JIVE" or "EXTERNAL" or "ALL". Defaults to "ALL"
+ *      "publishedAfter": 1367968760257  // Get comments that were created after this time only
+ * }
+ */
+/**
+ * Get all the comments in Jive for a given activity object by external ID.
+ * @memberof module:extstreamsInstances
+ * @param {Object} extstream
+ * @paarm {string} externalActivityID - external ID of the activity
+ * @param {Object} opts - JSON describing options for retrieving content from Jive. See above documentation.
+ * @returns {Promise} Promise A promise that resolves to a response. response.entity is the list of comments. See  See https://developers.jivesoftware.com/api/rest/index.html#lists
+ */
+extstreams.fetchCommentsOnActivityByExternalID = function (extstream, externalActivityID, opts) {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.FETCH_COMMENTS_ON_ACTIVITY_BY_EXTERNAL_ID, {
+        extstream: extstream,
+        externalActivityID: externalActivityID,
+        opts: opts
+    });
+};
+/**
  * Get all comments in Jive for ALL activity of the given external stream
  * Note pagination (next) operations are always performed inline, never on a separate node
  * @memberof module:extstreamsInstances
