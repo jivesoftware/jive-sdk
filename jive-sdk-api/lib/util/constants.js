@@ -41,6 +41,7 @@ exports.tileEventNames = {
     'PUSH_COMMENT_TO_JIVE':'pushCommentToJive',
     'COMMENT_ON_ACTIVITY':'commentOnActivity',
     'COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID':'commentOnActivityByExternalID',
+    'FETCH_COMMENTS_ON_ACTIVITY_BY_EXTERNAL_ID':'fetchCommentOnActivityByExternalID',
     'FETCH_COMMENTS_ON_ACTIVITY':'fetchCommentsOnActivity',
     'FETCH_ALL_COMMENTS_FOR_EXT_STREAM':'fetchAllCommentsForExtstream',
     'INSTANCE_REGISTRATION':'registration',
