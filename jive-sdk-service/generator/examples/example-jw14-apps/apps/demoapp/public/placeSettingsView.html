@@ -1,0 +1,22 @@
+<html>
+
+    <body>
+
+        <div id="j-content"></div>
+        <script type="text/javascript">
+            gadgets.util.registerOnLoadHandler(function() {
+
+                gadgets.actions.updateAction({
+                    id: "com.jivesoftware.jwdemo.placeSettings", // id from app.xml,
+                    callback: init
+                });
+
+            });
+
+            function init(ctx) {
+                $("#j-content").html('The associated place for this action is '+ctx.jive.content.type + ' / ' + ctx.jive.content.id);
+            }
+        </script>
+    </body>
+
+</html>
