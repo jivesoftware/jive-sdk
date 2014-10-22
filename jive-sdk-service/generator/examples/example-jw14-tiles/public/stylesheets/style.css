@@ -1,0 +1,29 @@
+* {
+    font-family: Arial, sans-serif;
+}
+
+body { background-color: #eee; margin:20px; }
+label, p { display: block; margin: 0.4em 0; }
+label input, label strong { display: inline-block; width: 4em; text-align: right; }
+button { font-size: 1.15em; font-weight: bold; }
+
+.j-card .hidden {
+    display: none;
+}
+
+h2 {
+    margin-bottom: -2px;
+}
+
+h3 {
+    margin-bottom: -8px;
+}
+
+ul {
+    margin-left:0px; padding-left:20px; list-style-type:square;
+}
+
+.j-textarea {
+    width: 50%;
+    height: 512px;
+}

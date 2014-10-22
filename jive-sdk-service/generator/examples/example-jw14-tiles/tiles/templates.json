@@ -1,0 +1,10 @@
+{
+    "default": {
+        "name": "defaultTemplate",
+        "displayName": "JiveWorld Purposeful Places Add-on Template",
+        "description": "Template for Jive Node SDK-based integrations session demo",
+        "tiles": [
+            "performance-tile", "performance-notification"
+        ]
+    }
+}
