@@ -63,7 +63,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/jivesoftware/jive-sdk"
+    "url": "http://github.com/jivesoftware/jive-sdk"
   },
   "keywords": [
     "jive",
