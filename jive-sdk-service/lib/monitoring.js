@@ -137,20 +137,14 @@ var executeTest = function(testMeta) {
         function(result) {
             status = 'ok';
             if ( result ) {
-                var message = {
-                    'summary' : result
-                };
-                messages.push( message );
+                messages.push( { 'summary': result } );
             }
         },
 
         function(err) {
             status = 'fault';
             if ( err) {
-                var message = {
-                    'summary' : err
-                };
-                messages.push( message );
+                messages.push( { 'summary': err } );
             }
         }
     ).finally( function() {
