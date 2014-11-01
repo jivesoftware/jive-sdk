@@ -95,6 +95,10 @@ exports.createPersistenceMonitor = function() {
     };
 };
 
+exports.isActive = function() {
+    return jive.service.options['monitoringInterval'];
+};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Private
 

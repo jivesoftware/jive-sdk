@@ -75,12 +75,17 @@ var setupExpressApp = function (app, rootDir, config) {
         service.security().lockRoute({ 'verb' : 'post', 'path' : '/unregister' });
         app.post('/jive/oauth/register', service.routes.jive.oauthRegister);
         app.post('/jive/oauth/unregister', service.routes.jive.oauthUnregister);
-        app.get('/jive/monitoring', service.routes.monitoring.ping);
+
+        if ( service.monitoring().isActive() ) {
+            app.get('/jive/monitoring', service.routes.monitoring.ping);
+        }
 
         jive.logger.debug("POST /registration");
         jive.logger.debug("POST /unregister");
         jive.logger.debug("POST /jive/oauth/register");
-        jive.logger.debug("GET /jive/monitoring");
+        if ( service.monitoring().isActive() ) {
+            jive.logger.debug("GET /jive/monitoring");
+        }
 
         // wire in an sdk app with its own views
         var jiveSdkApp = express();
