@@ -26,8 +26,13 @@ var q = require('q');
 var jive = require("../api");
 
 exports.ping = function( req, res ) {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
     var monitoringResult = jive.service.monitoring().getStatus();
+    if ( monitoringResult['status'] === 'ok' ) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+    } else {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+    }
+
     res.end(JSON.stringify(monitoringResult));
 };
 
