@@ -21,7 +21,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Private
 
-varservice = require('./service'),
+var service = require('./service'),
     jive = require('../api'),
     q = require('q');
 
@@ -30,8 +30,7 @@ var tests;
 var testResults = {};
 
 /**
- * Returns a promise which resolves a JSON object consistent with https://community.jivesoftware.com/docs/DOC-134072
- * @returns {Promise} promise
+ * Returns a JSON object consistent with https://community.jivesoftware.com/docs/DOC-134072
  */
 exports.getStatus = function() {
     return testResults;

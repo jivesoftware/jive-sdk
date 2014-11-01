@@ -27,6 +27,7 @@ var jive = require("../api");
 
 exports.ping = function( req, res ) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end("{}");
+    var monitoringResult = jive.service.monitoring().getStatus();
+    res.end(JSON.stringify(monitoringResult));
 };
 
