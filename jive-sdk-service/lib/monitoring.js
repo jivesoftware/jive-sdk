@@ -58,7 +58,41 @@ exports.addMonitor = function( testMeta ) {
     }
 
     // all is well; add the test
+    if ( !tests ) {
+        tests = [];
+    }
     tests.push( testMeta );
+};
+
+exports.createPersistenceMonitor = function() {
+    var test = function() {
+        var deferred = q.defer();
+
+        jive.service.persistence().find('jiveExtension', {}).then( function(result) {
+            if ( result ) {
+                if ( result[0]['id'] ) {
+                    deferred.resolve();
+                } else {
+                    deferred.reject('Error loading from db: jiveExtension.id');
+                }
+            } else {
+                deferred.reject('Error loading from db: jiveExtension');
+            }
+        }, function(err) {
+            deferred.reject('Error loading from db: ' + JSON.stringify(err));
+        });
+
+        return deferred.promise;
+    };
+
+    var meta = {
+        'name' : 'persistence'
+    };
+
+    return {
+        'test' : test,
+        'meta' : meta
+    };
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +114,7 @@ var finalizeServiceStatus = function(e) {
     var faultCount = 0;
     var intermittentCount = 0;
     if ( resources ) {
-        for ( var i = 0; resources.length; i++ ) {
+        for ( var i = 0; i < resources.length; i++ ) {
             var resource = resources[i];
             var resourceStatus = resource['status'];
             if ( resourceStatus !== 'ok' ) {
@@ -99,6 +133,7 @@ var finalizeServiceStatus = function(e) {
         status = 'intermittent';
     } else {
         // no faults, no intermittent/unknown ... means we're ok!
+        status = 'ok';
     }
 
     var now = new Date();
@@ -124,12 +159,14 @@ var runTests = function(deferred) {
         function() {
             // all tests ran -- with errors or success
             finalizeServiceStatus();
+            deferred.resolve();
         },
 
         function(e) {
             // unexpected error running the tests!
             // monitoring results are invalid
             finalizeServiceStatus(e);
+            deferred.reject(e);
         }
     );
 };
@@ -156,21 +193,7 @@ var executeTest = function(testMeta) {
     var status = "unknown";
     var messages = [];
 
-    test.then(
-        function(result) {
-            status = 'ok';
-            if ( result ) {
-                messages.push( { 'summary': result } );
-            }
-        },
-
-        function(err) {
-            status = 'fault';
-            if ( err) {
-                messages.push( { 'summary': err } );
-            }
-        }
-    ).finally( function() {
+    var addResource = function() {
         var resources = testResults['resources'];
         if ( !resources ) {
             resources = [];
@@ -179,9 +202,30 @@ var executeTest = function(testMeta) {
 
         var resource = {
             'name': name,
-            'status': status,
-            'messages': messages
+            'status': status
         };
+        if ( messages.length > 0 ) {
+            resource['messages'] = messages;
+        }
+
         resources.push(resource);
-    });
+    };
+
+    test().then(
+        function(result) {
+            status = 'ok';
+            if ( result ) {
+                messages.push( { 'summary': result } );
+            }
+            addResource();
+        },
+
+        function(err) {
+            status = 'fault';
+            if ( err) {
+                messages.push( { 'summary': err } );
+            }
+            addResource();
+        }
+    );
 };

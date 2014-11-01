@@ -181,7 +181,11 @@ var setupMonitoring = function(options) {
         return q.resolve();
     }
 
-    var task = new jive.tasks.build(jive.service.monitoring().runMonitoring, monitoringInterval);
+    var monitoring = jive.service.monitoring();
+    var dbMonitor = monitoring.createPersistenceMonitor();
+    monitoring.addMonitor(dbMonitor);
+
+    var task = new jive.tasks.build(monitoring.runMonitoring, monitoringInterval);
     jive.tasks.schedule(task, jive.service.scheduler());
 
 };
