@@ -19,15 +19,7 @@
  */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Private
-
-var service = require('./service'),
-    jive = require('../api'),
-    q = require('q');
-
-var tests;
-
-var testResults = {};
+// public
 
 /**
  * Returns a JSON object consistent with https://community.jivesoftware.com/docs/DOC-134072
@@ -44,9 +36,41 @@ exports.runMonitoring = function() {
     return deferred.promise;
 };
 
-exports.addMonitor = function( test ) {
-    // todo!!
+exports.addMonitor = function( testMeta ) {
+    if ( !testMeta ) {
+        // ignore empty test
+        return;
+    }
+
+    var test = testMeta.test;
+    if ( !test || typeof test !== 'function' ) {
+        throw Error("Bad test -- invalid testing function");
+    }
+
+    var meta = testMeta.meta;
+    if ( !meta ) {
+        throw Error("Bad test -- no metadata");
+    }
+
+    var name = meta['name'];
+    if ( !name ) {
+        throw Error("Bad test -- invalid metadata: no name");
+    }
+
+    // all is well; add the test
+    tests.push( testMeta );
 };
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Private
+
+var service = require('./service'),
+    jive = require('../api'),
+    q = require('q');
+
+var tests;
+
+var testResults = {};
 
 var finalizeServiceStatus = function(e) {
     // make the call based on the resources
