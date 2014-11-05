@@ -637,6 +637,12 @@ exports.getExpandedTileDefinitions = function(all) {
                 processedTile['action'] = host + ( processedTile['action'].indexOf('/') == 0 ? "" : "/" ) + processedTile['action'];
             }
         }
+        if ( processedTile['view'] ) {
+            if ( processedTile['view'].indexOf('http') != 0 && processedTile['view'].indexOf('%serviceURL%') === -1) {
+                // assume its relative to host then
+                processedTile['view'] = host + ( processedTile['view'].indexOf('/') == 0 ? "" : "/" ) + processedTile['view'];
+            }
+        }
         if ( !processedTile['config'] ) {
             processedTile['config'] = host + '/' + processedTile['definitionDirName'] + '/configure';
         } else {

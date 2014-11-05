@@ -1,0 +1,20 @@
+{
+    "sampleData": {
+        "title": "{{{TILE_NAME}}} {{{TILE_STYLE}}}",
+        "contents": [
+            {
+                "name": "Value",
+                "value": "Initial data"
+            }
+        ]},
+    "displayName" : "{{{TILE_NAME}}}",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "{{{TILE_NAME}}}",
+    "style": "CUSTOM_VIEW",
+    "icons": {
+        "16": "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
+        "48": "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
+        "128": "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png"
+    },
+    "view": "/{{{TILE_NAME}}}/view"
+}
