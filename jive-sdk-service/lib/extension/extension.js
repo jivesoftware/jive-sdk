@@ -74,7 +74,14 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                 // create the public/apps directory if doesn't exist
                 return jive.util.fsexists(svrPublicDir + '/apps').then( function(exists ) {
                     return !exists ? jive.util.fsmkdir( extensionPublicDir + '/apps') : q.resolve();
-                }).then( function () {
+                })
+                .then( function () {
+                    // create the public/tiles directory if doesn't exist
+                    return jive.util.fsexists(svrPublicDir + '/tiles').then( function(exists ) {
+                        return !exists ? jive.util.fsmkdir( extensionPublicDir + '/tiles') : q.resolve();
+                    });
+                })
+                .then( function () {
                     // recursively copy the server's public directory
                     return jive.util.fscopy(svrPublicDir, extensionPublicDir );
                 })
