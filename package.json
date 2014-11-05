@@ -1,7 +1,7 @@
 {
   "name": "jive-sdk",
   "description": "Node.js framework for building purposeful places",
-  "version": "0.1.147",
+  "version": "0.1.151",
   "main": "jive-sdk-service/api.js",
   "author": {
     "name": "Jive Software",
@@ -63,7 +63,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/jivesoftware/jive-sdk"
+    "url": "http://github.com/jivesoftware/jive-sdk"
   },
   "keywords": [
     "jive",

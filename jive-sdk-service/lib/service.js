@@ -42,6 +42,7 @@ var osAppsDir = rootDir + '/apps';
 var cartridgesDir = rootDir + '/cartridges';
 var storagesDir = rootDir + '/storages';
 var security = require('./security');
+var monitoring = require('./monitoring');
 var serviceState = 'stopped';
 
 var _dir = function(theDir, defaultDir ) {
@@ -565,12 +566,14 @@ exports.serviceURL = function() {
  * @property {Object} jive
  * @property {Object} dev
  * @property {Object} oauth
+ * @property {Object} monitoring
  */
 exports.routes = {
     'tiles' : require('../routes/tiles'),
     'jive' : require('../routes/jive'),
     'dev' : require('../routes/dev'),
-    'oauth' : require('../routes/oauth')
+    'oauth' : require('../routes/oauth'),
+    'monitoring' : require('../routes/monitoring')
 };
 
 /**
@@ -634,6 +637,12 @@ exports.getExpandedTileDefinitions = function(all) {
                 processedTile['action'] = host + ( processedTile['action'].indexOf('/') == 0 ? "" : "/" ) + processedTile['action'];
             }
         }
+        if ( processedTile['view'] ) {
+            if ( processedTile['view'].indexOf('http') != 0 && processedTile['view'].indexOf('%serviceURL%') === -1) {
+                // assume its relative to host then
+                processedTile['view'] = host + ( processedTile['view'].indexOf('/') == 0 ? "" : "/" ) + processedTile['view'];
+            }
+        }
         if ( !processedTile['config'] ) {
             processedTile['config'] = host + '/' + processedTile['definitionDirName'] + '/configure';
         } else {
@@ -680,6 +689,14 @@ exports.getExpandedTileDefinitions = function(all) {
  */
 exports.security = function() {
     return security;
+};
+
+/**
+ * API for managing service monitoring
+ * @returns {module:monitoring}
+ */
+exports.monitoring = function() {
+    return monitoring;
 };
 
 /**

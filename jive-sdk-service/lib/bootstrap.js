@@ -76,9 +76,16 @@ var setupExpressApp = function (app, rootDir, config) {
         app.post('/jive/oauth/register', service.routes.jive.oauthRegister);
         app.post('/jive/oauth/unregister', service.routes.jive.oauthUnregister);
 
-        jive.logger.debug("/registration");
-        jive.logger.debug("/unregister");
-        jive.logger.debug("/jive/oauth/register");
+        if ( service.monitoring().isActive() ) {
+            app.get('/jive/monitoring', service.routes.monitoring.ping);
+        }
+
+        jive.logger.debug("POST /registration");
+        jive.logger.debug("POST /unregister");
+        jive.logger.debug("POST /jive/oauth/register");
+        if ( service.monitoring().isActive() ) {
+            jive.logger.debug("GET /jive/monitoring");
+        }
 
         // wire in an sdk app with its own views
         var jiveSdkApp = express();
@@ -167,6 +174,27 @@ var setupExtension = function(options, tilesDir, appsDir, cartridgesDir, storage
     return extension.prepare('', tilesDir, appsDir, cartridgesDir, storagesDir, options['packageApps'] === true );
 };
 
+var setupMonitoring = function(options) {
+    if ( !options ) {
+        // skip scheduling monitoring if no options
+        return q.resolve();
+    }
+
+    var monitoringInterval = options['monitoringInterval'];
+    if ( !monitoringInterval ) {
+        // skip scheduling monitoring if no monitoring interval
+        return q.resolve();
+    }
+
+    var monitoring = jive.service.monitoring();
+    var dbMonitor = monitoring.createPersistenceMonitor();
+    monitoring.addMonitor(dbMonitor);
+
+    var task = new jive.tasks.build(monitoring.runMonitoring, monitoringInterval);
+    jive.tasks.schedule(task, jive.service.scheduler());
+
+};
+
 /**
  * @private
  * @param app Required.
@@ -189,6 +217,7 @@ exports.start = function (app, options, rootDir, tilesDir, appsDir, cartridgesDi
     return setupScheduler()
         .then( function() { return setupHttp(app, rootDir, options) })
         .then( function() { return setupExtension(options, tilesDir, appsDir, cartridgesDir, storagesDir) })
+        .then( function() { return setupMonitoring(options) })
         .then( function() { return jive.util.fsexists( __dirname + '/../../package.json') })
         .then( function() { return getSDKVersion() })
         .then( function(sdkVersion) {

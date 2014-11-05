@@ -43,7 +43,9 @@ module.exports = function(serviceConfig) {
     var dirtyCount = 0;
     var dirtyCollectionIDs = {};
     var intervalId;
-    var path = serviceConfig && serviceConfig['dataDirPath'] ? serviceConfig['dataDirPath'] : "db";
+    serviceConfig = serviceConfig || {};
+
+    var path = serviceConfig['dataDirPath'] ? serviceConfig['dataDirPath'] : "db";
 
     jive.logger.debug("File persistence dir at '" + path + "'");
 

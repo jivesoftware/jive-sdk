@@ -23,6 +23,12 @@
                         view="contentView"/>
 
                     <action
+                        id="com.jivesoftware.jwdemo.create"
+                        path="jive/actions/navmenu"
+                        label="Create Menu Action"
+                        view="createMenuView"/>
+
+                    <action
                         id="com.jivesoftware.jwdemo.bang"
                         path="jive/actions/rte"
                         label="!app Action"
@@ -77,6 +83,8 @@
     <Content type="html" view="canvas,home" href="canvas.html" />
 
     <Content type="html" view="contentView" href="contentView.html" />
+
+    <Content type="html" view="createMenuView" href="createMenuView.html" />
 
     <Content type="html" view="bangView" href="bangView.html" />
 
