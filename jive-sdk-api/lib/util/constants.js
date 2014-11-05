@@ -24,6 +24,7 @@
  * @property {String} PUSH_COMMENT_TO_JIVE Fired on request to push a comment into Jive.
  * @property {String} COMMENT_ON_ACTIVITY Fired on request to push a comment on an activity entry into Jive.
  * @property {String} COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID Fired on request to push a comment on an activity entry into Jive.
+ * @property {String} FETCH_COMMENTS_ON_ACTIVITY_BY_EXTERNAL_ID Fired on request for activity comments from jive, for an external activity.
  * @property {String} FETCH_COMMENTS_ON_ACTIVITY Fired on request for activity comments from Jive.
  * @property {String} FETCH_ALL_COMMENTS_FOR_EXT_STREAM Fired on request for activity comments from Jive.
  * @property {String} INSTANCE_REGISTRATION Fired on request to register a new tile or externalstream instance.

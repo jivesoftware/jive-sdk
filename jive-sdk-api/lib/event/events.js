@@ -359,6 +359,15 @@ exports.systemEvents = [
         'description' : 'Framework handler'
     },
     {
+        'event': jive.constants.tileEventNames.FETCH_COMMENTS_ON_ACTIVITY_BY_EXTERNAL_ID,
+        'handler': function (context) {
+            var extstream = context['extstream'];
+            var externalActivityID = context['externalActivityID'];
+            var opts = context['opts'];
+            return comments.fetchCommentsOnActivityByExternalID(extstream, externalActivityID, opts);
+        }
+    },
+    {
         'event': jive.constants.tileEventNames.COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID,
         'handler': function (context) {
             var extstream = context['extstream'];

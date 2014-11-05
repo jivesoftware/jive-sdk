@@ -136,7 +136,7 @@ extstreams.fetchCommentsOnActivity = function(activity, opts) {
  * Get all the comments in Jive for a given activity object by external ID.
  * @memberof module:extstreamsInstances
  * @param {Object} extstream
- * @paarm {string} externalActivityID - external ID of the activity
+ * @param {string} externalActivityID - external ID of the activity
  * @param {Object} opts - JSON describing options for retrieving content from Jive. See above documentation.
  * @returns {Promise} Promise A promise that resolves to a response. response.entity is the list of comments. See  See https://developers.jivesoftware.com/api/rest/index.html#lists
  */
