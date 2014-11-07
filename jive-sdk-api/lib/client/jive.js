@@ -158,6 +158,17 @@ exports.pushActivity = function (tileInstance, activity) {
 /**
  * @memberof jiveClient
  * @param tileInstance
+ * @param activity
+ * @returns {*}
+ */
+exports.updateActivity = function (tileInstance, activity) {
+    var url = activity['url'];
+    return tilePush('PUT', tileInstance, activity, url);
+};
+
+/**
+ * @memberof jiveClient
+ * @param tileInstance
  * @param comment
  * @param commentURL
  * @returns {*}

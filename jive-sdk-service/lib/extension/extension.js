@@ -382,7 +382,7 @@ function isDirectory(path){
 var truncateTagSrc = function(html, toTruncate) {
     var fn = function(all, tag, attrString) {
         var matchAttr = /(\w+)\s*=\s*"(.*?)"/g;
-        var lookFor = tag == "a" ? "href" : "src";
+        var lookFor = (tag == "a" || tag == 'link') ? "href" : "src";
         var newAttrs = attrString.replace(matchAttr, function(oneAttr, name, value, offset) {
             if (name == lookFor && value.indexOf(toTruncate) == 0) {
                 oneAttr = oneAttr.replace('"' + toTruncate, '"');

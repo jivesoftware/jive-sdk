@@ -321,6 +321,15 @@ exports.systemEvents = [
         'description' : 'Framework handler'
     },
     {
+        'event':jive.constants.tileEventNames.UPDATE_ACTIVITY_TO_JIVE,
+        'handler':function(context) {
+            var tileInstance = context['tileInstance'];
+            var activity = context['activity'];
+            return pusher.updateActivity(tileInstance, activity);
+        },
+        'description' : 'Framework handler'
+    },
+    {
         'event':jive.constants.tileEventNames.PUSH_COMMENT_TO_JIVE,
         'handler':function(context) {
             var tileInstance = context['tileInstance'];

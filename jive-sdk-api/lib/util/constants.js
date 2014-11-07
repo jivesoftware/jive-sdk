@@ -21,6 +21,7 @@
 /**
  * @property {String} PUSH_DATA_TO_JIVE <b>pushDataToJive</b> Fired on request to push tile data update to Jive.
  * @property {String} PUSH_ACTIVITY_TO_JIVE Fired on request to push externatstream activity to Jive.
+ * @property {String} UPDATE_ACTIVITY_TO_JIVE Fired on request to update externatstream activity to Jive.
  * @property {String} PUSH_COMMENT_TO_JIVE Fired on request to push a comment into Jive.
  * @property {String} COMMENT_ON_ACTIVITY Fired on request to push a comment on an activity entry into Jive.
  * @property {String} COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID Fired on request to push a comment on an activity entry into Jive.
@@ -38,6 +39,7 @@
 exports.tileEventNames = {
     'PUSH_DATA_TO_JIVE':'pushDataToJive',
     'PUSH_ACTIVITY_TO_JIVE':'pushActivityToJive',
+    'UPDATE_ACTIVITY_TO_JIVE':'updateActivityToJive',
     'PUSH_COMMENT_TO_JIVE':'pushCommentToJive',
     'COMMENT_ON_ACTIVITY':'commentOnActivity',
     'COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID':'commentOnActivityByExternalID',
