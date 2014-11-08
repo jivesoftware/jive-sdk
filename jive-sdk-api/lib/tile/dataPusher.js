@@ -29,6 +29,10 @@ exports.pushActivity = function (instance, dataToPush) {
     return push(pushActivityDelegate, "activity", { 'instance' : instance, 'dataToPush': dataToPush });
 };
 
+exports.updateActivity = function (instance, dataToPush) {
+    return push(updateActivityDelegate, "activity", { 'instance' : instance, 'dataToPush': dataToPush });
+};
+
 exports.pushComment = function(instance, commentURL, dataToPush) {
     return push(pushCommentDelegate, "comment", { 'instance' : instance, 'dataToPush': dataToPush, 'pushURL' : commentURL});
 };
@@ -255,6 +259,10 @@ var pushDataDelegate = function(operationContext) {
 
 var pushActivityDelegate = function(operationContext) {
     return jiveClient.pushActivity(operationContext['instance'], operationContext['dataToPush']);
+};
+
+var updateActivityDelegate = function(operationContext) {
+    return jiveClient.updateActivity(operationContext['instance'], operationContext['dataToPush']);
 };
 
 var pushCommentDelegate = function(operationContext) {

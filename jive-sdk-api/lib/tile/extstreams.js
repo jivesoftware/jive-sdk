@@ -53,6 +53,19 @@ extstreams.pushActivity = function ( tileInstance, activity) {
     } );
 };
 
+/**
+ * @memberof module:extstreamsInstances
+ * @param {Object} tileInstance
+ * @param {Object} activity
+ * @returns {Promise} Promise
+ */
+extstreams.updateActivity = function ( tileInstance, activity) {
+    return jive.context.scheduler.schedule(jive.constants.tileEventNames.UPDATE_ACTIVITY_TO_JIVE, {
+        'tileInstance' : tileInstance,
+        'activity' : activity
+    } );
+};
+
 var pushComment = function ( tileInstance, comment, commentURL) {
     return jive.context.scheduler.schedule(jive.constants.tileEventNames.PUSH_COMMENT_TO_JIVE, {
         'tileInstance' : tileInstance,
