@@ -22,36 +22,47 @@ var q = require('q');
 // public
 
 exports.pushData = function (instance, dataToPush) {
-    return push(pushDataDelegate, "data", { 'instance' : instance, 'dataToPush': dataToPush });
+    return push(pushDataDelegate, "data", {'instance': instance, 'dataToPush': dataToPush});
 };
 
 exports.pushActivity = function (instance, dataToPush) {
-    return push(pushActivityDelegate, "activity", { 'instance' : instance, 'dataToPush': dataToPush });
+    return push(pushActivityDelegate, "activity", {'instance': instance, 'dataToPush': dataToPush});
+};
+
+exports.fetchActivityByExternalID = function (instance, externalActivityID) {
+    return fetch(fetchActivityByExternalIdDelegate, 'activity', {
+        'instance': instance,
+        'externalActivityID': externalActivityID
+    });
 };
 
 exports.updateActivity = function (instance, dataToPush) {
-    return push(updateActivityDelegate, "activity", { 'instance' : instance, 'dataToPush': dataToPush });
+    return push(updateActivityDelegate, "activity", {'instance': instance, 'dataToPush': dataToPush});
 };
 
-exports.pushComment = function(instance, commentURL, dataToPush) {
-    return push(pushCommentDelegate, "comment", { 'instance' : instance, 'dataToPush': dataToPush, 'pushURL' : commentURL});
+exports.pushComment = function (instance, commentURL, dataToPush) {
+    return push(pushCommentDelegate, "comment", {
+        'instance': instance,
+        'dataToPush': dataToPush,
+        'pushURL': commentURL
+    });
 };
 
-exports.fetchExtendedProperties = function( instance ) {
-    return fetch(fetchExtendedPropertiesDelegate, 'extendedProperties', { 'instance' : instance });
+exports.fetchExtendedProperties = function (instance) {
+    return fetch(fetchExtendedPropertiesDelegate, 'extendedProperties', {'instance': instance});
 };
 
 exports.pushExtendedProperties = function (instance, props) {
-    return push(pushExtendedPropertiesDelegate, "extendedProperties", { 'instance' : instance, 'props': props});
+    return push(pushExtendedPropertiesDelegate, "extendedProperties", {'instance': instance, 'props': props});
 };
 
 exports.removeExtendedProperties = function (instance) {
-    return remove(removeExtendedPropertiesDelegate, "extendedProperties", { 'instance' : instance });
+    return remove(removeExtendedPropertiesDelegate, "extendedProperties", {'instance': instance});
 };
 
-exports.getPaginated = function(instance, url) {
+exports.getPaginated = function (instance, url) {
     var promise = getWithTileInstanceAuth(instance, url);
-    return promise.then(function(response){
+    return promise.then(function (response) {
         var entity = response.entity;
         if (typeof entity !== 'object') {
             return response;
@@ -61,8 +72,8 @@ exports.getPaginated = function(instance, url) {
             return response;
         }
 
-        entity.next = function() {
-            return exports.getPaginated( instance, entity.links.next );
+        entity.next = function () {
+            return exports.getPaginated(instance, entity.links.next);
         };
 
         return response;
@@ -74,22 +85,22 @@ exports.getPaginated = function(instance, url) {
 
 var oAuthHandler;
 
-var tileLibraryLookup = function(instance) {
-    return jive.tiles.definitions.findByTileName( instance['name'] ).then( function(tile) {
-        return tile ? jive.tiles: jive.extstreams;
+var tileLibraryLookup = function (instance) {
+    return jive.tiles.definitions.findByTileName(instance['name']).then(function (tile) {
+        return tile ? jive.tiles : jive.extstreams;
     });
 };
 
-var accessTokenRefresher = function(operationContext, oauth) {
+var accessTokenRefresher = function (operationContext, oauth) {
     var d = q.defer();
     var instance = operationContext['instance'];
     var jiveCommunity = instance['jiveCommunity'];
 
-    tileLibraryLookup(instance).then( function(instanceLibrary) {
+    tileLibraryLookup(instance).then(function (instanceLibrary) {
 
-        jive.community.findByCommunity( jiveCommunity).then( function(community) {
+        jive.community.findByCommunity(jiveCommunity).then(function (community) {
             var options = {};
-            if ( community ) {
+            if (community) {
                 options['client_id'] = community['clientId'];
                 options['client_secret'] = community['clientSecret'];
                 options['refresh_token'] = oauth['refreshToken'];
@@ -106,11 +117,11 @@ var accessTokenRefresher = function(operationContext, oauth) {
                             instance['refreshToken'] = accessTokenResponse['refresh_token'];
 
                             var updatedOAuth = {
-                                'accessToken' : instance['accessToken'],
-                                'refreshToken' : instance['refreshToken']
+                                'accessToken': instance['accessToken'],
+                                'refreshToken': instance['refreshToken']
                             };
 
-                            instanceLibrary.save(instance).then(function() {
+                            instanceLibrary.save(instance).then(function () {
                                 d.resolve(updatedOAuth);
                             });
                         } else {
@@ -134,23 +145,23 @@ var accessTokenRefresher = function(operationContext, oauth) {
     return d.promise;
 };
 
-var getOAuthHandler = function() {
-    if ( !oAuthHandler  ) {
+var getOAuthHandler = function () {
+    if (!oAuthHandler) {
         oAuthHandler = jive.util.oauth.buildOAuthHandler(accessTokenRefresher);
     }
 
     return oAuthHandler;
 };
 
-var doDestroyInstance = function(instance, instanceLibrary, response) {
+var doDestroyInstance = function (instance, instanceLibrary, response) {
     var deferred = q.defer();
 
     // push was rejected with a 'gone'
     jive.events.emit("destroyingInstance", instance);
 
     // destroy the instance
-    if ( instance ) {
-        instanceLibrary.remove(instance['id']).then( function() {
+    if (instance) {
+        instanceLibrary.remove(instance['id']).then(function () {
             jive.logger.info('Destroying tile instance from database after receiving 410 GONE response', instance);
             jive.events.emit("destroyedInstance", instance);
             deferred.resolve(response);
@@ -168,28 +179,28 @@ var push = function (pushDelegate, type, operationContext) {
     var instance = operationContext['instance'];
     var dataToPush = operationContext['dataToPush'];
     var oauth = {
-        'accessToken' : instance['accessToken'],
-        'refreshToken' : instance['refreshToken']
+        'accessToken': instance['accessToken'],
+        'refreshToken': instance['refreshToken']
     };
 
-    tileLibraryLookup(instance).then( function(instanceLibrary) {
+    tileLibraryLookup(instance).then(function (instanceLibrary) {
         getOAuthHandler().doOperation(pushDelegate, operationContext, oauth).then(
             // success
-            function(r) {
-                jive.events.emit( type + "Pushed", {
-                    'theInstance' : instance,
-                    'pushedData' : dataToPush,
-                    'response' : r
+            function (r) {
+                jive.events.emit(type + "Pushed", {
+                    'theInstance': instance,
+                    'pushedData': dataToPush,
+                    'response': r
                 });
                 d.resolve(r);
             },
 
             // err
-            function(error) {
-                if ( error.statusCode == 410 ) {
-                    doDestroyInstance(instance, instanceLibrary, error).then( function(err) {
+            function (error) {
+                if (error.statusCode == 410) {
+                    doDestroyInstance(instance, instanceLibrary, error).then(function (err) {
                         d.reject(err);
-                    } );
+                    });
                 } else {
                     jive.logger.info('4XX error returned from jive', error);
                     d.reject(error); //Another error code
@@ -202,23 +213,23 @@ var push = function (pushDelegate, type, operationContext) {
     return d.promise;
 };
 
-var fetch = function( fetchDelegate, type, operationContext ) {
+var fetch = function (fetchDelegate, type, operationContext) {
     var d = q.defer();
     var instance = operationContext['instance'];
 
     var oauth = {
-        'accessToken' : instance['accessToken'],
-        'refreshToken' : instance['refreshToken']
+        'accessToken': instance['accessToken'],
+        'refreshToken': instance['refreshToken']
     };
 
     getOAuthHandler().doOperation(fetchDelegate, operationContext, oauth).then(
         // success
-        function(r) {
+        function (r) {
             d.resolve(r);
         },
 
         // err
-        function(error) {
+        function (error) {
             d.reject(error); //Another error code
         }
     );
@@ -226,23 +237,23 @@ var fetch = function( fetchDelegate, type, operationContext ) {
     return d.promise;
 };
 
-var remove = function( removeDelegate, type, operationContext ) {
+var remove = function (removeDelegate, type, operationContext) {
     var d = q.defer();
     var instance = operationContext['instance'];
 
     var oauth = {
-        'accessToken' : instance['accessToken'],
-        'refreshToken' : instance['refreshToken']
+        'accessToken': instance['accessToken'],
+        'refreshToken': instance['refreshToken']
     };
 
     getOAuthHandler().doOperation(removeDelegate, operationContext, oauth).then(
         // success
-        function(r) {
+        function (r) {
             d.resolve(r);
         },
 
         // err
-        function(error) {
+        function (error) {
             d.reject(error); //Another error code
         }
     );
@@ -253,37 +264,40 @@ var remove = function( removeDelegate, type, operationContext ) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // private delagates
 
-var pushDataDelegate = function(operationContext) {
+var pushDataDelegate = function (operationContext) {
     return jiveClient.pushData(operationContext['instance'], operationContext['dataToPush'], operationContext['pushURL']);
 };
 
-var pushActivityDelegate = function(operationContext) {
+var pushActivityDelegate = function (operationContext) {
     return jiveClient.pushActivity(operationContext['instance'], operationContext['dataToPush']);
 };
+var fetchActivityByExternalIdDelegate = function(operationContext){
+    return jiveClient.fetchActivityByExternalID(operationContext['instance']);
+};
 
-var updateActivityDelegate = function(operationContext) {
+var updateActivityDelegate = function (operationContext) {
     return jiveClient.updateActivity(operationContext['instance'], operationContext['dataToPush']);
 };
 
-var pushCommentDelegate = function(operationContext) {
+var pushCommentDelegate = function (operationContext) {
     return jiveClient.pushComment(operationContext['instance'], operationContext['dataToPush'], operationContext['pushURL']);
 };
 
-var fetchExtendedPropertiesDelegate = function(operationContext) {
+var fetchExtendedPropertiesDelegate = function (operationContext) {
     return jiveClient.fetchExtendedProperties(operationContext['instance']);
 };
 
-var pushExtendedPropertiesDelegate = function(operationContext) {
-    return jiveClient.pushExtendedProperties(operationContext['instance'], operationContext['props']);
+var fetchActivityByExternalIdDelegate = function (operationContext) {
+    return jiveClient.fetchActivityByExternalID(operationContext['instance'],operationContext['externalActivityID']);
 };
 
-var removeExtendedPropertiesDelegate = function(operationContext) {
+var removeExtendedPropertiesDelegate = function (operationContext) {
     return jiveClient.removeExtendedProperties(operationContext['instance']);
 };
 
-var getWithTileInstanceAuthDelegate = function(operationContext) {
+var getWithTileInstanceAuthDelegate = function (operationContext) {
     return jiveClient.getWithTileInstanceAuth(operationContext['instance'], operationContext['url']);
 };
-var getWithTileInstanceAuth = function(instance, url ) {
-    return fetch( getWithTileInstanceAuthDelegate, "instance", { 'instance' : instance, 'url' : url } );
+var getWithTileInstanceAuth = function (instance, url) {
+    return fetch(getWithTileInstanceAuthDelegate, "instance", {'instance': instance, 'url': url});
 };
