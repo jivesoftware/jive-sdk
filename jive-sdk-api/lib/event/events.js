@@ -389,8 +389,6 @@ exports.systemEvents = [
         'handler': function (context) {
             var instance = context['exstream'];
             var externalActivityID = context['externalActivityID'];
-            console.log("instance: " + JSON.stringify(instance));
-            console.log("externalActivityID: " + externalActivityID);
             return pusher.fetchActivityByExternalID(instance, externalActivityID);
         },
         'description': 'Framework handler'

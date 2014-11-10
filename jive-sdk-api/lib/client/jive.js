@@ -279,9 +279,6 @@ var extractExternalPropsUrl = function (instance) {
 
 var extractFetchActivityByExternalIDUrl = function (instance, extActivtiyID) {
     var instanceURL = instance['url'];
-
-    var instanceUrl = instance['url'];
-//    http://[host]/api/jivelinks/v1/extstreams/[extstreaminstanceid]/extactivities/[externalid]
     if (endsWith(instanceURL, '/activities')) {
         var result = instanceURL.match(/(.+)\/activities/)[1] + '/extactivities/' + extActivtiyID;
         return result;
