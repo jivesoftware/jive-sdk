@@ -11,6 +11,8 @@
     "name" : "{{{TILE_NAME}}}",
     "description" : "{{{TILE_NAME}}}",
     "style": "CUSTOM_VIEW",
+    "displayWidth" : "ALL",
+    "pageType" : "PLACE_AND_USER",
     "icons": {
         "16": "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
         "48": "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
