@@ -453,8 +453,9 @@ exports.register = function( registration ) {
                         oauth['code'] = authorizationCode || oauth['code'];
                         oauth['jiveSignature'] = jiveSignature || oauth['jiveSignature'];
                         oauth['scope'] = oauthResponse['entity']['scope'] || oauth['scope'];
-                        oauth['expiresIn'] = oauthResponse['entity']['expires_in'] || oauth['expiresIn'];
-                        oauth['accessToken'] = oauthResponse['entity']['access_token'] || oauth['accessToken'];
+                        oauth['expires_in'] = oauthResponse['entity']['expires_in'] || oauth['expires_in'];
+                        oauth['access_token'] = oauthResponse['entity']['access_token'] || oauth['access_token'];
+                        oauth['refresh_token'] = oauthResponse['entity']['refresh_token'] ||oauth['refresh_token'];
                     }
 
                     community['jiveUrl' ] = jiveUrl || community['jiveUrl' ];
