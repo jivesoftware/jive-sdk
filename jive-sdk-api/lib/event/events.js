@@ -83,31 +83,31 @@ exports.eventHandlerMap = {};
  * @param {String} options.description
  *
  */
-exports.registerEventListener = function( event, handler, options) {
-    if ( !event ) {
+exports.registerEventListener = function (event, handler, options) {
+    if (!event) {
         throw new Error("Must specify a target event.");
     }
 
-    if ( !handler ) {
+    if (!handler) {
         throw new Error("Must specify an event handler function.");
     }
 
-    if ( typeof handler !== 'function' ) {
+    if (typeof handler !== 'function') {
         throw new Error("Event handler must be a function.");
     }
 
     var targetListener;
     var description;
 
-    if ( options ) {
+    if (options) {
         targetListener = options['eventListener'];
         description = options['description'];
     }
 
-    if ( targetListener ) {
+    if (targetListener) {
         addTargetedEventListener(targetListener, event, description, handler);
     } else {
-        addUntargetedEventListener(event, description, handler );
+        addUntargetedEventListener(event, description, handler);
     }
 };
 
@@ -118,21 +118,21 @@ exports.registerEventListener = function( event, handler, options) {
  * @param {String} eventListener
  * @returns {Array}
  */
-exports.getEventListeners = function(event, eventListener) {
-    if ( eventListener && event ) {
-        if ( !exports.eventHandlerMap[eventListener] || !exports.eventHandlerMap[eventListener][event] ) {
+exports.getEventListeners = function (event, eventListener) {
+    if (eventListener && event) {
+        if (!exports.eventHandlerMap[eventListener] || !exports.eventHandlerMap[eventListener][event]) {
             return null;
         }
 
         return exports.eventHandlerMap[eventListener][event];
     } else {
-        if ( eventListener && !event ) {
+        if (eventListener && !event) {
             var events = exports.eventHandlerMap[eventListener];
-            if ( !events ) {
+            if (!events) {
                 return null;
             }
 
-            if ( events['indexOf'] ) {
+            if (events['indexOf']) {
                 return events;
             }
 
@@ -144,16 +144,16 @@ exports.getEventListeners = function(event, eventListener) {
             }
 
             return handlers;
-        } else if ( !eventListener && event ) {
+        } else if (!eventListener && event) {
             var events = exports.eventHandlerMap;
             var handlers = [];
 
             for (var key in events) {
                 if (events.hasOwnProperty(key)) {
                     var listeners = events[key];
-                    if ( listeners && !listeners['indexOf'] ) {
+                    if (listeners && !listeners['indexOf']) {
                         var handler = listeners[event];
-                        if ( handler ) {
+                        if (handler) {
                             handlers.push(handler)
                         }
                     }
@@ -172,10 +172,10 @@ exports.getEventListeners = function(event, eventListener) {
  * @param {String} event
  * @param {function} handler
  */
-exports.addLocalEventListener = function( event, handler ) {
-    exports.addListener( event, function(context) {
+exports.addLocalEventListener = function (event, handler) {
+    exports.addListener(event, function (context) {
         return handler(context, event);
-    } );
+    });
 };
 
 /**
@@ -258,184 +258,210 @@ exports.globalEvents = [
 exports.systemEvents = [
     {
         'event': jive.constants.globalEventNames.NEW_INSTANCE,
-        'handler' : function(context){
+        'handler': function (context) {
             jive.logger.info("A new instance was created", context);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
         'event': jive.constants.globalEventNames.INSTANCE_UPDATED,
-        'handler' : function(context){
+        'handler': function (context) {
             jive.logger.info("An instance was updated", context);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
         'event': jive.constants.globalEventNames.INSTANCE_REMOVED,
-        'handler' : function(context){
+        'handler': function (context) {
             jive.logger.info("Instance has been destroyed", context);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
         'event': jive.constants.globalEventNames.DATA_PUSHED,
-        'handler' : function(context){
+        'handler': function (context) {
             var theInstance = context['theInstance'], pushedData = context['pushedData'], response = context['response'];
             jive.logger.info('Data push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
         'event': jive.constants.globalEventNames.ACTIVITY_PUSHED,
-        'handler' : function(context){
+        'handler': function (context) {
             var theInstance = context['theInstance'], pushedData = context['pushedData'], response = context['response'];
             jive.logger.info('Activity push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
         'event': jive.constants.globalEventNames.COMMENT_PUSHED,
-        'handler' : function(context){
+        'handler': function (context) {
             var theInstance = context['theInstance'], pushedData = context['pushedData'], response = context['response'];
             jive.logger.info('Comment push to', theInstance.url, response ? response.statusCode : '', theInstance.name);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
 
     {
-        'event':jive.constants.tileEventNames.PUSH_DATA_TO_JIVE,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.PUSH_DATA_TO_JIVE,
+        'handler': function (context) {
             var tileInstance = context['tileInstance'];
             var data = context['data'];
             return pusher.pushData(tileInstance, data);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
-        'event':jive.constants.tileEventNames.PUSH_ACTIVITY_TO_JIVE,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.PUSH_ACTIVITY_TO_JIVE,
+        'handler': function (context) {
             var tileInstance = context['tileInstance'];
             var activity = context['activity'];
             return pusher.pushActivity(tileInstance, activity);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
-        'event':jive.constants.tileEventNames.UPDATE_ACTIVITY_TO_JIVE,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.FETCH_ACTIVITY_BY_EXTERNAL_ID,
+        'handler': function (context) {
+            var tileInstance = context['tileInstance'];
+            var activity = context['activity'];
+            return pusher.pushActivity(tileInstance, activity);
+        },
+        'description': 'Framework handler'
+    },
+    {
+        'event': jive.constants.tileEventNames.UPDATE_ACTIVITY_TO_JIVE,
+        'handler': function (context) {
             var tileInstance = context['tileInstance'];
             var activity = context['activity'];
             return pusher.updateActivity(tileInstance, activity);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
-        'event':jive.constants.tileEventNames.PUSH_COMMENT_TO_JIVE,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.PUSH_COMMENT_TO_JIVE,
+        'handler': function (context) {
             var tileInstance = context['tileInstance'];
             var commentURL = context['commentsURL'];
             var comment = context['comment'];
             return pusher.pushComment(tileInstance, commentURL, comment);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
-        'event':jive.constants.tileEventNames.COMMENT_ON_ACTIVITY,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.COMMENT_ON_ACTIVITY,
+        'handler': function (context) {
             var activity = context['activity'];
             var comment = context['comment'];
-            return comments.commentOnActivity( activity, comment);
+            return comments.commentOnActivity(activity, comment);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
-        'event':jive.constants.tileEventNames.COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID,
+        'handler': function (context) {
             var extstream = context['extstream'];
             var externalActivityID = context['externalActivityID'];
             var comment = context['comment'];
-            return comments.commentOnActivityByExternalID( extstream, externalActivityID, comment );
+            return comments.commentOnActivityByExternalID(extstream, externalActivityID, comment);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
-        'event':jive.constants.tileEventNames.FETCH_COMMENTS_ON_ACTIVITY,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.FETCH_COMMENTS_ON_ACTIVITY,
+        'handler': function (context) {
             var activity = context['activity'];
             var opts = context['opts'];
-            return comments.fetchCommentsOnActivity( activity, opts );
+            return comments.fetchCommentsOnActivity(activity, opts);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
-        'event':jive.constants.tileEventNames.FETCH_ALL_COMMENTS_FOR_EXT_STREAM,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.FETCH_COMMENTS_ON_ACTIVITY_BY_EXTERNAL_ID,
+        'handler': function (context) {
+            var extstream = context['extstream'];
+            var externalActivityID = context['externalActivityID'];
+            var opts = context['opts'];
+            return comments.fetchCommentsOnActivityByExternalID(extstream, externalActivityID, opts);
+        }
+    }, {
+        'event': jive.constants.tileEventNames.FETCH_ACTIVITY_BY_EXTERNAL_ID,
+        'handler': function (context) {
+            var instance = context['exstream'];
+            var externalActivityID = context['externalActivityID'];
+            return pusher.fetchActivityByExternalID(instance, externalActivityID);
+        },
+        'description': 'Framework handler'
+    },
+    {
+        'event': jive.constants.tileEventNames.FETCH_ALL_COMMENTS_FOR_EXT_STREAM,
+        'handler': function (context) {
             var extstream = context['extstream'];
             var opts = context['opts'];
-            return comments.fetchAllCommentsForExtstream( extstream, opts );
+            return comments.fetchAllCommentsForExtstream(extstream, opts);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
-        'event':jive.constants.tileEventNames.INSTANCE_REGISTRATION,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.INSTANCE_REGISTRATION,
+        'handler': function (context) {
             return regHandler.registration(context);
         }
     },
     {
-        'event':jive.constants.tileEventNames.INSTANCE_UNREGISTRATION,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.INSTANCE_UNREGISTRATION,
+        'handler': function (context) {
             return regHandler.unregistration(context);
         }
     },
     {
-        'event':jive.constants.tileEventNames.CLIENT_APP_REGISTRATION,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.CLIENT_APP_REGISTRATION,
+        'handler': function (context) {
             return jive.community.register(context);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
-        'event':jive.constants.tileEventNames.CLIENT_APP_UNREGISTRATION,
-        'handler':function(context) {
+        'event': jive.constants.tileEventNames.CLIENT_APP_UNREGISTRATION,
+        'handler': function (context) {
             return jive.community.unregister(context);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
         'event': jive.constants.tileEventNames.GET_PAGINATED_RESULTS,
-        'handler':function(context) {
-            return pusher.getPaginated( context['extstream'], context['commentsURL'] );
+        'handler': function (context) {
+            return pusher.getPaginated(context['extstream'], context['commentsURL']);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
         'event': jive.constants.tileEventNames.GET_EXTERNAL_PROPS,
-        'handler':function(context) {
-            return pusher.fetchExtendedProperties( context['instance'] );
+        'handler': function (context) {
+            return pusher.fetchExtendedProperties(context['instance']);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
         'event': jive.constants.tileEventNames.SET_EXTERNAL_PROPS,
-        'handler':function(context) {
-            return pusher.pushExtendedProperties( context['instance'], context['props'] );
+        'handler': function (context) {
+            return pusher.pushExtendedProperties(context['instance'], context['props']);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     },
     {
         'event': jive.constants.tileEventNames.DELETE_EXTERNAL_PROPS,
-        'handler':function(context) {
-            return pusher.removeExtendedProperties( context['instance'] );
+        'handler': function (context) {
+            return pusher.removeExtendedProperties(context['instance']);
         },
-        'description' : 'Framework handler'
+        'description': 'Framework handler'
     }
 ];
 
 /**
  * Removes all event handlers.
  */
-exports.reset = function() {
+exports.reset = function () {
     exports.eventHandlerMap = {};
     exports.removeAllListeners();
 };

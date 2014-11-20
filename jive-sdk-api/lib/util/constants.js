@@ -25,6 +25,7 @@
  * @property {String} PUSH_COMMENT_TO_JIVE Fired on request to push a comment into Jive.
  * @property {String} COMMENT_ON_ACTIVITY Fired on request to push a comment on an activity entry into Jive.
  * @property {String} COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID Fired on request to push a comment on an activity entry into Jive.
+ * @property {String} FETCH_COMMENTS_ON_ACTIVITY_BY_EXTERNAL_ID Fired on request for activity comments from jive, for an external activity.
  * @property {String} FETCH_COMMENTS_ON_ACTIVITY Fired on request for activity comments from Jive.
  * @property {String} FETCH_ALL_COMMENTS_FOR_EXT_STREAM Fired on request for activity comments from Jive.
  * @property {String} INSTANCE_REGISTRATION Fired on request to register a new tile or externalstream instance.
@@ -37,22 +38,24 @@
  * @property {String} DELETE_EXTERNAL_PROPS  Fired on request for deleting external props on a tile or externalstream instance.
  */
 exports.tileEventNames = {
-    'PUSH_DATA_TO_JIVE':'pushDataToJive',
-    'PUSH_ACTIVITY_TO_JIVE':'pushActivityToJive',
-    'UPDATE_ACTIVITY_TO_JIVE':'updateActivityToJive',
-    'PUSH_COMMENT_TO_JIVE':'pushCommentToJive',
-    'COMMENT_ON_ACTIVITY':'commentOnActivity',
-    'COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID':'commentOnActivityByExternalID',
-    'FETCH_COMMENTS_ON_ACTIVITY':'fetchCommentsOnActivity',
-    'FETCH_ALL_COMMENTS_FOR_EXT_STREAM':'fetchAllCommentsForExtstream',
-    'INSTANCE_REGISTRATION':'registration',
-    'INSTANCE_UNREGISTRATION':'unregistration',
-    'CLIENT_APP_REGISTRATION':'clientAppRegistration',
-    'CLIENT_APP_UNREGISTRATION':'clientAppUnregistration',
-    'GET_PAGINATED_RESULTS':'getPaginatedResults',
-    'GET_EXTERNAL_PROPS':'getExternalProps',
-    'SET_EXTERNAL_PROPS':'setExternalProps',
-    'DELETE_EXTERNAL_PROPS':'deleteExternalProps'
+    'PUSH_DATA_TO_JIVE': 'pushDataToJive',
+    'PUSH_ACTIVITY_TO_JIVE': 'pushActivityToJive',
+    'UPDATE_ACTIVITY_TO_JIVE': 'updateActivityToJive',
+    'PUSH_COMMENT_TO_JIVE': 'pushCommentToJive',
+    'FETCH_ACTIVITY_BY_EXTERNAL_ID': 'fetchActivityByExternalIDFromJive',
+    'COMMENT_ON_ACTIVITY': 'commentOnActivity',
+    'COMMENT_ON_ACTIVITY_BY_EXTERNAL_ID': 'commentOnActivityByExternalID',
+    'FETCH_COMMENTS_ON_ACTIVITY_BY_EXTERNAL_ID': 'fetchCommentOnActivityByExternalID',
+    'FETCH_COMMENTS_ON_ACTIVITY': 'fetchCommentsOnActivity',
+    'FETCH_ALL_COMMENTS_FOR_EXT_STREAM': 'fetchAllCommentsForExtstream',
+    'INSTANCE_REGISTRATION': 'registration',
+    'INSTANCE_UNREGISTRATION': 'unregistration',
+    'CLIENT_APP_REGISTRATION': 'clientAppRegistration',
+    'CLIENT_APP_UNREGISTRATION': 'clientAppUnregistration',
+    'GET_PAGINATED_RESULTS': 'getPaginatedResults',
+    'GET_EXTERNAL_PROPS': 'getExternalProps',
+    'SET_EXTERNAL_PROPS': 'setExternalProps',
+    'DELETE_EXTERNAL_PROPS': 'deleteExternalProps'
 };
 
 /**
@@ -68,16 +71,16 @@ exports.tileEventNames = {
  * @property {String} CLIENT_APP_UNREGISTRATION_FAILED Fired when a community unregisters itself with the addon service unsuccessfully.
  */
 exports.globalEventNames = {
-    'NEW_INSTANCE':'newInstance',
-    'INSTANCE_UPDATED':'updateInstance',
-    'INSTANCE_REMOVED':'destroyedInstance',
-    'DATA_PUSHED':'dataPushed',
-    'ACTIVITY_PUSHED':'activityPushed',
-    'COMMENT_PUSHED':'commentPushed',
-    'CLIENT_APP_REGISTRATION_SUCCESS' : 'registeredJiveInstanceSuccess',
-    'CLIENT_APP_REGISTRATION_FAILED' : 'registeredJiveInstanceFailed',
-    'CLIENT_APP_UNREGISTRATION_SUCCESS' : 'unregisterJiveInstanceSuccess',
-    'CLIENT_APP_UNREGISTRATION_FAILED' : 'unregisterJiveInstanceFailed'
+    'NEW_INSTANCE': 'newInstance',
+    'INSTANCE_UPDATED': 'updateInstance',
+    'INSTANCE_REMOVED': 'destroyedInstance',
+    'DATA_PUSHED': 'dataPushed',
+    'ACTIVITY_PUSHED': 'activityPushed',
+    'COMMENT_PUSHED': 'commentPushed',
+    'CLIENT_APP_REGISTRATION_SUCCESS': 'registeredJiveInstanceSuccess',
+    'CLIENT_APP_REGISTRATION_FAILED': 'registeredJiveInstanceFailed',
+    'CLIENT_APP_UNREGISTRATION_SUCCESS': 'unregisterJiveInstanceSuccess',
+    'CLIENT_APP_UNREGISTRATION_FAILED': 'unregisterJiveInstanceFailed'
 };
 
 /**
@@ -86,9 +89,9 @@ exports.globalEventNames = {
  * @property {String} HTTP_HANDLER HTTP handler nodes specialize in accepting incoming requests, and possibly forwarding them for further processing.
  */
 exports.roles = {
-    'WORKER':'worker',
-    'PUSHER':'pusher',
-    'HTTP_HANDLER':'http'
+    'WORKER': 'worker',
+    'PUSHER': 'pusher',
+    'HTTP_HANDLER': 'http'
 };
 
 /**

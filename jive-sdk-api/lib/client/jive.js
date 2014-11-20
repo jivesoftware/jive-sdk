@@ -40,7 +40,7 @@ var JIVE_OAUTH2_TOKEN_REQUEST_PATH = "/oauth2/token";
  * @memberof jiveClient
  */
 exports.getWithTileInstanceAuth = function (tileInstance, url) {
-    return exports.tileFetch(tileInstance, url ).then(function (response) {
+    return exports.tileFetch(tileInstance, url).then(function (response) {
         if (!response.entity || !response.entity.body) {
             return response;
         }
@@ -71,7 +71,7 @@ exports.requestAccessToken = function (options, successCallback, failureCallback
     };
 
     try {
-        if ( !options.jiveUrl ) {
+        if (!options.jiveUrl) {
             throw new Error("Cannot request access token without a jiveUrl");
         } else {
             // otherwise we deal directly with jive
@@ -110,7 +110,7 @@ exports.refreshAccessToken = function (options, successCallback, failureCallback
     };
 
     try {
-        if ( !options.jiveUrl ) {
+        if (!options.jiveUrl) {
             throw new Error("Cannot refresh token without a jiveUrl");
         } else {
             // otherwise we deal directly with jive
@@ -154,7 +154,24 @@ exports.pushData = function (tileInstance, data) {
 exports.pushActivity = function (tileInstance, activity) {
     return tilePush('POST', tileInstance, activity, tileInstance['url']);
 };
-
+/**
+ * @memberof jiveClient
+ * @param instance
+ * @returns {*}
+ */
+exports.fetchActivityByExternalID = function (instance, externalActivityId) {
+    return jive.util.buildRequest(extractFetchActivityByExternalIDUrl(instance, externalActivityId),
+        'GET', null, makeExternalPropsHeader(instance));
+};
+/**
+ * @memberof jiveClient
+ * @param instance
+ * @returns {*}
+ */
+exports.fetchActivityByExternalID = function (instance) {
+    return jive.util.buildRequest(extractExternalPropsUrl(instance),
+        'GET', null, makeExternalPropsHeader(instance));
+};
 /**
  * @memberof jiveClient
  * @param tileInstance
@@ -182,9 +199,9 @@ exports.pushComment = function (tileInstance, comment, commentURL) {
  * @param instance
  * @returns {*}
  */
-exports.fetchExtendedProperties = function( instance ) {
-    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
-        'GET', null, makeExternalPropsHeader(instance) );
+exports.fetchExtendedProperties = function (instance) {
+    return jive.util.buildRequest(extractExternalPropsUrl(instance),
+        'GET', null, makeExternalPropsHeader(instance));
 };
 
 /**
@@ -193,9 +210,9 @@ exports.fetchExtendedProperties = function( instance ) {
  * @param props
  * @returns {*}
  */
-exports.pushExtendedProperties = function( instance, props ) {
-    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
-        'POST', props, makeExternalPropsHeader(instance)  );
+exports.pushExtendedProperties = function (instance, props) {
+    return jive.util.buildRequest(extractExternalPropsUrl(instance),
+        'POST', props, makeExternalPropsHeader(instance));
 };
 
 /**
@@ -203,9 +220,9 @@ exports.pushExtendedProperties = function( instance, props ) {
  * @param instance
  * @returns {*}
  */
-exports.removeExtendedProperties = function( instance ) {
-    return jive.util.buildRequest( extractExternalPropsUrl( instance ),
-        'DELETE', null, makeExternalPropsHeader(instance) );
+exports.removeExtendedProperties = function (instance) {
+    return jive.util.buildRequest(extractExternalPropsUrl(instance),
+        'DELETE', null, makeExternalPropsHeader(instance));
 };
 
 /**
@@ -236,7 +253,7 @@ var tilePush = function (method, tileInstance, data, pushURL) {
         'Authorization': auth
     };
 
-    if ( data && !data['status'] ) {
+    if (data && !data['status']) {
         // add an empty status object if it doesn't exist
         data['status'] = {};
     }
@@ -248,20 +265,31 @@ function endsWith(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }
 
-var extractExternalPropsUrl = function( instance ) {
+var extractExternalPropsUrl = function (instance) {
     var instanceURL = instance['url'];
-    if ( endsWith(instanceURL, '/data') ) {
+    if (endsWith(instanceURL, '/data')) {
         return instanceURL.match(/(.+)\/data/)[1] + '/extprops';
     }
-    if ( endsWith(instanceURL, '/activities') ) {
+    if (endsWith(instanceURL, '/activities')) {
         return instanceURL.match(/(.+)\/activities/)[1] + '/extprops';
     }
 
-    throw new Error( 'Could not extract external props url from instance' );
+    throw new Error('Could not extract external props url from instance');
 };
 
-var makeExternalPropsHeader = function(instance ) {
+var extractFetchActivityByExternalIDUrl = function (instance, extActivtiyID) {
+    var instanceURL = instance['url'];
+    if (endsWith(instanceURL, '/activities')) {
+        var result = instanceURL.match(/(.+)\/activities/)[1] + '/extactivities/' + extActivtiyID;
+        return result;
+    }
+
+    throw new Error('Could not extract external props url from instance');
+
+};
+
+var makeExternalPropsHeader = function (instance) {
     var auth = 'Bearer ' + instance['accessToken'];
-    return { 'X-Client-Id': jive.context.config['clientId'], 'Authorization' : auth };
+    return {'X-Client-Id': jive.context.config['clientId'], 'Authorization': auth};
 };
 
