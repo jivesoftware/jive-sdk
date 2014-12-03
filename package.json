@@ -1,7 +1,7 @@
 {
   "name": "jive-sdk",
   "description": "Node.js framework for building purposeful places",
-  "version": "0.1.153",
+  "version": "0.1.154",
   "main": "jive-sdk-service/api.js",
   "author": {
     "name": "Jive Software",
@@ -12,7 +12,7 @@
     "consolidate": "0.9.0",
     "underscore": "1.4.4",
     "q": "0.9.3",
-    "request": "2.16.6",
+    "request": "2.48.0",
     "mustache": "0.7.2",
     "mocha": "1.9.0",
     "optimist": "0.4.0",
