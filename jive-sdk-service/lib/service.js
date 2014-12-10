@@ -644,7 +644,11 @@ exports.getExpandedTileDefinitions = function(all) {
             }
         }
         if ( !processedTile['config'] ) {
-            processedTile['config'] = host + '/' + processedTile['definitionDirName'] + '/configure';
+            // compute if a configure URL is required based on presence of the autowired route
+            var path = _dir('/tiles') + '/' + name + '/backend/routes/configure/get.js';
+            if ( fs.existsSync(path) ) {
+                processedTile['config'] = host + '/' + processedTile['definitionDirName'] + '/configure';
+            }
         } else {
             if ( processedTile['config'].indexOf('http') != 0 && processedTile['config'].indexOf('%serviceURL%') === -1) {
                 // assume its relative to host then
