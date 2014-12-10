@@ -1,6 +1,6 @@
 # Jive Node SDK
 
-This repository contains the Jive Node.js library to help you get started using the Jive Development Platform.
+This repository contains the Jive Node.js library to help you get started using the [Jive Development Platform](https://developer.jivesoftware.com).
 
 ## Let's get started
 
