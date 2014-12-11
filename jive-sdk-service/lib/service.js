@@ -656,7 +656,10 @@ exports.getExpandedTileDefinitions = function(all) {
             }
         }
         if ( !processedTile['unregister']) {
-            processedTile['unregister'] = host + '/unregister';
+            // compute an unregister URL only if not an internal tile type
+            if ( processedTile['dataProviderKey'] !== 'internal' ) {
+                processedTile['unregister'] = host + '/unregister';
+            }
         } else {
             if ( processedTile['unregister'].indexOf('http') != 0 && processedTile['unregister'].indexOf('%serviceURL%') === -1 ) {
                 // assume its relative to host then
@@ -665,7 +668,10 @@ exports.getExpandedTileDefinitions = function(all) {
         }
 
         if ( !processedTile['register'] ) {
-            processedTile['register'] = host + '/registration';
+            // compute a register URL only if not an internal tile type
+            if ( processedTile['dataProviderKey'] !== 'internal' ) {
+                processedTile['register'] = host + '/registration';
+            }
         } else {
             if ( processedTile['register'].indexOf('http') != 0 && processedTile['register'].indexOf('%serviceURL%') === -1 ) {
                 // assume its relative to host then
