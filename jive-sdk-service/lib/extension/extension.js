@@ -320,11 +320,11 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
                     });
 
                     // Remove a config element with "__jive_none__"
-                    definitions.forEach(function(item) {
-                        if (item['config'] && item['config'].indexOf('__jive_none__') >= 0) {
-                            delete item['config'];
-                        }
-                    });
+                    // definitions.forEach(function(item) {
+                    //     if (item['config'] && item['config'].indexOf('__jive_none__') >= 0) {
+                    //         delete item['config'];
+                    //     }
+                    // });
 
                     jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
                     jive.logger.debug("packaged cartridges:\n" + JSON.stringify(cartridges, null, 4));
