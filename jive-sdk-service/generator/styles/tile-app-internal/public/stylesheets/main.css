@@ -1,0 +1,16 @@
+body {
+    background-color: #f0f0f0;
+}
+
+#key {
+    width: 300px;
+}
+
+.card {
+    font: 13px "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    display: none;
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 15px;
+}
