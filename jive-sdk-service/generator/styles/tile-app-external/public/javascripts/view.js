@@ -1,7 +1,7 @@
-jive.tile.onOpen(function(config, options) {
+jive.tile.onOpen(function(data, options) {
 
-    if ( typeof config !== 'object' ) {
-        config = JSON.parse(JSON.parse(config || {} ));
+    if ( typeof data !== 'object' ) {
+        data = JSON.parse(JSON.parse(data || {} ));
     }
 
     gadgets.window.adjustHeight();
