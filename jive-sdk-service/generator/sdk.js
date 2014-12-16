@@ -230,7 +230,28 @@ function processDefinition(target, type, name, style, force) {
 
     // copy definition
     promises.push(
-        jive.util.recursiveCopy(root + '/definition', target + '/tiles/' + name,    force )
+        jive.util.recursiveCopy(root + '/definition', target + '/tiles/' + name, force ).then(
+
+        // post process definition
+        function() {
+            var definitionJsonPath = target + '/tiles/' + name + '/definition.json';
+            return jive.util.fsreadJson(definitionJsonPath ).then( function(json) {
+                var config = json['config'];
+                if ( config && config === '__jive_none__' ) {
+                    // 1. remove the directive
+                    delete json['config'];
+
+                    // 2. rewrite the definition
+                    return jive.util.fswrite(JSON.stringify(json, null, 4), definitionJsonPath).then( function() {
+                        // 3. destroy autowired route
+                        var path = target + '/tiles/' + name + '/backend/routes/configure/get.js';
+                        return jive.util.fsdelete(path);
+                    })
+                } else {
+                    return q.resolve();
+                }
+            })
+        })
     );
 
     // copy style

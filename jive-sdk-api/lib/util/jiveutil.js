@@ -239,6 +239,22 @@ exports.fsread = function (path) {
  * @param path
  * @return {Promise} Promise
  */
+exports.fsdelete = function (path) {
+    var deferred = q.defer();
+    fs.remove(path, function (err) {
+        if (err ) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve();
+        }
+    });
+    return deferred.promise;
+};
+
+/**
+ * @param path
+ * @return {Promise} Promise
+ */
 exports.fsreadJson = function (path) {
     return exports.fsread(path).then(function (data) {
         return JSON.parse(new Buffer(data).toString());
