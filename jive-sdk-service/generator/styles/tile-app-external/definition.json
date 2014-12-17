@@ -1,12 +1,8 @@
 {
     "sampleData": {
-        "title": "{{{TILE_NAME}}} {{{TILE_STYLE}}}",
-        "contents": [
-            {
-                "name": "Value",
-                "value": "Initial data"
-            }
-        ]},
+        "pushData" : "Not yet initialized",
+        "pushCount" : "-1"
+    },
     "displayName" : "{{{TILE_NAME}}}",
     "name" : "{{{TILE_NAME}}}",
     "description" : "{{{TILE_NAME}}}",

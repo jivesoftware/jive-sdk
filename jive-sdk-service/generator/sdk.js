@@ -317,7 +317,7 @@ function finish(target) {
         console.log('         npm update ');
         console.log('(2)  If applicable, edit jiveclientconfiguration.json to specify your clientID, clientSecret, clientUrl, and other setup options.');
         console.log('(3a) If you are running a Jive Node SDK service, use this command to build an add-on package and start the service:');
-        console.log('        node app.js');
+        console.log('         node app.js');
         console.log('(3b) If you just want to use the SDK to build an add-on package (without a service), use one of these commands:')
         console.log('         jive-sdk build add-on');
         console.log('         jive-sdk build add-on --apphosting="jive"');

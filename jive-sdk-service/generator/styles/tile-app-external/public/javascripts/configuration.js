@@ -7,15 +7,20 @@
         }
 
         var json = config || {
-            "startSequence": "1"
+            "pushData": "Not initialized"
         };
 
-        // prepopulate the sequence input dialog
-        $("#start_sequence").val( json["startSequence"]);
+        // populate the input dialog with config data
+        $("#config_val").val( json["pushData"]);
 
         $("#btn_submit").click( function() {
-            config["startSequence"] = $("#start_sequence").val();
+
+            // update config data from input dialog
+            config["pushData"] = $("#config_val").val();
+
+            // send config to service
             jive.tile.close(config, {} );
+
             gadgets.window.adjustHeight(300);
         });
     });
