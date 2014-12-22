@@ -26,10 +26,10 @@ function processTileInstance(instance) {
     jive.logger.debug('Running data pusher for ', instance.name, 'instance', instance.id);
 
     // creates a data update structure
-    function getFormattedData(startSequence) {
+    function getFormattedData(configData) {
         return {
             data: {
-                "pushData": startSequence,
+                "pushData": configData,
                 "pushCount" : count++
             }
         };
