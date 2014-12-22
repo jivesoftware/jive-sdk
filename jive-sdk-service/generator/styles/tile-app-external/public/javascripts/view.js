@@ -4,5 +4,9 @@ jive.tile.onOpen(function(data, options) {
         data = JSON.parse(JSON.parse(data || {} ));
     }
 
+    // update HTML with data pushed from service
+    $("#data").text(data["pushData"]);
+    $("#count").text(data["pushCount"]);
+
     gadgets.window.adjustHeight();
 });
