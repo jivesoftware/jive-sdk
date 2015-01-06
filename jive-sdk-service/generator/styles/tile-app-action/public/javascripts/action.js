@@ -1,10 +1,5 @@
 jive.tile.onOpen(function(data, options) {
 
-    // Update field with public property data
-    jive.tile.getExtendedProps ( function(props) {
-        $("#public_string").val(data["publicString"]);
-    });
-
     // Update field with private property data
     jive.tile.getPrivateProps ( function(props) {
         $("#private_string").val(data["privateString"]);
@@ -15,7 +10,6 @@ jive.tile.onOpen(function(data, options) {
 
         // Return the new values
         var returnData = {
-            "publicString" : $("#public_string").val(),
             "privateString" : $("#private_string").val(),
         };
         jive.tile.close( returnData );
