@@ -27,13 +27,33 @@ var _ = require("underscore");
 var argv = require('optimist').argv;
 
 var validCommands = ['create','help','list', 'createExtension', 'build', 'version'];
-var groups = ['tiles', 'apps', 'services', 'storages', 'cartridges'];
+var groups = ['tiles', 'apps', 'services', 'storages', 'cartridges', 'examples'];
 
 var styles = [];
 var examples = [];
 
 var deprecatedNames = ['list',      'gauge',      'gallery',      'table',      'activity',      'github',         'sfdc',               'bitcoin',         'todo',         'auth',         'basecamp',         'jenkins',         'jira',         'newrelic',         'podio',         'stock-price',         'wikibang',         'sampleapps',         'samplegoogle',         'albums',         'samplewebhooks',   'analytics',         'sampleservice',   'samplecartridges',   'sampleFilesStorage'];
 var refactoredNames = ['tile-list', 'tile-gauge', 'tile-gallery', 'tile-table', 'tile-activity', 'example-github', 'example-salesforce', 'example-bitcoin', 'example-todo', 'example-auth', 'example-basecamp', 'example-jenkins', 'example-jira', 'example-newrelic', 'example-podio', 'example-stockprice', 'example-wikibang', 'example-sampleapps', 'example-samplegoogle', 'example-albums', 'example-webhooks', 'example-analytics', 'example-service', 'example-cartridges', 'example-filestorage'];
+
+// Add descriptions for all template items here.
+// If you don't add a description here, the help output will
+// not have a description for that template...
+// Examples are not described -- just template items.
+var itemDescriptions = {
+    'app' : 'A basic Jive app',
+    'tile-activity': 'A basic activity stream',
+    'cartridge' : 'A basic cartridge',
+    'tile-list' : 'A basic list tile',
+    'tile-table': 'A basic table tile',
+    'tile-gallery': 'A basic gallery tile',
+    'tile-carousel': 'A basic carousel tile',
+    'tile-gauge': 'A basic gauge tile',
+    'tile-sectionlist': 'A basic sectionlist (aka accordion) tile',
+    'tile-app-simple' : 'A basic custom view tile (Jive-hosted)',
+    'tile-app-internal' : 'A custom view tile with configuration (Jive-hosted)',
+    'tile-app-external' : 'An external custom view tile',
+    'tile-app-action' : 'A custom view tile with a tile action (Jive-hosted)'
+}
 
 var groupedExamples = {};
 _.each(groups, function(group) { groupedExamples[group] = [] });
@@ -393,9 +413,8 @@ function doAll( options ) {
 }
 
 function sortItems(itemArray) {
-    var simpleItems = [];
+    var basicItems = [];
     var exampleItems = [];
-    var specialItems = ['all'];
 
     itemArray.sort().forEach( function(item) {
 
@@ -403,64 +422,53 @@ function sortItems(itemArray) {
         if (item.indexOf('example-') == 0) {
             exampleItems.push(item);
         } else {
-            simpleItems.push(item);
+            basicItems.push(item);
         }
     });
-    // put the simple items first, examples next, special last
-    return simpleItems.concat(exampleItems).concat(specialItems);
+
+    return { basicItems: basicItems, exampleItems: exampleItems}
 }
 
-function displayItemsInColumns(itemArray, numColumns, columnLength) {
 
-    // Always start line with some spaces
-    process.stdout.write('   ');
 
-    // Loop through all the items
+function displayDetailedItems(itemArray, columnSize) {
+
     for (var itemIndex in itemArray) {
+        process.stdout.write('   ' + itemArray[itemIndex]);
 
-        // Print the item
-        process.stdout.write(itemArray[itemIndex]);
+        // Add more spaces so that columns line up (except when item name too long)
+        for (var spaceIndex = 0; spaceIndex < (columnSize + 2 - itemArray[itemIndex].length); spaceIndex++) {
+            process.stdout.write(' ');
+        }
 
-        // If it's not the last item...
-        if (itemIndex < itemArray.length-1) {
-
-            // Always display at least two spaces
-            process.stdout.write('  ');
-
-            // Add more spaces so that columns line up (except when item name too long)
-            for (var spaceIndex = 0; spaceIndex < (columnLength-itemArray[itemIndex].length); spaceIndex++) {
-                process.stdout.write(' ');
-            }
-
-            // Add new line after numColumns have been reached
-            if (itemIndex % numColumns == (numColumns-1)) {
-                console.log();
-                process.stdout.write('   ');
-            }
+        if (itemDescriptions[itemArray[itemIndex]] != null) {
+            console.log(itemDescriptions[itemArray[itemIndex]]);
+        } else {
+            console.log();
         }
     }
-    console.log();
 }
 
 function doHelp() {
     console.log('usage: jive-sdk <command> <item> [--options]\n');
     console.log('Available commands:');
     console.log('   help                  Display this help page');
-    console.log('   list                  List all the existing examples for a category');
-    console.log('   create                Create a jive-sdk example');
+    console.log('   list                  List the existing items for a category');
+    console.log('   create                Create a jive-sdk template or example');
     console.log('   build                 Build an addon package\n');
 
     // Display list items
-    console.log('Available items for list command:');
+    console.log('Available category items for list command:');
     _.each(groups, function(group) {
         console.log('   ' + group);
     });
 
     // Display create items
+    var itemResults = sortItems(examples.concat(styles));
     console.log();
-    console.log('Available items for create command:');
-    // Display items (in columns, sorted, with examples at the end)
-    displayItemsInColumns(sortItems(examples.concat(styles)),3,20);
+    console.log('Available template items for create command:');
+    displayDetailedItems(itemResults.basicItems, 20);
+    console.log('   (Use "jive-sdk list examples" to view other items that you can create)');
     console.log();
 
     console.log('Available items for build command:');
@@ -471,7 +479,8 @@ function doHelp() {
     console.log('Available options:');
     console.log('   --force=<true/false>           Whether to overwrite existing data; defaults to false');
     console.log('   --name="<string>"              Use the specified string for the new item name');
-    console.log('   --apphosting="<self|jive>"     jive=apps are packaged in the add-on, self=apps are hosted externally; defaults to self');
+    console.log('   --apphosting="<self|jive>"     "jive" apps are packaged in the add-on, "self" apps are hosted externally; defaults to "self"');
+    console.log();
 }
 
 function execute(options) {
@@ -586,6 +595,10 @@ function prepare() {
                     });
                 });
             });
+
+            var itemResults = sortItems(examples.concat(styles));
+            groupedExamples['examples'] = itemResults.exampleItems;
+
             return q.allResolved(deferreds);
         } );
     });
