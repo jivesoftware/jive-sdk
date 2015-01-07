@@ -35,11 +35,15 @@ var examples = [];
 var deprecatedNames = ['list',      'gauge',      'gallery',      'table',      'activity',      'github',         'sfdc',               'bitcoin',         'todo',         'auth',         'basecamp',         'jenkins',         'jira',         'newrelic',         'podio',         'stock-price',         'wikibang',         'sampleapps',         'samplegoogle',         'albums',         'samplewebhooks',   'analytics',         'sampleservice',   'samplecartridges',   'sampleFilesStorage'];
 var refactoredNames = ['tile-list', 'tile-gauge', 'tile-gallery', 'tile-table', 'tile-activity', 'example-github', 'example-salesforce', 'example-bitcoin', 'example-todo', 'example-auth', 'example-basecamp', 'example-jenkins', 'example-jira', 'example-newrelic', 'example-podio', 'example-stockprice', 'example-wikibang', 'example-sampleapps', 'example-samplegoogle', 'example-albums', 'example-webhooks', 'example-analytics', 'example-service', 'example-cartridges', 'example-filestorage'];
 
+// Add descriptions for all template items here.
+// If you don't add a description here, the help output will
+// not have a description for that template...
+// Examples are not described -- just template items.
 var itemDescriptions = {
     'app' : 'A basic Jive app',
+    'tile-activity': 'A basic activity stream',
     'cartridge' : 'A basic cartridge',
     'tile-list' : 'A basic list tile',
-    'tile-activity': 'A basic activity stream',
     'tile-table': 'A basic table tile',
     'tile-gallery': 'A basic gallery tile',
     'tile-carousel': 'A basic carousel tile',
@@ -437,7 +441,11 @@ function displayDetailedItems(itemArray, columnSize) {
             process.stdout.write(' ');
         }
 
-        console.log(itemDescriptions[itemArray[itemIndex]]);
+        if (itemDescriptions[itemArray[itemIndex]] != null) {
+            console.log(itemDescriptions[itemArray[itemIndex]]);
+        } else {
+            console.log();
+        }
     }
 }
 
@@ -445,12 +453,12 @@ function doHelp() {
     console.log('usage: jive-sdk <command> <item> [--options]\n');
     console.log('Available commands:');
     console.log('   help                  Display this help page');
-    console.log('   list                  List all the existing examples for a category');
-    console.log('   create                Create a jive-sdk example');
+    console.log('   list                  List the existing items for a category');
+    console.log('   create                Create a jive-sdk template or example');
     console.log('   build                 Build an addon package\n');
 
     // Display list items
-    console.log('Available items for list command:');
+    console.log('Available category items for list command:');
     _.each(groups, function(group) {
         console.log('   ' + group);
     });
@@ -458,7 +466,7 @@ function doHelp() {
     // Display create items
     var itemResults = sortItems(examples.concat(styles));
     console.log();
-    console.log('Template items for create command:');
+    console.log('Available template items for create command:');
     displayDetailedItems(itemResults.basicItems, 20);
     console.log('   (Use "jive-sdk list examples" to view other items that you can create)');
     console.log();
@@ -472,6 +480,7 @@ function doHelp() {
     console.log('   --force=<true/false>           Whether to overwrite existing data; defaults to false');
     console.log('   --name="<string>"              Use the specified string for the new item name');
     console.log('   --apphosting="<self|jive>"     "jive" apps are packaged in the add-on, "self" apps are hosted externally; defaults to "self"');
+    console.log();
 }
 
 function execute(options) {
