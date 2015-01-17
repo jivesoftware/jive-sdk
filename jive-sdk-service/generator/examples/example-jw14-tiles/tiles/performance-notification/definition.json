@@ -1,5 +1,4 @@
 {
-    "sampleData" : {},
     "displayName" : "Performance Notification",
     "name" : "performance-notification",
     "description" : "Lists certain performance notifications in the activity stream",

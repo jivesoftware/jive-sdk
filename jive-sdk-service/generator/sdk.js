@@ -33,7 +33,7 @@ var styles = [];
 var examples = [];
 
 var deprecatedNames = ['list',      'gauge',      'gallery',      'table',      'activity',      'github',         'sfdc',               'bitcoin',         'todo',         'auth',         'basecamp',         'jenkins',         'jira',         'newrelic',         'podio',         'stock-price',         'wikibang',         'sampleapps',         'samplegoogle',         'albums',         'samplewebhooks',   'analytics',         'sampleservice',   'samplecartridges',   'sampleFilesStorage'];
-var refactoredNames = ['tile-list', 'tile-gauge', 'tile-gallery', 'tile-table', 'tile-activity', 'example-github', 'example-salesforce', 'example-bitcoin', 'example-todo', 'example-auth', 'example-basecamp', 'example-jenkins', 'example-jira', 'example-newrelic', 'example-podio', 'example-stockprice', 'example-wikibang', 'example-sampleapps', 'example-samplegoogle', 'example-albums', 'example-webhooks', 'example-analytics', 'example-service', 'example-cartridges', 'example-filestorage'];
+var refactoredNames = ['tile-list', 'tile-gauge', 'tile-gallery', 'tile-table', 'tile-activity', 'example-github', 'example-salesforce', 'example-bitcoin', 'example-todo', 'example-auth', 'example-basecamp', 'example-jenkins', 'example-jira', 'example-newrelic', 'example-podio', 'example-stockprice', 'example-wikibang', 'example-sampleapps', 'example-samplegoogle', 'example-albums', 'example-webhooks', 'example-analytics', 'service', 'example-cartridges', 'example-filestorage'];
 
 // Add descriptions for all template items here.
 // If you don't add a description here, the help output will
@@ -52,8 +52,9 @@ var itemDescriptions = {
     'tile-app-simple' : 'A basic custom view tile (Jive-hosted)',
     'tile-app-internal' : 'A custom view tile with configuration (Jive-hosted)',
     'tile-app-external' : 'An external custom view tile',
-    'tile-app-action' : 'A custom view tile with a tile action (Jive-hosted)'
-}
+    'tile-app-action' : 'A custom view tile with a tile action (Jive-hosted)',
+    'service' : 'A basic service'
+};
 
 var groupedExamples = {};
 _.each(groups, function(group) { groupedExamples[group] = [] });

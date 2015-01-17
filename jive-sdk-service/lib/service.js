@@ -625,12 +625,6 @@ exports.getExpandedTileDefinitions = function(all) {
         var processedTile = JSON.parse(stringified);
 
         // defaults
-        if ( !processedTile['published'] ) {
-            processedTile['published'] = "2013-02-28T15:12:16.768-0800";
-        }
-        if ( !processedTile['updated'] ) {
-            processedTile['updated'] = "2013-02-28T15:12:16.768-0800";
-        }
         if ( processedTile['action'] ) {
             if ( processedTile['action'].indexOf('http') != 0 && processedTile['action'].indexOf('%serviceURL%') === -1) {
                 // assume its relative to host then

@@ -1,5 +1,4 @@
 {
-    "sampleData" : {},
     "displayName" : "Basecamp Project Activity ({{{TILE_NAME}}})",
     "name" : "{{{TILE_NAME}}}",
     "description" : "BaseCamp-Activity",

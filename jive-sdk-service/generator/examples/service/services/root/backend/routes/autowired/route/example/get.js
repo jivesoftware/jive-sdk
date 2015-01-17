@@ -18,5 +18,5 @@ var jive = require("jive-sdk");
 
 exports.route = function(req, res){
     var conf = jive.service.options;
-    res.render('hello.html', { name: jive.util.guid() });
+    res.render('hello.html', { routeMethod : 'autowired', name: jive.util.guid() });
 };

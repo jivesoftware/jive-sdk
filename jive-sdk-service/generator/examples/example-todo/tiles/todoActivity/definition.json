@@ -1,5 +1,4 @@
 {
-    "sampleData" : {},
     "displayName" : "{{{TILE_NAME}}} Activity",
     "name" : "{{{TILE_NAME}}}",
     "description" : "{{{TILE_NAME}}} Activity Pusher",

@@ -1,5 +1,4 @@
 {
-    "sampleData" : {},
     "displayName" : "Activity for an SFDC Opportunity",
     "name" : "{{{TILE_NAME}}}",
     "description" : "Opportunity activity.",

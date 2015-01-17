@@ -1,5 +1,4 @@
 {
-    "sampleData" : {},
     "displayName" : "GitHubActivity ({{{TILE_NAME}}})",
     "name" : "{{{TILE_NAME}}}",
     "description" : "GitHubActivity",

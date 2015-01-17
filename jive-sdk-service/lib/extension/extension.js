@@ -226,7 +226,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         description = limit(description, 255);
     }
 
-    var defaultMinimumVersion = '0000';
+    var defaultMinimumVersion = '0000000000';
     if ( packageApps ) {
         // minimum version is 8c4
         defaultMinimumVersion = '0080300000';
@@ -269,6 +269,10 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
     return q.all([ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ]).then(finalizeRequest)
     .then( function(definitions) {
         if ( !packageApps) {
+            definitions.forEach( function(definition) {
+                delete definition['id'];
+                delete definition['definitionDirName'];
+            });
             return definitions;
         } else {
             var proms = [];
@@ -279,9 +283,11 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
                 var action = definition['action'];
                 var config = definition['config'];
 
+                delete definition['id'];
                 definition['view'] = !view ? view : view.replace(host, '/public/tiles');
                 definition['action'] = !action ? action : action.replace(host, '/public/tiles');
                 definition['config'] = !config ? config : config.replace(host, '/public/tiles');
+                delete definition['definitionDirName'];
 
                 // post-process
                 var tileDir = tilesRootDir + '/' + name;
@@ -336,10 +342,10 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
                             'runAsStrategy': extensionInfo['runAsStrategy']
                         },
                         'tiles': (definitions && definitions.length > 0) ? definitions : undefined,
-                        'templates': templates,
-                        'osapps': apps,
-                        'storageDefinitions': storages,
-                        'jabCartridges': cartridges
+                        'templates': (templates && templates.length > 0) ? templates : undefined,
+                        'osapps': (apps && apps.length > 0) ? apps : undefined,
+                        'storageDefinitions':(storages && storages.length > 0) ? storages : undefined,
+                        'jabCartridges': (cartridges && cartridges.length > 0) ? cartridges : undefined
                     };
 
                     var definitionJsonPath = extensionSrcDir + '/definition.json';
