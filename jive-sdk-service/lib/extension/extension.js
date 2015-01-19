@@ -226,7 +226,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         description = limit(description, 255);
     }
 
-    var defaultMinimumVersion = '0000000000';
+    var defaultMinimumVersion = '0070300000';
     if ( packageApps ) {
         // minimum version is 8c4
         defaultMinimumVersion = '0080300000';
@@ -345,7 +345,7 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
                         'templates': (templates && templates.length > 0) ? templates : undefined,
                         'osapps': (apps && apps.length > 0) ? apps : undefined,
                         'storageDefinitions':(storages && storages.length > 0) ? storages : undefined,
-                        'jabCartridges': (cartridges && cartridges.length > 0) ? cartridges : undefined
+                        'jabCartridges': cartridges
                     };
 
                     var definitionJsonPath = extensionSrcDir + '/definition.json';
