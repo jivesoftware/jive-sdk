@@ -3,14 +3,17 @@ var fs = require('fs');
 var q = require('q');
 var logger = require('log4js').getLogger('storage-service');
 
+/**
+ * Register Place endpoint
+ */
 exports.registerPlace = function (req, res) {
-    logger.info("Registering place...");
+    logger.info("Register place...");
 
     var registerReq = req.body;
     // We create a new folder for the created group.
     // Since this is a sample code we don't handle the case of 2 groups with the same name.
     var containerPath = jive.service.options.rootFolder + "/" + registerReq.container.name;
-    var cotainerGuid = jive.util.guid();
+    var containerGuid = jive.util.guid();
 
     jive.community.requestAccessToken(registerReq.jiveUrl, registerReq.oauthCode)
         .then(function (oauthResponse) {
@@ -28,24 +31,24 @@ exports.registerPlace = function (req, res) {
         .then(function () {
             logger.info("Directory for group " + req.body.container.name + " was created in: " + containerPath);
             req.body.containerPath = containerPath;
-            return jive.context.persistence.save("places", cotainerGuid, registerReq);
+            return jive.context.persistence.save("places", containerGuid, registerReq);
         })
         .then(function () {
             var responseBody =
             {
-                'externalId': cotainerGuid,
+                'externalId': containerGuid,
 
                 //These resources are used by the jive server side to upload data later on to this service.
                 //By using to container guid as part of the URL we can later identify where to save the uploaded file.
                 'resources': [
                     {
                         'name': 'self',
-                        'url': '/fsstorage/place?container=' + cotainerGuid,
+                        'url': '/fsstorage/place?container=' + containerGuid,
                         'verbs': ['GET', 'PUT', 'DELETE']
                     },
                     {
                         'name': 'uploadFile',
-                        'url': '/fsstorage/upload?container=' + cotainerGuid,
+                        'url': '/fsstorage/upload?container=' + containerGuid,
                         'verbs': ['POST']
                     }
                 ]
@@ -60,6 +63,9 @@ exports.registerPlace = function (req, res) {
         });
 };
 
+/**
+ * Upload File endpoint
+ */
 exports.uploadFile = function (req, res) {
     logger.info("Upload file...");
     var containerGuid = req.query['container'];
@@ -104,6 +110,9 @@ exports.uploadFile = function (req, res) {
         });
 };
 
+/**
+ * Upload File Version endpoint
+ */
 exports.uploadVersion = function (req, res) {
     logger.info("Upload file version...");
     var fileGuid = req.query.file;
@@ -122,6 +131,9 @@ exports.uploadVersion = function (req, res) {
         });
 };
 
+/**
+ * Download File endpoint
+ */
 exports.downloadVersion = function (req, res) {
     var versionGuid = req.query.version;
     logger.info("Download version... " + versionGuid);
@@ -137,6 +149,9 @@ exports.downloadVersion = function (req, res) {
         });
 };
 
+/**
+ * Delete Container / Place endpoint
+ */
 exports.deleteContainer = function (req, res) {
     var containerGuid = req.query.container;
     logger.info("Delete container... container id:" + containerGuid);
@@ -173,6 +188,9 @@ exports.deleteContainer = function (req, res) {
         });
 }
 
+/**
+ * Delete File endpoint
+ */
 exports.deleteFile = function (req, res) {
     var fileGuid = req.query.file;
 
@@ -215,40 +233,9 @@ exports.deleteFile = function (req, res) {
         });
 }
 
-// This iterates over all folders and look for files that are not uploaded to jive and push them.
-exports.task = new jive.tasks.build(
-    // runnable
-    function () {
-        jive.context.persistence.find("places")
-            .then(function (places) {
-                places.forEach(function (place) {
-                    var uploadFilePath = place.containerPath + "/uploads";
-                    jive.util.fsexists(uploadFilePath).then(function (exists) {
-                        if (exists) {
-                            return jive.util.fsreaddir(uploadFilePath);
-                        }
-                    })
-                        .then(function (items) {
-                            items.forEach(function (item) {
-                                var path = uploadFilePath + '/' + item;
-                                if (item.indexOf('.DS_Store') != 0) {
-                                    jive.util.fsisdir(path)
-                                        .then(function (isDir) {
-                                            if (!isDir) {
-                                                pushFileToJive(path, item, place);
-                                            }
-                                        });
-                                }
-                            });
-                        });
-                });
-            });
-    },
-
-    // interval (optional)
-    5000
-);
-
+/**
+ * Helper function to handle file versioning.
+ */
 function handleFileVersion(fileGuid, fileObj, versionObj, tempFile) {
     var versionGuid = jive.util.guid();
     if (fileObj.versionsList) {
@@ -315,6 +302,9 @@ function handleFileVersion(fileGuid, fileObj, versionObj, tempFile) {
         });
 };
 
+/**
+ * Helper function to push file information to Jive.
+ */
 function pushFileToJive(filePath, filename, place) {
     logger.info("Pushing file " + filePath);
     var fileGuid = jive.util.guid();
@@ -325,7 +315,11 @@ function pushFileToJive(filePath, filename, place) {
         fileName: filename,
         contentType: 'TBD'
     };
+
+    // Create the ESF REST API url:
+    // http://{jive url}/api/core/v3/exstorage/containers/{containerID}/files
     var pushFileUrl = place.jiveUrl + place.containerApiSuffix + "files";
+
     var tempFile;
     jive.util.fsGetSize(filePath)
         .then(function (size) {
@@ -340,8 +334,7 @@ function pushFileToJive(filePath, filename, place) {
             if (!exists) {
                 return jive.util.fsmkdir(fileObj.fileDirectoryPath);
             } else {
-                return q.fcall(function () {
-                });
+                return q.fcall(function () { });
             }
         })
         .then(function () {
@@ -352,6 +345,8 @@ function pushFileToJive(filePath, filename, place) {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + place.oauth.access_token
             };
+
+            // Perform a POST request to upload the file
             return jive.util.buildRequest(pushFileUrl, "POST", reqPayload, headers);
         })
         .then(function () {
@@ -362,6 +357,60 @@ function pushFileToJive(filePath, filename, place) {
         });
 };
 
-//exports.onBootstrap = function (app) {
-//    logger.info("This should have run on service bootstrap!");
-//};
+/**
+ * This function iterates over all folders and looks for files in the /uploads folder
+ * of each container that are not uploaded to jive. If it finds files, it will push
+ * them to Jive (performed by the pushFileToJive function).
+ */
+var checkUploadFolder = function() {
+
+    jive.context.persistence.find("places")
+
+        .then(function (places) {
+
+            // Loop through each container / place
+            places.forEach(function (place) {
+                var uploadFilePath = place.containerPath + "/uploads";
+
+                // Check if the uploads folder exists
+                jive.util.fsexists(uploadFilePath)
+                    .then(function (exists) {
+                        if (!exists) {
+                            // If it doesn't exist, create a new folder
+                            return jive.util.fsmkdir(uploadFilePath);
+                        }
+                    })
+
+                    .then(function() {
+                        // Read the files in the upload folder
+                        return jive.util.fsreaddir(uploadFilePath);;
+                    })
+
+                    .then(function (items) {
+                        // Loop through each file in the uploads folder
+                        items.forEach(function (item) {
+                            var path = uploadFilePath + '/' + item;
+                            if (item.indexOf('.DS_Store') != 0) {
+                                jive.util.fsisdir(path)
+                                    .then(function (isDir) {
+                                        if (!isDir) {
+                                            // Push this file to Jive!
+                                            pushFileToJive(path, item, place);
+                                        }
+                                    });
+                            }
+                        });
+                    });
+            });
+        });
+};
+
+/**
+ * Tasks
+ */
+exports.task = [
+    {
+        'interval' : 5000,
+        'handler'  : checkUploadFolder
+    }
+];
