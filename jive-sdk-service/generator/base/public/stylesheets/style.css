@@ -53,7 +53,7 @@ button {
     outline: none;
 }
 
-input[type = 'text'] {
+input[type = 'text'], textarea {
     margin-top: 2px;
     border-radius: 4px;
     border: 1px solid #bbb;

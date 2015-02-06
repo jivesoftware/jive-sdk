@@ -15,64 +15,45 @@
  */
 
 jive.tile.onOpen(function(config, options) {
+    $(document).ready( function( ){
+        debugger;
+        gadgets.window.adjustHeight();
+        gadgets.window.adjustWidth();
 
-    config = JSON.parse(JSON.parse(config));
-    console.log("config:", config);
-    console.log("options:", options);
-
-    var parent;
-    jive.tile.getContainer(function(container) {
-        parent = container.resources.self.ref;
-    });
-
-
-
-    $("#create-discussion").click(function() {
-
-        var message = $("#message").val();
-
-        var obj = {
-            "content": {
-                "type": "text/html",
-                "text": '<p>'+message+'</p><p>Current count is <b>'+config.count + '</b></p>'
-            },
-            "subject": $("#subject").val(),
-            "visibility": "place",
-            "parent": parent
-
+        if ( typeof config !== 'object') {
+            config = JSON.parse(JSON.parse(config));
         }
+        console.log("config:", config);
+        console.log("options:", options);
 
-        osapi.jive.corev3.discussions.create(obj).execute(function(result) {
-            console.log("result:", result);
+        var parent;
+        jive.tile.getContainer(function(container) {
+            parent = container.resources.self.ref;
         });
-        $("#message").val('');
-        $("#subject").val('');
-        alertBox('success', "The discussion has been posted.");
-        setTimeout(function() {
-            jive.tile.close(config, {} );
-        }, 1000);
+
+        $("#create-discussion").click(function() {
+            var message = $("#message").val();
+            var obj = {
+                "content": {
+                    "type": "text/html",
+                    "text": '<p>'+message+'</p><p>Current count is <b>'+config.count + '</b></p>'
+                },
+                "subject": $("#subject").val(),
+                "visibility": "place",
+                "parent": parent
+            };
+
+            osapi.jive.corev3.discussions.create(obj).execute(function(result) {
+                $("#message").val('');
+                $("#subject").val('');
+                console.log("result:", result);
+                osapi.jive.core.container.sendNotification( {'message':"The discussion has been posted.", 'severity' : 'success'} );
+                setTimeout(function() {
+                    jive.tile.close(config, {} );
+                }, 1000);
+            });
+
+        });
     });
 
-    window.setTimeout( function() {
-         gadgets.window.adjustHeight();
-     }, 1000);
-
-    gadgets.window.adjustHeight();
-
-//    }, 1000);
 });
-
-function alertBox(type, message) {
-    if(!type) {
-        type = 'success';
-    }
-
-    var alertBox = $(".alert-area").removeClass().addClass('alert-' + type).text(message).fadeIn();
-    gadgets.window.adjustHeight();
-
-    setTimeout(function(){
-        alertBox.fadeOut();
-        alertBox.removeClass().addClass('alert-area');
-        jive.tile.close({"message": "The discussion has been created."});
-    }, 2000);
-}
