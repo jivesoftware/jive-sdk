@@ -86,6 +86,6 @@
   -->
 
   <Content type="html" view="home" href="home.html" preferred_height="400" />
-  <Content type="html" view="canvas" href="canvas.html" />
+  <Content type="html" view="embedded,canvas" href="canvas.html" />
 
 </Module>
