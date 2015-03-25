@@ -75,4 +75,5 @@
   "bin": {
     "jive-sdk": "jive-sdk-service/generator/jive-sdk"
   }
+
 }
