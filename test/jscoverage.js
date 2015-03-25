@@ -14,3 +14,4 @@ function func(input) {
 process.on('message', function(m) {
     func(m);
 });
+
