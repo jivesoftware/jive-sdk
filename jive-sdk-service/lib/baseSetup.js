@@ -96,7 +96,7 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
                 if ( typeof candidate == 'object' && candidate['verb'] && candidate['route'] ) {
                     // its a valid handler
                     var path =  candidate['path'] || key;
-                    var method;
+
                     if ( path !== '/' ) {
                         if ( path.indexOf('/') === 0 ) {
                             // in this case of /something
@@ -109,12 +109,11 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
 
                     httpVerb = candidate['verb'] || 'get';  // default to GET verb
                     httpVerb = httpVerb.toLowerCase();
-                    method = app[httpVerb];
 
                     if (candidate.validate) {
-                      method(routeContextPath, candidate.validate, candidate['route']);
+                      app[httpVerb](routeContextPath, candidate.validate, candidate['route']);
                     } else {
-                      method(routeContextPath, candidate['route']);
+                      app[httpVerb](routeContextPath, candidate['route']);
                     }
 
                     // lock the route if its marked to be locked
