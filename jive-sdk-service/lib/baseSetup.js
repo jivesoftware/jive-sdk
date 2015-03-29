@@ -181,7 +181,12 @@ exports.setupServices = function( app, definitionName, svcDir, setupEventListene
                 jive.events.addLocalEventListener( "serviceBootstrapped", function() {
                     // bootstrap
                     jive.logger.debug("Bootstrapping " + definitionName + "...");
-                    target['onBootstrap'](app);
+                    try {
+                        target['onBootstrap'](app);
+                    } catch(e) {
+                        jive.logger.fatal(e.stack);
+                        process.exit(-1);
+                    }
                 });
             }
 

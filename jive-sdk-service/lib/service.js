@@ -169,6 +169,18 @@ exports.persistence = function(persistenceStrategy) {
                 arguments.length > 5 ? arguments[5] : undefined
             );
 
+        },
+
+        query: function(query) {
+            if ( !persistence ) {
+                return q.reject( new Error("persistence not defined") );
+            }
+
+            if ( !persistence['query'] ) {
+                return q.resolve();
+            }
+
+            return persistence.query(query);
         }
     }
 };
