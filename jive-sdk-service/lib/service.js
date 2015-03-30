@@ -171,16 +171,16 @@ exports.persistence = function(persistenceStrategy) {
 
         },
 
-        query: function(query) {
+        getQueryClient: function() {
             if ( !persistence ) {
                 return q.reject( new Error("persistence not defined") );
             }
 
-            if ( !persistence['query'] ) {
+            if ( !persistence['getQueryClient'] ) {
                 return q.resolve();
             }
 
-            return persistence.query(query);
+            return persistence.getQueryClient();
         }
     }
 };
