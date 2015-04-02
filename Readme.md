@@ -6,7 +6,7 @@ This repository contains the Jive Node.js library to help you get started using 
 
 For instructions on installing and using the Jive Node SDK, refer to [Getting Started with the Jive Node SDK](https://community.jivesoftware.com/docs/DOC-114053) in the Jive Community.
 
-You can also access the API documentation [here](https://cdn.rawgit.com/jivesoftware/jive-sdk/master/docs/api/index.html).
+You can also access the SDK documentation [here](https://cdn.rawgit.com/jivesoftware/jive-sdk/master/docs/api/index.html).
 
 **Enjoy!**
 
