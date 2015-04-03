@@ -435,7 +435,7 @@ function initPersistence(options) {
                 var persistenceStrategy = require(process.cwd() + '/node_modules/' + persistence);
                 exports.persistence(new persistenceStrategy(options));
             } catch ( e ) {
-                jive.logger.error(e);
+                jive.logger.error(e.stack);
                 jive.logger.warn('Invalid persistence option given "' + persistence + '". Must be one of ' + Object.keys(jive.persistence));
                 process.exit(-1);
             }
@@ -461,7 +461,7 @@ function initScheduler(options) {
                 var schedulerStrategy = require(process.cwd() + '/node_modules/' + scheduler);
                 exports.scheduler(new schedulerStrategy(options));
             } catch ( e ) {
-                jive.logger.error(e);
+                jive.logger.error(e.stack);
                 jive.logger.warn('Invalid scheduler option given "' + scheduler + '". Must be one of ' + Object.keys(jive.scheduler));
                 process.exit(-1);
             }
