@@ -39,35 +39,42 @@ function getFormattedData(count) {
     };
 }
 
-exports.task = function() {
-    jive.extstreams.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
-        if ( instances ) {
-            instances.forEach( function( instance ) {
-                var config = instance['config'];
-                if ( config && config['posting'] === 'off' ) {
-                    return;
-                }
+exports.task = jive.tasks.build(
+    function() {
+        jive.extstreams.findByDefinitionName( '{{{TILE_NAME}}}' ).then( function(instances) {
+            if ( instances ) {
+                instances.forEach( function( instance ) {
+                    var config = instance['config'];
+                    if ( config && config['posting'] === 'off' ) {
+                        return;
+                    }
 
-                jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
+                    jive.logger.debug('running pusher for ', instance.name, 'instance', instance.id );
 
-                var store = jive.service.persistence();
-                return store.find('exampleStore', {
-                    'key':'count'
-                }).then(function(count) {
-                    count = count.length > 0 ? count[0].count : parseInt(instance.config.startSequence, 10);
-		    count = count || 0;
-                    store.save('exampleStore', 'count', {
-                        'key':'count',
-                        'count':count+1
-                    }).then(function() {
-                        jive.extstreams.pushActivity(instance, getFormattedData(count));
+                    var store = jive.service.persistence();
+                    return store.find('exampleStore', {
+                        'key':'count'
+                    }).then(function(count) {
+                        count = count.length > 0 ? count[0].count : instance.config.startSequence;
+                        count = Number(count);
+                        if ( isNaN(count) ) {
+                            count = 0;
+                        }
+                        store.save('exampleStore', 'count', {
+                            'key':'count',
+                            'count':count+1
+                        }).then(function() {
+                            jive.extstreams.pushActivity(instance, getFormattedData(count));
+                        });
+                    }, function(err) {
+                        //some error
+                        jive.logger.debug('Error encountered, push failed', err);
                     });
-                }, function(err) {
-                    //some error
-                    jive.logger.debug('Error encountered, push failed', err);
-                });
 
-            });
-        }
-    });
-};
+                });
+            }
+        });
+    },
+    1000,
+    jive.util.guid()
+);
