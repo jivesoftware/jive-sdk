@@ -32,8 +32,8 @@ var groups = ['tiles', 'apps', 'services', 'storages', 'cartridges', 'examples']
 var styles = [];
 var examples = [];
 
-var deprecatedNames = ['example-filestorage', 'list',      'gauge',      'gallery',      'table',      'activity',      'github',         'sfdc',               'bitcoin',         'todo',         'auth',         'basecamp',         'jenkins',         'jira',         'newrelic',         'podio',         'stock-price',         'wikibang',         'sampleapps',         'samplegoogle',         'albums',         'samplewebhooks',   'analytics',         'sampleservice',   'samplecartridges',   'sampleFilesStorage'];
-var refactoredNames = ['esf', 'tile-list', 'tile-gauge', 'tile-gallery', 'tile-table', 'tile-activity', 'example-github', 'example-salesforce', 'example-bitcoin', 'example-todo', 'example-auth', 'example-basecamp', 'example-jenkins', 'example-jira', 'example-newrelic', 'example-podio', 'example-stockprice', 'example-wikibang', 'example-sampleapps', 'example-samplegoogle', 'example-albums', 'example-webhooks', 'example-analytics', 'service', 'example-cartridges', 'example-filestorage'];
+var deprecatedNames = ['tile-activity', 'example-filestorage', 'list',      'gauge',      'gallery',      'table',      'activity',      'github',         'sfdc',               'bitcoin',         'todo',         'auth',         'basecamp',         'jenkins',         'jira',         'newrelic',         'podio',         'stock-price',         'wikibang',         'sampleapps',         'samplegoogle',         'albums',         'samplewebhooks',   'analytics',         'sampleservice',   'samplecartridges',   'sampleFilesStorage'];
+var refactoredNames = ['activity-stream', 'esf', 'tile-list', 'tile-gauge', 'tile-gallery', 'tile-table', 'tile-activity', 'example-github', 'example-salesforce', 'example-bitcoin', 'example-todo', 'example-auth', 'example-basecamp', 'example-jenkins', 'example-jira', 'example-newrelic', 'example-podio', 'example-stockprice', 'example-wikibang', 'example-sampleapps', 'example-samplegoogle', 'example-albums', 'example-webhooks', 'example-analytics', 'service', 'example-cartridges', 'example-filestorage'];
 
 // Add descriptions for all template items here.
 // If you don't add a description here, the help output will
@@ -42,7 +42,7 @@ var refactoredNames = ['esf', 'tile-list', 'tile-gauge', 'tile-gallery', 'tile-t
 var itemDescriptions = {
     'app' : 'A basic Jive app',
     'esf' : 'An external storage framework that uses a file system',
-    'tile-activity': 'A basic activity stream',
+    'activity-stream': 'A basic activity stream',
     'cartridge' : 'A basic cartridge',
     'tile-list' : 'A basic list tile',
     'tile-table': 'A basic table tile',
