@@ -33,7 +33,7 @@ var styles = [];
 var examples = [];
 
 var deprecatedNames = ['tile-activity', 'example-filestorage', 'list',      'gauge',      'gallery',      'table',      'activity',      'github',         'sfdc',               'bitcoin',         'todo',         'auth',         'basecamp',         'jenkins',         'jira',         'newrelic',         'podio',         'stock-price',         'wikibang',         'sampleapps',         'samplegoogle',         'albums',         'samplewebhooks',   'analytics',         'sampleservice',   'samplecartridges',   'sampleFilesStorage'];
-var refactoredNames = ['activity-stream', 'esf', 'tile-list', 'tile-gauge', 'tile-gallery', 'tile-table', 'tile-activity', 'example-github', 'example-salesforce', 'example-bitcoin', 'example-todo', 'example-auth', 'example-basecamp', 'example-jenkins', 'example-jira', 'example-newrelic', 'example-podio', 'example-stockprice', 'example-wikibang', 'example-sampleapps', 'example-samplegoogle', 'example-albums', 'example-webhooks', 'example-analytics', 'service', 'example-cartridges', 'example-filestorage'];
+var refactoredNames = ['activity-stream', 'esf', 'tile-list', 'tile-gauge', 'tile-gallery', 'tile-table', 'activity-stream', 'example-github', 'example-salesforce', 'example-bitcoin', 'example-todo', 'example-auth', 'example-basecamp', 'example-jenkins', 'example-jira', 'example-newrelic', 'example-podio', 'example-stockprice', 'example-wikibang', 'example-sampleapps', 'example-samplegoogle', 'example-albums', 'example-webhooks', 'example-analytics', 'service', 'example-cartridges', 'esf'];
 
 // Add descriptions for all template items here.
 // If you don't add a description here, the help output will
