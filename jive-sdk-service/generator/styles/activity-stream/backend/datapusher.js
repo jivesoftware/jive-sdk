@@ -32,7 +32,7 @@ function getFormattedData(count) {
                 "url": "http://www.google.com",
                 "image": "http://placehold.it/102x102",
                 "title": "Activity " + count,
-                "description": "Activity " + count
+                "description": "This is the activity description for Activity " + count
             },
             "externalID": '' + new Date().getTime()
         }
@@ -75,6 +75,6 @@ exports.task = jive.tasks.build(
             }
         });
     },
-    1000,
+    5000,
     jive.util.guid()
 );
