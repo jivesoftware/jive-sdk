@@ -271,14 +271,9 @@ exports.init = function(expressApp, options ) {
 
     var initialPromise;
     if ( typeof options === 'object' ) {
-        applyDefaults(options);
-        applyOverrides(options);
-        exports.options = options;
-        jive.context.config = exports.options;
-
-        initialPromise = q.fcall( function() {
-            return options;
-        });
+        initialPromise = function() {
+            return q.resolve(options);
+        }
     } else {
         // if no options are provided, then try getting them from
         // cmd line arguments, or from environemnt
@@ -306,29 +301,35 @@ exports.init = function(expressApp, options ) {
             }
         }
 
-        initialPromise = q.nfcall( fs.readFile, options, 'utf8').then( function (data) {
-            var jiveConfig = JSON.parse(data);
-
-            traverse(jiveConfig).forEach(function(value) {
-                if (typeof (value) === 'string') {
-                    this.update(mustache.render(value, process.env));
-                }
+        initialPromise = function() {
+            var deferred = q.defer();
+            q.nfcall( fs.readFile, options, 'utf8').then( function (data) {
+                deferred.resolve(JSON.parse(data));
             });
 
-            applyDefaults(jiveConfig);
-            applyOverrides(jiveConfig);
-
-            exports.options = jiveConfig;
-            jive.context.config = exports.options;
-
-            jive.logger.debug('Startup configuration from', options);
-            jive.logger.debug(jiveConfig);
-
-            return jiveConfig;
-        });
+            return deferred.promise;
+        }
     }
 
-    return initialPromise
+    return initialPromise()
+            .then( function(jiveConfig) {
+                traverse(jiveConfig).forEach(function(value) {
+                    if (typeof (value) === 'string') {
+                        this.update(mustache.render(value, process.env));
+                    }
+                });
+
+                applyDefaults(jiveConfig);
+                applyOverrides(jiveConfig);
+
+                exports.options = jiveConfig;
+                jive.context.config = exports.options;
+
+                jive.logger.debug('Startup configuration from', options);
+                jive.logger.debug(jiveConfig);
+
+                return jiveConfig;
+            })
             .then(initLogger)
             .then(initPersistence)
             .then(initScheduler);
@@ -361,6 +362,7 @@ function initLogger(options) {
 }
 
 function initPersistence(options) {
+    var deferred = q.defer();
 
     /**
      * Offered to the persistence strategy; may or may not be used.
@@ -419,21 +421,24 @@ function initPersistence(options) {
     };
 
     var persistence = options['persistence'];
+    var initializer = options['persistenceInitializer'];
+    var normalizedPersistence;
+
     if ( typeof persistence === 'object' ) {
         // set persistence if the object is provided
-        exports.persistence( options['persistence'] );
+        normalizedPersistence = exports.persistence( options['persistence'] );
     }
     else if ( typeof persistence === 'string' ) {
         //If a string is provided, and it's a valid type exported in jive.persistence, then use that.
         options['schema'] = defaultSchema;
 
         if (jive.persistence[persistence]) {
-            exports.persistence(new jive.persistence[persistence](options)); //pass options, such as location of DB for mongoDB.
+            normalizedPersistence = exports.persistence(new jive.persistence[persistence](options)); //pass options, such as location of DB for mongoDB.
         } else {
             // finally try to require the persistence strategy
             try {
                 var persistenceStrategy = require(process.cwd() + '/node_modules/' + persistence);
-                exports.persistence(new persistenceStrategy(options));
+                normalizedPersistence = exports.persistence(new persistenceStrategy(options));
             } catch ( e ) {
                 jive.logger.error(e.stack);
                 jive.logger.warn('Invalid persistence option given "' + persistence + '". Must be one of ' + Object.keys(jive.persistence));
@@ -441,7 +446,23 @@ function initPersistence(options) {
             }
         }
     }
-    return options;
+
+    if ( normalizedPersistence && initializer ) {
+        var promise = initializer(normalizedPersistence, options);
+        if ( !promise ) {
+            deferred.resolve(options);
+        } else {
+            promise.then( function() {
+                deferred.resolve(options);
+            }).catch( function(e) {
+                throw e;
+            });
+        }
+    } else {
+        deferred.resolve(options);
+    }
+
+    return deferred.promise;
 }
 
 function initScheduler(options) {
