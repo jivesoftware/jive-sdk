@@ -348,6 +348,11 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
                         'jabCartridges': cartridges
                     };
 
+                    // Remove cartridge element if empty
+                    if (cartridges == null || cartridges.length == 0) {
+                        delete definitionsJson.jabCartridges;
+                    }
+
                     var definitionJsonPath = extensionSrcDir + '/definition.json';
                     var stringifiedDefinitionJson = JSON.stringify(definitionsJson, null, 4);
                     return jive.util.fswrite(stringifiedDefinitionJson, definitionJsonPath).then( function() {
