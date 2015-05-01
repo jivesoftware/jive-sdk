@@ -182,7 +182,14 @@ exports.setupServices = function( app, definitionName, svcDir, setupEventListene
                     // bootstrap
                     jive.logger.debug("Bootstrapping " + definitionName + "...");
                     try {
-                        target['onBootstrap'](app);
+                        var returned = target['onBootstrap'](app);
+                        if ( returned ) {
+                            // any error here precipitates
+                            returned.catch( function(e) {
+                                jive.logger.fatal(e.stack);
+                                process.exit(-1);
+                            });
+                        }
                     } catch(e) {
                         jive.logger.fatal(e.stack);
                         process.exit(-1);

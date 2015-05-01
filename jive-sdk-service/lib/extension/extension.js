@@ -194,12 +194,15 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         // synthesize a reasonable description
         if ( hasCartridges ) {
             var c = [];
-            definitions['jabCartridges'].forEach( function(cartridge) {
-                c.push(cartridge['name']);
-            });
-            description += 'Cartridges: [';
-            description += c.join(', ').trim();
-            description += '] ';
+            var jabCartridges = definitions['jabCartridges'];
+            if ( jabCartridges ) {
+                jabCartridges.forEach( function(cartridge) {
+                    c.push(cartridge['name']);
+                });
+                description += 'Cartridges: [';
+                description += c.join(', ').trim();
+                description += '] ';
+            }
         }
 
         if ( hasTiles ) {
@@ -248,6 +251,10 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         "service_url": jive.service.serviceURL(),
         "redirect_url": extensionInfo['redirectURL'] || "%serviceURL%"
     }, jive.service.options['extensionInfo']);
+
+    // these should never be there
+    delete extensionMeta['uuid'];
+    delete extensionMeta['jiveServiceSignature'];
 
     // suppress the register and unregister URLs if configured to do so
     if ( jive.service.options['suppressAddonRegistration'] == true ) {
