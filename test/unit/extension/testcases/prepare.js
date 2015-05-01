@@ -64,8 +64,7 @@ describe('jive', function () {
                     assert.ok( definitionJson['storageDefinitions'] );
                     assert.equal( definitionJson['storageDefinitions'].length, 1 );
 
-                    assert.ok( definitionJson['jabCartridges'] );
-                    assert.equal( definitionJson['jabCartridges'].length, 0 );
+                    assert.ok( definitionJson['jabCartridges'] === undefined );
 
                 }).then( function() {
                     done();
@@ -198,8 +197,7 @@ describe('jive', function () {
                 return jive.util.fsreadJson( extensionRoot + '/extension_src/definition.json' )
                     .then( function(definitionJson) {
                         assert.ok(definitionJson);
-                        assert.ok(definitionJson['jabCartridges']);
-                        assert.equal(definitionJson['jabCartridges'].length, 0);
+                        assert.ok( definitionJson['jabCartridges'] === undefined );
                         loggedAWarningForCartridge(warnings, true);
                     }).then(function () {
                         return testForCartridgeZips(jive, extensionRoot, 0);
@@ -246,8 +244,7 @@ describe('jive', function () {
                 return jive.util.fsreadJson( extensionRoot + '/extension_src/definition.json' )
                     .then( function(definitionJson) {
                         assert.ok( definitionJson );
-                        assert.ok( definitionJson['jabCartridges'] );
-                        assert.equal( definitionJson['jabCartridges'].length, 0  );
+                        assert.ok( definitionJson['jabCartridges'] === undefined );
                         loggedAWarningForCartridge(warnings, false);
                     }).then(function () {
                         return testForCartridgeZips(jive, extensionRoot, 0);
@@ -296,8 +293,7 @@ describe('jive', function () {
                 return jive.util.fsreadJson( extensionRoot + '/extension_src/definition.json' )
                     .then( function(definitionJson) {
                         assert.ok( definitionJson );
-                        assert.ok( definitionJson['jabCartridges'] );
-                        assert.equal( definitionJson['jabCartridges'].length, 0  );
+                        assert.ok( definitionJson['jabCartridges'] === undefined );
                         loggedAWarningForCartridge(warnings, false);
                     }).then(function () {
                         return testForCartridgeZips(jive, extensionRoot, 0);
