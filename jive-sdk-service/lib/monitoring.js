@@ -28,12 +28,93 @@ exports.getStatus = function() {
     return testResults;
 };
 
+exports.getMetrics = function() {
+    if ( !metrics ) {
+        // all done
+        return q.resolve({});
+    }
+
+    // run all metrics
+    var deferred = q.defer();
+    var metricsResults = {};
+
+    function executeMetric( metricMeta ) {
+        var metric = metricMeta.metric;
+        var meta = metricMeta.meta;
+
+        if ( !meta ) {
+            // todo log?
+            return;
+        }
+
+        var name = meta['name'];
+
+        if ( !name ) {
+            // todo log?
+            return;
+        }
+
+        metric().then(
+            function(result) {
+                metricsResults[name] = result;
+            },
+
+            function(err) {
+                // !!
+                metricsResults[name] = JSON.stringify(err);
+            }
+        );
+    }
+
+    q.all( metrics.map( executeMetric ) ).then(
+        function() {
+            deferred.resolve(metricsResults);
+        },
+
+        function(e) {
+            // unexpected error running the tests!
+            // metrics results are invalid
+            deferred.reject(e);
+        }
+    );
+
+    return deferred.promise;
+};
+
 exports.runMonitoring = function() {
     var deferred = q.defer();
 
     runTests( deferred );
 
     return deferred.promise;
+};
+
+exports.addMetric = function( metricData ) {
+    if ( !metricData ) {
+        // ignore empty metrics
+        return;
+    }
+
+    var metric = metricData.metric;
+    if ( !metric || typeof metric !== 'function' ) {
+        throw Error("Bad metric -- invalid metric function");
+    }
+
+    var meta = metricData.meta;
+    if ( !meta ) {
+        throw Error("Bad metric -- no metadata");
+    }
+
+    var name = meta['name'];
+    if ( !name ) {
+        throw Error("Bad metric -- invalid metadata: no name");
+    }
+
+    // all is well; add the metrics
+    if ( !metrics ) {
+        metrics = [];
+    }
+    metrics.push( metricData );
 };
 
 exports.addMonitor = function( testMeta ) {
@@ -62,6 +143,44 @@ exports.addMonitor = function( testMeta ) {
         tests = [];
     }
     tests.push( testMeta );
+};
+
+exports.createUptimeMetric = function() {
+    var startTS = new Date().getTime();
+
+    var uptime  = function() {
+        var deferred = q.defer();
+        var now = new Date().getTime();
+        deferred.resolve( Math.round((now - startTS)/1000) );
+        return deferred.promise;
+    };
+
+    return {
+        'metric' : uptime,
+        'meta' : {
+            'name' : 'uptime'
+        }
+    }
+};
+
+exports.createCodeVersionMetric = function() {
+    var codeVersionString = jive.service.options['codeVersionString'];
+    if ( !codeVersionString ) {
+        codeVersionString = '(none)';
+    }
+
+    var codeVersion  = function() {
+        var deferred = q.defer();
+        deferred.resolve(codeVersionString);
+        return deferred.promise;
+    };
+
+    return {
+        'metric' : codeVersion,
+        'meta' : {
+            'name' : 'codeVersion'
+        }
+    }
 };
 
 exports.createPersistenceMonitor = function() {
@@ -107,6 +226,7 @@ var service = require('./service'),
     q = require('q');
 
 var tests;
+var metrics;
 
 var testResults = {};
 

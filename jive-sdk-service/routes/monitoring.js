@@ -21,11 +21,10 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var url = require('url');
-var http = require('http');
 var q = require('q');
 var jive = require("../api");
 
-exports.ping = function( req, res ) {
+exports.healthCheck = function( req, res ) {
     var monitoringResult = jive.service.monitoring().getStatus();
     if ( monitoringResult['status'] === 'ok' ) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -36,3 +35,14 @@ exports.ping = function( req, res ) {
     res.end(JSON.stringify(monitoringResult));
 };
 
+exports.ping = function( req, res ) {
+    res.writeHead(200);
+    res.end('pong');
+};
+
+exports.metrics = function( req, res ) {
+    jive.service.monitoring().getMetrics().then( function(metrics) {
+        res.writeHead(200);
+        res.end(JSON.stringify(metrics));
+    });
+};
