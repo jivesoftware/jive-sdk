@@ -336,6 +336,16 @@ exports.init = function(expressApp, options ) {
 };
 
 function initLogger(options) {
+    var customLoggingAppender = options['customServiceLogger'];
+
+    if ( customLoggingAppender ) {
+        // clear the default appender(s)
+        log4js.clearAppenders();
+
+        //
+        log4js.addAppender(customLoggingAppender, 'jive-sdk');
+    }
+
     var logfile = options['logFile'] || options['logfile'];
     var logLevel = process.env['jive_logging_level'] || options['logLevel'] || options['loglevel'] || 'INFO';
     logLevel = logLevel.toUpperCase();
@@ -357,6 +367,17 @@ function initLogger(options) {
     }
 
     jive.logger.setLevel(logLevel);
+
+    jive.logger['addLogger'] = function(loggerName) {
+        if ( customLoggingAppender ) {
+            log4js.addAppender(customLoggingAppender, loggerName);
+        }
+        log4js.getLogger(loggerName).setLevel(logLevel);
+    };
+
+    jive.logger['getLogger'] = function(loggerName) {
+        return log4js.getLogger(loggerName);
+    };
 
     return options;
 }
@@ -423,6 +444,8 @@ function initPersistence(options) {
     var persistence = options['persistence'];
     var initializer = options['persistenceInitializer'];
     var normalizedPersistence;
+
+    options['customLogger'] = jive.logger;
 
     if ( typeof persistence === 'object' ) {
         // set persistence if the object is provided
