@@ -123,6 +123,9 @@ var setupExpressApp = function (app, rootDir, config) {
 };
 
 var wireAdminEndpoints = function(appToUse, options) {
+    if ( !appToUse ) {
+        return;
+    }
     if ( service.monitoring().isActive() ) {
         // alias for monitoring endpoint
         appToUse.get('/healthcheck', service.routes.monitoring.healthCheck);
