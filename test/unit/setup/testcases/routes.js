@@ -63,6 +63,33 @@ describe('jive', function () {
             })
         });
 
+        it('add validation middleware', function (done) {
+            var jive = this['jive'];
+            var testUtils = this['testUtils'];
+
+            var options = testUtils.createBaseServiceOptions('/services/tile_routes');
+            delete options['role'];
+            options['port'] = 5555; options['logLevel'] = 'FATAL'; options['clientUrl'] = 'http://localhost:5555';
+            testUtils.setupService(jive, options).then( function(service) {
+                jive.util.buildRequest('http://localhost:5555/validated/1').then( function(r) {
+                    assert.ok(r['entity']);
+                    return jive.util.buildRequest('http://localhost:5555/validated/unexpected-value');
+                }).then(
+                  function(r) {
+                      assert.fail(r, 'expected error');
+                  },
+
+                  function(e) {
+                      assert.ok(e);
+                      assert.equal(e['statusCode'], 400);
+                  }
+                ).then( function() {
+                    service.stop().then( function() {
+                        done();
+                    });
+                });
+            });
+        });
     });
 
 });
