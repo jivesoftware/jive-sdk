@@ -75,16 +75,16 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                 return jive.util.fsexists(svrPublicDir + '/apps').then( function(exists ) {
                     return !exists ? jive.util.fsmkdir( extensionPublicDir + '/apps') : q.resolve();
                 })
-                .then( function () {
-                    // create the public/tiles directory if doesn't exist
-                    return jive.util.fsexists(svrPublicDir + '/tiles').then( function(exists ) {
-                        return !exists ? jive.util.fsmkdir( extensionPublicDir + '/tiles') : q.resolve();
-                    });
-                })
-                .then( function () {
-                    // recursively copy the server's public directory
-                    return jive.util.fscopy(svrPublicDir, extensionPublicDir );
-                })
+                    .then( function () {
+                        // create the public/tiles directory if doesn't exist
+                        return jive.util.fsexists(svrPublicDir + '/tiles').then( function(exists ) {
+                            return !exists ? jive.util.fsmkdir( extensionPublicDir + '/tiles') : q.resolve();
+                        });
+                    })
+                    .then( function () {
+                        // recursively copy the server's public directory
+                        return jive.util.fscopy(svrPublicDir, extensionPublicDir );
+                    })
             }).then( function() {
                 // copy over the server public directory TODO - should this be configurable? or done based on dependency analysis?
                 return jive.util.fsexists(svrPublicDir).then( function(exists ) {
@@ -194,12 +194,15 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         // synthesize a reasonable description
         if ( hasCartridges ) {
             var c = [];
-            definitions['jabCartridges'].forEach( function(cartridge) {
-                c.push(cartridge['name']);
-            });
-            description += 'Cartridges: [';
-            description += c.join(', ').trim();
-            description += '] ';
+            var jabCartridges = definitions['jabCartridges'];
+            if ( jabCartridges ) {
+                jabCartridges.forEach( function(cartridge) {
+                    c.push(cartridge['name']);
+                });
+                description += 'Cartridges: [';
+                description += c.join(', ').trim();
+                description += '] ';
+            }
         }
 
         if ( hasTiles ) {
@@ -238,7 +241,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         "type": type,
         "name": name,
         "description": description,
-        "minimum_version": extensionInfo['minimum_version'] || extensionInfo['minJiveVersion'] || defaultMinimumVersion,
+        "minimum_version": extensionInfo['minJiveVersion'] || defaultMinimumVersion,
         "icon_16": extensionInfo['icon16'] || "extension-16.png",
         "icon_48": extensionInfo['icon48'] || "extension-48.png",
         "icon_128": extensionInfo['icon128'] || "extension-128.png",
@@ -248,6 +251,10 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         "service_url": jive.service.serviceURL(),
         "redirect_url": extensionInfo['redirectURL'] || "%serviceURL%"
     }, jive.service.options['extensionInfo']);
+
+    // these should never be there
+    delete extensionMeta['uuid'];
+    delete extensionMeta['jiveServiceSignature'];
 
     // suppress the register and unregister URLs if configured to do so
     if ( jive.service.options['suppressAddonRegistration'] == true ) {
@@ -267,45 +274,45 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
         return q.resolve(jive.service.getExpandedTileDefinitions(toReturn));
     };
     return q.all([ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ]).then(finalizeRequest)
-    .then( function(definitions) {
-        if ( !packageApps) {
-            definitions.forEach( function(definition) {
-                delete definition['id'];
-                delete definition['definitionDirName'];
-            });
-            return definitions;
-        } else {
-            var proms = [];
-            var host = jive.service.serviceURL();
-            definitions.forEach( function(definition) {
-                var name = definition['name'];
-                var view = definition['view'];
-                var action = definition['action'];
-                var config = definition['config'];
-
-                delete definition['id'];
-                definition['view'] = !view ? view : view.replace(host, '/public/tiles');
-                definition['action'] = !action ? action : action.replace(host, '/public/tiles');
-                definition['config'] = !config ? config : config.replace(host, '/public/tiles');
-                delete definition['definitionDirName'];
-
-                // post-process
-                var tileDir = tilesRootDir + '/' + name;
-
-                var copyTileDirToPublic = function(tile) {
-                    return packageApps ? jive.util.fscopy(tileDir + '/public', extensionPublicDir + '/tiles/' + name).then( function() {
-                        return sanitizeReferences(extensionPublicDir, extensionPublicDir + '/tiles/' + name, '/' + name + '/' )(tile);
-                    }) : q.resolve(tile);
-                };
-
-                proms.push( copyTileDirToPublic(definition) );
-            });
-
-            return q.all(proms).then( function() {
+        .then( function(definitions) {
+            if ( !packageApps) {
+                definitions.forEach( function(definition) {
+                    delete definition['id'];
+                    delete definition['definitionDirName'];
+                });
                 return definitions;
-            });
-        }
-    });
+            } else {
+                var proms = [];
+                var host = jive.service.serviceURL();
+                definitions.forEach( function(definition) {
+                    var name = definition['name'];
+                    var view = definition['view'];
+                    var action = definition['action'];
+                    var config = definition['config'];
+
+                    delete definition['id'];
+                    definition['view'] = !view ? view : view.replace(host, '/public/tiles');
+                    definition['action'] = !action ? action : action.replace(host, '/public/tiles');
+                    definition['config'] = !config ? config : config.replace(host, '/public/tiles');
+                    delete definition['definitionDirName'];
+
+                    // post-process
+                    var tileDir = tilesRootDir + '/' + name;
+
+                    var copyTileDirToPublic = function(tile) {
+                        return packageApps ? jive.util.fscopy(tileDir + '/public', extensionPublicDir + '/tiles/' + name).then( function() {
+                            return sanitizeReferences(extensionPublicDir, extensionPublicDir + '/tiles/' + name, '/' + name + '/' )(tile);
+                        }) : q.resolve(tile);
+                    };
+
+                    proms.push( copyTileDirToPublic(definition) );
+                });
+
+                return q.all(proms).then( function() {
+                    return definitions;
+                });
+            }
+        });
 }
 
 function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, extensionSrcDir, extensionPublicDir,
@@ -347,6 +354,11 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
                         'storageDefinitions':(storages && storages.length > 0) ? storages : undefined,
                         'jabCartridges': cartridges
                     };
+
+                    // Remove cartridge element if empty
+                    if (cartridges == null || cartridges.length == 0) {
+                        delete definitionsJson.jabCartridges;
+                    }
 
                     var definitionJsonPath = extensionSrcDir + '/definition.json';
                     var stringifiedDefinitionJson = JSON.stringify(definitionsJson, null, 4);
@@ -534,7 +546,7 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
                                     return q.resolve(cartridge);
                                 });
                             };
-                           return cartridge;
+                            return cartridge;
                         }) );
                     }
                 });

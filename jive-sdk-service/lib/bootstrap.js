@@ -24,6 +24,8 @@ var express = require('express'),
     security = require("./security");
 
 var alreadyBootstrapped = false;
+var adminApp;
+var primaryApp;
 
 /**
  * @private
@@ -55,6 +57,8 @@ var setupExpressApp = function (app, rootDir, config) {
 
     var p1 = q.defer();
     var p2 = q.defer();
+
+    primaryApp = app;
 
     app.configure(function () {
         app.engine('html', consolidate.mustache);
@@ -116,6 +120,34 @@ var setupExpressApp = function (app, rootDir, config) {
     });
 
     return q.all( [ p1, p2 ] );
+};
+
+var wireAdminEndpoints = function(appToUse, options) {
+    if ( !appToUse ) {
+        return;
+    }
+    if ( service.monitoring().isActive() ) {
+        // alias for monitoring endpoint
+        appToUse.get('/healthcheck', service.routes.monitoring.healthCheck);
+        appToUse.get('/jive/monitoring', service.routes.monitoring.healthCheck);
+    }
+
+    appToUse.get('/ping', service.routes.monitoring.ping);
+
+    appToUse.get('/metrics', service.routes.monitoring.metrics);
+
+    var monitoring = jive.service.monitoring();
+    var dbMonitor = monitoring.createPersistenceMonitor();
+    monitoring.addMonitor(dbMonitor);
+
+    var monitoringInterval = options['monitoringInterval'];
+    var task = new jive.tasks.build(monitoring.runMonitoring, monitoringInterval);
+    jive.tasks.schedule(task, jive.service.scheduler());
+
+    monitoring.addMetric( monitoring.createUptimeMetric() );
+    monitoring.addMetric( monitoring.createCodeVersionMetric() );
+
+    jive.logger.info("Service logging endpoints enabled: /healthcheck, /ping, /metrics");
 };
 
 var setupScheduler = function() {
@@ -181,18 +213,47 @@ var setupMonitoring = function(options) {
     }
 
     var monitoringInterval = options['monitoringInterval'];
-    if ( !monitoringInterval ) {
-        // skip scheduling monitoring if no monitoring interval
+    if ( !monitoringInterval || options['suppressMonitoring']) {
+        // skip monitoring if no monitoring interval
         return q.resolve();
     }
 
-    var monitoring = jive.service.monitoring();
-    var dbMonitor = monitoring.createPersistenceMonitor();
-    monitoring.addMonitor(dbMonitor);
+    var adminPort = options['adminPort'];
+    var deferred = q.defer();
+    if ( adminPort && adminPort !== primaryApp.get("port") ) {
+        // spawn a new server listening on the admin port
+        adminApp = express();
+        if ( options && !options['suppressHttpLogging'] ) {
+            adminApp.use(express.logger('dev'));
+        }
+        var protocol = require('url')
+            .parse(jive.service.serviceURL())
+            .protocol
+            .toLowerCase()
+            .replace(':', '');
+        var protocolLibrary;
+        if ( protocol == 'http' ) {
+            protocolLibrary = require('http');
+        }
+        if ( protocol == 'https' ) {
+            protocolLibrary = require('https');
+        }
+        if ( !protocolLibrary ) {
+            return q.resolve();
+        }
 
-    var task = new jive.tasks.build(monitoring.runMonitoring, monitoringInterval);
-    jive.tasks.schedule(task, jive.service.scheduler());
+        var server = protocolLibrary.createServer(adminApp).listen( adminPort, primaryApp.get('hostname') || undefined, function () {
+            jive.logger.info("Express admin endpoint listening on " + server.address().address +':'+server.address().port);
+            wireAdminEndpoints(adminApp, options);
+            deferred.resolve();
 
+        });
+    } else {
+        wireAdminEndpoints(primaryApp, options);
+        deferred.resolve();
+    }
+
+    return deferred.promise;
 };
 
 /**
