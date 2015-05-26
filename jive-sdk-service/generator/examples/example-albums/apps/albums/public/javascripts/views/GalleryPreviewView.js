@@ -137,7 +137,7 @@ window.GalleryPreviewView = (function() {
                 context.drawImage(playIcon, 0, 0);
                 context.restore();
 
-                return canvas.toDataURL("image/jpeg");
+                return canvas.toDataURL("image/jpeg", 0.3);
             }
 
             var firstImg = imgContainerDom.find("img").first();
