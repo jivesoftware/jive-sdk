@@ -148,6 +148,18 @@ var wireAdminEndpoints = function(appToUse, options) {
     monitoring.addMetric( monitoring.createCodeVersionMetric() );
 
     jive.logger.info("Service logging endpoints enabled: /healthcheck, /ping, /metrics");
+
+    // setup statsd client
+    var statsdClientConfig = options['statsdClientConfig'];
+    if ( statsdClientConfig ) {
+        var host = statsdClientConfig['host'] || 'localhost';
+        var port = statsdClientConfig['port'] || 8125;
+        var interval = statsdClientConfig['interval'] || 1000;
+
+        jive.logger.info("Enabling statsd client host:", host, "port:", port, "interval:", interval);
+        var statsdTask = new jive.tasks.build(monitoring.runStatsdClient, interval);
+        jive.tasks.schedule(statsdTask, jive.service.scheduler());
+    }
 };
 
 var setupScheduler = function() {

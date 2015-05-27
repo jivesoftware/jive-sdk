@@ -18,6 +18,8 @@
  * @module monitoring
  */
 
+var SDC = require('node-statsd-client');
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // public
 
@@ -85,6 +87,60 @@ exports.runMonitoring = function() {
     var deferred = q.defer();
 
     runTests( deferred );
+
+    return deferred.promise;
+};
+
+exports.runStatsdClient = function() {
+    var deferred = q.defer();
+
+    var statsdClientConfig = jive.service.options['statsdClientConfig'] || {};
+    if ( !statsdClientConfig ) {
+        jive.logger.warn("No statsdClientConfig settings found, defaulting to localhost:8125, 1000ms");
+    }
+    var host = statsdClientConfig['host'] || 'localhost';
+    var port = statsdClientConfig['port'] || 8125;
+    var interval = statsdClientConfig['interval'] || 1000;
+
+    var sdc = new SDC.Client(host, port);
+
+    exports.getStatsdStats().then( function(stats) {
+        for ( var i = 0; i < stats.length; i++ ) {
+            var stat = stats[i];
+            sdc.gauge(stat.name, stat.value);
+        }
+
+        deferred.resolve();
+    });
+
+    return deferred.promise;
+};
+
+exports.getStatsdStats = function() {
+    var deferred = q.defer();
+
+    exports.getMetrics().then( function(metrics) {
+
+        if ( !metrics) {
+            deferred.resolve([]);
+            return;
+        }
+
+        var toSend = [];
+
+        for (var k in metrics){
+            if (metrics.hasOwnProperty(k)) {
+                var value = metrics[k];
+                if ( isNumber(value) ) {
+                    toSend.push({
+                        name: k,
+                        value: value
+                    })
+                }
+            }
+        }
+        deferred.resolve(toSend);
+    });
 
     return deferred.promise;
 };
@@ -353,3 +409,7 @@ var executeTest = function(testMeta) {
         }
     );
 };
+
+function isNumber(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
