@@ -211,11 +211,11 @@ var getSDKVersion = function() {
     });
 };
 
-var setupExtension = function(options, tilesDir, appsDir, cartridgesDir, storagesDir) {
+var setupExtension = function(options, tilesDir, appsDir, cartridgesDir, storagesDir, servicesDir) {
     if ( options['skipCreateExtension'] ) {
         return q.resolve();
     }
-    return extension.prepare('', tilesDir, appsDir, cartridgesDir, storagesDir, options['packageApps'] === true );
+    return extension.prepare('', tilesDir, appsDir, cartridgesDir, storagesDir, servicesDir, options['packageApps'] === true );
 };
 
 var setupMonitoring = function(options) {
@@ -273,7 +273,7 @@ var setupMonitoring = function(options) {
  * @param app Required.
  * @param rootDir Optional; defaults to process.cwd() if not specified
  */
-exports.start = function (app, options, rootDir, tilesDir, appsDir, cartridgesDir, storagesDir) {
+exports.start = function (app, options, rootDir, tilesDir, appsDir, cartridgesDir, storagesDir, servicesDir) {
     if ( alreadyBootstrapped ) {
         return q.fcall( function() {
             jive.logger.warn('Already bootstrapped, skipping.');
@@ -289,7 +289,7 @@ exports.start = function (app, options, rootDir, tilesDir, appsDir, cartridgesDi
 
     return setupScheduler()
         .then( function() { return setupHttp(app, rootDir, options) })
-        .then( function() { return setupExtension(options, tilesDir, appsDir, cartridgesDir, storagesDir) })
+        .then( function() { return setupExtension(options, tilesDir, appsDir, cartridgesDir, storagesDir, servicesDir) })
         .then( function() { return setupMonitoring(options) })
         .then( function() { return jive.util.fsexists( __dirname + '/../../package.json') })
         .then( function() { return getSDKVersion() })

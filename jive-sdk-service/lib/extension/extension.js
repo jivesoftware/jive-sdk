@@ -54,10 +54,11 @@ exports.save = function(record) {
  * @param appsDir
  * @param cartridgesDir
  * @param storagesDir
+ * @param servicesDir
  * @param packageApps
  * @returns {Promise} Promise
  */
-exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesDir, packageApps) {
+exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesDir, servicesDir, packageApps) {
     var extensionSrcDir = ( rootDir ? rootDir + '/' : '' ) + 'extension_src';
     var extensionPublicDir = extensionSrcDir + '/public';
     var svrPublicDir = ( rootDir ? rootDir + '/' : '' )  + 'public';
@@ -86,6 +87,11 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                         return jive.util.fscopy(svrPublicDir, extensionPublicDir );
                     })
             }).then( function() {
+                // create the public/services directory if doesn't exist
+                return jive.util.fsexists(svrPublicDir + '/services').then( function(exists ) {
+                    return !exists ? jive.util.fsmkdir( extensionPublicDir + '/services') : q.resolve();
+                })
+            }).then( function() {
                 // copy over the server public directory TODO - should this be configurable? or done based on dependency analysis?
                 return jive.util.fsexists(svrPublicDir).then( function(exists ) {
                     return !exists ? jive.util.fsmkdir( extensionPublicDir) : q.resolve();
@@ -111,6 +117,7 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                     appsDir,
                     cartridgesDir,
                     storagesDir,
+                    servicesDir,
                     extensionSrcDir,
                     extensionPublicDir,
                     extensionInfo,
@@ -315,60 +322,53 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
         });
 }
 
-function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, extensionSrcDir, extensionPublicDir,
+function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, servicesDir, extensionSrcDir, extensionPublicDir,
                                       extensionInfo, definitions, packageApps) {
     return getTemplates(tilesDir).then(function (templates) {
         return getApps(appsDir, extensionPublicDir, extensionInfo, packageApps).then(function (apps) {
-            return getStorages(storagesDir, extensionInfo).then(function (storages) {
-                return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
+            return getServices(servicesDir, extensionPublicDir, extensionInfo, packageApps).then(function (services) {
+                return getStorages(storagesDir, extensionInfo).then(function (storages) {
+                    return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
 
-
-                    if(cartridgeIsNotConfigured(extensionInfo["type"])){
-                        cartridges = [];
-                    }
-                    cartridges.forEach(function (cartridge) {
-                        cartridge.zipUp().then(function () {
-                            delete cartridge.zipUp;
+                        if(cartridgeIsNotConfigured(extensionInfo["type"])){
+                            cartridges = [];
+                        }
+                        cartridges.forEach(function (cartridge) {
+                            cartridge.zipUp().then(function () {
+                                delete cartridge.zipUp;
+                            });
                         });
+
+                        jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
+                        jive.logger.debug("packaged cartridges:\n" + JSON.stringify(cartridges, null, 4));
+
+                        var definitionsJson = {
+                            'integrationUser': {
+                                'systemAdmin': extensionInfo['jiveServiceSignature'] ? true : false,
+                                'jiveServiceSignature': extensionInfo['jiveServiceSignature'],
+                                'runAsStrategy': extensionInfo['runAsStrategy']
+                            },
+                            'tiles': (definitions && definitions.length > 0) ? definitions : undefined,
+                            'templates': (templates && templates.length > 0) ? templates : undefined,
+                            'osapps': (apps && apps.length > 0) ? apps : undefined,
+                            'storageDefinitions':(storages && storages.length > 0) ? storages : undefined,
+                            'jabCartridges': cartridges
+                        };
+
+                        // Remove cartridge element if empty
+                        if (cartridges == null || cartridges.length == 0) {
+                            delete definitionsJson.jabCartridges;
+                        }
+
+                        var definitionJsonPath = extensionSrcDir + '/definition.json';
+                        var stringifiedDefinitionJson = JSON.stringify(definitionsJson, null, 4);
+                        return jive.util.fswrite(stringifiedDefinitionJson, definitionJsonPath).then( function() {
+                            return definitionsJson;
+                        })
                     });
-
-                    // Remove a config element with "__jive_none__"
-                    // definitions.forEach(function(item) {
-                    //     if (item['config'] && item['config'].indexOf('__jive_none__') >= 0) {
-                    //         delete item['config'];
-                    //     }
-                    // });
-
-                    jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
-                    jive.logger.debug("packaged cartridges:\n" + JSON.stringify(cartridges, null, 4));
-
-                    var definitionsJson = {
-                        'integrationUser': {
-                            'systemAdmin': extensionInfo['jiveServiceSignature'] ? true : false,
-                            'jiveServiceSignature': extensionInfo['jiveServiceSignature'],
-                            'runAsStrategy': extensionInfo['runAsStrategy']
-                        },
-                        'tiles': (definitions && definitions.length > 0) ? definitions : undefined,
-                        'templates': (templates && templates.length > 0) ? templates : undefined,
-                        'osapps': (apps && apps.length > 0) ? apps : undefined,
-                        'storageDefinitions':(storages && storages.length > 0) ? storages : undefined,
-                        'jabCartridges': cartridges
-                    };
-
-                    // Remove cartridge element if empty
-                    if (cartridges == null || cartridges.length == 0) {
-                        delete definitionsJson.jabCartridges;
-                    }
-
-                    var definitionJsonPath = extensionSrcDir + '/definition.json';
-                    var stringifiedDefinitionJson = JSON.stringify(definitionsJson, null, 4);
-                    return jive.util.fswrite(stringifiedDefinitionJson, definitionJsonPath).then( function() {
-                        return definitionsJson;
-                    })
                 });
             });
         });
-
     });
 }
 
@@ -511,6 +511,30 @@ function getApps(appsRootDir, extensionPublicDir, extensionInfo, packageApps) {
             });
         } else {
             return apps;
+        }
+    });
+}
+
+function getServices(servicesRootDir, extensionPublicDir, extensionInfo, packageServices) {
+    var services = [];
+    return jive.util.fsexists( servicesRootDir).then( function(exists) {
+        if ( exists ) {
+            return q.nfcall(fs.readdir, servicesRootDir).then(function(dirContents){
+                var proms = [];
+                dirContents.forEach(function(item) {
+                    var serviceDir = servicesRootDir + '/' + item;
+                    if ( fs.existsSync(serviceDir + '/public') && isDirectory(serviceDir) ) {
+                        proms.push(  function() {
+                            return packageServices ? jive.util.fscopy(serviceDir + '/public', extensionPublicDir + '/services/' + item).then( function() {
+                                return sanitizeReferences(extensionPublicDir, extensionPublicDir + '/services/' + item )(serviceDir);
+                            }) : q.resolve();
+                        }() );
+                    }
+                });
+                return q.all(proms);
+            });
+        } else {
+            return services;
         }
     });
 }

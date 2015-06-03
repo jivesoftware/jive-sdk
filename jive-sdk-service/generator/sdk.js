@@ -564,6 +564,7 @@ function doCreateExtension( options ) {
                     options.target + "/apps",
                     options.target + "/cartridges",
                     options.target + "/storages",
+                    options.target + "/services",
                     options.apphosting === 'jive'
                 ).then(function(){
                 var persistence = jive.service.persistence();

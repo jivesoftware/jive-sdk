@@ -152,6 +152,16 @@ exports.oauth2SuccessCallback = function( state, originServerAccessTokenResponse
 };
 
 
+/**
+ * Override this in a subclass!
+ * @param oauth2CallbackRequest
+ * @param originServerAccessTokenResponse
+ * @param callback
+ */
+exports.oauth2FailureCallback = function(  res, code, error ) {
+    errorResponse( res, code, error );
+};
+
 var errorResponse = function( res, code, error ){
     res.status(code);
     res.set({'Content-Type': 'application/json'});
@@ -174,34 +184,44 @@ exports.oauth2Callback = function(req, res ) {
     var url_parts = url.parse(req.url, true);
     var query = url_parts.query;
 
+    var self = this;
+    var oauth2FailureCallback = self.oauth2FailureCallback;
+
     var code = query['code'];
     if ( !code ) {
-        errorResponse( res, 400, 'Authorization code required');
+        var msg = 'Authorization code required';
+        jive.logger.warn('oauth2Callback failed', res, 400, msg);
+        oauth2FailureCallback( res, 400, msg);
         return;
     }
 
     var stateStr = query['state'];
     if ( !stateStr ) {
-        errorResponse( res, 400, 'Missing state string');
+        var msg = 'Missing state string';
+        jive.logger.warn('oauth2Callback failed', res, 400, msg);
+        oauth2FailureCallback( res, 400, msg);
         return;
     }
 
     try {
         var state = JSON.parse( JSON.parse( jive.util.base64Decode(stateStr)) );
     } catch ( e ) {
-        errorResponse( res, 400, 'Invalid state string, cannot parse.');
+        var msg = 'Invalid state string, cannot parse.';
+        jive.logger.warn('oauth2Callback failed', res, 400, msg);
+        oauth2FailureCallback( res, 400, msg);
         return;
     }
 
     var jiveRedirectUrl = state['jiveRedirectUrl'];
     if ( !jiveRedirectUrl ) {
-        errorResponse( res, 400, 'Invalid state string, no jiveRedirectUrl provided.');
+        var msg = 'Invalid state string, no jiveRedirectUrl provided.';
+        jive.logger.warn('oauth2Callback failed', res, 400, msg);
+        oauth2FailureCallback( res, 400, msg);
         return;
     }
 
     var jiveTenantID = state['context'] ? state['context']['jiveTenantID'] : undefined;
     var originJiveTenantID = state['context'] ? state['context']['originJiveTenantID'] : undefined;
-    var self = this;
 
     getOAuth2Conf(jiveTenantID, originJiveTenantID, this).then(
 
@@ -217,7 +237,8 @@ exports.oauth2Callback = function(req, res ) {
 
             var proceed = function(context, error) {
                 if (error) {
-                    errorResponse(res, 500, error);
+                    jive.logger.error('oauth2Callback failed', res, 500, error);
+                    oauth2FailureCallback(res, 500, error);
                     return;
                 }
 
@@ -262,10 +283,12 @@ exports.oauth2Callback = function(req, res ) {
                 },
                 function(e) {
                     // failure
-                    errorResponse( res, 500, e);
+                    jive.logger.error('oauth2Callback failed', res, 500, e);
+                    oauth2FailureCallback( res, 500, e);
                 }
             ).catch(function(e){
-                errorResponse(res,500,e);
+                jive.logger.error('oauth2Callback failed', res, 500, e);
+                oauth2FailureCallback(res,500,e);
             });
 
 
@@ -273,7 +296,7 @@ exports.oauth2Callback = function(req, res ) {
 
         /////////////
         function(err) {
-            errorResponse( res, 500, err);
+            oauth2FailureCallback( res, 500, err);
         }
     );
 

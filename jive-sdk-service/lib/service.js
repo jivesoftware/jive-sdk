@@ -41,6 +41,7 @@ var tilesDir = rootDir + '/tiles';
 var osAppsDir = rootDir + '/apps';
 var cartridgesDir = rootDir + '/cartridges';
 var storagesDir = rootDir + '/storages';
+var servicesDir = rootDir + '/services';
 var security = require('./security');
 var monitoring = require('./monitoring');
 var serviceState = 'stopped';
@@ -574,7 +575,7 @@ exports.autowire = function(options) {
  */
 exports.start = function() {
     serviceState = 'starting';
-    return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir, cartridgesDir, storagesDir).then( function() {
+    return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir, cartridgesDir, storagesDir, servicesDir).then( function() {
         if (app['settings'] && app['settings']['env']) {
             jive.logger.info("Service started in " + app['settings']['env'] + " mode");
             serviceState = 'started';

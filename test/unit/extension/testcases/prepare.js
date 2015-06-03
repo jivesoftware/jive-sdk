@@ -29,7 +29,8 @@ describe('jive', function () {
                         extensionRoot + '/tiles',
                         extensionRoot + '/apps',
                         extensionRoot + '/cartridges',
-                        extensionRoot + '/storages'
+                        extensionRoot + '/storages',
+                        extensionRoot + '/services'
                     ).then( function() {
                         return service.stop();
                     }).then( function() {
@@ -126,7 +127,8 @@ describe('jive', function () {
                         extensionRoot + '/tiles',
                         extensionRoot + '/apps',
                         extensionRoot + '/cartridges',
-                        extensionRoot + '/storages'
+                        extensionRoot + '/storages',
+                        extensionRoot + '/services'
                     ).then( function() {
                         return service.stop();
                     }).then( function() {
@@ -185,7 +187,8 @@ describe('jive', function () {
                                 extensionRoot + '/tiles',
                                 extensionRoot + '/apps',
                                 extensionRoot + '/cartridges',
-                                extensionRoot + '/storages'
+                                extensionRoot + '/storages',
+                                extensionRoot + '/services'
                         ).then( function() {
                                 return service.stop();
                             }).then( function() {
@@ -232,7 +235,8 @@ describe('jive', function () {
                                 extensionRoot + '/tiles',
                                 extensionRoot + '/apps',
                                 extensionRoot + '/cartridges',
-                                extensionRoot + '/storages'
+                                extensionRoot + '/storages',
+                                extensionRoot + '/services'
                         ).then(function () {
                                 return service.stop();
                             }).then(function () {
@@ -281,7 +285,8 @@ describe('jive', function () {
                                 extensionRoot + '/tiles',
                                 extensionRoot + '/apps',
                                 extensionRoot + '/cartridges',
-                                extensionRoot + '/storages'
+                                extensionRoot + '/storages',
+                                extensionRoot + '/services'
                         ).then(function () {
                                 return service.stop();
                             }).then(function () {
