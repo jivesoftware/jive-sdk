@@ -43,6 +43,7 @@ exports.getMetrics = function() {
     function executeMetric( metricMeta ) {
         var metric = metricMeta.metric;
         var meta = metricMeta.meta;
+        var deferred = q.defer();
 
         if ( !meta ) {
             // todo log?
@@ -63,12 +64,23 @@ exports.getMetrics = function() {
 
             function(err) {
                 // !!
+                jive.logger.error(err);
                 metricsResults[name] = JSON.stringify(err);
             }
-        );
+        ).finally(function() {
+                deferred.resolve();
+            });
+
+        return deferred.promise;
     }
 
-    q.all( metrics.map( executeMetric ) ).then(
+    var allMetrics = [];
+    for ( var key in metrics ) {
+        var metric = metrics[key];
+        allMetrics.push( executeMetric(metric));
+    }
+
+    q.all( allMetrics ).then(
         function() {
             deferred.resolve(metricsResults);
         },
