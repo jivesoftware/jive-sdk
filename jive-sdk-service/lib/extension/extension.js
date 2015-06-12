@@ -20,7 +20,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var fs = require('fs'),
+var fs = require('fs-extra'),
     q  = require('q'),
     jive  = require('../../api'),
     _ = require("underscore");
@@ -124,15 +124,17 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                     definitions,
                     packageApps
                 ).then( function(definitionsJson) {
-                        // persist the extension metadata
-                        return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
-                            var meta = fillExtensionMetadata(extensionInfo, definitionsJson, packageApps, cartridges);
-                            var stringifiedMeta = JSON.stringify(meta, null, 4);
-                            jive.logger.debug("Extension meta: \n" + stringifiedMeta);
-                            return jive.util.fswrite( stringifiedMeta, extensionSrcDir  + '/meta.json' );
-                        })
-
+                    // persist the extension metadata
+                    return getCartridges(cartridgesDir, extensionSrcDir)
+                    .then(function (cartridges) {
+                        var meta = fillExtensionMetadata(extensionInfo, definitionsJson, packageApps, cartridges);
+                        return copyExtensionIcons(meta, extensionSrcDir);
+                    }).then( function(meta) {
+                        var stringifiedMeta = JSON.stringify(meta, null, 4);
+                        jive.logger.debug("Extension meta: \n" + stringifiedMeta);
+                        return jive.util.fswrite( stringifiedMeta, extensionSrcDir  + '/meta.json');
                     });
+                });
             });
     }).then( function() {
         // zip it all
@@ -144,6 +146,48 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
         throw error;
     });
 };
+
+function copyIcon(meta, iconAttr, to ) {
+    var icon = meta[iconAttr];
+
+    var fileName = require('path').basename(icon);
+    var dest = to + '/' + fileName;
+
+    return jive.util.fsexists(icon).then( function( exists ) {
+        if ( !exists ) {
+            return q.resolve();
+        }
+
+        return jive.util.fsexists(dest)
+        .then( function(toExists){
+            if ( toExists ) {
+                // remove it if it already exists
+                return jive.util.fsdelete(dest);
+            } else {
+                return q.resolve();
+            }
+        })
+        .then( function () {
+            return jive.util.fscopy( icon, dest );
+        })
+        .then( function() {
+            // update meta to point to the *filename*, not its source path
+            meta[iconAttr] = fileName;
+            return q.resolve();
+        });
+    });
+}
+
+function copyExtensionIcons( meta, extensionSrcDir ) {
+    var target = extensionSrcDir + '/data';
+    var icons = [];
+    icons.push( copyIcon(meta, 'icon_16', target ) );
+    icons.push( copyIcon(meta, 'icon_48', target ) );
+    icons.push( copyIcon(meta, 'icon_128', target ) );
+    return q.all(icons).then( function(){
+        return q.resolve(meta);
+    });
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // private
@@ -249,9 +293,9 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         "name": name,
         "description": description,
         "minimum_version": extensionInfo['minJiveVersion'] || defaultMinimumVersion,
-        "icon_16": extensionInfo['icon16'] || "extension-16.png",
-        "icon_48": extensionInfo['icon48'] || "extension-48.png",
-        "icon_128": extensionInfo['icon128'] || "extension-128.png",
+        "icon_16": extensionInfo['icon_16'] || extensionInfo['icon16'] || "extension-16.png",
+        "icon_48": extensionInfo['icon_48'] || extensionInfo['icon48'] || "extension-48.png",
+        "icon_128": extensionInfo['icon_128'] || extensionInfo['icon128'] || "extension-128.png",
         "released_on": extensionInfo['releasedOn'] || "2013-03-08T19:11:11.234Z",
         "register_url": extensionInfo['registerURL'] || "%serviceURL%/jive/oauth/register",
         "unregister_url": extensionInfo['unregisterURL'] || "%serviceURL%/jive/oauth/unregister",
