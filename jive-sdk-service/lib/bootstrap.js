@@ -80,10 +80,6 @@ var setupExpressApp = function (app, rootDir, config) {
         app.post('/jive/oauth/register', service.routes.jive.oauthRegister);
         app.post('/jive/oauth/unregister', service.routes.jive.oauthUnregister);
 
-        if ( service.monitoring().isActive() ) {
-            app.get('/jive/monitoring', service.routes.monitoring.ping);
-        }
-
         jive.logger.debug("POST /registration");
         jive.logger.debug("POST /unregister");
         jive.logger.debug("POST /jive/oauth/register");
@@ -129,7 +125,7 @@ var wireAdminEndpoints = function(appToUse, options) {
     if ( service.monitoring().isActive() ) {
         // alias for monitoring endpoint
         appToUse.get('/healthcheck', service.routes.monitoring.healthCheck);
-        appToUse.get('/jive/monitoring', service.routes.monitoring.healthCheck);
+        appToUse.get('/jive/monitoring', service.routes.monitoring.healthCheckJive);
     }
 
     appToUse.get('/ping', service.routes.monitoring.ping);
