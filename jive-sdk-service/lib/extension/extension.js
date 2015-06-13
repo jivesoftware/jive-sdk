@@ -292,7 +292,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         "type": type,
         "name": name,
         "description": description,
-        "minimum_version": extensionInfo['minJiveVersion'] || defaultMinimumVersion,
+        "minimum_version": extensionInfo['minimum_version'] || extensionInfo['minJiveVersion'] || defaultMinimumVersion,
         "icon_16": extensionInfo['icon_16'] || extensionInfo['icon16'] || "extension-16.png",
         "icon_48": extensionInfo['icon_48'] || extensionInfo['icon48'] || "extension-48.png",
         "icon_128": extensionInfo['icon_128'] || extensionInfo['icon128'] || "extension-128.png",
