@@ -113,13 +113,14 @@ exports.runStatsdClient = function() {
     var host = statsdClientConfig['host'] || 'localhost';
     var port = statsdClientConfig['port'] || 8125;
     var interval = statsdClientConfig['interval'] || 1000;
+    var prefix = statsdClientConfig['servicePrefix'] || 'jive'
 
     var sdc = new SDC.Client(host, port);
 
     exports.getStatsdStats().then( function(stats) {
         for ( var i = 0; i < stats.length; i++ ) {
             var stat = stats[i];
-            sdc.gauge(stat.name, stat.value);
+            sdc.gauge(prefix + '_' + stat.name, stat.value);
         }
 
         deferred.resolve();
