@@ -1,0 +1,53 @@
+<html>
+
+    <body>
+
+        <p><button id="click-me">Add an App Action Link</button></p>
+
+        <script>
+
+            gadgets.util.registerOnLoadHandler(function () {
+                gadgets.actions.updateAction({
+                    id: "com.jivesoftware.jwdemo.bang", // Same action id from app.xml
+                    callback: init
+                });
+
+            });
+
+            function init(ctx) {
+                console.log('App action ID: '+ctx.actionId);
+                console.log('Content type: '+ctx.jive.content.type);
+                console.log('Content ID: '+ctx.jive.content.id);
+
+                $("#click-me").click(function(e) {
+                    e.preventDefault();
+
+                    insertAppActionLink();
+                });
+            }
+
+            function insertAppActionLink() {
+                osapi.jive.core.container.closeApp({
+                    data: {
+                        display: {
+                            type: 'text',
+                            icon: 'images/jw-16.png',
+                            label: 'Embedded App Link'
+                        },
+                        target: {
+                            type: 'embed',
+                            view: 'embeddedView', // View  in app.xml
+                            context: {
+                                test: 'value',
+                                data: {
+                                    name: 'Demo'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+    </body>
+
+</html>

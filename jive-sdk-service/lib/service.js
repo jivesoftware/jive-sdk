@@ -41,7 +41,9 @@ var tilesDir = rootDir + '/tiles';
 var osAppsDir = rootDir + '/apps';
 var cartridgesDir = rootDir + '/cartridges';
 var storagesDir = rootDir + '/storages';
+var servicesDir = rootDir + '/services';
 var security = require('./security');
+var monitoring = require('./monitoring');
 var serviceState = 'stopped';
 
 var _dir = function(theDir, defaultDir ) {
@@ -168,6 +170,18 @@ exports.persistence = function(persistenceStrategy) {
                 arguments.length > 5 ? arguments[5] : undefined
             );
 
+        },
+
+        getQueryClient: function() {
+            if ( !persistence ) {
+                return q.reject( new Error("persistence not defined") );
+            }
+
+            if ( !persistence['getQueryClient'] ) {
+                return q.resolve();
+            }
+
+            return persistence.getQueryClient();
         }
     }
 };
@@ -258,14 +272,9 @@ exports.init = function(expressApp, options ) {
 
     var initialPromise;
     if ( typeof options === 'object' ) {
-        applyDefaults(options);
-        applyOverrides(options);
-        exports.options = options;
-        jive.context.config = exports.options;
-
-        initialPromise = q.fcall( function() {
-            return options;
-        });
+        initialPromise = function() {
+            return q.resolve(options);
+        }
     } else {
         // if no options are provided, then try getting them from
         // cmd line arguments, or from environemnt
@@ -293,35 +302,51 @@ exports.init = function(expressApp, options ) {
             }
         }
 
-        initialPromise = q.nfcall( fs.readFile, options, 'utf8').then( function (data) {
-            var jiveConfig = JSON.parse(data);
-
-            traverse(jiveConfig).forEach(function(value) {
-                if (typeof (value) === 'string') {
-                    this.update(mustache.render(value, process.env));
-                }
+        initialPromise = function() {
+            var deferred = q.defer();
+            q.nfcall( fs.readFile, options, 'utf8').then( function (data) {
+                deferred.resolve(JSON.parse(data));
             });
 
-            applyDefaults(jiveConfig);
-            applyOverrides(jiveConfig);
-
-            exports.options = jiveConfig;
-            jive.context.config = exports.options;
-
-            jive.logger.debug('Startup configuration from', options);
-            jive.logger.debug(jiveConfig);
-
-            return jiveConfig;
-        });
+            return deferred.promise;
+        }
     }
 
-    return initialPromise
+    return initialPromise()
+            .then( function(jiveConfig) {
+                traverse(jiveConfig).forEach(function(value) {
+                    if (typeof (value) === 'string') {
+                        this.update(mustache.render(value, process.env));
+                    }
+                });
+
+                applyDefaults(jiveConfig);
+                applyOverrides(jiveConfig);
+
+                exports.options = jiveConfig;
+                jive.context.config = exports.options;
+
+                jive.logger.debug('Startup configuration from', options);
+                jive.logger.debug(jiveConfig);
+
+                return jiveConfig;
+            })
             .then(initLogger)
             .then(initPersistence)
             .then(initScheduler);
 };
 
 function initLogger(options) {
+    var customLoggingAppender = options['customServiceLogger'];
+
+    if ( customLoggingAppender ) {
+        // clear the default appender(s)
+        log4js.clearAppenders();
+
+        //
+        log4js.addAppender(customLoggingAppender, 'jive-sdk');
+    }
+
     var logfile = options['logFile'] || options['logfile'];
     var logLevel = process.env['jive_logging_level'] || options['logLevel'] || options['loglevel'] || 'INFO';
     logLevel = logLevel.toUpperCase();
@@ -344,10 +369,22 @@ function initLogger(options) {
 
     jive.logger.setLevel(logLevel);
 
+    jive.logger['addLogger'] = function(loggerName) {
+        if ( customLoggingAppender ) {
+            log4js.addAppender(customLoggingAppender, loggerName);
+        }
+        log4js.getLogger(loggerName).setLevel(logLevel);
+    };
+
+    jive.logger['getLogger'] = function(loggerName) {
+        return log4js.getLogger(loggerName);
+    };
+
     return options;
 }
 
 function initPersistence(options) {
+    var deferred = q.defer();
 
     /**
      * Offered to the persistence strategy; may or may not be used.
@@ -406,29 +443,50 @@ function initPersistence(options) {
     };
 
     var persistence = options['persistence'];
+    var initializer = options['persistenceInitializer'];
+    var normalizedPersistence;
+
+    options['customLogger'] = jive.logger;
+
     if ( typeof persistence === 'object' ) {
         // set persistence if the object is provided
-        exports.persistence( options['persistence'] );
+        normalizedPersistence = exports.persistence( options['persistence'] );
     }
     else if ( typeof persistence === 'string' ) {
         //If a string is provided, and it's a valid type exported in jive.persistence, then use that.
         options['schema'] = defaultSchema;
 
         if (jive.persistence[persistence]) {
-            exports.persistence(new jive.persistence[persistence](options)); //pass options, such as location of DB for mongoDB.
+            normalizedPersistence = exports.persistence(new jive.persistence[persistence](options)); //pass options, such as location of DB for mongoDB.
         } else {
             // finally try to require the persistence strategy
             try {
                 var persistenceStrategy = require(process.cwd() + '/node_modules/' + persistence);
-                exports.persistence(new persistenceStrategy(options));
+                normalizedPersistence = exports.persistence(new persistenceStrategy(options));
             } catch ( e ) {
-                jive.logger.error(e);
+                jive.logger.error(e.stack);
                 jive.logger.warn('Invalid persistence option given "' + persistence + '". Must be one of ' + Object.keys(jive.persistence));
                 process.exit(-1);
             }
         }
     }
-    return options;
+
+    if ( normalizedPersistence && initializer ) {
+        var promise = initializer(normalizedPersistence, options);
+        if ( !promise ) {
+            deferred.resolve(options);
+        } else {
+            promise.then( function() {
+                deferred.resolve(options);
+            }).catch( function(e) {
+                throw e;
+            });
+        }
+    } else {
+        deferred.resolve(options);
+    }
+
+    return deferred.promise;
 }
 
 function initScheduler(options) {
@@ -448,7 +506,7 @@ function initScheduler(options) {
                 var schedulerStrategy = require(process.cwd() + '/node_modules/' + scheduler);
                 exports.scheduler(new schedulerStrategy(options));
             } catch ( e ) {
-                jive.logger.error(e);
+                jive.logger.error(e.stack);
                 jive.logger.warn('Invalid scheduler option given "' + scheduler + '". Must be one of ' + Object.keys(jive.scheduler));
                 process.exit(-1);
             }
@@ -517,7 +575,7 @@ exports.autowire = function(options) {
  */
 exports.start = function() {
     serviceState = 'starting';
-    return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir, cartridgesDir, storagesDir).then( function() {
+    return bootstrap.start( app, exports.options, rootDir, tilesDir, osAppsDir, cartridgesDir, storagesDir, servicesDir).then( function() {
         if (app['settings'] && app['settings']['env']) {
             jive.logger.info("Service started in " + app['settings']['env'] + " mode");
             serviceState = 'started';
@@ -565,12 +623,14 @@ exports.serviceURL = function() {
  * @property {Object} jive
  * @property {Object} dev
  * @property {Object} oauth
+ * @property {Object} monitoring
  */
 exports.routes = {
     'tiles' : require('../routes/tiles'),
     'jive' : require('../routes/jive'),
     'dev' : require('../routes/dev'),
-    'oauth' : require('../routes/oauth')
+    'oauth' : require('../routes/oauth'),
+    'monitoring' : require('../routes/monitoring')
 };
 
 /**
@@ -622,46 +682,52 @@ exports.getExpandedTileDefinitions = function(all) {
         var processedTile = JSON.parse(stringified);
 
         // defaults
-        if ( !processedTile['published'] ) {
-            processedTile['published'] = "2013-02-28T15:12:16.768-0800";
-        }
-        if ( !processedTile['updated'] ) {
-            processedTile['updated'] = "2013-02-28T15:12:16.768-0800";
-        }
         if ( processedTile['action'] ) {
-            if ( processedTile['action'].indexOf('http') != 0 ) {
+            if ( processedTile['action'].indexOf('http') != 0 && processedTile['action'].indexOf('%serviceURL%') === -1) {
                 // assume its relative to host then
                 processedTile['action'] = host + ( processedTile['action'].indexOf('/') == 0 ? "" : "/" ) + processedTile['action'];
             }
         }
+        if ( processedTile['view'] ) {
+            if ( processedTile['view'].indexOf('http') != 0 && processedTile['view'].indexOf('%serviceURL%') === -1) {
+                // assume its relative to host then
+                processedTile['view'] = host + ( processedTile['view'].indexOf('/') == 0 ? "" : "/" ) + processedTile['view'];
+            }
+        }
         if ( !processedTile['config'] ) {
-            processedTile['config'] = host + '/' + processedTile['definitionDirName'] + '/configure';
+            // compute if a configure URL is required based on presence of the autowired route
+            var path = _dir('/tiles') + '/' + name.toLowerCase() + '/backend/routes/configure/get.js';
+            if ( fs.existsSync(path) ) {
+                processedTile['config'] = host + '/' + processedTile['definitionDirName'] + '/configure';
+            }
         } else {
-            if ( processedTile['config'].indexOf('http') != 0 ) {
+            if ( processedTile['config'].indexOf('http') != 0 && processedTile['config'].indexOf('%serviceURL%') === -1) {
                 // assume its relative to host then
                 processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];
             }
         }
         if ( !processedTile['unregister']) {
-            processedTile['unregister'] = host + '/unregister';
+            // compute an unregister URL only if not an internal tile type
+            if ( processedTile['dataProviderKey'] !== 'internal' ) {
+                processedTile['unregister'] = host + '/unregister';
+            }
         } else {
-            if ( processedTile['unregister'].indexOf('http') != 0 ) {
+            if ( processedTile['unregister'].indexOf('http') != 0 && processedTile['unregister'].indexOf('%serviceURL%') === -1 ) {
                 // assume its relative to host then
                 processedTile['unregister'] = host + ( processedTile['unregister'].indexOf('/') == 0 ? "" : "/" ) + processedTile['unregister'];
             }
         }
 
         if ( !processedTile['register'] ) {
-            processedTile['register'] = host + '/registration';
+            // compute a register URL only if not an internal tile type
+            if ( processedTile['dataProviderKey'] !== 'internal' ) {
+                processedTile['register'] = host + '/registration';
+            }
         } else {
-            if ( processedTile['register'].indexOf('http') != 0 ) {
+            if ( processedTile['register'].indexOf('http') != 0 && processedTile['register'].indexOf('%serviceURL%') === -1 ) {
                 // assume its relative to host then
                 processedTile['register'] = host + ( processedTile['register'].indexOf('/') == 0 ? "" : "/" ) + processedTile['register'];
             }
-        }
-        if ( processedTile['unregister'] && processedTile['unregister'].indexOf('http') != 0 ) {
-            // assume its relative to host then
-            processedTile['unregister'] = host + ( processedTile['unregister'].indexOf('/') == 0 ? "" : "/" ) + processedTile['unregister'];
         }
         if ( !processedTile['client_id'] ) {
             processedTile['client_id'] = conf.clientId;
@@ -684,6 +750,14 @@ exports.getExpandedTileDefinitions = function(all) {
  */
 exports.security = function() {
     return security;
+};
+
+/**
+ * API for managing service monitoring
+ * @returns {module:monitoring}
+ */
+exports.monitoring = function() {
+    return monitoring;
 };
 
 /**

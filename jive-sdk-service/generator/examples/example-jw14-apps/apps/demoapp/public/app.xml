@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module specificationVersion="1">
+    <ModulePrefs title="JiveWorld14 Demo"
+                 description="JiveWorld14 Demo"
+                 author="Jive Software Professional Services"
+                 author_affiliation="Jive">
+
+        <Require feature="dynamic-height"/>
+        <Require feature="jive-core-v3"/>
+        <Require feature="jive-core-v3-resolver"/>
+        <Require feature="jquery-1.6"/>
+        <Require feature="osapi"/>
+        <Require feature="opensocial-data"/>
+        <Require feature="views"/>
+        <Require feature="actions">
+            <Param name="action-contributions">
+                <![CDATA[
+
+                    <action
+                        id="com.jivesoftware.jwdemo.content"
+                        path="jive/actions/content/*"
+                        label="Content Action"
+                        view="contentView"/>
+
+                    <action
+                        id="com.jivesoftware.jwdemo.create"
+                        path="jive/actions/navmenu"
+                        label="Create Menu Action"
+                        view="createMenuView"/>
+
+                    <action
+                        id="com.jivesoftware.jwdemo.bang"
+                        path="jive/actions/rte"
+                        label="!app Action"
+                        view="bangView"/>
+
+                    <action
+                        id="com.jivesoftware.jwdemo.placeAction"
+                        path="jive/actions/places/space"
+                        label="Space Action"
+                        view="placeActionView"/>
+
+                    <action
+                        id="com.jivesoftware.jwdemo.placeTab"
+                        path="jive/tabs/places/space"
+                        label="Space Tab"
+                        view="placeTabView"/>
+
+                    <action
+                        id="com.jivesoftware.jwdemo.placeSettings"
+                        path="jive/settings/places/space"
+                        label="Space Settings"
+                        view="placeSettingsView"/>
+
+                    <action
+                        id="com.jivesoftware.jwdemo.actionTab"
+                        path="jive/tabs/actions"
+                        label="Action Tab"
+                        view="actionView"/>
+
+                    <action
+                        id="com.jivesoftware.jwdemo.profile"
+                        path="jive/tabs/profile"
+                        label="Profile Tab"
+                        view="profileView"/>
+
+                    <action
+                        id="com.jivesoftware.jwdemo.profileAction"
+                        path="jive/actions/profile"
+                        url="http://jiveworld.jivesoftware.com/"
+                        icon="images/jw-16.png"
+                        label="Profile Action"/>
+                ]]>
+            </Param>
+        </Require>
+
+        <Link rel="Icon" href="images/jw-16.png"/>
+        <Link rel="MediumIcon" href="images/jw-48.png"/>
+        <Link rel="LargeIcon" href="images/jw-128.png"/>
+
+    </ModulePrefs>
+
+    <Content type="html" view="canvas,home" href="canvas.html" />
+
+    <Content type="html" view="contentView" href="contentView.html" />
+
+    <Content type="html" view="createMenuView" href="createMenuView.html" />
+
+    <Content type="html" view="bangView" href="bangView.html" />
+
+    <Content type="html" view="embeddedView" href="embeddedView.html" />
+
+    <Content type="html" view="placeActionView" href="placeActionView.html" />
+
+    <Content type="html" view="placeTabView" href="placeTabView.html" />
+
+    <Content type="html" view="placeSettingsView" href="placeSettingsView.html" />
+
+    <Content type="html" view="actionView" href="actionView.html" />
+
+    <Content type="html" view="profileView" href="profileView.html" />
+
+    <Content type="html" view="extStreamAppView" href="extStreamAppView.html"/>
+
+</Module>

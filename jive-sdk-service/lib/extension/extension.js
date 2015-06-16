@@ -20,7 +20,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var fs = require('fs'),
+var fs = require('fs-extra'),
     q  = require('q'),
     jive  = require('../../api'),
     _ = require("underscore");
@@ -54,10 +54,11 @@ exports.save = function(record) {
  * @param appsDir
  * @param cartridgesDir
  * @param storagesDir
+ * @param servicesDir
  * @param packageApps
  * @returns {Promise} Promise
  */
-exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesDir, packageApps) {
+exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesDir, servicesDir, packageApps) {
     var extensionSrcDir = ( rootDir ? rootDir + '/' : '' ) + 'extension_src';
     var extensionPublicDir = extensionSrcDir + '/public';
     var svrPublicDir = ( rootDir ? rootDir + '/' : '' )  + 'public';
@@ -74,9 +75,21 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                 // create the public/apps directory if doesn't exist
                 return jive.util.fsexists(svrPublicDir + '/apps').then( function(exists ) {
                     return !exists ? jive.util.fsmkdir( extensionPublicDir + '/apps') : q.resolve();
-                }).then( function () {
-                    // recursively copy the server's public directory
-                    return jive.util.fscopy(svrPublicDir, extensionPublicDir );
+                })
+                    .then( function () {
+                        // create the public/tiles directory if doesn't exist
+                        return jive.util.fsexists(svrPublicDir + '/tiles').then( function(exists ) {
+                            return !exists ? jive.util.fsmkdir( extensionPublicDir + '/tiles') : q.resolve();
+                        });
+                    })
+                    .then( function () {
+                        // recursively copy the server's public directory
+                        return jive.util.fscopy(svrPublicDir, extensionPublicDir );
+                    })
+            }).then( function() {
+                // create the public/services directory if doesn't exist
+                return jive.util.fsexists(svrPublicDir + '/services').then( function(exists ) {
+                    return !exists ? jive.util.fsmkdir( extensionPublicDir + '/services') : q.resolve();
                 })
             }).then( function() {
                 // copy over the server public directory TODO - should this be configurable? or done based on dependency analysis?
@@ -97,13 +110,14 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
     }).then( function(extensionInfo) {
         return jive.util.recursiveCopy( __dirname + "/template", extensionSrcDir)
             .then( function() {
-                return getTileDefinitions();
+                return getTileDefinitions(extensionPublicDir, tilesDir, packageApps);
             }).then( function(definitions) {
                 return setupExtensionDefinitionJson(
                     tilesDir,
                     appsDir,
                     cartridgesDir,
                     storagesDir,
+                    servicesDir,
                     extensionSrcDir,
                     extensionPublicDir,
                     extensionInfo,
@@ -111,10 +125,15 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                     packageApps
                 ).then( function(definitionsJson) {
                     // persist the extension metadata
-                    var meta = fillExtensionMetadata(extensionInfo, definitionsJson, packageApps);
+                    return getCartridges(cartridgesDir, extensionSrcDir)
+                    .then(function (cartridges) {
+                        var meta = fillExtensionMetadata(extensionInfo, definitionsJson, packageApps, cartridges);
+                        return copyExtensionIcons(meta, extensionSrcDir);
+                    }).then( function(meta) {
                         var stringifiedMeta = JSON.stringify(meta, null, 4);
                         jive.logger.debug("Extension meta: \n" + stringifiedMeta);
-                        return jive.util.fswrite( stringifiedMeta, extensionSrcDir  + '/meta.json' );
+                        return jive.util.fswrite( stringifiedMeta, extensionSrcDir  + '/meta.json');
+                    });
                 });
             });
     }).then( function() {
@@ -128,6 +147,48 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
     });
 };
 
+function copyIcon(meta, iconAttr, to ) {
+    var icon = meta[iconAttr];
+
+    var fileName = require('path').basename(icon);
+    var dest = to + '/' + fileName;
+
+    return jive.util.fsexists(icon).then( function( exists ) {
+        if ( !exists ) {
+            return q.resolve();
+        }
+
+        return jive.util.fsexists(dest)
+        .then( function(toExists){
+            if ( toExists ) {
+                // remove it if it already exists
+                return jive.util.fsdelete(dest);
+            } else {
+                return q.resolve();
+            }
+        })
+        .then( function () {
+            return jive.util.fscopy( icon, dest );
+        })
+        .then( function() {
+            // update meta to point to the *filename*, not its source path
+            meta[iconAttr] = fileName;
+            return q.resolve();
+        });
+    });
+}
+
+function copyExtensionIcons( meta, extensionSrcDir ) {
+    var target = extensionSrcDir + '/data';
+    var icons = [];
+    icons.push( copyIcon(meta, 'icon_16', target ) );
+    icons.push( copyIcon(meta, 'icon_48', target ) );
+    icons.push( copyIcon(meta, 'icon_128', target ) );
+    return q.all(icons).then( function(){
+        return q.resolve(meta);
+    });
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // private
 
@@ -139,24 +200,28 @@ function limit(str, chars) {
     return str.substring(0, str.length > chars ? chars : str.length );
 }
 
-function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
+function cartridgeIsNotConfigured(type) {
+    return type != 'jab-cartridges-app';
+}
+function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridges) {
 
     var description = extensionInfo['description'];
     var name = extensionInfo['name'];
-    var type = 'client-app'; // by default
+    var type = extensionInfo['type'] || 'client-app'; // by default
     var id = extensionInfo['uuid'];
 
-    var hasCartridges = definitions['jabCartridges'] && definitions['jabCartridges'].length > 0;
+    var hasCartridges = cartridges && cartridges.length > 0;
     var hasOsapps = definitions['osapps'] && definitions['osapps'].length > 0;
     var hasTiles = definitions['tiles'] && definitions['tiles'].length > 0;
     var hasTemplates = definitions['templates'] && definitions['templates'].length > 0;
 
-    if ( hasCartridges && (hasOsapps || hasTiles || hasTemplates ) ) {
-        throw Error("Extension cannot contain Jive Anywhere cartridges and other types.");
-    }
-
-    if ( hasCartridges ) {
-        type = 'jab-cartridges-app';
+    if (hasCartridges && cartridgeIsNotConfigured(type)) {
+        jive.logger.warn('***********************\n' +
+            'This add-on contains cartridges,  ' +
+            'but it is not configured to package them. '+
+            'To enable this, add "type": "jab-cartridges-app" ' +
+            'to the extensionInfo field of jiveclientconfiguration.json\n' +
+            '**********************');
     }
 
     if (!name) {
@@ -180,12 +245,15 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
         // synthesize a reasonable description
         if ( hasCartridges ) {
             var c = [];
-            definitions['jabCartridges'].forEach( function(cartridge) {
-                c.push(cartridge['name']);
-            });
-            description += 'Cartridges: [';
-            description += c.join(', ').trim();
-            description += '] ';
+            var jabCartridges = definitions['jabCartridges'];
+            if ( jabCartridges ) {
+                jabCartridges.forEach( function(cartridge) {
+                    c.push(cartridge['name']);
+                });
+                description += 'Cartridges: [';
+                description += c.join(', ').trim();
+                description += '] ';
+            }
         }
 
         if ( hasTiles ) {
@@ -212,7 +280,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
         description = limit(description, 255);
     }
 
-    var defaultMinimumVersion = '0000';
+    var defaultMinimumVersion = '0070300000';
     if ( packageApps ) {
         // minimum version is 8c4
         defaultMinimumVersion = '0080300000';
@@ -224,16 +292,20 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
         "type": type,
         "name": name,
         "description": description,
-        "minimum_version": extensionInfo['minJiveVersion'] || defaultMinimumVersion,
-        "icon_16": "extension-16.png",
-        "icon_48": "extension-48.png",
-        "icon_128": "extension-128.png",
+        "minimum_version": extensionInfo['minimum_version'] || extensionInfo['minJiveVersion'] || defaultMinimumVersion,
+        "icon_16": extensionInfo['icon_16'] || extensionInfo['icon16'] || "extension-16.png",
+        "icon_48": extensionInfo['icon_48'] || extensionInfo['icon48'] || "extension-48.png",
+        "icon_128": extensionInfo['icon_128'] || extensionInfo['icon128'] || "extension-128.png",
         "released_on": extensionInfo['releasedOn'] || "2013-03-08T19:11:11.234Z",
         "register_url": extensionInfo['registerURL'] || "%serviceURL%/jive/oauth/register",
         "unregister_url": extensionInfo['unregisterURL'] || "%serviceURL%/jive/oauth/unregister",
         "service_url": jive.service.serviceURL(),
         "redirect_url": extensionInfo['redirectURL'] || "%serviceURL%"
     }, jive.service.options['extensionInfo']);
+
+    // these should never be there
+    delete extensionMeta['uuid'];
+    delete extensionMeta['jiveServiceSignature'];
 
     // suppress the register and unregister URLs if configured to do so
     if ( jive.service.options['suppressAddonRegistration'] == true ) {
@@ -244,7 +316,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps) {
     return extensionMeta;
 }
 
-function getTileDefinitions() {
+function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
     var finalizeRequest = function (allDefinitions) {
         var toReturn = [];
         allDefinitions.forEach(function (batch) {
@@ -252,41 +324,95 @@ function getTileDefinitions() {
         });
         return q.resolve(jive.service.getExpandedTileDefinitions(toReturn));
     };
-    return q.all([ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ]).then(finalizeRequest);
+    return q.all([ jive.tiles.definitions.findAll(), jive.extstreams.definitions.findAll() ]).then(finalizeRequest)
+        .then( function(definitions) {
+            if ( !packageApps) {
+                definitions.forEach( function(definition) {
+                    delete definition['id'];
+                    delete definition['definitionDirName'];
+                });
+                return definitions;
+            } else {
+                var proms = [];
+                var host = jive.service.serviceURL();
+                definitions.forEach( function(definition) {
+                    var name = definition['name'];
+                    var view = definition['view'];
+                    var action = definition['action'];
+                    var config = definition['config'];
+
+                    delete definition['id'];
+                    definition['view'] = !view ? view : view.replace(host, '/public/tiles');
+                    definition['action'] = !action ? action : action.replace(host, '/public/tiles');
+                    definition['config'] = !config ? config : config.replace(host, '/public/tiles');
+                    delete definition['definitionDirName'];
+
+                    // post-process
+                    var tileDir = tilesRootDir + '/' + name;
+
+                    var copyTileDirToPublic = function(tile) {
+                        return packageApps ? jive.util.fscopy(tileDir + '/public', extensionPublicDir + '/tiles/' + name).then( function() {
+                            return sanitizeReferences(extensionPublicDir, extensionPublicDir + '/tiles/' + name, '/' + name + '/' )(tile);
+                        }) : q.resolve(tile);
+                    };
+
+                    proms.push( copyTileDirToPublic(definition) );
+                });
+
+                return q.all(proms).then( function() {
+                    return definitions;
+                });
+            }
+        });
 }
 
-function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, extensionSrcDir, extensionPublicDir,
+function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, servicesDir, extensionSrcDir, extensionPublicDir,
                                       extensionInfo, definitions, packageApps) {
     return getTemplates(tilesDir).then(function (templates) {
         return getApps(appsDir, extensionPublicDir, extensionInfo, packageApps).then(function (apps) {
-            return getStorages(storagesDir, extensionInfo).then(function (storages) {
-                return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
+            return getServices(servicesDir, extensionPublicDir, extensionInfo, packageApps).then(function (services) {
+                return getStorages(storagesDir, extensionInfo).then(function (storages) {
+                    return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
 
-                    jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
-                    jive.logger.debug("cartridges:\n" + JSON.stringify(cartridges, null, 4));
+                        if(cartridgeIsNotConfigured(extensionInfo["type"])){
+                            cartridges = [];
+                        }
+                        cartridges.forEach(function (cartridge) {
+                            cartridge.zipUp().then(function () {
+                                delete cartridge.zipUp;
+                            });
+                        });
 
-                    var definitionsJson = {
-                        'integrationUser': {
-                            'systemAdmin': extensionInfo['jiveServiceSignature'] ? true : false,
-                            'jiveServiceSignature': extensionInfo['jiveServiceSignature'],
-                            'runAsStrategy': extensionInfo['runAsStrategy']
-                        },
-                        'tiles': (definitions && definitions.length > 0) ? definitions : undefined,
-                        'templates': templates,
-                        'osapps': apps,
-                        'storageDefinitions': storages,
-                        'jabCartridges': cartridges
-                    };
+                        jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
+                        jive.logger.debug("packaged cartridges:\n" + JSON.stringify(cartridges, null, 4));
 
-                    var definitionJsonPath = extensionSrcDir + '/definition.json';
-                    var stringifiedDefinitionJson = JSON.stringify(definitionsJson, null, 4);
-                    return jive.util.fswrite(stringifiedDefinitionJson, definitionJsonPath).then( function() {
-                        return definitionsJson;
-                    })
+                        var definitionsJson = {
+                            'integrationUser': {
+                                'systemAdmin': extensionInfo['jiveServiceSignature'] ? true : false,
+                                'jiveServiceSignature': extensionInfo['jiveServiceSignature'],
+                                'runAsStrategy': extensionInfo['runAsStrategy']
+                            },
+                            'tiles': (definitions && definitions.length > 0) ? definitions : undefined,
+                            'templates': (templates && templates.length > 0) ? templates : undefined,
+                            'osapps': (apps && apps.length > 0) ? apps : undefined,
+                            'storageDefinitions':(storages && storages.length > 0) ? storages : undefined,
+                            'jabCartridges': cartridges
+                        };
+
+                        // Remove cartridge element if empty
+                        if (cartridges == null || cartridges.length == 0) {
+                            delete definitionsJson.jabCartridges;
+                        }
+
+                        var definitionJsonPath = extensionSrcDir + '/definition.json';
+                        var stringifiedDefinitionJson = JSON.stringify(definitionsJson, null, 4);
+                        return jive.util.fswrite(stringifiedDefinitionJson, definitionJsonPath).then( function() {
+                            return definitionsJson;
+                        })
+                    });
                 });
             });
         });
-
     });
 }
 
@@ -317,6 +443,71 @@ function getStorages(storagesDir, extensionInfo) {
     });
 }
 
+function isDirectory(path){
+    return fs.statSync(path).isDirectory();
+}
+
+var truncateTagSrc = function(html, toTruncate) {
+    var fn = function(all, tag, attrString) {
+        var matchAttr = /(\w+)\s*=\s*"(.*?)"/g;
+        var lookFor = (tag == "a" || tag == 'link') ? "href" : "src";
+        var newAttrs = attrString.replace(matchAttr, function(oneAttr, name, value, offset) {
+            if (name == lookFor && value.indexOf(toTruncate) == 0) {
+                oneAttr = oneAttr.replace('"' + toTruncate, '"');
+            }
+            return oneAttr;
+        });
+        return all.replace(attrString, newAttrs);
+    };
+
+    var re = /<(script|img|a|link)\s+(.*?)\/?>/gi;
+    return html.replace(re, fn);
+};
+
+function sanitizeReferences(extensionPublicDir, dirToProcess, tagValueToTruncate) {
+    var processOneFile = function(target) {
+        var deferred = q.defer();
+        var t = target.replace( 'public' + '/', '');
+        var depth = (t.split("/").length - 1);
+        var publicReplacement = '';
+        for ( var i = 0; i < depth; i++ ) {
+            publicReplacement += '../';
+        }
+
+        jive.util.fsread( extensionPublicDir + '/' + t).then( function(data) {
+            var raw = data.toString();
+            var processed = raw.replace(/\/__public__\//g, publicReplacement);
+            if ( tagValueToTruncate ) {
+                processed = truncateTagSrc(processed, tagValueToTruncate);
+            }
+
+            jive.util.fswrite( processed, extensionPublicDir + '/' + t).then( function() {
+                deferred.resolve();
+            });
+        });
+
+        return deferred.promise;
+    };
+
+    return function(app) {
+        return jive.util.recursiveDirectoryProcessor(dirToProcess, dirToProcess, '/tmp', true,function (type, currentFsItem) {
+            return q.fcall(function () {
+                var proms = [];
+                var lowercased = currentFsItem.toLowerCase();
+                var ext = lowercased.substring(currentFsItem.lastIndexOf('.') + 1, lowercased.length);
+                var validType = ext === 'xml'  || ext === 'html' || ext === 'css' || ext === 'js';
+                if (type === 'file' && validType) {
+                    var target = currentFsItem.substring(currentFsItem.indexOf('/') + 1, currentFsItem.length);
+                    proms.push(processOneFile(target));
+                }
+                return q.all(proms);
+            })
+        }).then(function () {
+            return q.resolve(app);
+        });
+    };
+}
+
 function getApps(appsRootDir, extensionPublicDir, extensionInfo, packageApps) {
     var apps = [];
     return jive.util.fsexists( appsRootDir).then( function(exists) {
@@ -324,52 +515,13 @@ function getApps(appsRootDir, extensionPublicDir, extensionInfo, packageApps) {
             return q.nfcall(fs.readdir, appsRootDir).then(function(dirContents){
                 var proms = [];
                 dirContents.forEach(function(item) {
-                    if ( isValid(item) ) {
-                        var appDir = appsRootDir + '/' + item;
+                    var appDir = appsRootDir + '/' + item;
+                    if ( isDirectory(appDir) ) {
 
                         var copyAppDirToPublic = function(app) {
                             return packageApps ? jive.util.fscopy(appDir + '/public', extensionPublicDir + '/apps/' + item).then( function() {
-                                return sanitizeAppPublicDirReferences(app);
+                                return sanitizeReferences(extensionPublicDir, extensionPublicDir + '/apps/' + item )(app);
                             }) : q.resolve(app);
-                        };
-
-                        var replacePublicReferences = function(target) {
-                            var deferred = q.defer();
-                            var t = target.replace( 'public' + '/', '');
-                            var depth = (t.split("/").length - 1);
-                            var replacement = '';
-                            for ( var i = 0; i < depth; i++ ) {
-                                replacement += '../';
-                            }
-
-                            jive.util.fsread( extensionPublicDir + '/' + t).then( function(data) {
-                                var raw = data.toString();
-                                var processed = raw.replace('/__public__/', replacement);
-                                jive.util.fswrite( processed, extensionPublicDir + '/' + t).then( function() {
-                                    deferred.resolve();
-                                });
-                            });
-
-                            return deferred.promise;
-                        };
-
-                        var sanitizeAppPublicDirReferences = function(app) {
-                            var root = extensionPublicDir + '/apps/' + item;
-                            return jive.util.recursiveDirectoryProcessor(root, root, '/tmp', true,function (type, currentFsItem) {
-                                return q.fcall(function () {
-                                    var proms = [];
-                                    var lowercased = currentFsItem.toLowerCase();
-                                    var ext = lowercased.substring(currentFsItem.lastIndexOf('.') + 1, lowercased.length);
-                                    var validType = ext === 'xml'  || ext === 'html' || ext === 'css' || ext === 'js';
-                                    if (type === 'file' && validType) {
-                                        var target = currentFsItem.substring(currentFsItem.indexOf('/') + 1, currentFsItem.length);
-                                        proms.push(replacePublicReferences(target));
-                                    }
-                                    return q.all(proms);
-                                })
-                            }).then(function () {
-                                return q.resolve(app);
-                            });
                         };
 
                         var definitionDir = appDir + '/definition.json';
@@ -407,6 +559,29 @@ function getApps(appsRootDir, extensionPublicDir, extensionInfo, packageApps) {
     });
 }
 
+function getServices(servicesRootDir, extensionPublicDir, extensionInfo, packageServices) {
+    var services = [];
+    return jive.util.fsexists( servicesRootDir).then( function(exists) {
+        if ( exists ) {
+            return q.nfcall(fs.readdir, servicesRootDir).then(function(dirContents){
+                var proms = [];
+                dirContents.forEach(function(item) {
+                    var serviceDir = servicesRootDir + '/' + item;
+                    if ( fs.existsSync(serviceDir + '/public') && isDirectory(serviceDir) ) {
+                        proms.push(  function() {
+                            return packageServices ? jive.util.fscopy(serviceDir + '/public', extensionPublicDir + '/services/' + item).then( function() {
+                                return sanitizeReferences(extensionPublicDir, extensionPublicDir + '/services/' + item )(serviceDir);
+                            }) : q.resolve();
+                        }() );
+                    }
+                });
+                return q.all(proms);
+            });
+        } else {
+            return services;
+        }
+    });
+}
 
 function getCartridges(cartridgesRootDir, extensionSrcDir) {
     var cartridges = [];
@@ -415,8 +590,9 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
             return q.nfcall(fs.readdir, cartridgesRootDir).then(function(dirContents){
                 var proms = [];
                 dirContents.forEach(function(item) {
-                    if ( isValid(item) ) {
-                        var definitionDir = cartridgesRootDir + '/' + item + '/definition.json';
+                    var appDir = cartridgesRootDir + '/' + item;
+                    if ( isDirectory(appDir) ) {
+                        var definitionDir = appDir + '/definition.json';
                         var contentDir = cartridgesRootDir + '/' + item + '/content';
                         proms.push( jive.util.fsreadJson(definitionDir).then(function(cartridge) {
                             if ( !cartridge['name'] ) {
@@ -424,18 +600,21 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
                                 cartridge['name'] = jive.util.guid(item);
                             }
 
-                            var zipFileName = cartridge['zipFileName'];
-                            if ( !zipFileName ) {
-                                zipFileName = cartridge['name'];
-                                zipFileName = zipFileName.replace(/[^\S]+/, '');
-                                zipFileName = zipFileName.replace(/[^a-zA-Z0-9]/, '-');
-                                zipFileName += '.zip';
-                            }
+                            cartridge.zipUp = function(){
+                                var zipFileName = cartridge['zipFileName'];
+                                if ( !zipFileName ) {
+                                    zipFileName = cartridge['name'];
+                                    zipFileName = zipFileName.replace(/[^\S]+/, '');
+                                    zipFileName = zipFileName.replace(/[^a-zA-Z0-9]/, '-');
+                                    zipFileName += '.zip';
+                                }
 
-                            var zipFile = extensionSrcDir + '/data/' + zipFileName;
-                            return jive.util.zipFolder( contentDir, zipFile, true).then( function() {
-                                return q.resolve(cartridge);
-                            })
+                                var zipFile = extensionSrcDir + '/data/' + zipFileName;
+                                return jive.util.zipFolder( contentDir, zipFile, true).then( function() {
+                                    return q.resolve(cartridge);
+                                });
+                            };
+                            return cartridge;
                         }) );
                     }
                 });
@@ -529,8 +708,8 @@ function getAllDefinitions() {
                 });
             });
 
-        return tiles;
-    });
+            return tiles;
+        });
 }
 
 function buildDefaultTemplate(allDefinitions, extension) {

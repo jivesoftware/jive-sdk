@@ -82,8 +82,8 @@ serviceSetup.setupOneService = function( app, serviceDir ) {
             return {};
         }
     }).then( function( definitionJson ) {
-            var pathPrefix = definitionJson['pathPrefix'];
-            return setupPublicRoutes(serviceDir, app, pathPrefix ).then( function(serviceName) {
+        var pathPrefix = definitionJson['pathPrefix'];
+        return setupPublicRoutes(serviceDir, app, pathPrefix ).then( function(serviceName) {
             if (!serviceName)  {
                 return q.resolve();
             }
@@ -114,7 +114,7 @@ serviceSetup.setupOneService = function( app, serviceDir ) {
             return q.all(promises);
         })
     }).catch( function(e) {
-        jive.logger.error("Failed to setup service at " + serviceDir + "; " + e);
+        jive.logger.error("Failed to setup service at " + serviceDir + "; " + e.stack);
         process.exit(-1);
     });
 };

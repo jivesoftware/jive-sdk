@@ -1,0 +1,18 @@
+<html>
+
+<body>
+
+<div id="j-content">External Stream App View</div>
+
+<script>
+    gadgets.util.registerOnLoadHandler(function() {
+
+        osapi.jive.core.container.getLaunchContext(function(ctx){
+            console.log('Context: ', ctx);
+        });
+
+    });
+</script>
+</body>
+
+</html>

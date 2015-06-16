@@ -1,0 +1,14 @@
+{
+    "displayName" : "JiveWorld14 Activity Stream",
+    "name" : "demo-activity",
+    "description" : "Demonstration of embedding Apps in External Activity",
+    "style" : "ACTIVITY",
+    "config": "%serviceURL%/demo-activity/configure",
+    "register": "%serviceURL%/registration",
+    "unregister": "%serviceURL%/unregister",
+    "icons" : {
+        "16" : "%serviceURL%/demo-activity/images/jw-16.png",
+        "48" : "%serviceURL%/demo-activity/images/jw-48.png",
+        "128" : "%serviceURL%/demo-activity/images/jw-128.png"
+    }
+}

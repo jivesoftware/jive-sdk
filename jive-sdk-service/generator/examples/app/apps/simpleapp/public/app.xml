@@ -17,7 +17,12 @@
     <Require feature="embedded-experiences" />
 	<Require feature="actions">  
 		<Param name="action-contributions">  
-			<![CDATA[ 
+			<![CDATA[
+				<action id="com.jivesoftware.places"
+						path="jive/actions/places/*"
+						label="Place action ({{{TILE_PREFIX}}}simpleapp)"
+						view="canvas"
+				/>
 				<action id="com.jivesoftware.profile.rtc" 
 						path="jive/actions/profile" 
 						label="Example Profile Pop-Up" 
@@ -80,12 +85,7 @@
   </UserPref>
   -->
 
-  <!-- To begin development, remove the hello view and uncomment the home and canvas views below -->
-  <Content type="html" view="home,canvas" href="hello.html" preferred_height="400" />
-
-  <!--
   <Content type="html" view="home" href="home.html" preferred_height="400" />
-  <Content type="html" view="canvas" href="canvas.html" />
-  -->
+  <Content type="html" view="embedded,canvas" href="canvas.html" />
 
 </Module>

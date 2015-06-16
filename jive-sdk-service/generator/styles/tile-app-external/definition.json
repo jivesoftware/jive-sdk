@@ -1,0 +1,19 @@
+{
+    "sampleData": {
+        "pushData" : "Not yet initialized",
+        "pushCount" : "-1"
+    },
+    "displayName" : "{{{TILE_NAME}}}",
+    "name" : "{{{TILE_NAME}}}",
+    "description" : "{{{TILE_NAME}}}",
+    "style": "CUSTOM_VIEW",
+    "displayWidth" : "ALL",
+    "pageTypes" : [ "PLACE", "USER" ],
+    "icons": {
+        "16": "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
+        "48": "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
+        "128": "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png"
+    },
+    "config": "/{{{TILE_NAME}}}/configuration.html",
+    "view": "/{{{TILE_NAME}}}/view.html"
+}

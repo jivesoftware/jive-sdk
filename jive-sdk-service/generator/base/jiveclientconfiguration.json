@@ -1,4 +1,5 @@
 {
     "clientUrl": "http://localhost",
-    "port": "8090"
+    "port": "8090",
+    "development" : true
 }

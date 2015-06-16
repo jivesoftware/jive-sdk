@@ -24,6 +24,7 @@
 
 var q = require('q');
 var fs = require('fs-extra');
+var mv = require('mv');
 var uuid = require('node-uuid');
 var mustache = require('mustache');
 var jive = require('../../api');
@@ -162,7 +163,7 @@ exports.fscopy = function (source, target) {
 var fsSimpleRename = function (source, target) {
     var deferred = q.defer();
 
-    fs.rename(source, target, function (err) {
+    mv(source, target, function (err) {
         if (err) {
             deferred.reject(err);
         }
@@ -230,6 +231,22 @@ exports.fsread = function (path) {
     fs.readFile(path, function (err, data) {
         deferred.resolve(data);
         return data;
+    });
+    return deferred.promise;
+};
+
+/**
+ * @param path
+ * @return {Promise} Promise
+ */
+exports.fsdelete = function (path) {
+    var deferred = q.defer();
+    fs.remove(path, function (err) {
+        if (err ) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve();
+        }
     });
     return deferred.promise;
 };

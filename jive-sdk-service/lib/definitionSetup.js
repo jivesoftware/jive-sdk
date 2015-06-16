@@ -227,7 +227,7 @@ definitionSetup.setupOneDefinition = function( app, definitionDir, definitionNam
             return q.resolve();
         }
     }).catch( function(e) {
-        jive.logger.error("Failed to setup tile at " + definitionName + "; " + e);
+        jive.logger.error("Failed to setup tile at " + definitionName + "; " + e.stack);
         process.exit(-1);
     });
 };

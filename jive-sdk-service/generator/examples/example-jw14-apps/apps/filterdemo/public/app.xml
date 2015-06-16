@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module specificationVersion="1">
+    <ModulePrefs title="JiveWorld14 Conditional Display Demo"
+                 description="JiveWorld14 Conditional Display Demo"
+                 author="Jive Software Professional Services"
+                 author_affiliation="Jive">
+
+        <Require feature="dynamic-height"/>
+        <Require feature="jive-core-v3"/>
+        <Require feature="jive-core-v3-resolver"/>
+        <Require feature="jquery-1.6"/>
+        <Require feature="osapi"/>
+        <Require feature="opensocial-data"/>
+        <Require feature="views"/>
+        <Require feature="actions">
+            <Param name="action-contributions">
+                <![CDATA[
+
+                    <action
+                        id="com.jivesoftware.jwdemo.filter.placeAction"
+                        path="jive/actions/places/space?filter=equals(context.extprops.showCustomAction,true)"
+                        label="Filtered Space Action"
+                        view="placeActionView"/>
+
+
+                    <action
+                        id="com.jivesoftware.jwdemo.filter.placeSettings"
+                        path="jive/settings/places/space"
+                        label="Filtered Space Settings"
+                        view="placeSettingsView"/>
+
+                ]]>
+            </Param>
+        </Require>
+
+        <Link rel="Icon" href="images/jw-16.png"/>
+        <Link rel="MediumIcon" href="images/jw-48.png"/>
+        <Link rel="LargeIcon" href="images/jw-128.png"/>
+
+    </ModulePrefs>
+
+    <Content type="html" view="placeActionView" href="filteredPlaceActionView.html" />
+
+    <Content type="html" view="placeSettingsView" href="filteredPlaceSettingsView.html" />
+
+</Module>

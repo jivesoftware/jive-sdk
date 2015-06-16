@@ -6,10 +6,10 @@
 PLACE=$(perl -MURI::Escape -e 'print uri_escape($ARGV[0]);' "$1")
 
 #regex used to grab users names from cloudalytic json objects
-USER="\"username\":\"[^\"]*\""
+USER="\"Username\":\"[^\"]*\""
 
 #Gets all cloudalytic objects filtered by the given space
-JSON=$(curl "https://api.jivesoftware.com/analytics/v1/export/activity?count=all&filter=place(${PLACE})" -H "Authorization: $SESSION")
+JSON=$(curl "https://api.jivesoftware.com/analytics/v1/export/activity?count=all&filter=place(${PLACE})&friendly=true" -H "Authorization: $SESSION")
 
 echo "# actions | username"
 

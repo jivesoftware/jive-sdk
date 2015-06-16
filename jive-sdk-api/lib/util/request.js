@@ -147,64 +147,68 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
         }
     }
 
+    var formData = requestOptions && requestOptions['formData'] ? requestOptions['formData'] : null;
     var postBodyStr;
 
-    if (method === 'POST' || method === 'PUT') {
+    if ( !formData ) {
+        // if not multipart, set headers and stuff
+        if (method === 'POST' || method === 'PUT') {
 
-        if (!(headers['Content-Type'])) {
-            if (typeof body === 'object') {
-                headers['Content-Type'] = 'application/json'; //If it's an object, set default content type to application/json
-            }
-            else if (typeof body === 'string') {
-                try {
-                    var parsed = JSON.parse(body);
-                    headers['Content-Type'] = 'application/json'; //If it parses as a JSON object set Content-Type to application/json
-                } catch (e) {
-                    //do nothing, send request without content type
+            if (!(headers['Content-Type'])) {
+                if (typeof body === 'object') {
+                    headers['Content-Type'] = 'application/json'; //If it's an object, set default content type to application/json
+                }
+                else if (typeof body === 'string') {
+                    try {
+                        var parsed = JSON.parse(body);
+                        headers['Content-Type'] = 'application/json'; //If it parses as a JSON object set Content-Type to application/json
+                    } catch (e) {
+                        //do nothing, send request without content type
+                    }
                 }
             }
-        }
 
-        postBodyStr = '';
-        var contentType = headers['Content-Type'];
+            postBodyStr = '';
+            var contentType = headers['Content-Type'];
 
-        if (contentType === 'application/json') {
-            if (typeof body === 'object') {
-                postBodyStr = JSON.stringify(body);
-            } else if (typeof body === 'string') {
-                postBodyStr = body;
-            } else {
-                throw new Error("Illegal type of post body; only object or string is permitted.");
-            }
-        } else if (contentType === 'application/x-www-form-urlencoded') {
-            var postObject;
-            if (typeof body === 'string') {
-                try {
-                    postObject = JSON.parse(body);
-                } catch (e) {
+            if (contentType === 'application/json') {
+                if (typeof body === 'object') {
+                    postBodyStr = JSON.stringify(body);
+                } else if (typeof body === 'string') {
                     postBodyStr = body;
+                } else {
+                    throw new Error("Illegal type of post body; only object or string is permitted.");
                 }
-            } else if (typeof body === 'object') {
-                postObject = body;
+            } else if (contentType === 'application/x-www-form-urlencoded') {
+                var postObject;
+                if (typeof body === 'string') {
+                    try {
+                        postObject = JSON.parse(body);
+                    } catch (e) {
+                        postBodyStr = body;
+                    }
+                } else if (typeof body === 'object') {
+                    postObject = body;
+                }
+                else {
+                    throw new Error("Illegal type of post body; only object or string is permitted.");
+                }
+
+                for (var key in postObject) {
+                    if (postObject.hasOwnProperty(key)) {
+                        if (postBodyStr.length > 0) {
+                            postBodyStr += '&';
+                        }
+                        postBodyStr += encodeURIComponent(key) + '=' + encodeURIComponent(postObject[key]);
+                    }
+                }
             }
             else {
-                throw new Error("Illegal type of post body; only object or string is permitted.");
+                postBodyStr = body.toString();
             }
 
-            for (var key in postObject) {
-                if (postObject.hasOwnProperty(key)) {
-                    if (postBodyStr.length > 0) {
-                        postBodyStr += '&';
-                    }
-                    postBodyStr += encodeURIComponent(key) + '=' + encodeURIComponent(postObject[key]);
-                }
-            }
+            headers['Content-Length'] = Buffer.byteLength(postBodyStr, 'utf8');
         }
-        else {
-            postBodyStr = body.toString();
-        }
-
-        headers['Content-Length'] = Buffer.byteLength(postBodyStr, 'utf8');
     }
 
     return {

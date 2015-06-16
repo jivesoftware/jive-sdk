@@ -7,6 +7,5 @@
         "funcster" : "*",
         "q-io" : "*",
 	    "sinon" : "*"
-
     }
 }
