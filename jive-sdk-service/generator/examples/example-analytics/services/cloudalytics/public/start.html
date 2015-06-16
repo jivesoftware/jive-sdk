@@ -26,9 +26,9 @@
 
     <form id="frmStart" method="POST" action="./start">
         <select id="profile" name="profile">
-            {{#profile}}
-            <option value="{{id}}">{{name}}</option>
-            {{/profile}}
+            {{{#profile}}}
+            <option value="{{{id}}}">{{{name}}}</option>
+            {{{/profile}}}
         </select>
         <input type="button" id="btnStart" value="Start"/>
     </form>
