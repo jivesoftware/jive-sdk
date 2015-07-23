@@ -670,6 +670,23 @@ exports.recursiveCopy = function (root, target, force, substitutions, file) {
  * @param flatten
  * @return {Promise} Promise
  */
+exports.unzipFile = function (zipFile, targetDirectory) {
+    var deferred = q.defer();
+	var fs = require('fs');
+	var unzip = require('unzip');
+
+    fs.createReadStream(zipFile).pipe(unzip.Extract({ path: targetDirectory }));
+    deferred.resolve();
+
+    return deferred.promise;
+};
+
+/**
+ * @param root
+ * @param targetZip
+ * @param flatten
+ * @return {Promise} Promise
+ */
 exports.zipFolder = function (root, targetZip, flatten) {
     var fs = require('fs');
     var deferred = q.defer();
