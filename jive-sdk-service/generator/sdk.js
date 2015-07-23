@@ -26,7 +26,7 @@ var _ = require("underscore");
 
 var argv = require('optimist').argv;
 
-var validCommands = ['create','help','list', 'createExtension', 'build', 'version'];
+var validCommands = ['create','help','list', 'createExtension', 'build', 'version', 'unpack'];
 var groups = ['tiles', 'apps', 'services', 'storages', 'cartridges', 'examples'];
 
 var styles = [];
@@ -85,6 +85,21 @@ function validate(options) {
             }
         }
     }
+    
+    if ( options.cmd === 'unpack' ) {
+        if( options['subject'] ) {
+    		jive.util.fsexists(options.subject)
+			.then( function(exists) {
+				if (!exists) {
+					err.push('Invalid Filename ' + options.subject + ' File Not Found');
+				} else {
+					//TODO: VALIDATE THAT THE FILE IS A VALID ADD-ON
+				} // end if
+			});
+        } else {
+    		err.push('Missing Add-On Filename Option');
+		} // end if
+    } // end if
 
     return err;
 }
@@ -454,10 +469,11 @@ function displayDetailedItems(itemArray, columnSize) {
 function doHelp() {
     console.log('usage: jive-sdk <command> <item> [--options]\n');
     console.log('Available commands:');
-    console.log('   help                  Display this help page');
-    console.log('   list                  List the existing items for a category');
-    console.log('   create                Create a jive-sdk template or example');
-    console.log('   build                 Build an addon package\n');
+    console.log('   help                      Display this help page');
+    console.log('   list   (category)         List the existing items for a category');
+    console.log('   create <template>         Create a jive-sdk template or example');
+    console.log('   build                     Build an addon package');
+    console.log('   unpack <addOnZipFile>     Create project from Simple Stream Integration addon (see: https://developer.jivesoftware.com/quickstart)\n');
 
     // Display list items
     console.log('Available category items for list command:');
@@ -548,6 +564,10 @@ function execute(options) {
     if ( cmd === 'createExtension' || cmd === 'build' ) {
         doCreateExtension( options );
     }
+    
+    if (cmd === 'unpack') {
+    	doUnpackAddOn(options['subject'],options);
+    }
 }
 
 function doCreateExtension( options ) {
@@ -577,6 +597,108 @@ function doCreateExtension( options ) {
             });
         });
 }
+
+function doUnpackAddOn( zipFile, options ) {
+	var path = require('path');
+	
+	var force = options['force'];
+	var name = options['name'] || path.basename(zipFile,'.zip');
+	var target = options['target'] || process.cwd();
+	
+    /*** UNZIP EXTENSION TO extension_src ***/
+    jive.util.unzipFile(zipFile, target+'/extension_src').then(
+    	function() {
+    	    /*** BRING IN THE BASE ADDON FILES ***/
+    		jive.util.recursiveCopy(__dirname + '/base', target, force, { 'TILE_NAME': name, 'TILE_STYLE': '', 'host': '' }).then(
+    			function() {
+    				
+    			    //TODO:  ADD LOTS OF ERROR HANDLING AND USE-CASES CATCHES - CURRENTLY OPTIMIZED FOR JUST SIMPLE STREAM INTEGRATION STORY
+    				
+    				/*** SYNC METADATA FROM ADDON TO PROJECT FILES ***/
+    			    var metaJsonFilePath = target+'/extension_src/meta.json';
+    			    var jiveClientConfigurationJsonFilePath = target+'/jiveclientconfiguration.json';
+    			    
+    			    //console.log('meta.json',metaJsonFilePath);
+    			    //console.log('jiveclientconfiguration.json',jiveClientConfigurationJsonFilePath);
+
+    			    /*** READ EXTRACTED ADDON meta.json & GENERATED jiveclientconfiguration.json FOR COPY OF VALUES ***/
+    			    readJsonFile( metaJsonFilePath ).then(
+    			    	function (metaJson) {
+    			    		readJsonFile( jiveClientConfigurationJsonFilePath ).then(
+			    				function (clientConfiguration) {
+			        				//console.log('meta.json',metaJson);
+			        				//console.log('jiveclientconfiguration.json',clientConfiguration);
+			        				
+			        				/**** UPDATE jiveclientconfiguration.json WITH VALUES FROM THE meta.json ****/
+			        				clientConfiguration["extensionInfo"] = {};
+			        			    clientConfiguration["extensionInfo"]["id"] = metaJson["id"];
+			        			    clientConfiguration["extensionInfo"]["name"] = metaJson["name"];
+			        			    clientConfiguration["extensionInfo"]["description"] = metaJson["description"];
+			        			    
+			        			    if (metaJson["service_url"] === "http:") {
+			        			    	clientConfiguration["suppressAddonRegistration"] = true;
+			        			    } // end if
+			        				clientConfiguration["logLevel"] = "DEBUG";
+			        				clientConfiguration["ignoreExtensionRegistrationSource"] = "false";
+			        				
+			        			    /*** WRITE UPDATES BACK TO jiveclientconfiguration.json ***/
+			        			    fs.writeFileSync(jiveClientConfigurationJsonFilePath, JSON.stringify(clientConfiguration, null, '\t'));		
+			        			    
+			        			    unpackDefinitions(target);
+			        			    
+			    				} // end function
+    			    		);
+    			    	} // end function
+    			    );
+	
+    			} // end function
+    		);
+    	} // end function
+    );
+    
+} // end doUnpackAddOn
+
+function unpackDefinitions(target) {
+	
+    var definitionJsonFilePath = target+'/extension_src/definition.json';
+    //console.log('definition.json',definitionJsonFilePath);
+    
+    readJsonFile( definitionJsonFilePath ).then(
+		function (definitionJson) {
+			var tiles = definitionJson["tiles"];
+			if (tiles) {
+				var tilesDir = target + '/tiles';
+				/*** CREATE PARENT /tiles DIRECTORY ***/
+				conditionalMkdir(tilesDir,true).then(
+					function() {
+						for (var x in tiles) {
+							var tile = tiles[x];
+							//console.log("tile",tile);
+							/*** CREATE CHILD /tiles/xxxxx DIRECTORY ***/
+							var tileDir = tilesDir + "/" + tile["name"];
+							conditionalMkdir(tileDir,true).then(
+								function() {
+									/*** COPY TILE definition.json FROM EXISTING ADD-ON ***/
+									fs.writeFileSync(tileDir + "/definition.json", JSON.stringify(tile, null, '\t'));									
+								} // end function
+							);
+							conditionalMkdir(tileDir + "/backend",true).then(
+								function() {
+									conditionalMkdir(tileDir + "/public",true).then(
+										function() {
+											/*** NOOP ***/
+										} // end function
+									);
+								} // end function
+							);
+						} // endfor
+					} // end function
+				);
+			} // end if
+		} // end function
+    );
+
+} // end function
 
 function prepare() {
     var root = __dirname;
@@ -610,6 +732,22 @@ function prepare() {
         } );
     });
 }
+
+var readJsonFile = function( file ) {
+    return jive.util.fsexists( file ).then( function(exists) {
+        if ( exists ) {
+            return jive.util.fsreadJson( file ).then( function(json) {
+                if ( json ) {
+                    return json;
+                } else {
+                    return null;
+                }
+            });
+        } else {
+            return null;
+        }
+    });
+};
 
 var getSDKVersion = function() {
     var sdkPackagePath = __dirname + '/../../package.json';
