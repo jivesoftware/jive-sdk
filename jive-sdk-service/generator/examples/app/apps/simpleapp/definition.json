@@ -1,3 +1,4 @@
 {
-    "name" : "{{{TILE_PREFIX}}}Simple App Skeleton"
+	"id" : "{{{GENERATED_APP_UUID}}}",
+	"name" : "{{{TILE_PREFIX}}}Simple App Skeleton"
 }

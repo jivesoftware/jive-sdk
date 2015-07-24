@@ -1,3 +1,4 @@
 {
-    "name" : "Wikipedia {{{TILE_NAME}}}"
+	"id" : "{{{GENERATED_APP_UUID}}}",
+	"name" : "Wikipedia {{{TILE_NAME}}}"
 }

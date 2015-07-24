@@ -302,6 +302,80 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         "service_url": jive.service.serviceURL(),
         "redirect_url": extensionInfo['redirectURL'] || "%serviceURL%"
     }, jive.service.options['extensionInfo']);
+   
+    if (extensionInfo["minimum_edition"]) {
+    	extensionMeta["minimum_edition"] = extensionInfo["minimum_edition"];
+    } // end if
+    
+    if (extensionInfo['author']) {
+    	extensionMeta["author"] = extensionInfo['author'];
+    	extensionMeta["author_affiliation"] = extensionInfo['author_affiliation'];
+    	extensionMeta["author_email"] = extensionInfo['author_email'];
+    } // end if
+    
+    if (extensionInfo["config_url"]) {
+    	extensionMeta["config_url"] = extensionInfo["config_url"];
+    } // end if
+    
+    if (extensionInfo["health_url"]) {
+    	extensionMeta["health_url"] = extensionInfo["health_url"];
+    } // end if
+
+    if (extensionInfo["website_url"]) {
+    	extensionMeta["website_url"] = extensionInfo["website_url"];
+    } // end if
+
+    if (extensionInfo["community_url"]) {
+    	extensionMeta["community_url"] = extensionInfo["community_url"];
+    } // end if
+
+    if (extensionInfo["support_info"]) {
+    	extensionMeta["support_info"] = extensionInfo["support_info"];
+    } // end if
+
+    if (extensionInfo["info_email"]) {
+    	extensionMeta["info_email"] = extensionInfo["info_email"];
+    } // end if
+
+    if (extensionInfo["tags"]) {
+    	extensionMeta["tags"] = extensionInfo["tags"];
+    } // end if
+    
+    if (extensionInfo["overview"]) {
+    	extensionMeta["overview"] = extensionInfo["overview"];
+    } // end if
+
+    if (extensionInfo["install_instructions"]) {
+    	extensionMeta["install_instructions"] = extensionInfo["install_instructions"];
+    } // end if
+
+    if (extensionInfo["eula_filename"]) {
+    	extensionMeta["eula_filename"] = extensionInfo["eula_filename"];
+    } // end if
+
+    if (extensionInfo["privacy_policy"]) {
+    	extensionMeta["privacy_policy"] = extensionInfo["privacy_policy"];
+    } // end if
+
+    if (extensionInfo["screen_shots"]) {
+    	extensionMeta["screen_shots"] = extensionInfo["screen_shots"];
+    } // end if
+
+    if (extensionInfo["solution_categories"]) {
+    	extensionMeta["solution_categories"] = extensionInfo["solution_categories"];
+    } // end if
+
+    if (extensionInfo["target_integrations"]) {
+    	extensionMeta["target_integrations"] = extensionInfo["target_integrations"];
+    } // end if
+
+    if (extensionInfo["key_features"]) {
+    	extensionMeta["key_features"] = extensionInfo["key_features"];
+    } // end if
+
+    if (extensionInfo["jive_technology_partner_id"]) {
+    	extensionMeta["jive_technology_partner_id"] = extensionInfo["jive_technology_partner_id"];
+    } // end if
 
     // these should never be there
     delete extensionMeta['uuid'];
@@ -345,6 +419,13 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
                     definition['view'] = !view ? view : view.replace(host, '/public/tiles');
                     definition['action'] = !action ? action : action.replace(host, '/public/tiles');
                     definition['config'] = !config ? config : config.replace(host, '/public/tiles');
+                    
+                    //*** NEEDED TO PREVENT SDK FROM ADDING IN REGISTER URLS ***
+                    if (definition['transform']) {
+                    	delete definition['unregister'];
+                    	delete definition['register'];
+                    } // end if
+                    
                     delete definition['definitionDirName'];
 
                     // post-process
@@ -373,7 +454,6 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
             return getServices(servicesDir, extensionPublicDir, extensionInfo, packageApps).then(function (services) {
                 return getStorages(storagesDir, extensionInfo).then(function (storages) {
                     return getCartridges(cartridgesDir, extensionSrcDir).then(function (cartridges) {
-
                         if(cartridgeIsNotConfigured(extensionInfo["type"])){
                             cartridges = [];
                         }
@@ -627,6 +707,7 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
 }
 
 function getTemplates(tilesDir) {
+	
     var templatesPath = tilesDir + '/templates.json';
 
     var toTemplateArray = function(allDefinitions, templates) {
@@ -657,7 +738,7 @@ function getTemplates(tilesDir) {
         }
         return templateArray;
     };
-
+    
     return getAllDefinitions().then( function(allDefinitions) {
         return jive.util.fsexists(tilesDir).then(function(exists) {
             if ( !exists ) {
@@ -667,13 +748,22 @@ function getTemplates(tilesDir) {
                     return jive.util.fsexists(templatesPath.trim()).then(function (exists) {
                         if (!exists) {
                             // create it
-                            return buildDefaultTemplate(allDefinitions, extension).then( function(defaultTemplate) {
-                                var templates = {};
-                                templates['default'] = defaultTemplate;
-                                return jive.util.fswrite(JSON.stringify(templates, null, 4), tilesDir + '/templates.json').then( function () {
-                                    return toTemplateArray(allDefinitions, templates);
-                                })
-                            });
+                            return buildDefaultTemplate(allDefinitions, extension).then( 
+                            		function(defaultTemplate) {
+		                                if (!defaultTemplate) {
+		                                	return toTemplateArray(allDefinitions, null);
+		                                } else {
+		                                    var templates = {};
+		                                    templates['default'] = defaultTemplate;
+		                                    return jive.util.fswrite(
+		                                    			JSON.stringify(templates, null, 4), tilesDir + '/templates.json'
+		                                    		).then( 
+			                                    		function () {
+			                                    			return toTemplateArray(allDefinitions, templates);
+			                                    		}
+		                                    		);
+		                                } // end if
+                            		});
                         } else {
                             // make sure there is a default template
                             return jive.util.fsread(templatesPath).then( function(data) {
@@ -712,7 +802,11 @@ function getAllDefinitions() {
         });
 }
 
-function buildDefaultTemplate(allDefinitions, extension) {
+function buildDefaultTemplate(allDefinitions, extension) {	
+	if (!extension) {
+		return q.resolve(null);
+	} // end if
+	
     var extensionName = extension['name'];
     var extensionDescription = extension['description'];
 

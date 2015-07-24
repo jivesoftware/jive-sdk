@@ -1,5 +1,5 @@
 {
     "name" : "TODOs",
     "appPath" : "{{{TILE_NAME_BASE}}}_{{{GENERATED_UUID}}}",
-    "id": "{{{GENERATED_UUID}}}"
+	"id" : "{{{GENERATED_APP_UUID}}}"
 }

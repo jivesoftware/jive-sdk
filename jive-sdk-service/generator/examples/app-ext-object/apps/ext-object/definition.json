@@ -1,0 +1,4 @@
+{
+	"id" : "{{{GENERATED_APP_UUID}}}",
+	"name" : "{{{TILE_PREFIX}}}-ext-object"
+}
