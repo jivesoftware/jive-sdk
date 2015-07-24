@@ -287,7 +287,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
     }
 
     var extensionMeta = _.defaults({
-        "package_version": extensionInfo['packageVersion'] || '1.0',
+        "package_version": extensionInfo['packageVersion'] || extensionInfo['package_version'] || '1.0',
         "id": id,
         "type": type,
         "name": name,
@@ -422,6 +422,7 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
                     
                     //*** NEEDED TO PREVENT SDK FROM ADDING IN REGISTER URLS ***
                     if (definition['transform']) {
+                    	definition['config'] = definition['config'].substring(definition['config'].indexOf('/public/configuration'));
                     	delete definition['unregister'];
                     	delete definition['register'];
                     } // end if
