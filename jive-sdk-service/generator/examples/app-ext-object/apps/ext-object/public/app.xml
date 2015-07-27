@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module specificationVersion="1">
-  <ModulePrefs title="{{{TILE_PREFIX}}}-ext-object"
-               description="Description of {{{TILE_PREFIX}}}-ext-object"
+  <ModulePrefs title="{{{TILE_PREFIX}}}app-ext-object"
+               description="Description of {{{TILE_PREFIX}}}app-ext-object"
                author="Rashed Talukder"
                author_affiliation="Jive"
                author_email="jivedev@jivesoftware.com">

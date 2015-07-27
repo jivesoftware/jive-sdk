@@ -1,17 +1,20 @@
-gadgets.util.registerOnLoadHandler(function() {
-    // add code that should run on page load here
+var app = {
 
-    osapi.jive.corev3.people.getViewer().execute( function(viewer) {
-        var viewerID = viewer.displayName;
-        $("#viewer").html(viewerID);
-    });
+    jiveURL : opensocial.getEnvironment()['jiveUrl'],
+    
+	init : function() {
+		//** LOAD CURRENT VIEW ***
+		var currentView = gadgets.views.getCurrentView().getName();
+		
+		/*** LOAD CONTEXT ***/
+		osapi.jive.core.container.getLaunchContext(handleContext);
+		
+	}, // end init
 
-    $("#j-fun-button").click( function() {
-        var message = $("#j-message").val() || "Pop me!";
-        osapi.jive.core.container.sendNotification( {'message':message, 'severity' : 'success'} );
-    });
+	handleContext : function(ctx) {
+		var appObj = this;
+		$("#output").html('<pre>'+ctx.jive.context.body+'</pre>');  
+	} // end handleContext
+};
 
-    // resize app window to fit content
-    gadgets.window.adjustHeight();
-    gadgets.window.adjustWidth();
-});
+gadgets.util.registerOnLoadHandler(gadgets.util.makeClosure(app, app.init));
