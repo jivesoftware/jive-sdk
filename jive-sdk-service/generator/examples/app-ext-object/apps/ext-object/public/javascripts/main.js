@@ -2,18 +2,21 @@ var app = {
 
     jiveURL : opensocial.getEnvironment()['jiveUrl'],
     
+    currentView : null,
+    
 	init : function() {
 		//** LOAD CURRENT VIEW ***
-		var currentView = gadgets.views.getCurrentView().getName();
+		this.currentView = gadgets.views.getCurrentView().getName();
 		
 		/*** LOAD CONTEXT ***/
-		osapi.jive.core.container.getLaunchContext(handleContext);
+		osapi.jive.core.container.getLaunchContext(this.handleContext);
 		
 	}, // end init
 
 	handleContext : function(ctx) {
 		var appObj = this;
-		$("#output").html('<pre>'+ctx.jive.context.body+'</pre>');  
+		$("#output").html('<pre>'+JSON.stringify(ctx, null, '\t')+'</pre>');  
+		gadgets.window.adjustHeight();
 	} // end handleContext
 };
 
