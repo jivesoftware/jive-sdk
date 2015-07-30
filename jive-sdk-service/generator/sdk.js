@@ -41,6 +41,7 @@ var refactoredNames = ['activity-stream', 'esf', 'tile-list', 'tile-gauge', 'til
 // Examples are not described -- just template items.
 var itemDescriptions = {
     'app' : 'A basic Jive app',
+    'app-ext-object' : 'A basic example that uses simple stream integrations and Jive app external objects',
     'esf' : 'An external storage framework that uses a file system',
     'activity-stream': 'A basic activity stream',
     'cartridge' : 'A basic cartridge',
