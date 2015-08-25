@@ -100,10 +100,11 @@ exports.prepare = function (rootDir, tilesDir, appsDir, cartridgesDir, storagesD
                 })
             });
         } else {
-            // destroy the extension public directory if it exists since we're not packaging apps
-            return jive.util.fsexists(extensionPublicDir).then( function(exists ) {
-                return exists ? jive.util.fsrmdir( extensionPublicDir) : q.resolve();
-            });
+// REMOVING FUNCTIONALITY AS THIS CAN DAMAGE AN UNPACKED ADD-ON - RR 08/25/2015
+//        	// destroy the extension public directory if it exists since we're not packaging apps
+//            return jive.util.fsexists(extensionPublicDir).then( function(exists ) {
+//                return exists ? jive.util.fsrmdir( extensionPublicDir) : q.resolve();
+//            });
         }
     }).then( function() {
         return getPersistedExtensionInfo(jive.service.options['extensionInfo'] || {});
