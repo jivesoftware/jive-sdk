@@ -706,7 +706,7 @@ exports.getExpandedTileDefinitions = function(all) {
             	if (processedTile['config'].indexOf('/public') != 0) {
                     // assume its relative to host then
                     processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];            		
-            	} // end if
+            	}// end if
             }
         }
         if ( !processedTile['unregister']) {
@@ -742,6 +742,13 @@ exports.getExpandedTileDefinitions = function(all) {
         if (conf.clientId) {
             processedTile.description += ' for ' + conf.clientId;
         }
+        
+        /*** NEED TO REMOVE register/unregister IF IT IS A JIVE HOSTED APP ***/
+        if (processedTile['config'].indexOf('/public') == 0) {
+            delete processedTile['register'];
+            delete processedTile['unregister'];
+        } // end if
+        
         processed.push( processedTile );
     });
     return processed;
