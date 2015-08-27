@@ -32,7 +32,7 @@ function processTileInstance(instance) {
                 "contents": [
                     {
                         "text": "Current count: " + count,
-                        "icon": "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
+                        "icon": "https://developer.jivesoftware.com/DeveloperAssets/images/icons/jivedev-med.png",
                         "linkDescription": "Current counter."
                     }
                 ],
@@ -48,7 +48,7 @@ function processTileInstance(instance) {
             }
         };
     }
-
+    	
     var store = jive.service.persistence();
     return store.find('exampleStore', { 'key': 'count' } ).then(function(found) {
         found = found.length > 0 ? found[0].count : parseInt(instance.config.startSequence, 10);

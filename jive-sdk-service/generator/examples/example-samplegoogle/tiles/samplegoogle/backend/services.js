@@ -12,7 +12,7 @@ function processTileInstance(instance) {
             "contents": [
                 {
                     "text": JSON.stringify(instance['config']['data']),
-                    "icon": "https://community.jivesoftware.com/servlet/JiveServlet/showImage/102-99994-1-1023036/j.png",
+                    "icon": "https://developer.jivesoftware.com/DeveloperAssets/images/icons/jivedev-med.png",
                     "linkDescription": "Current counter."
                 }
             ],
