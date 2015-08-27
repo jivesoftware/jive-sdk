@@ -20,6 +20,13 @@ var path = require('path');
 var jive = require('../api');
 var _ = require("underscore");
 
+var ADD_ON_GUID = jive.util.guid();
+var APP_GUID = jive.util.guid();
+var APP2_GUID = jive.util.guid();
+var APP3_GUID = jive.util.guid();
+var APP4_GUID = jive.util.guid();
+var APP5_GUID = jive.util.guid();
+
 /**
  * jive-sdk create -type
  */
@@ -143,10 +150,6 @@ function processExample(target, example, name, force) {
     var tilePrefix = customName ? name  + '_' : '';
 
     var root = __dirname;
-    var uniqueUUID = jive.util.guid();
-    var uniqueAppUUID = jive.util.guid();
-    var uniqueApp2UUID = jive.util.guid();
-    var uniqueApp3UUID = jive.util.guid();
 
     var processSubRootFolder = function( sourceSubRoot, targetSubRoot, doSubstitutions ){
         return jive.util.fsexists(targetSubRoot).then( function(exists) {
@@ -157,10 +160,12 @@ function processExample(target, example, name, force) {
                     'TILE_PREFIX': tilePrefix,
                     'TILE_NAME_BASE' : name,
                     'TILE_NAME': name,
-                    'GENERATED_UUID' : uniqueUUID,
-                    'GENERATED_APP_UUID' : uniqueAppUUID,
-                    'GENERATED_APP2_UUID' : uniqueApp2UUID,
-                    'GENERATED_APP3_UUID' : uniqueApp3UUID,
+                    'NAME': name,
+                    'GENERATED_UUID' : ADD_ON_GUID,
+                    'GENERATED_APP_UUID' : APP_GUID,
+                    'GENERATED_APP2_UUID' : APP2_GUID,
+                    'GENERATED_APP3_UUID' : APP3_GUID,
+                    'TIMESTAMP' : new Date().toISOString(),
                     'host': '{{{host}}}'
                 } );
             } else {
@@ -168,6 +173,7 @@ function processExample(target, example, name, force) {
                     var promises = [];
                     if ( subDirs && subDirs['forEach'] ) {
                         subDirs.forEach(function(subDir) {
+                        	targetSubRoot
                             var sourceSubRootEntry = sourceSubRoot + '/' + subDir;
                             var tileName;
                             if ( customName ) {
@@ -176,19 +182,30 @@ function processExample(target, example, name, force) {
                                 tileName = subDir;
                             }
 
-                            var targetSubRootEntry =
-                                targetSubRoot + '/' + tileName;
-
+                            var targetSubRootEntry = targetSubRoot + '/' + tileName;
+                            
+                            /*** SPECIAL BEHAVIOR FOR AN IMPORTANT PACKAGING DIRECTORY ***/
+                            if (targetSubRoot.indexOf('/extension_src') > 0) {
+                            	targetSubRootEntry = targetSubRoot + '/' +subDir;
+                            } // end if
+                            
                             var substitutions = !doSubstitutions ? undefined : {
                                 'TILE_PREFIX': tilePrefix,
                                 'TILE_NAME_BASE' : name,
                                 'TILE_NAME': tileName,
-                                'GENERATED_UUID' : uniqueUUID,
-                                'GENERATED_APP_UUID' : uniqueAppUUID,
-                                'GENERATED_APP2_UUID' : uniqueApp2UUID,
-                                'GENERATED_APP3_UUID' : uniqueApp3UUID,
+                                'NAME': name,
+                                'GENERATED_UUID' : ADD_ON_GUID,
+                                'GENERATED_APP_UUID' : APP_GUID,
+                                'GENERATED_APP2_UUID' : APP2_GUID,
+                                'GENERATED_APP3_UUID' : APP3_GUID,
+                                'TIMESTAMP' : new Date().toISOString(),
                                 'host': '{{{host}}}'
                             };
+                            
+                        	promises.push(
+                        			conditionalMkdir(targetSubRootEntry,true)
+                        	);
+                        	
                             promises.push(
                                 jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions )
                             );
@@ -226,6 +243,12 @@ function processExample(target, example, name, force) {
     var baseSubstitutions = {
         'TILE_PREFIX': tilePrefix,
         'TILE_NAME_BASE': name,
+        'NAME': name,
+        'GENERATED_UUID' : ADD_ON_GUID,
+        'GENERATED_APP_UUID' : APP_GUID,
+        'GENERATED_APP2_UUID' : APP2_GUID,
+        'GENERATED_APP3_UUID' : APP3_GUID,
+        'TIMESTAMP' : new Date().toISOString(),
         'host': '{{{host}}}'
     };
 
@@ -261,6 +284,12 @@ function processDefinition(target, type, name, style, force) {
     var substitutions = {
         'TILE_NAME': name,
         'TILE_STYLE': style,
+        'NAME': name,
+        'GENERATED_UUID' : ADD_ON_GUID,
+        'GENERATED_APP_UUID' : APP_GUID,
+        'GENERATED_APP2_UUID' : APP2_GUID,
+        'GENERATED_APP3_UUID' : APP3_GUID,
+        'TIMESTAMP' : new Date().toISOString(),
         'host': '{{{host}}}'
     };
 

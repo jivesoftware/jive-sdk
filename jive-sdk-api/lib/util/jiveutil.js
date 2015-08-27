@@ -146,7 +146,6 @@ exports.fsexists = function (path) {
 exports.fscopy = function (source, target) {
     jive.logger.debug('Copying', source, 'to', target);
     var deferred = q.defer();
-
     fs.copy(source, target, function (err) {
         if (err) {
             deferred.reject(err);
@@ -405,7 +404,7 @@ exports.fswrite = function (data, path) {
     return deferred.promise;
 };
 
-var supportedTemplatableExtensions = [ '.json', '.txt', '.text', '.js', '.sql', '.html', '.xml' ];
+var supportedTemplatableExtensions = [ '.json', '.txt', '.text', '.js', '.sql', '.html', '.xml', '.md' ];
 
 function getExtension(filename) {
     if (!filename) {
@@ -427,7 +426,7 @@ exports.fsTemplateCopy = function (source, target, substitutions) {
         jive.logger.debug(source + ' is not a supported templatable file type. Doing straight copying', source, '->', target);
         return exports.fscopy(source, target);
     } else {
-        jive.logger.debug('Templatized Copying', source, '->', target);
+    	jive.logger.debug('Templatized Copying', source, '->', target);
         return exports.fsread(source).then(function (data) {
             var raw = data.toString();
             var processed = mustache.render(raw, substitutions || {});
@@ -582,7 +581,7 @@ exports.sortObject = function (o) {
  * @return {Promise} Promise
  */
 exports.recursiveDirectoryProcessor = function (currentFsItem, root, targetRoot, force, processor) {
-
+    
     var recurseDirectory = function (directory) {
         return q.nfcall(fs.readdir, directory).then(function (subItems) {
             var promises = [];
@@ -645,6 +644,7 @@ var copyFileProcessor = function (type, currentFsItem, targetPath, substitutions
  * @return {Promise} Promise
  */
 exports.recursiveCopy = function (root, target, force, substitutions, file) {
+	
     return exports.fsisdir(root).then( function(isDir) {
         if( !isDir ) {
             return copyFileProcessor("file", root, target, substitutions);
