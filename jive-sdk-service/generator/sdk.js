@@ -51,6 +51,8 @@ var itemDescriptions = {
     'app-ext-object' : 'A basic example that uses simple stream integrations and Jive app external objects',
     'esf' : 'An external storage framework that uses a file system',
     'activity-stream': 'A basic activity stream',
+    'simple-stream': 'A boiler plate example using the simple stream framework with a bundled ext-object app example',
+    'oauth2-client': 'A quick project for creating OAuth2 client add-ons',
     'cartridge' : 'A basic cartridge',
     'tile-list' : 'A basic list tile',
     'tile-table': 'A basic table tile',
@@ -143,7 +145,7 @@ function mergeRecursive(original, newcommer) {
     return original;
 }
 
-function processExample(target, example, name, force) {
+function processExample(target, example, name, force,authorizeUrl) {
     console.log('Preparing example ', name, target );
 
     var customName = name !== example;
@@ -165,6 +167,7 @@ function processExample(target, example, name, force) {
                     'GENERATED_APP_UUID' : APP_GUID,
                     'GENERATED_APP2_UUID' : APP2_GUID,
                     'GENERATED_APP3_UUID' : APP3_GUID,
+                    'OAUTH_AUTHORIZE_URL' : authorizeUrl ? authorizeUrl : 'REPLACE_ME_WITH_OAUTH_AUTHORIZE_URL',
                     'TIMESTAMP' : new Date().toISOString(),
                     'host': '{{{host}}}'
                 } );
@@ -198,6 +201,7 @@ function processExample(target, example, name, force) {
                                 'GENERATED_APP_UUID' : APP_GUID,
                                 'GENERATED_APP2_UUID' : APP2_GUID,
                                 'GENERATED_APP3_UUID' : APP3_GUID,
+                                'OAUTH_AUTHORIZE_URL' : authorizeUrl ? authorizeUrl : 'REPLACE_ME_WITH_OAUTH_AUTHORIZE_URL',
                                 'TIMESTAMP' : new Date().toISOString(),
                                 'host': '{{{host}}}'
                             };
@@ -248,6 +252,7 @@ function processExample(target, example, name, force) {
         'GENERATED_APP_UUID' : APP_GUID,
         'GENERATED_APP2_UUID' : APP2_GUID,
         'GENERATED_APP3_UUID' : APP3_GUID,
+        'OAUTH_AUTHORIZE_URL' : authorizeUrl ? authorizeUrl : 'REPLACE_ME_WITH_OAUTH_AUTHORIZE_URL',
         'TIMESTAMP' : new Date().toISOString(),
         'host': '{{{host}}}'
     };
@@ -289,6 +294,7 @@ function processDefinition(target, type, name, style, force) {
         'GENERATED_APP_UUID' : APP_GUID,
         'GENERATED_APP2_UUID' : APP2_GUID,
         'GENERATED_APP3_UUID' : APP3_GUID,
+        'OAUTH_AUTHORIZE_URL' : authorizeUrl ? authorizeUrl : 'REPLACE_ME_WITH_OAUTH_AUTHORIZE_URL',
         'TIMESTAMP' : new Date().toISOString(),
         'host': '{{{host}}}'
     };
@@ -353,7 +359,7 @@ function listDirectory(dirName, dirPath, excludes) {
     })
 }
 
-function finish(target) {
+function finish(target,options) {
     var definitionsDir = target + '/tiles';
     var appsDir = target + '/apps';
     var servicesDir = target + '/services';
@@ -408,17 +414,26 @@ function finish(target) {
             }
         });
     }).then( function() {
-        console.log('\nThings to do now:');
-        console.log();
-        console.log('(1)  Install dependent modules:');
-        console.log('         npm update ');
-        console.log('(2)  If applicable, edit jiveclientconfiguration.json to specify your clientID, clientSecret, clientUrl, and other setup options.');
-        console.log('(3a) If you are running a Jive Node SDK service, use this command to build an add-on package and start the service:');
-        console.log('         node app.js');
-        console.log('(3b) If you just want to use the SDK to build an add-on package (without a service), use one of these commands:')
-        console.log('         jive-sdk build add-on');
-        console.log('         jive-sdk build add-on --apphosting="jive"');
-        console.log();
+        if (options['subject'] == "oauth2-client" && options['authorizeUrl']) {
+    		console.log('Auto-creating your ['+options['subject']+' OAuth2 Client extension.zip ...');
+    		doCreateExtension(options);
+    		console.log('\n\nNext Steps:\n**************************************************************************');
+    		console.log('If you are ready-to-go, simply upload the [extension.zip] add-on to your Jive instance to obtain your clientId/clientSecret for your OAuth2 client.');
+    		console.log('\nIf you would like to make changes, EDIT the [jiveclientconfiguration.json] and/or UPDATE icons in [/extension_src], SAVE and then RUN [jive-sdk build] to re-generate [extension.zip].');
+    		console.log('**************************************************************************\n\n');
+        } else {
+            console.log('\nThings to do now:');
+            console.log();
+            console.log('(1)  Install dependent modules:');
+            console.log('         npm update ');
+            console.log('(2)  If applicable, edit jiveclientconfiguration.json to specify your clientID, clientSecret, clientUrl, and other setup options.');
+            console.log('(3a) If you are running a Jive Node SDK service, use this command to build an add-on package and start the service:');
+            console.log('         node app.js');
+            console.log('(3b) If you just want to use the SDK to build an add-on package (without a service), use one of these commands:')
+            console.log('         jive-sdk build add-on');
+            console.log('         jive-sdk build add-on --apphosting="jive"');
+            console.log();        	
+        } // end if
     });
 }
 
@@ -440,8 +455,10 @@ function doExample( options ) {
 
     var example =  options['subject'];
     var name = options['name'] ? options['name'] : example;
-    processExample(target, example, name, force).then( function() {
-        finish(target);
+    var authorizeUrl = options['authorizeUrl'] ? options['authorizeUrl'] : null;
+
+    processExample(target, example, name, force,authorizeUrl).then( function() {
+        finish(target,options);
     });
 }
 
@@ -541,6 +558,8 @@ function doHelp() {
     console.log('                                "jive" apps are packaged in the add-on,');
     console.log('                                "self" apps are hosted externally;');
     console.log('                                defaults to "self"');
+    console.log('   --oauthAuthorizeUrl="...."   Used only with "jive-sdk create oauth2-client" for;');
+    console.log('                                simple OAuth2 client generation');
     console.log();
 }
 
@@ -919,6 +938,7 @@ exports.init = function(target) {
             var name = argv['name'];
             var apphosting = argv['apphosting'];
             var force = argv['force'] || false;
+            var authorizeUrl = argv['oauthAuthorizeUrl'];
 
             if (name) {
                 name = name.replace(/[^\S]+/, '');
@@ -931,7 +951,8 @@ exports.init = function(target) {
                 'cmd'       : cmd,
                 'subject'   : subject,
                 'force'     : force,
-                'target'    : target
+                'target'    : target,
+                'authorizeUrl'	: authorizeUrl
             };
 
             var err = validate(options);

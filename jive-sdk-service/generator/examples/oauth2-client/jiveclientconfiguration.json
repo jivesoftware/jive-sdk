@@ -1,0 +1,17 @@
+{
+	"clientUrl": "http:",
+	"port": "8090",
+	"development": true,
+	"suppressAddonRegistration": true,
+	"clientUrlExcludesPort": true,
+	"extensionInfo": {
+		"id": "{{GENERATED_UUID}}",
+		"uuid": "{{GENERATED_UUID}}",
+		"name": "{{{NAME}}}",
+		"description": "This is an OAuth2 Client add-on for {{{NAME}}}",
+		"redirectURL" : "{{{OAUTH_AUTHORIZE_URL}}}",
+		"icon_16": "extension-16.png",
+		"icon_48": "extension-48.png",
+		"icon_128": "extension-128.png"
+	}
+}
