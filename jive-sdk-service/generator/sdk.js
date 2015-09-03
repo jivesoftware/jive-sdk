@@ -145,7 +145,7 @@ function mergeRecursive(original, newcommer) {
     return original;
 }
 
-function processExample(target, example, name, force,authorizeUrl) {
+function processExample(target, example, name, force, authorizeUrl) {
     console.log('Preparing example ', name, target );
 
     var customName = name !== example;
@@ -278,7 +278,7 @@ function processExample(target, example, name, force,authorizeUrl) {
     })
 }
 
-function processDefinition(target, type, name, style, force) {
+function processDefinition(target, type, name, style, force, authorizeUrl) {
 
     console.log('Preparing', type == 'all' ? '' : type,
         '"' + name + '"',
@@ -444,7 +444,9 @@ function doStyle( options ) {
     var style =  options['subject'];
     var name = options['name'] || 'sample' + style;
     var type = style == 'activity' ? 'activity' : style;
-    processDefinition(target, type, name, style, force).then( function() {
+    var authorizeUrl = options['authorizeUrl'] ? options['authorizeUrl'] : null;
+    
+    processDefinition(target, type, name, style, force, authorizeUrl).then( function() {
         finish(target);
     });
 }
@@ -465,17 +467,18 @@ function doExample( options ) {
 function doAll( options ) {
     var force = options['force'];
     var target = options['target'] || process.cwd();
+    var authorizeUrl = options['authorizeUrl'] ? options['authorizeUrl'] : null;
 
     var promises = [];
     styles.forEach( function(style) {
         var name = 'sample' + style + (options['name'] ? '-' + options['name'] : '' );
         var type = style == 'activity' ? 'activity' : style;
-        promises.push( processDefinition(target, type, name, style, force));
+        promises.push( processDefinition(target, type, name, style, force, authorizeUrl));
     });
 
     examples.forEach( function( example ) {
         var name = example + ( options['name'] ? ('-' + options['name'] ) : '');
-        promises.push(processExample(target, example, name, force));
+        promises.push(processExample(target, example, name, force,authorizeUrl));
     });
 
     q.all(promises).then( function() {
