@@ -447,7 +447,7 @@ function doStyle( options ) {
     var authorizeUrl = options['authorizeUrl'] ? options['authorizeUrl'] : null;
     
     processDefinition(target, type, name, style, force, authorizeUrl).then( function() {
-        finish(target);
+        finish(target,options);
     });
 }
 
@@ -484,7 +484,7 @@ function doAll( options ) {
     q.all(promises).then( function() {
         var root = __dirname;
         return jive.util.fsTemplateCopy( root + '/base/package.json', target + '/package.json', { 'TILE_NAME': 'jive-examples-all' } )
-            .then( function() { return finish(target); });
+            .then( function() { return finish(target,options); });
     });
 }
 
