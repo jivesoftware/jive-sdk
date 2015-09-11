@@ -703,7 +703,7 @@ exports.getExpandedTileDefinitions = function(all) {
         } else {
             if ( processedTile['config'].indexOf('http') != 0 && processedTile['config'].indexOf('%serviceURL%') === -1) {
             	// ADDITIONAL CHECK FOR A PUBLIC CONFIGURATION SCREEN HOSTED IN JIVE
-            	if (processedTile['config'].indexOf('/public') != 0) {
+            	if (processedTile['config'] && processedTile['config'].indexOf('/public') != 0) {
                     // assume its relative to host then
                     processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];            		
             	}// end if
