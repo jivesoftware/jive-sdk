@@ -665,11 +665,11 @@ exports.getExpandedTileDefinitions = function(all) {
     var conf = exports.options;
     var host = exports.serviceURL();
     var processed = [];
-
     all.forEach( function( tile ) {
         if ( !tile ) {
             return;
         }
+        
         var name = tile.name;
         var stringified = JSON.stringify(tile);
         stringified =  mustache.render(stringified, {
@@ -707,7 +707,7 @@ exports.getExpandedTileDefinitions = function(all) {
                     // assume its relative to host then
                     processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];            		
             	}// end if
-            }
+            }            
         }
         if ( !processedTile['unregister']) {
             // compute an unregister URL only if not an internal tile type
@@ -744,7 +744,7 @@ exports.getExpandedTileDefinitions = function(all) {
         }
         
         /*** NEED TO REMOVE register/unregister IF IT IS A JIVE HOSTED APP ***/
-        if (processedTile['config'].indexOf('/public') == 0) {
+        if (processedTile['config'] && processedTile['config'].indexOf('/public') == 0) {
             delete processedTile['register'];
             delete processedTile['unregister'];
         } // end if
