@@ -210,7 +210,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
     var name = extensionInfo['name'];
     var type = extensionInfo['type'] || 'client-app'; // by default
     var id = extensionInfo['uuid'];
-
+    
     var hasCartridges = cartridges && cartridges.length > 0;
     var hasOsapps = definitions['osapps'] && definitions['osapps'].length > 0;
     var hasTiles = definitions['tiles'] && definitions['tiles'].length > 0;
@@ -377,13 +377,17 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
     if (extensionInfo["jive_technology_partner_id"]) {
     	extensionMeta["jive_technology_partner_id"] = extensionInfo["jive_technology_partner_id"];
     } // end if
-
+    
     // these should never be there
     delete extensionMeta['uuid'];
     delete extensionMeta['jiveServiceSignature'];
 
     // suppress the register and unregister URLs if configured to do so
-    if ( jive.service.options['suppressAddonRegistration'] == true ) {
+    if ( (jive.service.options['suppressAddonRegistration'] == true ) || 
+          // assuming that if clientUrl is still localhost that we shouldn't initiate a register event
+    	  // In the event this causes issue, clientUrl can be set to 127.0.0.1 to bring back original behavior
+    	 (jive.service.options['clientUrl'] && jive.service.options['clientUrl'].indexOf('localhost') > -1)
+       ) {
         delete extensionMeta['register_url'];
         delete extensionMeta['unregister_url'];
     }
