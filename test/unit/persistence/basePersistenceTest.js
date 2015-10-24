@@ -188,16 +188,8 @@ exports.testFind = function( testUtils, persistence ) {
                 return persistence.find('myOtherCollection',
                     { 'data.number' : { '$lt' : 3 } }, true
                 ).then( function(cursor) {
-
                     var p = q.defer();
                     var foundCount = 0;
-                    cursor.on('data', function(entry, key) {
-                        if ( [1,2].indexOf( entry['data']['number']) < 0 ) {
-                            deferred.reject("failed cursor");
-                        } else {
-                            foundCount++;
-                        }
-                    });
 
                     cursor.on('end', function() {
                         if ( foundCount != 2 ) {
@@ -209,6 +201,16 @@ exports.testFind = function( testUtils, persistence ) {
 
                     cursor.on('error', function(e) {
                         p.reject(e);
+                    });
+
+                    cursor.on('readable', function(entry, key) {
+                        if (undefined === entry) {
+                          // Don't care as we've reach the end of the Array
+                        } else if ( [1,2].indexOf( entry['data']['number']) < 0 ) {
+                            deferred.reject("failed cursor");
+                        } else {
+                            foundCount++;
+                        }
                     });
                 });
             })
