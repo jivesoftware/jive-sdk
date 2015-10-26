@@ -35,7 +35,7 @@ describe('jive', function () {
                 },
 
                 function ( e ) {
-                    assert.equal(e.errno, 34, 'Not the expected error.')
+                    assert.equal(e.errno, -2, 'Not the expected error.')
                     done();
                 }
             );
