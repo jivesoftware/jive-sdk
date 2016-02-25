@@ -31,7 +31,8 @@ var findCredentials = function(req) {
     var conf = jive.service.options;
 
     // try to get it from body
-    var jiveUrl = req.body['jiveUrl'];
+    // Added ternary in the event the request is a GET with no body
+    var jiveUrl = req.body ? req.body['jiveUrl'] : null;
 
     // default to system credentials
     var credentials = {
