@@ -1,3 +1,11 @@
+#debug-wrapper { width : 800px; }
+#currentUser { width : 100%; height: 220px; overflow: scroll; background-color: #CFDBC5; }
+#currentActionContext, #currentViewContext { width : 50%; height: 220px; overflow: scroll; }
+span.actionContext,span.viewContext { padding: 0px 8px; }
+.actionContext { background-color: #CCEEFF; float: right;}
+.viewContext { background-color: #E6E6FA;  float: left; }
+.clickContext { background-color: #FFFACD; width: 100%; }
+
 body {
     color: #5e5e5e;
     font: 13px "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;

@@ -1,18 +1,26 @@
 <html>
 <head>
     <link rel="stylesheet" href="stylesheets/main.css" type="text/css" media="screen" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="javascripts/coreapi-context-resolver-v3.js"></script>
     <script type="text/javascript" charset="utf-8" src="javascripts/main.js"></script>
 </head>
 
 <body>
 
-<div>
-    <h1>Welcome <span id="viewer"></span>!</h1>
-    <p>This is the HTML template for your very own Jive App.</p>
-    <input type="text" id="j-message" value="Pop me!">
-    <p>Click this button to invoke a popup notification via the Jive app container.</p>
-    <button id="j-fun-button">Invoke Popup</button>
-</div>
+  <div id="debug-wrapper">
+      <h1>Jive App Context</h1>
+      <p></p>
+      <h2>Who Am I?</h2>
+      <div id="currentUser"></div>
+      <hr/>
+      <h2>Where Am I?</h2>
+      <span class="actionContext"><strong>Action Context</strong></span>
+      <span class="viewContext"><strong>View Context</strong></span>
+      <br/><br/>
+      <div id="currentActionContext" class="actionContext"></div>
+      <div id="currentViewContext" class="viewContext"></div>
+  </div>
 
 </body>
 

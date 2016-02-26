@@ -1,91 +1,198 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module specificationVersion="1">
-  <ModulePrefs title="{{{TILE_PREFIX}}}simpleapp"
-               description="Description of {{{TILE_PREFIX}}}simpleapp"
-               author="Aron Racho"
-               author_affiliation="Jive"
-               author_email="aron.racho@jivesoftware.com">
+  <ModulePrefs title="{{{TILE_PREFIX}}} Reference App"
+               description="Default App Contribution for {{{TILE_PREFIX}}}"
+               author="Jive Developers"
+               author_affiliation="Jive Software (Open Source)"
+               author_email="jivedev@jivesoftware.com">
 
-    <!-- Commonly used features -->
-    <Require feature="dynamic-height" />
-    <Require feature="jive-core-v2" />
-    <Require feature="jquery-1.6" />
-    <Require feature="osapi"/>
-    <Require feature="settitle"/>
-    <Require feature="views" />
-    <Require feature="jive-core-v3" />
-    <Require feature="embedded-experiences" />
-	<Require feature="actions">  
-		<Param name="action-contributions">  
-			<![CDATA[
-				<action id="com.jivesoftware.places"
-						path="jive/actions/places/*"
-						label="Place action ({{{TILE_PREFIX}}}simpleapp)"
-						view="canvas"
-				/>
-				<action id="com.jivesoftware.profile.rtc" 
-						path="jive/actions/profile" 
-						label="Example Profile Pop-Up" 
-						url="https://developer.jivesoftware.com" 
-						icon="images/icon16.png"
-						windowSpec="left=40,top=40,width=500,height=500,toolbar=1,resizable=0"/> 
-			]]>  
-		</Param>  
-	</Require>  
+   <!-- Commonly used features -->
+   <Require feature="dynamic-height" />
+   <Require feature="jive-core-v2" />
+   <Require feature="jquery-1.6" />
+   <Require feature="osapi"/>
+   <Require feature="settitle"/>
+   <Require feature="views" />
+   <Require feature="jive-core-v3" />
+   <Require feature="embedded-experiences" />
+	  <Require feature="actions">
+		    <Param name="action-contributions">
+   			<![CDATA[
+           <!--
+           #### UNCOMMENT THIS TO HIDE THE APP FROM THE APPS MENU IN THE NAV BAR ####
+           <action id="example.app.launcherlessapp"
+                   path="jive/apps/launcher?filter=false()"/>
+           -->
 
-    <!-- Icons: 3 sizes, 16x16, 48x48, 128x128 -->
-    <Link rel="Icon"       href="images/icon16.png" />
-    <Link rel="MediumIcon" href="images/icon48.png" />
-    <Link rel="LargeIcon"  href="images/icon128.png" />
+           <action id="example.app.places.all.tab"
+                   path="jive/tabs/places/*"
+                   label="Example (All Places)"
+                   view="place-all-tab"/>
 
-    <!-- Screenshots: 600w x 400h, should include at least 1 and up to 5 -->
-    <!--
-    <Link rel="Screenshot1" href="images/screenshot1.png" />
-    <Link rel="Screenshot2" href="images/screenshot2.png" />
-    <Link rel="Screenshot3" href="images/screenshot3.png" />
-    <Link rel="Screenshot4" href="images/screenshot4.png" />
-    <Link rel="Screenshot5" href="images/screenshot5.png" />
-    -->
+           <action id="example.app.places.project.tab"
+                   path="jive/tabs/places/project"
+                   label="Example (Project)"
+                   view="place-project-tab"/>
 
-    <!-- OAuth Services: https://developers.jivesoftware.com/community/docs/DOC-1161 -->
-    <!--
-    <OAuth>
-      <Service name="example">
-        <Access url="http://api.example.com/oauth/access_token" method="POST" />
-        <Request url="http://api.example.com/oauth/request_token" method="POST" />
-        <Authorization url="http://api.example.com/oauth/authorize" />
-      </Service>
-    </OAuth>
-    -->
+           <action id="example.app.places.space.tab"
+                   path="jive/tabs/places/space"
+                   label="Example (Space)"
+                   view="place-space-tab"/>
 
-    <!-- Lifecycle Events: https://developers.jivesoftware.com/community/docs/DOC-1119 -->
-    <!--
-    <Link rel="event.addapp" href="http://www.example.com/add" />
-    <Link rel="event.removeapp" href="http://www.example.com/remove" />
-    -->
+           <action id="example.app.places.group.tab"
+                   path="jive/tabs/places/group"
+                   label="Example (Group)"
+                   view="place-group-tab"/>
 
-    <!-- Preloaded Content: http://wiki.opensocial.org/index.php?title=Remote_Data_Requests_%28v0.9%29#Preloading_data -->
-    <!--
-    <Preload href="http://www.example.com" />
-    -->
+           <action id="example.app.actions.tab"
+                   path="jive/tabs/actions"
+                   label="Example (Actions)"
+                   view="actions-tab"/>
 
-  </ModulePrefs>
+           <action id="example.app.profile.tab"
+                   path="jive/tabs/profile"
+                   label="Example (Profile)"
+                   view="profile-tab"/>
 
-  <!-- User Preferences: http://code.google.com/apis/gadgets/docs/reference.html#Userprefs_Ref -->
-  <!--
-  <UserPref name="where_i_live" display_name="Where I Live" datatype="string" default_value="" required="false" />
-  <UserPref name="subscribe_to_newsletter" display_name="Subscribe to Newsletter" datatype="bool" default_value="" required="false" />
-  <UserPref name="difficulty"
-       display_name="Difficulty"
-       datatype="enum"
-       default_value="2">
-    <EnumValue value="1" display_value="Easy"/>
-    <EnumValue value="2" display_value="Medium"/>
-    <EnumValue value="3" display_value="Hard"/>
-  </UserPref>
-  -->
+           <action id="example.app.content.all.action"
+                   path="jive/actions/content/*"
+                   label="Example (All Content)"
+                   view="content-action-all"/>
 
-  <Content type="html" view="home" href="home.html" preferred_height="400" />
-  <Content type="html" view="embedded,canvas" href="canvas.html" />
+           <action id="example.app.content.document.action"
+                   path="jive/actions/content/document"
+                   label="Example (Document)"
+                   view="content-action-document"/>
+
+           <action id="example.app.content.discussion.action"
+                   path="jive/actions/content/discussion"
+                   label="Example (Discussion)"
+                   view="content-action-discussion"/>
+
+           <action id="example.app.content.question.action"
+                   path="jive/actions/content/question"
+                   label="Example (Question)"
+                   view="content-action-question"/>
+
+           <action id="example.app.content.document.binary.action"
+                   path="jive/actions/content/document/binary/*"
+                   label="Example (Document Binary)"
+                   view="content-action-document-binary"/>
+
+           <action id="example.app.content.blogpost.action"
+                   path="jive/actions/content/blogpost"
+                   label="Example (Blog Post)"
+                   view="content-action-blogpost"/>
+
+           <action id="example.app.content.poll.action"
+                   path="jive/actions/content/poll"
+                   label="Example (Poll)"
+                   view="content-action-poll"/>
+
+           <action id="example.app.content.video.action"
+                   path="jive/actions/content/video"
+                   label="Example (Video)"
+                   view="content-action-video"/>
+
+           <action id="example.app.content.idea.action"
+                   path="jive/actions/content/idea"
+                   label="Example (Idea)"
+                   view="content-action-idea"/>
+
+           <action id="example.app.content.event.action"
+                   path="jive/actions/content/event"
+                   label="Example (Event)"
+                   view="content-action-event"/>
+
+           <action id="example.app.createmenu.action"
+                   path="jive/actions/navmenu"
+                   label="Example (Create Menu)"
+                   view="createmenu-action"/>
+
+           <action id="example.app.places.all.action"
+                   path="jive/actions/places/*"
+                   label="Example (All Places)"
+                   view="place-all-action"/>
+
+           <action id="example.app.places.project.action"
+                   path="jive/actions/places/project"
+                   label="Example (Project)"
+                   view="place-project-action"/>
+
+           <action id="example.app.places.space.action"
+                   path="jive/actions/places/space"
+                   label="Example (Space)"
+                   view="place-space-action"/>
+
+           <action id="example.app.places.group.action"
+                   path="jive/actions/places/group"
+                   label="Example (Group)"
+                   view="place-group-action"/>
+
+           <action id="example.app.places.settings.all.action"
+                   path="jive/settings/places/*"
+                   label="Example (All Places)"
+                   view="place-settings-all-action"/>
+
+           <action id="example.app.places.settings.project.action"
+                   path="jive/settings/places/project"
+                   label="Example (Project)"
+                   view="place-settings-project-action"/>
+
+           <action id="example.app.places.settings.space.action"
+                   path="jive/settings/places/space"
+                   label="Example (Space)"
+                   view="place-settings-space-action"/>
+
+           <action id="example.app.places.settings.group.action"
+                   path="jive/settings/places/group"
+                   label="Example (Group)"
+                   view="place-settings-group-action"/>
+
+           <action id="example.app.rte.action"
+                   path="jive/actions/rte"
+                   label="Example (!app)"
+                   view="rte-action"
+                   icon="images/icon16.png"/>
+
+   				<action id="example.app.profile.navbar.site"
+   						path="jive/actions/profile"
+   						label="Example (Profile NavBar Site)"
+   						url="https://developer.jivesoftware.com"
+   						icon="images/icon16.png"
+   						windowSpec="left=40,top=40,width=500,height=500,toolbar=1,resizable=0"/>
+
+           <action id="example.app.profile.navbar.email"
+               path="jive/actions/profile"
+               label="Example (Profile NavBar Email)"
+               url="example:{context.email}"
+               icon="images/icon16.png" />
+
+           <action id="example.app.profile.navbar.phone"
+               path="jive/actions/profile"
+               label="Example (Profile NavBar Phone)"
+               url="tel:{context.profileFields.__AP_phoneNumber__}"
+               icon="images/icon16.png" />
+
+   			]]>
+		</Param>
+	</Require>
+
+   <!-- Icons: 3 sizes, 16x16, 48x48, 128x128 -->
+   <Link rel="Icon"       href="images/icon16.png" />
+   <Link rel="MediumIcon" href="images/icon48.png" />
+   <Link rel="LargeIcon"  href="images/icon128.png" />
+
+   <!-- Preloaded Content: http://wiki.opensocial.org/index.php?title=Remote_Data_Requests_%28v0.9%29#Preloading_data -->
+   <!--
+   <Preload href="http://www.example.com" />
+   -->
+
+ </ModulePrefs>
+
+ <Content type="html"
+          view="home,canvas,place-all-tab,place-space-tab,place-group-tab,place-project-tab,actions-tab,profile-tab,rte-action,content-action-all,content-action-document,content-action-discussion,content-action-question,content-action-document-binary,content-action-blogpost,content-action-poll,content-action-video,content-action-idea,content-action-event,createmenu-action,place-all-action,place-space-action,place-group-action,place-project-action,place-settings-all-action,place-settings-space-action,place-settings-group-action,place-settings-project-action"
+          href="canvas.html"
+          preferred_height="800" />
 
 </Module>
