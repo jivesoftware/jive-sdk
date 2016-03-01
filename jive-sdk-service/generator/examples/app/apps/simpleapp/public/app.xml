@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module specificationVersion="1">
-  <ModulePrefs title="{{{TILE_PREFIX}}} Reference App"
-               description="Default App Contribution for {{{TILE_PREFIX}}}"
+  <ModulePrefs title="jivedev Reference App ({{{TILE_PREFIX}}})"
+               description="Jive Developer App Contributions for {{{TILE_PREFIX}}}"
                author="Jive Developers"
                author_affiliation="Jive Software (Open Source)"
                author_email="jivedev@jivesoftware.com">

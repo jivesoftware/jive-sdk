@@ -4,13 +4,12 @@ var app = {
 
     getCurrentView : function() {
       var currentView = location.href.substr(location.href.indexOf('view=')+'view='.length);
-      if (currentView) {
-        currentView = currentView.substr(0,currentView.indexOf('&'));
-      } // end if
-      return (!currentView) ? '' : currentView;
+      currentView = currentView.substr(0,currentView.indexOf('&'));
+      return currentView;
     },
 
     init : function() {
+
       // add code that should run on page load here
       osapi.jive.corev3.people.getViewer().execute(gadgets.util.makeClosure(this, this.handleViewer));
 
@@ -58,7 +57,10 @@ var app = {
     /*** EXAMPLE GET CONTEXT FOR APP VIEWS ****/
     handleViewContext : function(context) {
         console.log("handleViewContext",context);
-        $('span.viewContext').append('&nbsp;&nbsp;<em>'+this.getCurrentView()+"</em>");
+
+        var currentView = this.getCurrentView();
+        $('span.viewContext').append('&nbsp;&nbsp;<em>'+currentView+"</em>");
+
         if (context) {
           $("#currentViewContext").html("<p><strong>Raw Context</strong></p>");
           $("#currentViewContext").append("<pre>"+JSON.stringify(context,null,2)+"</pre>");
@@ -68,9 +70,24 @@ var app = {
               gadgets.window.adjustHeight();
               gadgets.window.adjustWidth();
           });
-          gadgets.window.adjustHeight();
-          gadgets.window.adjustWidth();
+
         } // end if
+
+        /*** ADD IN A BUTTON ***/
+        if (currentView == 'rte-action') {
+            /**** EXAMPLE LOADING CONTEXT DATA FOR !APP VIEW ****/
+            opensocial.data.getDataContext().registerListener('org.opensocial.ee.context',
+                function (key) {
+                   var data = opensocial.data.getDataContext().getDataSet(key);
+                   console.log("getDataContext",data);
+                   $("#currentActionContext").html("<p><strong>Raw Context</strong></p>");
+                   $("#currentActionContext").append("<pre>"+JSON.stringify(data,null,2)+"</pre>");
+                } // end function
+            );
+        } // end if
+        gadgets.window.adjustHeight();
+        gadgets.window.adjustWidth();
+
     }, // end handleViewContext
 
     /*************************************************************************************
@@ -83,12 +100,21 @@ var app = {
           $('span.actionContext').append('&nbsp;&nbsp;<em>'+action+"</em>");
           $("#currentActionContext").html("<p><strong>Raw Context</strong></p>");
           $("#currentActionContext").append("<pre>"+JSON.stringify(context,null,2)+"</pre>");
-          osapi.jive.corev3.resolveContext(context,
-            function(object) {
-              $("#currentActionContext").append("<hr/><p><strong>After Resolve</strong></p><pre>"+JSON.stringify(object["content"],null,2)+"</pre>");
-              gadgets.window.adjustHeight();
-              gadgets.window.adjustWidth();
-          });
+
+          /*** PREVENT FROM FIRING ON !APP SINCE THERE IS NO CONTEXT YET ***/
+          if (action != 'example.app.rte.action') {
+              osapi.jive.corev3.resolveContext(context,
+                function(object) {
+                  $("#currentActionContext").append("<hr/><p><strong>After Resolve</strong></p><pre>"+JSON.stringify(object["content"],null,2)+"</pre>");
+                  gadgets.window.adjustHeight();
+                  gadgets.window.adjustWidth();
+              });
+          } else {
+              /*** CONVENIENT PLACE TO PUT CODE TO RENDER THE "SAVE" BUTTON ***/
+              $('#btnEmbedApp').click(gadgets.util.makeClosure(app, app.embedAppReference));
+              $('#btnEmbedApp').show();
+          } // end if
+
           gadgets.window.adjustHeight();
           gadgets.window.adjustWidth();
         } // end if
@@ -97,7 +123,29 @@ var app = {
     handleViewer : function(viewer) {
         console.log("handleViewer",viewer);
         $("#currentUser").html("<pre>"+JSON.stringify(viewer,null,2)+"</pre>");
-    } // end handleViewer
+    }, // end handleViewer
+
+    embedAppReference : function() {
+        osapi.jive.core.container.closeApp({
+           data: {
+               display: {
+                   type: 'text',
+                   icon: 'images/icon16.png',
+                   label: 'Example (!app)'
+               },
+               target: {
+                   type: 'embed',
+                   view: 'rte-action', // View  in app.xml
+                   context: {
+                       timestamp : new Date().toString(),
+                       data : {
+                           name: 'Example Data'
+                       }
+                   }
+               }
+           }
+        });
+    } // end embedAppReference
 
 };
 

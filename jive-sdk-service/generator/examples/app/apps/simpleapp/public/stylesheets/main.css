@@ -5,6 +5,7 @@ span.actionContext,span.viewContext { padding: 0px 8px; }
 .actionContext { background-color: #CCEEFF; float: right;}
 .viewContext { background-color: #E6E6FA;  float: left; }
 .clickContext { background-color: #FFFACD; width: 100%; }
+#btnEmbedApp { background-color: yellow; height: 40px; width: 200px; text-align: center; font-size: 14pt; font-weight: bold; }
 
 body {
     color: #5e5e5e;
