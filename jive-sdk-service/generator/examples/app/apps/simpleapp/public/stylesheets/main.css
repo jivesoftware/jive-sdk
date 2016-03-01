@@ -17,11 +17,6 @@ body {
     display: none;
 }
 
-h1, h2 {
-    margin-top: 0;
-    margin-bottom: -5px;
-}
-
 ul {
     margin-left:0px; padding-left:20px; list-style-type:square;
 }
