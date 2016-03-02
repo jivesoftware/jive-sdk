@@ -191,7 +191,7 @@
  </ModulePrefs>
 
  <Content type="html"
-          view="home,canvas,place-all-tab,place-space-tab,place-group-tab,place-project-tab,actions-tab,profile-tab,rte-action,content-action-all,content-action-document,content-action-discussion,content-action-question,content-action-document-binary,content-action-blogpost,content-action-poll,content-action-video,content-action-idea,content-action-event,createmenu-action,place-all-action,place-space-action,place-group-action,place-project-action,place-settings-all-action,place-settings-space-action,place-settings-group-action,place-settings-project-action"
+          view="home,canvas,ext-object,place-all-tab,place-space-tab,place-group-tab,place-project-tab,actions-tab,profile-tab,rte-action,content-action-all,content-action-document,content-action-discussion,content-action-question,content-action-document-binary,content-action-blogpost,content-action-poll,content-action-video,content-action-idea,content-action-event,createmenu-action,place-all-action,place-space-action,place-group-action,place-project-action,place-settings-all-action,place-settings-space-action,place-settings-group-action,place-settings-project-action"
           href="canvas.html"
           preferred_height="800" />
 

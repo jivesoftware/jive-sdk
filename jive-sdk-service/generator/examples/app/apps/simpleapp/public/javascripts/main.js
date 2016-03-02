@@ -48,6 +48,11 @@ var app = {
         "example.app.rte.action"
       ]);
 
+      var currentView = this.getCurrentView();
+      $('#paramsSampleLink').click(function() {
+        gadgets.views.requestNavigateTo(currentView, { timestamp: new Date().toString() });
+      });
+
       // resize app window to fit content
       gadgets.window.adjustHeight();
       gadgets.window.adjustWidth();
@@ -59,7 +64,15 @@ var app = {
         console.log("handleViewContext",context);
 
         var currentView = this.getCurrentView();
-        $('span.viewContext').append('&nbsp;&nbsp;<em>'+currentView+"</em>");
+        $('span.viewContext').append('<em>'+currentView+"</em>");
+
+        /*** HANDLE GADGET PARAMS ***/
+        var gadgetParams = gadgets.views.getParams();
+        if (gadgetParams) {
+          $('#paramsContext').html('<pre>'+JSON.stringify(gadgetParams,null,2)+"</pre>");
+        } else {
+          $('#paramsContext').html('No Params Found');
+        }// end if
 
         if (context) {
           $("#currentViewContext").html("<p><strong>Raw Context</strong></p>");
@@ -97,7 +110,7 @@ var app = {
     handleActionContext : function(action,context) {
         console.log("handleActionContext",context,action);
         if (context) {
-          $('span.actionContext').append('&nbsp;&nbsp;<em>'+action+"</em>");
+          $('span.actionContext').append('<em>'+action+"</em>");
           $("#currentActionContext").html("<p><strong>Raw Context</strong></p>");
           $("#currentActionContext").append("<pre>"+JSON.stringify(context,null,2)+"</pre>");
 
@@ -131,7 +144,7 @@ var app = {
                display: {
                    type: 'text',
                    icon: 'images/icon16.png',
-                   label: 'Example (!app)'
+                   label: 'jivedev (!app)'
                },
                target: {
                    type: 'embed',

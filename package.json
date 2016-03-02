@@ -1,7 +1,7 @@
 {
   "name": "jive-sdk",
   "description": "Node.js SDK for Jive Software to assist with the development of add-ons",
-  "version": "0.1.216",
+  "version": "0.1.217",
   "main": "jive-sdk-service/api.js",
   "author": {
     "name": "Jive Software",
@@ -59,8 +59,12 @@
       "email": "matt@jivesoftware.com"
     },
     {
-      "name": "Charles Capps",
-      "email": "charles.capps@jivesoftware.com"
+      "name": "Ryan Rutan",
+      "email": "ryan.rutan@jivesoftware.com"
+    },
+    {
+      "name": "Rashed Talukder",
+      "email": "rashed.talukder@jivesoftware.com"
     }
   ],
   "repository": {
