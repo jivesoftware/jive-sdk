@@ -1,7 +1,7 @@
 {
   "name": "jive-sdk",
   "description": "Node.js SDK for Jive Software to assist with the development of add-ons",
-  "version": "0.1.217",
+  "version": "0.1.218",
   "main": "jive-sdk-service/api.js",
   "author": {
     "name": "Jive Software",

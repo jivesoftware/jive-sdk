@@ -124,8 +124,10 @@ var app = {
               });
           } else {
               /*** CONVENIENT PLACE TO PUT CODE TO RENDER THE "SAVE" BUTTON ***/
-              $('#btnEmbedApp').click(gadgets.util.makeClosure(app, app.embedAppReference));
-              $('#btnEmbedApp').show();
+              $('#btnEmbedApp').click(gadgets.util.makeClosure(app, app.embedAppReferenceSimple));
+              $('#btnEmbedAppProg').click(gadgets.util.makeClosure(app, app.embedAppReferenceProg));
+              $('#btnEmbedMarkup').click(gadgets.util.makeClosure(app, app.embedMarkUp));
+              $('#embed-actions').show();
           } // end if
 
           gadgets.window.adjustHeight();
@@ -138,27 +140,77 @@ var app = {
         $("#currentUser").html("<pre>"+JSON.stringify(viewer,null,2)+"</pre>");
     }, // end handleViewer
 
-    embedAppReference : function() {
-        osapi.jive.core.container.closeApp({
-           data: {
-               display: {
-                   type: 'text',
-                   icon: 'images/icon16.png',
-                   label: 'jivedev (!app)'
-               },
-               target: {
-                   type: 'embed',
-                   view: 'rte-action', // View  in app.xml
-                   context: {
-                       timestamp : new Date().toString(),
-                       data : {
-                           name: 'Example Data'
-                       }
-                   }
-               }
-           }
-        });
-    } // end embedAppReference
+    /*** SEE: https://community.jivesoftware.com/docs/DOC-66636 FOR MORE DETAILS ***/
+    /*** SEE: https://github.com/jivesoftware/jive-sdk/blob/6ba453332d3e6feab694e718e4e74f48314911e4/jive-sdk-service/generator/examples/example-sampleapps/apps/rtejsondropper/public/javascripts/main.js ***/
+    embedMarkUp : function() {
+      var html = '<p align="center"><img src="/api/core/v3/people/1/avatar" /><br/>Example HTML Embedded from !app.  Output is a simple HTML string.  The string can be static or even a composite of API data concatenated and then INSERTED</p>';
+      osapi.jive.core.container.editor().insert(html);
+    },
+
+    /*** SEE: https://community.jivesoftware.com/docs/DOC-66636 FOR MORE DETAILS ***/
+    embedAppReferenceProg : function() {
+      var context = {
+         data: {
+             display: {
+                 type: 'text',
+                 icon: 'images/icon16.png',
+                 label: 'jivedev (!app)'
+             },
+             target: {
+                 type: 'embed',
+                 view: 'rte-action', // View  in app.xml
+                 context: {
+                     timestamp : new Date().toString(),
+                     data : {
+                         name: 'Example Data Programmatic'
+                     }
+                 }
+             }
+         }
+      };
+      osapi.jive.core.container.artifacts.create(
+          context,
+          'example.app.rte.action',
+          function (markupResponse) {
+            console.log('markup',markupResponse.markup,'error',markupResponse.error);
+            var html = '<p align="center"><strong>Programmatic Embed</strong><br/>';
+            if (markupResponse.error) {
+              console.log("Error creating !app App Reference",markupResponse.error);
+              html += '<span style="color: red;">'+markupResponse.error+'</span>';
+            } else {
+              html += '<div>'+markupResponse.markup+'</div>';
+              html = html.replace('')
+            } // end if
+            html += '</p>';
+            osapi.jive.core.container.editor().insert( html );
+          },
+          false,
+          true
+        );
+      }, // end embedAppReferenceProg
+
+      /*** SEE: https://community.jivesoftware.com/docs/DOC-66636 FOR MORE DETAILS ***/
+      embedAppReferenceSimple : function() {
+          osapi.jive.core.container.closeApp({
+             data: {
+                 display: {
+                     type: 'text',
+                     icon: 'images/icon16.png',
+                     label: 'jivedev (!app)'
+                 },
+                 target: {
+                     type: 'embed',
+                     view: 'rte-action', // View  in app.xml
+                     context: {
+                         timestamp : new Date().toString(),
+                         data : {
+                             name: 'Example Data Simple'
+                         }
+                     }
+                 }
+             }
+          });
+    } // end embedAppReferenceSimple
 
 };
 
