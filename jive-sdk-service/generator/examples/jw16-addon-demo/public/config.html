@@ -1,0 +1,222 @@
+<html>
+<head>
+    <title>Configure My Install</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script>
+        var allFilters = ["kqn","fig","rac","sim","arc","pin","tns","blg"];
+        function init(cfg) {
+            if (typeof gadgets !== "undefined") {
+                window.setTimeout(function () {
+                    gadgets.window.adjustHeight(350);
+                }, 500);
+            }
+            cfg = cfg || {};
+            cfg.filter = cfg.filter || allFilters.slice();
+            var allFiltersSelector = "#" + allFilters.join(":checked,#") + ":checked";
+            var allIds = "panel1,panel2,bad-api-key,welcome,save,pwn,triforce".split(",");
+            var initialState = cfg.apiKey ? "configure" : "initial";
+            var state = null;
+            var stateTable = {};
+            showsTheseIn("initial", "panel1", "welcome", "pwn");
+            showsTheseIn("bad-api-key", "panel1", "bad-api-key", "pwn");
+            showsTheseIn("configure", "panel2", "save", "triforce");
+            resetForm();
+            $("#validate").click(function () {
+                // a valid license key always contains "TFC" somewhere in it
+                var key = $("#key").val();
+                if (!key) {
+                    updateState("initial");
+                } else {
+                    var valid = /OMG/.test(key);
+                    updateState(valid ? "configure" : "bad-api-key");
+                }
+            });
+            $(".channel input:checkbox").click(function() {
+                var f = [];
+                $(allFiltersSelector).each(function(i, element) {
+                    f.push($(element).attr("id"));
+                });
+                cfg.filter = f;
+            }).val(cfg.filter);
+            $("#save").click(function () {
+                cfg.apiKey = $("#key").val();
+                jive.tile.close(cfg); // Pass an object to proceed with the install
+            }).text(cfg ? "Update" : "Save");
+            $("button.cancel").click(function () {
+                if (typeof jive !== "undefined") {
+                    jive.tile.close(); // Pass nothing to abort the install
+                } else {
+                    resetForm();
+                }
+            });
+            $("#referrer").text(window.document.referrer || "http://???");
+            function resetForm() {
+                updateState(initialState);
+                $("#key").val(cfg.apiKey || "");
+                $(".channel input:checkbox").val(cfg.filter || allFilters);
+            }
+            function updateState(state) {
+                stateTable[state]();
+            }
+            function showsTheseIn(targetState, args) {
+                var show = {}, i;
+                for (i = 1; i < arguments.length; i++) {
+                    show[arguments[i]] = true;
+                }
+                var showSelector = [];
+                var hideSelector = [];
+                for (i = 0; i < allIds.length; i++) {
+                    var id = allIds[i];
+                    if (show[id]) {
+                        showSelector.push("#" + id);
+                    } else {
+                        hideSelector.push("#" + id);
+                    }
+                }
+                stateTable[targetState] = function() {
+                    state = targetState;
+                    $(hideSelector.join(",")).hide();
+                    $(showSelector.join(",")).show();
+                };
+            }
+        }
+        if (typeof gadgets !== "undefined") {
+            jive.tile.onOpen(init);
+        } else {
+            $(function() { init(); });
+        }
+    </script>
+    <style type="text/css">
+        body, p, h3 {
+            font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
+            text-shadow: 0px 0px 10px #fff,0px 0px 10px #fff,0px 0px 10px #fff,0px 0px 10px #fff;
+        }
+        .channel {
+            display: block;
+        }
+        .button-box {
+            margin-top: 8px;
+        }
+        button {
+            border-top: 1px solid #96d1f8;
+            background: #65a9d7;
+            background: -webkit-gradient(linear, left top, left bottom, from(#3e779d), to(#65a9d7));
+            background: -webkit-linear-gradient(top, #3e779d, #65a9d7);
+            background: -moz-linear-gradient(top, #3e779d, #65a9d7);
+            background: -ms-linear-gradient(top, #3e779d, #65a9d7);
+            background: -o-linear-gradient(top, #3e779d, #65a9d7);
+            padding: 5px 10px;
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            border-radius: 8px;
+            -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+            -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+            box-shadow: rgba(0,0,0,1) 0 1px 0;
+            text-shadow: rgba(0,0,0,.4) 0 1px 0;
+            color: white;
+            font-size: 14px;
+            font-family: 'Lucida Grande', Helvetica, Arial, Sans-Serif;
+            text-decoration: none;
+            vertical-align: middle;
+        }
+        button:hover {
+            border-top-color: #28597a;
+            background: #28597a;
+            color: #ccc;
+        }
+        button:active {
+            border-top-color: #1b435e;
+            background: #1b435e;
+        }
+        button.cancel {
+            border-top: 1px solid #ffffff;
+            background: #d9d9d9;
+            background: -webkit-gradient(linear, left top, left bottom, from(#9e9e9e), to(#d9d9d9));
+            background: -webkit-linear-gradient(top, #9e9e9e, #d9d9d9);
+            background: -moz-linear-gradient(top, #9e9e9e, #d9d9d9);
+            background: -ms-linear-gradient(top, #9e9e9e, #d9d9d9);
+            background: -o-linear-gradient(top, #9e9e9e, #d9d9d9);
+            padding: 5px 10px;
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            border-radius: 8px;
+            -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+            -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+            box-shadow: rgba(0,0,0,1) 0 1px 0;
+            text-shadow: rgba(0,0,0,.4) 0 1px 0;
+            color: white;
+            font-size: 14px;
+            font-family: 'Lucida Grande', Helvetica, Arial, Sans-Serif;
+            text-decoration: none;
+            vertical-align: middle;
+        }
+        button.cancel:hover {
+            border-top-color: #787878;
+            background: #787878;
+            color: #ccc;
+        }
+        button.cancel:active {
+            border-top-color: #5e5e5e;
+            background: #5e5e5e;
+        }
+        .graphic {
+            width: 175px;
+            height: 200px;
+            background: no-repeat bottom right;
+            background-size: 100%;
+            float: right;
+            margin-left: -175px;
+        }
+        #pwn {
+            background-image: url(pwn.png);
+        }
+        #triforce {
+            width: 325px;
+            height: 325px;
+            background-image: url(triforce.png);
+        }
+        #hr {
+            margin: 6px 0;
+            width: calc(100% - 325px);
+            height: 2px;
+            background-image: url(hr.png);
+            background-size: 100% 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="pwn"  class="graphic" style="display: none">&nbsp;</div>
+<div id="triforce"  class="graphic" style="display: none">&nbsp;</div>
+<h3>Triforce Connect Configuration</h3>
+<div id="panel1" style="display: none">
+    <p id="bad-api-key" style="display: none">
+        <span class="error">This API key is not valid!</span>
+        Please try again. If you continue to have problems, please contact us at <a href="#">https://triforce-arcade.net</a>
+    </p>
+    <p id="welcome">
+        <span class="title">Triforce Connect</span> needs you to put in your API key.
+    </p>
+    <input id="key" size="36" placeholder="Enter your API key here"/>
+    <div class="button-box">
+        <button id="validate">Check My Key</button>
+        <button class="cancel">Cancel</button>
+    </div>
+</div>
+<div id="panel2" style="display: none">
+    <p>Please update the global filter for events and data your wish to make available in your community:</p>
+    <label class="channel"><input type="checkbox" id="kqn" value="kqn"/>Killer Queen</label>
+    <label class="channel"><input type="checkbox" id="fig" value="fig"/>Fighting Games</label>
+    <label class="channel"><input type="checkbox" id="rac" value="rac"/>Racing Games</label>
+    <label class="channel"><input type="checkbox" id="sim" value="sim"/>Simulation Games</label>
+    <label class="channel"><input type="checkbox" id="arc" value="arc"/>Classic Arcade Games</label>
+    <label class="channel"><input type="checkbox" id="pin" value="pin"/>Pinball</label>
+    <div id="hr"></div>
+    <label class="channel"><input type="checkbox" id="tns" value="tns"/>Tournament News &amp; Scores</label>
+    <label class="channel"><input type="checkbox" id="blg" value="blg"/>Triforce Blog</label>
+    <div class="button-box">
+        <button id="save">Save</button>
+        <button class="cancel">Cancel</button>
+    </div>
+</div>
+</body>
+</html>

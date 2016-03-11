@@ -1,0 +1,47 @@
+{  
+    "status": "intermittent",  
+    "lastUpdate": "2016-03-15T21:22:13.779Z",  
+    "messages": [  
+        {  
+            "level": "warn",  
+            "summary": "Email temporarily unavialble",  
+            "detail": "We are experiencing technical difficulties with our email service. We expect this service to be back up shortly."  
+        },  
+        {  
+            "level": "info",  
+            "summary": "Scheduled Downtime",  
+            "detail": "Our regular scheduled downtime window is 7:00pm to 9:00pm on Wednesday evenings."  
+        }  
+    ],  
+    "resources": [
+        {  
+            "name": "Load balancer",  
+            "url": "https://connect.triforce-arcade.net",  
+            "status": "ok",  
+            "lastUpdate": "2016-03-15T21:18:54.652Z"
+        },  
+        {  
+            "name": "Storage",  
+            "status": "ok",  
+            "lastUpdate": "2016-03-15T20:30:01.022Z"
+        }, 
+        {  
+            "name": "Message bus",  
+            "status": "ok",  
+            "lastUpdate": "2016-03-15T21:22:13.779Z"
+        }, 
+        {  
+            "name": "Email queue",  
+            "status": "fault",  
+            "lastUpdate": "2016-03-15T21:20:47.365Z",
+            "messages": [
+                {
+                    "level": "error",
+                    "summary": "Outbound queue is blocked",
+                    "detail": "Outbound emails are currently being queued. Any queued emails will be sent once the issue has been resolved. This affects outbound communications, text messages and password resets.",
+                    "fix": "We expect this to be resolved before 4:00pm PDT today. We appologize for the inconveneince." 
+                }
+            ]  
+        }
+    ]  
+}  

@@ -1,0 +1,290 @@
+<html>
+<head>
+    <title>Validate My Install</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script>
+        function init() {
+            if (typeof gadgets !== "undefined") {
+                window.setTimeout(function () {
+                    gadgets.window.adjustHeight(350);
+                }, 500);
+            }
+            var allIds = "panel1,panel2,bad-license,welcome,check-begin,checking,check-pass,check-fail,check-results,begin,retry,install,n3rd,h4ck".split(",");
+            var state = "initial";
+            var stateTable = {};
+            var loop = null;
+            showsTheseIn("initial", "panel1", "welcome", "n3rd");
+            showsTheseIn("bad-license", "panel1", "bad-license", "n3rd");
+            showsTheseIn("net-check", "panel2", "check-begin", "begin", "h4ck");
+            showsTheseIn("net-check-run", "panel2", "checking", "check-results", "h4ck");
+            showsTheseIn("net-check-pass", "panel2", "check-pass", "check-results", "retry", "install", "h4ck");
+            showsTheseIn("net-check-fail", "panel2", "check-fail", "check-results", "retry", "h4ck");
+            $("#validate").click(function() {
+                // a valid license key always contains "TFC" somewhere in it
+                var key = $("#key").val();
+                if (!key) {
+                    updateState("initial");
+                } else {
+                    var valid = /TFC/.test(key);
+                    updateState(valid ? "net-check" : "bad-license");
+                }
+            });
+            $("#begin,#retry").click(function(ev) {
+                updateState("net-check-run");
+                $(".check-step").removeClass("running failed passed").addClass("pending");
+                var step = 0;
+                var fail = !!ev.shiftKey; // must hold down shift for tests to pass
+                loop = window.setInterval(function () {
+                    step++;
+                    switch (step) {
+                        case 3:
+                            $("#chk-con").removeClass("pending").addClass("running");
+                            break;
+                        case 11:
+                            if (!fail) {
+                                $("#chk-con").removeClass("running").addClass("passed");
+                            }
+                            break;
+                        case 13:
+                            if (!fail) {
+                                $("#chk-ver").removeClass("pending").addClass("running");
+                            }
+                            break;
+                        case 18:
+                            if (!fail) {
+                                $("#chk-ver").removeClass("running").addClass("passed");
+                            }
+                            break;
+                        case 20:
+                            if (!fail) {
+                                $("#chk-spd").removeClass("pending").addClass("running");
+                            }
+                            break;
+                        case 22:
+                            if (fail) {
+                                $("#chk-con").removeClass("running").addClass("failed");
+                                step = 99999; // fast abort
+                                updateState("net-check-fail");
+                            }
+                            break;
+                        case 32:
+                            if (!fail) {
+                                $("#chk-spd").removeClass("running").addClass("passed");
+                                updateState("net-check-pass");
+                            } else {
+
+                            }
+                            break;
+                    }
+                    if (step >= 32) {
+                        window.clearInterval(loop);
+                        loop = null;
+                    }
+                }, 250);
+            });
+            $("#install").click(function() {
+                jive.tile.close({}); // Pass an object to proceed with the install
+            });
+            $("button.cancel").click(function() {
+                if (typeof jive !== "undefined") {
+                    jive.tile.close(); // Pass nothing to abort the install
+                } else {
+                    updateState("initial");
+                    $("#key").val("");
+                    if (loop) {
+                        window.clearInterval(loop);
+                        loop = null;
+                    }
+                }
+            });
+            $("#referrer").text(window.document.referrer || "http://???");
+            function updateState(state) {
+                stateTable[state]();
+            }
+            function showsTheseIn(targetState, args) {
+                var show = {}, i;
+                for (i = 1; i < arguments.length; i++) {
+                    show[arguments[i]] = true;
+                }
+                var showSelector = [];
+                var hideSelector = [];
+                for (i = 0; i < allIds.length; i++) {
+                    var id = allIds[i];
+                    if (show[id]) {
+                        showSelector.push("#" + id);
+                    } else {
+                        hideSelector.push("#" + id);
+                    }
+                }
+                stateTable[targetState] = function() {
+                    state = targetState;
+                    $(hideSelector.join(",")).hide();
+                    $(showSelector.join(",")).show();
+                };
+            }
+        }
+        if (typeof gadgets !== "undefined") {
+            gadgets.util.registerOnLoadHandler(init);
+        } else {
+            $(init);
+        }
+    </script>
+    <style type="text/css">
+        body, p, h3 {
+            font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
+            text-shadow: 0px 0px 10px #fff,0px 0px 10px #fff,0px 0px 10px #fff,0px 0px 10px #fff;
+        }
+        #panel1, #panel2 {
+            position: relative;
+        }
+        .check-step {
+            padding-left: 24px;
+            background-repeat: no-repeat;
+            list-style: none;
+            line-height: 20px;
+            margin-top: 4px;
+        }
+        .check-step:first-child {
+            margin-top: 0;
+        }
+        .check-step.pending {
+            background-image: url(clock.gif);
+        }
+        .check-step.running {
+            background-image: url(pac_man.gif);
+        }
+        .check-step.failed {
+            background-image: url(fail.gif);
+        }
+        .check-step.passed {
+            background-image: url(check.gif);
+        }
+        .result {
+            display: none;
+            padding-left: 8px;
+            color: #36c;
+        }
+        .passed .result {
+            display: inline;
+        }
+        .button-box {
+            margin-top: 8px;
+        }
+        button {
+            border-top: 1px solid #96d1f8;
+            background: #65a9d7;
+            background: -webkit-gradient(linear, left top, left bottom, from(#3e779d), to(#65a9d7));
+            background: -webkit-linear-gradient(top, #3e779d, #65a9d7);
+            background: -moz-linear-gradient(top, #3e779d, #65a9d7);
+            background: -ms-linear-gradient(top, #3e779d, #65a9d7);
+            background: -o-linear-gradient(top, #3e779d, #65a9d7);
+            padding: 5px 10px;
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            border-radius: 8px;
+            -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+            -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+            box-shadow: rgba(0,0,0,1) 0 1px 0;
+            text-shadow: rgba(0,0,0,.4) 0 1px 0;
+            color: white;
+            font-size: 14px;
+            font-family: 'Lucida Grande', Helvetica, Arial, Sans-Serif;
+            text-decoration: none;
+            vertical-align: middle;
+        }
+        button:hover {
+            border-top-color: #28597a;
+            background: #28597a;
+            color: #ccc;
+        }
+        button:active {
+            border-top-color: #1b435e;
+            background: #1b435e;
+        }
+        button.cancel {
+            border-top: 1px solid #ffffff;
+            background: #d9d9d9;
+            background: -webkit-gradient(linear, left top, left bottom, from(#9e9e9e), to(#d9d9d9));
+            background: -webkit-linear-gradient(top, #9e9e9e, #d9d9d9);
+            background: -moz-linear-gradient(top, #9e9e9e, #d9d9d9);
+            background: -ms-linear-gradient(top, #9e9e9e, #d9d9d9);
+            background: -o-linear-gradient(top, #9e9e9e, #d9d9d9);
+            padding: 5px 10px;
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            border-radius: 8px;
+            -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+            -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+            box-shadow: rgba(0,0,0,1) 0 1px 0;
+            text-shadow: rgba(0,0,0,.4) 0 1px 0;
+            color: white;
+            font-size: 14px;
+            font-family: 'Lucida Grande', Helvetica, Arial, Sans-Serif;
+            text-decoration: none;
+            vertical-align: middle;
+        }
+        button.cancel:hover {
+            border-top-color: #787878;
+            background: #787878;
+            color: #ccc;
+        }
+        button.cancel:active {
+            border-top-color: #5e5e5e;
+            background: #5e5e5e;
+        }
+        .graphic {
+            width: 175px;
+            height: 200px;
+            background: no-repeat bottom right;
+            background-size: 100%;
+            float: right;
+            margin-left: -175px;
+        }
+        #h4ck {
+            background-image: url(h4ck.png);
+        }
+        #n3rd {
+            background-image: url(n3rd.png);
+        }
+    </style>
+</head>
+<body>
+<div id="n3rd" class="graphic">&nbsp;</div>
+<div id="h4ck" class="graphic" style="display: none">&nbsp;</div>
+<h3>Triforce Connect</h3>
+<div id="panel1">
+    <p id="bad-license" style="display: none">
+        <span class="error">This license key is not valid!</span>
+        Please try again. If you continue to have problems, please contact us at <a href="#">https://triforce-arcade.net</a>
+    </p>
+    <p id="welcome">
+        <span class="title">Triforce Connect</span> requires a license to use.
+        If you have not obtained a license key yet, please visit us at <a href="#">https://triforce-arcade.net</a>.
+    </p>
+    <input id="key" size="36" placeholder="Enter your license key here"/>
+    <div class="button-box">
+        <button id="validate">Proceed</button>
+        <button class="cancel">Cancel</button>
+    </div>
+</div>
+<div id="panel2" style="display: none">
+    <p id="check-begin">We need to check a few things. Click <span>Run Tests</span> to begin.</p>
+    <div id="checking">
+        <p>Checking your network...</p>
+    </div>
+    <p id="check-pass">Checking your network...</p>
+    <p id="check-fail">We were unable to reach your Jive server at <span id="referrer"></span>. You may need to update your firewall settings.</p>
+    <ul id="check-results">
+        <li id="chk-con" class="check-step pending">Connectivity <span class="result">Ping: 36ms</span></li>
+        <li id="chk-ver" class="check-step pending">Version Compatibility <span class="result">Jive: 2016.1.0.0</span> <span class="result">API: 3.14</span></li>
+        <li id="chk-spd" class="check-step pending">Performance <span class="result">Xfer: 438M/s</span> <span class="result">Response: 0.28s</span></li>
+    </ul>
+    <div class="button-box">
+        <button id="begin">Run Tests</button>
+        <button id="retry">Rerun Tests</button>
+        <button id="install">Install</button>
+        <button class="cancel">Cancel</button>
+    </div>
+</div>
+</body>
+</html>
