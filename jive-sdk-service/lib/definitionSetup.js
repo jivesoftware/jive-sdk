@@ -241,16 +241,7 @@ definitionSetup.setupAllDefinitions = function( app, definitionsRootDir ) {
     return jive.util.fsexists( definitionsRootDir).then( function(exists) {
         if ( exists ) {
             return q.nfcall(fs.readdir, definitionsRootDir).then(function(dirContents){
-                var proms = [];
-                dirContents.forEach(function(item) {
-                    if ( !isValidFile(item) ) {
-                        return;
-                    }
-                    var dirPath = definitionsRootDir + '/' + item ;
-                    proms.push(definitionSetup.setupOneDefinition(app, dirPath));
-                });
-
-                return q.all(proms);
+                return setupDefinitionsSequentially(app,definitionsRootDir, dirContents);
             });
         } else {
             return q.resolve();
@@ -277,8 +268,32 @@ definitionSetup.setupAllDefinitions = function( app, definitionsRootDir ) {
         };
 
         return remove( jive.tiles.definitions).then( function() {
-           return remove( jive.extstreams.definitions );
+            return remove( jive.extstreams.definitions );
         });
     });
 
 };
+
+/**
+ * This will setup tiledefinition persistence by having one tile insert at a time.
+ * Tested on jive-persistence-postgres and jive-persistence-mongo
+ * @param app
+ * @param definitionsRootDir
+ * @param directoryContents
+ * @returns {*}
+ */
+function setupDefinitionsSequentially(app,definitionsRootDir, directoryContents) {
+    if (directoryContents.length == 0) {
+        return q.resolve();
+    } else {
+        var item = directoryContents.shift();
+        if (!isValidFile(item)) {
+            return setupDefinitionsSequentially(app,definitionsRootDir, directoryContents);
+        }
+        var dirPath = definitionsRootDir + '/' + item;
+        return definitionSetup.setupOneDefinition(app, dirPath)
+            .then(function () {
+                return setupDefinitionsSequentially(app,definitionsRootDir, directoryContents);
+            });
+    }
+}
