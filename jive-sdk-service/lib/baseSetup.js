@@ -109,7 +109,12 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
 
                     httpVerb = candidate['verb'] || 'get';  // default to GET verb
                     httpVerb = httpVerb.toLowerCase();
-                    app[httpVerb](routeContextPath, candidate['route']);
+
+                    if (candidate.validate) {
+                      app[httpVerb](routeContextPath, candidate.validate, candidate['route']);
+                    } else {
+                      app[httpVerb](routeContextPath, candidate['route']);
+                    }
 
                     // lock the route if its marked to be locked
                     if ( candidate['jiveLocked'] ) {
