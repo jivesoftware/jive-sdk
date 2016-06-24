@@ -43,18 +43,19 @@ var returnOne = function(found ) {
  * @returns {Promise} Promise
  */
 exports.save = function(community ) {
+    var tenantId = community['tenantId'];
     var jiveUrl = community['jiveUrl'];
     var jiveCommunity = community['jiveCommunity'];
 
-    if ( !jiveUrl ) {
-        throw new Error("Invalid commmunity object, must specify a jiveUrl property.");
+    if ( !tenantId ) {
+        throw new Error("Invalid commmunity object, must specify a tenantId property.");
     }
 
     if ( !jiveCommunity ) {
         community['jiveCommunity'] = exports.parseJiveCommunity(jiveUrl);
     }
 
-    return jive.context.persistence.save( "community", community['jiveUrl'], community );
+    return jive.context.persistence.save( "community", community['tenantId'], community );
 };
 
 var find = function( filter, expectOne ) {
@@ -121,26 +122,26 @@ exports.parseJiveCommunity = function( jiveUrl ) {
 
 /**
  * Requests an access token by oauth access code (oauth access code is given in registration requests and valid for few minutes).
- * @param jiveUrl - the url of the jive community. this function will use this url to find the community in the persistence and get the client id and secret.
+ * @param tenantId - the tenantId of the jive community. this function will use this tenantId to find the community in the persistence and get the client id and secret.
  * @param oauthCode - the code needed to be use to get access to a specific registration scope (usually a group).
  * @returns {Promise} Promise A promise for success and failure [use .then(...) and .catch(...)]
  */
-exports.requestAccessToken = function (jiveUrl, oauthCode) {
+exports.requestAccessToken = function (tenantId, oauthCode) {
     var defer = q.defer();
 
-    exports.findByJiveURL(jiveUrl)
+    exports.findByTenantID(tenantId)
         .then(function (communityObj) {
             if (communityObj) {
                 var oauthConf = {
                     client_id: communityObj.clientId,
                     client_secret: communityObj.clientSecret,
                     code: oauthCode,
-                    jiveUrl: jiveUrl
+                    jiveUrl: communityObj.jiveUrl
                 };
                 jiveClient.requestAccessToken(oauthConf, defer.resolve, defer.reject);
             }
             else {
-                defer.reject(new Error("No community found by the url: " + jiveUrl));
+                defer.reject(new Error("No community found by the TenantId: " + tenantId));
             }
         })
         .catch(defer.reject);
@@ -345,7 +346,7 @@ exports.remove = function(community) {
     var deferred = q.defer();
 
     if (community) {
-        jive.context.persistence.remove("community", community['jiveUrl']).then(function(removed) {
+        jive.context.persistence.remove("community", community['tenantId']).then(function(removed) {
             if (removed) {
                 jive.events.emit("unregisterJiveInstanceSuccess", community);
                 deferred.resolve();
@@ -369,10 +370,10 @@ exports.remove = function(community) {
 exports.unregister = function(packet) {
     var deferred = q.defer();
 
-    var jiveUrl = packet['jiveUrl'];
+    var tenantId = packet['tenantId'];
 
     validateRegistration(packet).then(function() {
-        exports.findByJiveURL(jiveUrl).then(function(community) {
+        exports.findByTenantID(tenantId).then(function(community) {
             exports.remove(community).then(function() {
                 deferred.resolve();
             }).fail(function(err) {
@@ -444,7 +445,7 @@ exports.register = function( registration ) {
 
             // do access token exchange
             function persistCommunity(oauthResponse) {
-                exports.findByJiveURL(jiveUrl).then(function (community) {
+                exports.findByTenantID(tenantId).then(function (community) {
                     community = community || {};
 
                     var oauth;

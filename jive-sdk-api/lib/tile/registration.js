@@ -49,7 +49,7 @@ exports.registration = function(context) {
                 });
 
             } else {
-                return instanceLibrary.register(jiveUrl, pushUrl, config, name, code, guid).then(
+                return instanceLibrary.register(tenantID, pushUrl, config, name, code, guid).then(
                     function (tileInstance) {
                         if ( !tileInstance ) {
                             var statusObj = { status: 500, 'error': 'Failed to register' };
@@ -69,6 +69,7 @@ exports.registration = function(context) {
                                     }
 
                                     community = community || {};
+                                    community['tenantId'] = tenantID;
                                     community['jiveUrl'] = jiveUrl;
                                     community['jiveCommunity'] = jiveCommunity;
                                     jive.community.save(community).then(function () {

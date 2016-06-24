@@ -53,7 +53,7 @@ exports.getCollection = function() {
  * On success, the returned promise will be resolved with the inserted or updated object; if failure,
  * the promise will be rejected with an error.
  * @param {Object} instance
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.save = function (instance) {
     if (!instance.id) {
@@ -78,7 +78,7 @@ exports.save = function (instance) {
  * @param {Object} keyValues
  * @param {Boolean} expectOne If true, the promise will be resolved with at most 1 found item, or null (if none are found).
  * @param {Boolean} cursor If true, the promise will be resolved with a collection cursor object.
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.find = function ( keyValues, expectOne, cursor ) {
     return this.persistence().find(this.getCollection(), keyValues, cursor).then( function( found ) {
@@ -91,7 +91,7 @@ exports.find = function ( keyValues, expectOne, cursor ) {
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
  * @param {String} instanceID Id of the instance to be retrieved.
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.findByID = function (instanceID) {
     return this.find( { "id" : instanceID }, true );
@@ -103,7 +103,7 @@ exports.findByID = function (instanceID) {
  * The promise will resolve with an empty array, or populated array, depending on whether any instances matched the search criteria.
  * @param {String} definitionName
  * @param {Boolean} cursor If true, the promise will be resolved with a collection cursor object.
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.findByDefinitionName = function (definitionName, cursor) {
     return this.find( { "name": definitionName }, false, cursor );
@@ -114,7 +114,7 @@ exports.findByDefinitionName = function (definitionName, cursor) {
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
  * @param {String} scope
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.findByScope = function (scope) {
     return this.find( { "scope" : scope }, true );
@@ -125,7 +125,7 @@ exports.findByScope = function (scope) {
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
  * @param {String} guid
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.findByGuid = function (guid) {
     return this.find( { "guid" : guid }, true );
@@ -136,7 +136,7 @@ exports.findByGuid = function (guid) {
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
  * @param {String} url
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.findByURL = function (url) {
     return this.find( { "url" : url }, true );
@@ -147,10 +147,21 @@ exports.findByURL = function (url) {
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * If one is not found, the promise will resolve a null (undefined) value.
  * @param {String} communityName
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.findByCommunity = function (communityName) {
     return this.find( { "jiveCommunity" : communityName }, true );
+};
+
+/**
+ * Searches persistence for an instance that matches the given tenantID (the 'community' attribute).
+ * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
+ * If one is not found, the promise will resolve a null (undefined) value.
+ * @param {String} tenantID
+ * @returns {Promise} Promise
+ */
+exports.findByTenantID = function (tenantID) {
+    return this.find( { "tenantID" : tenantID }, true );
 };
 
 /**
@@ -158,7 +169,7 @@ exports.findByCommunity = function (communityName) {
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * The promise will resolve with an empty array, or populated array, depending on whether any instances exist.
  * @param {Boolean} cursor If true, the promise will be resolved with a collection cursor object.
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.findAll = function (cursor) {
     return this.find( null, false, cursor );
@@ -168,33 +179,34 @@ exports.findAll = function (cursor) {
  * Removes an instance from persistence with the specified id (attribute 'id').
  * The collection that is searched is defined in subclasses of this class (@see {@link abstractInstances:getCollection}).
  * @param {String} instanceID
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.remove = function (instanceID) {
     return this.persistence().remove(this.getCollection(), instanceID );
 };
 
-var findCredentials = function(jiveUrl) {
+var findCredentials = function(tenantID) {
+    console.log('findCredentials',tenantID);
     var deferred = q.defer();
 
-    if ( jiveUrl) {
+    if (tenantID) {
         // try to resolve trust by jiveUrl
-        jive.community.findByJiveURL( jiveUrl ).then( function(credentials) {
+        jive.community.findByTenantID( tenantID ).then( function(credentials) {
             if( credentials ) {
                 deferred.resolve( credentials );
             } else {
                 // could not find community trust
-                deferred.reject(new Error("Could not find community with jiveUrl " + jiveUrl));
+                deferred.reject(new Error("Could not find community with tenantId " + tenantID));
             }
         });
     } else {
-        deferred.reject(new Error("Invalid jiveUrl ["+jiveUrl+"]"));
+        deferred.reject(new Error("Invalid tenantId ["+tenantID+"]"));
     }
 
     return deferred.promise;
 };
 
-var doRegister = function(options, pushUrl, config, name, jiveUrl, guid, deferred) {
+var doRegister = function(options, pushUrl, config, name, tenantId, jiveUrl, guid, deferred) {
     jiveClient.requestAccessToken(options,
         // success
         function (response) {
@@ -214,6 +226,7 @@ var doRegister = function(options, pushUrl, config, name, jiveUrl, guid, deferre
             instance['refreshToken'] = accessTokenResponse['refresh_token'];
             instance['scope'] = scope;
             instance['guid'] = guid;
+            instance['tenantId'] = tenantId;
             instance['jiveCommunity'] = jiveUrl ?
                 jive.community.parseJiveCommunity(jiveUrl)
               : decodeURIComponent(scope.split(/:/)[1].split('/')[0]).split(/:/)[0];
@@ -244,15 +257,19 @@ var doRegister = function(options, pushUrl, config, name, jiveUrl, guid, deferre
  * @param {String} name
  * @param {String} code
  * @param {String} guid
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
-exports.register = function (jiveUrl, pushUrl, config, name, code, guid ) {
+exports.register = function (tenantID, pushUrl, config, name, code, guid ) {
     var deferred = q.defer();
 
-    return findCredentials(jiveUrl).then( function(credentials) {
+    console.log('register',tenantID, pushUrl, config, name, code, guid);
 
+    return findCredentials(tenantID).then( function(credentials) {
+
+        console.log('findCredentials',credentials);
         var clientId = credentials['clientId'];
         var clientSecret = credentials['clientSecret'];
+        var jiveUrl = credentials['jiveUrl'];
 
         var options = {
             client_id: clientId,
@@ -261,7 +278,7 @@ exports.register = function (jiveUrl, pushUrl, config, name, code, guid ) {
             jiveUrl: jiveUrl
         };
 
-        doRegister(options, pushUrl, config, name, jiveUrl, guid, deferred );
+        doRegister(options, pushUrl, config, name, tenantID, jiveUrl, guid, deferred );
 
         return deferred.promise;
     }, function(e) {
@@ -327,7 +344,7 @@ exports.refreshAccessToken = function (instance) {
 /**
  * Retrieves a map of extended properties set on the instance, in the remote jive community.
  * @param {Object} instance
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.getExternalProps = function( instance ) {
     return jive.context.scheduler.schedule(jive.constants.tileEventNames.GET_EXTERNAL_PROPS, {
@@ -339,7 +356,7 @@ exports.getExternalProps = function( instance ) {
  * Sets a map of extended properties on the instance, in the remote jive community.
  * @param {Object} instance
  * @param {Object} props
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.setExternalProps = function( instance, props ) {
     return jive.context.scheduler.schedule(jive.constants.tileEventNames.SET_EXTERNAL_PROPS, {
@@ -351,7 +368,7 @@ exports.setExternalProps = function( instance, props ) {
 /**
  * Removes the map of extended properties on the instance, in the remote community.
  * @param {Object} instance
- * @returns {Promise} Promise 
+ * @returns {Promise} Promise
  */
 exports.deleteExternalProps = function( instance ){
     return jive.context.scheduler.schedule(jive.constants.tileEventNames.DELETE_EXTERNAL_PROPS, {

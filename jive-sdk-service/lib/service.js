@@ -24,6 +24,8 @@
 var fs = require('fs');
 var path = require('path');
 var express = require('express');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
 var q = require('q');
 var bootstrap = require('./bootstrap');
 var definitionConfigurator = require('./definitionSetup');
@@ -239,13 +241,14 @@ exports.init = function(expressApp, options ) {
     tilesDir = rootDir + '/tiles';
 
     // for some reason this needs to be configured earlier than later
-    app.use(express.bodyParser());
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
     if ( options && !options['suppressHttpLogging'] ) {
         app.use(express.logger('dev'));
-    }
-    app.use(express.methodOverride());
-    app.use(app.router);
-    app.use(express.errorHandler());
+    } // end if
+    app.use(methodOverride('X-HTTP-Method'));        // Microsoft
+    app.use(methodOverride('X-HTTP-Method-Override')); // Google/GData
+    app.use(methodOverride('X-Method-Override'));      // IBM
 
     // attach security middleware
     app.all( '*', security.checkAuthHeadersMiddleware );
@@ -669,7 +672,7 @@ exports.getExpandedTileDefinitions = function(all) {
         if ( !tile ) {
             return;
         }
-        
+
         var name = tile.name;
         var stringified = JSON.stringify(tile);
         stringified =  mustache.render(stringified, {
@@ -705,9 +708,9 @@ exports.getExpandedTileDefinitions = function(all) {
             	// ADDITIONAL CHECK FOR A PUBLIC CONFIGURATION SCREEN HOSTED IN JIVE
             	if (processedTile['config'] && processedTile['config'].indexOf('/public') != 0) {
                     // assume its relative to host then
-                    processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];            		
+                    processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];
             	}// end if
-            }            
+            }
         }
         if ( !processedTile['unregister']) {
             // compute an unregister URL only if not an internal tile type
@@ -742,13 +745,13 @@ exports.getExpandedTileDefinitions = function(all) {
         if (conf.clientId) {
             processedTile.description += ' for ' + conf.clientId;
         }
-        
+
         /*** NEED TO REMOVE register/unregister IF IT IS A JIVE HOSTED APP ***/
         if (processedTile['config'] && processedTile['config'].indexOf('/public') == 0) {
             delete processedTile['register'];
             delete processedTile['unregister'];
         } // end if
-        
+
         processed.push( processedTile );
     });
     return processed;

@@ -50,6 +50,8 @@ exports.postWebhooks = {
                             });
                     } // end doWebhook
 
+                    //** TODO: NEED TO UPDATE TO USE tenantID ***/
+
                     jive.community.findByJiveURL(communityUri).then(
                         function(community) {
                             doWebhook( community , community['oauth']['access_token']);

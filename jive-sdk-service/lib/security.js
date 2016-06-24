@@ -67,17 +67,17 @@ var findCredentials = function(req) {
         }
     }
 
-    if ( !jiveUrl ) {
+    if ( !tenantID ) {
         // default to service credentials -- cannot look it up by community
         deferred.resolve( credentials );
     } else {
         // try to resolve trust by jiveUrl
-        jive.community.findByJiveURL(jiveUrl).then(function (community) {
+        jive.community.findByTenantID(tenantID).then(function (community) {
             if (community) {
                 credentials['clientId'] = community['clientId'];
                 credentials['clientSecret'] = community['clientSecret'];
             } else {
-                jive.logger.debug("Could not look up security credentials by community jiveURL " + jiveUrl + " -- using service credentials " +
+                jive.logger.debug("Could not look up security credentials by community tenantID " + tenantID + " -- using service credentials " +
                     "from service configuration file (usually jiveclientconfiguration.json).");
             }
             deferred.resolve(credentials);

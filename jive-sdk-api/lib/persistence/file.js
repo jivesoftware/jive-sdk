@@ -118,7 +118,7 @@ module.exports = function(serviceConfig) {
         if (shrink.length) {
             jive.logger.info('Discarded ' + shrink.length + ' data file(s): [' + (shrink.join(', ')) + ']' )
         }
-        return q.allResolved(deferreds);
+        return q.allSettled(deferreds);
     }
 
     function getCacheEntry(collectionID, callback) {
@@ -347,4 +347,3 @@ module.exports = function(serviceConfig) {
 
     return filePersistenceSubtype;
 };
-

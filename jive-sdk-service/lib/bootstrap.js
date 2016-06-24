@@ -16,6 +16,8 @@
 
 var express = require('express'),
     path = require('path'),
+    errorHandler = require('errorhandler'),
+    favicon = require('serve-favicon'),
     service = require('./service'),
     jive = require('../api'),
     consolidate = require('consolidate'),
@@ -55,70 +57,65 @@ var setupExpressApp = function (app, rootDir, config) {
         } );
     }
 
-    var p1 = q.defer();
-    var p2 = q.defer();
-
     primaryApp = app;
 
-    app.configure(function () {
-        app.engine('html', consolidate.mustache);
-        app.set('view engine', 'html');
-        app.set('views', rootDir + '/public/tiles');
-        app.use(express.favicon());
-        app.use(express.static(path.join(rootDir, 'public')));
-        // alias /__public__ to the public directory in the service
-        app.use( '/__public__', express.static(path.join(rootDir, 'public')) );
+    app.engine('html', consolidate.mustache);
+    app.set('view engine', 'html');
+    app.set('views', rootDir + '/public/tiles');
+    app.use(express.static(path.join(rootDir, 'public')));
+    // alias /__public__ to the public directory in the service
+    app.use( '/__public__', express.static(path.join(rootDir, 'public')) );
 
-        app.set('port', config['port']);
-        app.set('hostname', config['hostname']);
+    app.set('port', config['port']);
+    app.set('hostname', config['hostname']);
 
-        jive.logger.debug('Global framework routes:');
-        app.post('/registration', service.routes.tiles.registration);
-        service.security().lockRoute({ 'verb' : 'post', 'path' : '/registration' });
-        app.post('/unregister', service.routes.tiles.unregister);
-        service.security().lockRoute({ 'verb' : 'post', 'path' : '/unregister' });
-        app.post('/jive/oauth/register', service.routes.jive.oauthRegister);
-        app.post('/jive/oauth/unregister', service.routes.jive.oauthUnregister);
+    jive.logger.debug('Global framework routes:');
+    app.post('/registration', service.routes.tiles.registration);
+    service.security().lockRoute({ 'verb' : 'post', 'path' : '/registration' });
+    app.post('/unregister', service.routes.tiles.unregister);
+    service.security().lockRoute({ 'verb' : 'post', 'path' : '/unregister' });
+    app.post('/jive/oauth/register', service.routes.jive.oauthRegister);
+    app.post('/jive/oauth/unregister', service.routes.jive.oauthUnregister);
 
-        jive.logger.debug("POST /registration");
-        jive.logger.debug("POST /unregister");
-        jive.logger.debug("POST /jive/oauth/register");
-        if ( service.monitoring().isActive() ) {
-            jive.logger.debug("GET /jive/monitoring");
-        }
+    jive.logger.debug("POST /registration");
+    jive.logger.debug("POST /unregister");
+    jive.logger.debug("POST /jive/oauth/register");
+    if ( service.monitoring().isActive() ) {
+        jive.logger.debug("GET /jive/monitoring");
+    }
 
-        // wire in an sdk app with its own views
-        var jiveSdkApp = express();
+    // wire in an sdk app with its own views
+    var jiveSdkApp = express();
 
-        jiveSdkApp.engine('html js', consolidate.mustache);
-        jiveSdkApp.engine('js', consolidate.mustache);
-        jiveSdkApp.set('view engine', 'html js');
-        jiveSdkApp.set('views', __dirname + '/../views' );    // assume that views will be in the root jive-sdk folder
+    jiveSdkApp.engine('html js', consolidate.mustache);
+    jiveSdkApp.engine('js', consolidate.mustache);
+    jiveSdkApp.set('view engine', 'html js');
+    jiveSdkApp.set('views', __dirname + '/../views' );    // assume that views will be in the root jive-sdk folder
 
-        app.use( jiveSdkApp );
+    app.use( jiveSdkApp );
 
-        // oauth2 endpoints
-        jiveSdkApp.get('/javascripts/oauth2client.js', function(req, res) {
-            res.render('oauth2client.js');
-        });
-
-        p1.resolve();
+    // oauth2 endpoints
+    jiveSdkApp.get('/javascripts/oauth2client.js', function(req, res) {
+        res.render('oauth2client.js');
     });
 
-    app.configure( 'development', function () {
-        jive.logger.debug('Global dev framework routes:');
+    jive.logger.debug('Global dev framework routes:');
 
-        app.get('/tiles', service.routes.dev.tiles);
-        app.get('/dev/tiles', service.routes.dev.tiles);
-        jive.logger.debug("/dev/tiles");
+    app.get('/tiles', service.routes.dev.tiles);
+    app.get('/dev/tiles', service.routes.dev.tiles);
+    jive.logger.debug("/dev/tiles");
 
-        p2.resolve();
-    });
+    /*** MOVED THIS FROM SERVICE.JS - NEEDS TO BE LAST!!!!!????? ****/
+    /*** SEE: http://expressjs.com/en/guide/error-handling.html ***/
+    app.use(errorHandler);
 
-    return q.all( [ p1, p2 ] );
+    return q.fcall(function() {
+        jive.logger.debug("setupExpressApp - Complete.");
+    } );
 };
 
 var wireAdminEndpoints = function(appToUse, options) {
+    console.log('wireAdminEndpoints');
     if ( !appToUse ) {
         return;
     }

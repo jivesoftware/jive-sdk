@@ -95,7 +95,7 @@ function validate(options) {
             }
         }
     }
-    
+
     if ( options.cmd === 'unpack' ) {
         if( options['subject'] ) {
     		jive.util.fsexists(options.subject)
@@ -186,12 +186,12 @@ function processExample(target, example, name, force, authorizeUrl) {
                             }
 
                             var targetSubRootEntry = targetSubRoot + '/' + tileName;
-                            
+
                             /*** SPECIAL BEHAVIOR FOR AN IMPORTANT PACKAGING DIRECTORY ***/
                             if (targetSubRoot.indexOf('/extension_src') > 0) {
                             	targetSubRootEntry = targetSubRoot + '/' +subDir;
                             } // end if
-                            
+
                             var substitutions = !doSubstitutions ? undefined : {
                                 'TILE_PREFIX': tilePrefix,
                                 'TILE_NAME_BASE' : name,
@@ -205,11 +205,11 @@ function processExample(target, example, name, force, authorizeUrl) {
                                 'TIMESTAMP' : new Date().toISOString(),
                                 'host': '{{{host}}}'
                             };
-                            
+
                         	promises.push(
                         			conditionalMkdir(targetSubRootEntry,true)
                         	);
-                        	
+
                             promises.push(
                                 jive.util.recursiveCopy(sourceSubRootEntry, targetSubRootEntry, force, substitutions )
                             );
@@ -432,7 +432,7 @@ function finish(target,options) {
             console.log('(3b) If you just want to use the SDK to build an add-on package (without a service), use one of these commands:')
             console.log('         jive-sdk build add-on');
             console.log('         jive-sdk build add-on --apphosting="jive"');
-            console.log();        	
+            console.log();
         } // end if
     });
 }
@@ -445,7 +445,7 @@ function doStyle( options ) {
     var name = options['name'] || 'sample' + style;
     var type = style == 'activity' ? 'activity' : style;
     var authorizeUrl = options['authorizeUrl'] ? options['authorizeUrl'] : null;
-    
+
     processDefinition(target, type, name, style, force, authorizeUrl).then( function() {
         finish(target,options);
     });
@@ -625,7 +625,7 @@ function execute(options) {
     if ( cmd === 'createExtension' || cmd === 'build' ) {
         doCreateExtension( options );
     }
-    
+
     if (cmd === 'unpack') {
     	doUnpackAddOn(options['subject'],options);
     }
@@ -661,24 +661,24 @@ function doCreateExtension( options ) {
 
 function doUnpackAddOn( zipFile, options ) {
 	var path = require('path');
-	
+
 	var force = options['force'];
 	var name = options['name'] || path.basename(zipFile,'.zip');
 	var target = options['target'] || process.cwd();
-	
+
     /*** UNZIP EXTENSION TO extension_src ***/
     jive.util.unzipFile(zipFile, target+'/extension_src').then(
     	function() {
     	    /*** BRING IN THE BASE ADDON FILES ***/
     		jive.util.recursiveCopy(__dirname + '/base', target, force, { 'TILE_NAME': name, 'TILE_STYLE': '', 'host': '' }).then(
     			function() {
-    				
+
     			    //TODO:  ADD LOTS OF ERROR HANDLING AND USE-CASES CATCHES - CURRENTLY OPTIMIZED FOR JUST SIMPLE STREAM INTEGRATION STORY
-    				
+
     				/*** SYNC METADATA FROM ADDON TO PROJECT FILES ***/
     			    var metaJsonFilePath = target+'/extension_src/meta.json';
     			    var jiveClientConfigurationJsonFilePath = target+'/jiveclientconfiguration.json';
-    			    
+
     			    //console.log('meta.json',metaJsonFilePath);
     			    //console.log('jiveclientconfiguration.json',jiveClientConfigurationJsonFilePath);
 
@@ -689,7 +689,7 @@ function doUnpackAddOn( zipFile, options ) {
 			    				function (clientConfiguration) {
 //			        				console.log('meta.json',metaJson);
 //			        				console.log('jiveclientconfiguration.json',clientConfiguration);
-			        				
+
 			        				/**** UPDATE jiveclientconfiguration.json WITH VALUES FROM THE meta.json ****/
 			        			    if (metaJson["service_url"]) {
 			        			    	clientConfiguration["clientUrl"] = metaJson["service_url"];
@@ -697,30 +697,30 @@ function doUnpackAddOn( zipFile, options ) {
 				        			    	clientConfiguration["suppressAddonRegistration"] = true;
 				        			    } // end if
 			        			    } // end if
-			    					
+
 			        				clientConfiguration["extensionInfo"] = {};
 			        			    clientConfiguration["extensionInfo"]["id"] = metaJson["id"];
 			        			    clientConfiguration["extensionInfo"]["uuid"] = metaJson["id"];
 			        			    clientConfiguration["extensionInfo"]["name"] = metaJson["name"];
 			        			    clientConfiguration["extensionInfo"]["type"] = metaJson["type"];
 			        			    clientConfiguration["extensionInfo"]["description"] = metaJson["description"];
-			        			    clientConfiguration["extensionInfo"]["packageVersion"] = metaJson["package_version"];			        			    
+			        			    clientConfiguration["extensionInfo"]["packageVersion"] = metaJson["package_version"];
 			        			    clientConfiguration["extensionInfo"]["minimum_version"] = metaJson["minimum_version"];
 		        			    	clientConfiguration["extensionInfo"]["minimum_edition"] = metaJson["minimum_edition"];
 			        			    clientConfiguration["extensionInfo"]["status"] = metaJson["status"];
-			        			    
+
 			        			    clientConfiguration["extensionInfo"]["icon_16"] = metaJson["icon_16"];
 			        			    clientConfiguration["extensionInfo"]["icon_48"] = metaJson["icon_48"];
 			        			    clientConfiguration["extensionInfo"]["icon_128"] = metaJson["icon_128"];
-			        			    
+
 			        			    clientConfiguration["extensionInfo"]["releasedOn"] = metaJson["released_on"];
-			        			    
+
 			        			    if (metaJson["author"]) {
 				        			    clientConfiguration["extensionInfo"]["author"] = metaJson["author"];
 				        			    clientConfiguration["extensionInfo"]["author_affiliation"] = metaJson["author_affiliation"];
 				        			    clientConfiguration["extensionInfo"]["author_email"] = metaJson["author_email"];
 			        			    } // end if
-			        			    
+
 			        			    if (metaJson["register_url"]) {
 			        			    	clientConfiguration["extensionInfo"]["registerURL"] = metaJson["register_url"];
 			        			    } // end if
@@ -728,11 +728,11 @@ function doUnpackAddOn( zipFile, options ) {
 			        			    if (metaJson["unregister_url"]) {
 			        			    	clientConfiguration["extensionInfo"]["unregisterURL"] = metaJson["unregister_url"];
 			        			    } // end if
-			        			    
+
 			        			    if (metaJson["redirect_url"]) {
 			        			    	clientConfiguration["extensionInfo"]["redirectURL"] = metaJson["redirect_url"];
 			        			    } // end if
-			        					
+
 			        			    if (metaJson["config_url"]) {
 			        			    	clientConfiguration["extensionInfo"]["config_url"] = metaJson["config_url"];
 			        			    } // end if
@@ -744,7 +744,7 @@ function doUnpackAddOn( zipFile, options ) {
 			        			    if (metaJson["website_url"]) {
 			        			    	clientConfiguration["extensionInfo"]["website_url"] = metaJson["website_url"];
 			        			    } // end if
-			        			    
+
 			        			    if (metaJson["community_url"]) {
 			        			    	clientConfiguration["extensionInfo"]["community_url"] = metaJson["community_url"];
 			        			    } // end if
@@ -756,72 +756,72 @@ function doUnpackAddOn( zipFile, options ) {
 			        			    if (metaJson["info_email"]) {
 			        			    	clientConfiguration["extensionInfo"]["info_email"] = metaJson["info_email"];
 			        			    } // end if
-			        			    
+
 			        			    if (metaJson["tags"]) {
 			        			    	clientConfiguration["extensionInfo"]["tags"] = metaJson["tags"];
 			        			    } // end if
-			        			    
+
 			        			    if (metaJson["overview"]) {
 			        			    	clientConfiguration["extensionInfo"]["overview"] = metaJson["overview"];
 			        			    } // end if
-			        			    
+
 			        			    if (metaJson["install_instructions"]) {
 			        			    	clientConfiguration["extensionInfo"]["install_instructions"] = metaJson["install_instructions"];
 			        			    } // end if
-			        			    
+
 			        			    if (metaJson["eula_filename"]) {
 			        			    	clientConfiguration["extensionInfo"]["eula_filename"] = metaJson["eula_filename"];
-			        			    } // end if			        			    
-			        			    
+			        			    } // end if
+
 			        			    if (metaJson["privacy_policy"]) {
 			        			    	clientConfiguration["extensionInfo"]["privacy_policy"] = metaJson["privacy_policy"];
-			        			    } // end if			        			    
-			        			    
+			        			    } // end if
+
 			        			    if (metaJson["screen_shots"]) {
 			        			    	clientConfiguration["extensionInfo"]["screen_shots"] = metaJson["screen_shots"];
-			        			    } // end if		
-			        			    
+			        			    } // end if
+
 			        			    if (metaJson["solution_categories"]) {
 			        			    	clientConfiguration["extensionInfo"]["solution_categories"] = metaJson["solution_categories"];
-			        			    } // end if		
-			        			    
+			        			    } // end if
+
 			        			    if (metaJson["target_integrations"]) {
 			        			    	clientConfiguration["extensionInfo"]["target_integrations"] = metaJson["target_integrations"];
-			        			    } // end if		
-			        			    
+			        			    } // end if
+
 			        			    if (metaJson["key_features"]) {
 			        			    	clientConfiguration["extensionInfo"]["key_features"] = metaJson["key_features"];
-			        			    } // end if		
-			        			    
+			        			    } // end if
+
 			        			    if (metaJson["jive_technology_partner_id"]) {
 			        			    	clientConfiguration["extensionInfo"]["jive_technology_partner_id"] = metaJson["jive_technology_partner_id"];
-			        			    } // end if					        			    
-			        			    
+			        			    } // end if
+
 			        			    clientConfiguration["logLevel"] = "DEBUG";
 			        				clientConfiguration["ignoreExtensionRegistrationSource"] = "false";
-			        				
+
 			        			    /*** WRITE UPDATES BACK TO jiveclientconfiguration.json ***/
-			        			    fs.writeFileSync(jiveClientConfigurationJsonFilePath, JSON.stringify(clientConfiguration, null, '\t'));		
-			        			    
+			        			    fs.writeFileSync(jiveClientConfigurationJsonFilePath, JSON.stringify(clientConfiguration, null, '\t'));
+
 			        			    unpackDefinitions(target);
-			        			    
+
 			    				} // end function
     			    		);
     			    	} // end function
     			    );
-	
+
     			} // end function
     		);
     	} // end function
     );
-    
+
 } // end doUnpackAddOn
 
 function unpackDefinitions(target) {
-	
+
     var definitionJsonFilePath = target+'/extension_src/definition.json';
     //console.log('definition.json',definitionJsonFilePath);
-    
+
     readJsonFile( definitionJsonFilePath ).then(
 		function (definitionJson) {
 			var tiles = definitionJson["tiles"];
@@ -838,7 +838,7 @@ function unpackDefinitions(target) {
 							conditionalMkdir(tileDir,true).then(
 								function() {
 									/*** COPY TILE definition.json FROM EXISTING ADD-ON ***/
-									fs.writeFileSync(tileDir + "/definition.json", JSON.stringify(tile, null, '\t'));									
+									fs.writeFileSync(tileDir + "/definition.json", JSON.stringify(tile, null, '\t'));
 								} // end function
 							);
 							conditionalMkdir(tileDir + "/backend",true).then(
@@ -887,7 +887,7 @@ function prepare() {
             var itemResults = sortItems(examples.concat(styles));
             groupedExamples['examples'] = itemResults.exampleItems;
 
-            return q.allResolved(deferreds);
+            return q.allSettled(deferreds);
         } );
     });
 }
