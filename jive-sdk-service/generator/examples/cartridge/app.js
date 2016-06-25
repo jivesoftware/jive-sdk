@@ -22,12 +22,9 @@
 // Setup express
 
 var express = require('express'),
-    favicon = require('serve-favicon'),
     jive = require('jive-sdk');
 
 var app = express();
-app.use(favicon(__dirname + '/public/favicon.ico'));
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Setup jive
 

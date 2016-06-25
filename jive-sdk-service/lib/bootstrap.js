@@ -15,8 +15,10 @@
  */
 
 var express = require('express'),
+    favicon = require('serve-favicon'),
     path = require('path'),
     errorHandler = require('errorhandler'),
+    logger = require('morgan'),
     favicon = require('serve-favicon'),
     service = require('./service'),
     jive = require('../api'),
@@ -65,6 +67,9 @@ var setupExpressApp = function (app, rootDir, config) {
     app.use(express.static(path.join(rootDir, 'public')));
     // alias /__public__ to the public directory in the service
     app.use( '/__public__', express.static(path.join(rootDir, 'public')) );
+
+    app.use(favicon(process.cwd() + '/public/favicon.ico'));
+
 
     app.set('port', config['port']);
     app.set('hostname', config['hostname']);
@@ -229,7 +234,7 @@ var setupMonitoring = function(options) {
         // spawn a new server listening on the admin port
         adminApp = express();
         if ( options && !options['suppressHttpLogging'] ) {
-            adminApp.use(express.logger('dev'));
+            adminApp.use(morgan('dev'));
         }
         var protocol = require('url')
             .parse(jive.service.serviceURL())

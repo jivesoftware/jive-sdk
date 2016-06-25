@@ -25,6 +25,7 @@ var fs = require('fs');
 var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
+var logger = require('morgan');
 var methodOverride = require('method-override');
 var q = require('q');
 var bootstrap = require('./bootstrap');
@@ -244,7 +245,7 @@ exports.init = function(expressApp, options ) {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
     if ( options && !options['suppressHttpLogging'] ) {
-        app.use(express.logger('dev'));
+        app.use(logger('dev'));
     } // end if
     app.use(methodOverride('X-HTTP-Method'));        // Microsoft
     app.use(methodOverride('X-HTTP-Method-Override')); // Google/GData

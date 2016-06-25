@@ -2,6 +2,7 @@ var assert = require('assert');
 var q = require('q');
 var sinon = require('sinon');
 var jiveClient = require(process.cwd() + '/jive-sdk-api/lib/client/jive');
+var fakeTenantID = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx";
 
 describe('jive', function () {
     beforeEach(function() {
@@ -21,7 +22,7 @@ describe('jive', function () {
             var needsRefresh = q.defer();
             var ok = q.defer();
             var current = needsRefresh;
-            var community = {oauth: {}, jiveUrl: "http://localhost:8080"};
+            var community = { oauth: {}, jiveUrl: "http://localhost:8080", tenantId: fakeTenantID };
 
             this.stub(jive.util, "buildRequest", function( f ) {
                 var thisOne = current;
@@ -33,7 +34,7 @@ describe('jive', function () {
                 success({statusCode: 200, entity: {access_token:'abc', refresh_token: 'bbb'}});
             });
 
-            this.stub(jive.community, "findByCommunity").returns(q(community));
+            this.stub(jive.community, "findByTenantID").returns(q(fakeTenantID));
 
             ok.resolve({statusCode: 200, entity: {'a':'b'}});
             needsRefresh.reject({statusCode: 403});
