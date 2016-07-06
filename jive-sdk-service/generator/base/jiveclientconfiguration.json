@@ -2,8 +2,8 @@
     "clientUrl": "http://localhost",
     "port": "8090",
     "development" : true,
-	"clientUrlExcludesPort": true,
-	"extensionInfo": {
+	  "clientUrlExcludesPort": true,
+	  "extensionInfo": {
 		"id": "{{{GENERATED_UUID}}}",
 		"uuid": "{{{GENERATED_UUID}}}",
 		"name": "{{{NAME}}}",
@@ -18,8 +18,29 @@
 	},
 	"otherPropertiesToConsider" : {
 		"ignoreExtensionRegistrationSource": true,
+    "packageApps" : false,
+    "skipCreateExtension" : true,
 		"suppressAddonRegistration" : true,
+    "suppressHttpLogging": false,
 		"logLevel": "DEBUG",
+    "logFile" : "logs/jive-sdk.log",
+    "logFileSize" : 20480,
+    "logFileNumBackups" : 3,
+    "customServiceLogger": {},
+    "persistence": "mongo",
+    "persistenceInitializer" : {},
+    "suppressMonitoring" : false,
+    "monitoringInterval": 1000,
+    "codeVersionString": "jive",
+    "adminPort" : 8091,
+    "statsdClientConfig": {
+      "host" : "localhost",
+      "port" : 8125,
+      "interval" : 1000,
+      "servicePrefix" : "jive"
+    },
+    "role" : "worker",
+    "scheduler": {},
 		"extensionInfo": {
 			"registerURL": "%serviceURL%/jive/oauth/register",
 			"unregisterURL": "%serviceURL%/jive/oauth/unregister",
