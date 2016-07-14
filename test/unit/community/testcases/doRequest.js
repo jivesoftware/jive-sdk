@@ -34,7 +34,7 @@ describe('jive', function () {
                 success({statusCode: 200, entity: {access_token:'abc', refresh_token: 'bbb'}});
             });
 
-            this.stub(jive.community, "findByTenantID").returns(q(fakeTenantID));
+            this.stub(jive.community, "findByTenantID").returns(q(community));
 
             ok.resolve({statusCode: 200, entity: {'a':'b'}});
             needsRefresh.reject({statusCode: 403});
@@ -55,7 +55,7 @@ describe('jive', function () {
             var needsRefresh = q.defer();
             var ok = q.defer();
             var current = needsRefresh;
-            var community = {jiveUrl: "http://localhost:8080"};
+            var community = { oauth: {}, jiveUrl: "http://localhost:8080", tenantId: fakeTenantID };
             var newToken;
             var authHeaders = [];
 
@@ -72,7 +72,7 @@ describe('jive', function () {
                 success({statusCode: 200, entity: {access_token:'abc', refresh_token: 'bbb'}});
             });
 
-            this.stub(jive.community, "findByCommunity").returns(q(community));
+            this.stub(jive.community, "findByTenantID").returns(q(community));
 
             ok.resolve({statusCode: 200, entity: {'foo':'b'}});
             needsRefresh.reject({statusCode: 403});

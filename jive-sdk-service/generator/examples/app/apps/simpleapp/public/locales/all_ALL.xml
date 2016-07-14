@@ -1,0 +1,7 @@
+<messagebundle>
+  <msg name="debug">Default ALL</msg>
+  <msg name="app">jivedev App</msg>
+  <msg name="title">jivedev Reference App ({{{TILE_PREFIX}}})</msg>
+  <msg name="description">Jive Developer App Contributions for {{{TILE_PREFIX}}}</msg>
+  <msg name="exampleLabel">Example Label</msg>
+</messagebundle>

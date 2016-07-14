@@ -1,21 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module specificationVersion="1">
+  <!-- EXAMPLE WITHOUT LOCATLIZATION (ENGLISH ONLY) -->
   <ModulePrefs title="jivedev Reference App ({{{TILE_PREFIX}}})"
                description="Jive Developer App Contributions for {{{TILE_PREFIX}}}"
                author="Jive Developers"
                author_affiliation="Jive Software (Open Source)"
                author_email="jivedev@jivesoftware.com">
 
+ <!-- EXAMPLE USING LOCATLIZATION -->
+ <!--
+ <ModulePrefs title="__MSG_title__"
+              description="__MSG_description__"
+              author="Jive Developers"
+              author_affiliation="Jive Software (Open Source)"
+              author_email="jivedev@jivesoftware.com">
+   <Locale messages="locales/all_ALL.xml"/>
+   <Locale lang="da" messages="locales/da_ALL.xml"/>
+   <Locale lang="de" messages="locales/de_ALL.xml"/>
+   <Locale lang="en" messages="locales/en_ALL.xml"/>
+   <Locale lang="es" messages="locales/es_ALL.xml"/>
+   <Locale lang="fr" messages="locales/fr_ALL.xml"/>
+   <Locale lang="id" messages="locales/id_ALL.xml"/>
+   <Locale lang="it" messages="locales/it_ALL.xml"/>
+   <Locale lang="ja" messages="locales/ja_ALL.xml"/>
+   <Locale lang="ko" messages="locales/ko_ALL.xml"/>
+   <Locale lang="ms" messages="locales/ms_ALL.xml"/>
+   <Locale lang="nl" messages="locales/nl_ALL.xml"/>
+   <Locale lang="no" messages="locales/no_ALL.xml"/>
+   <Locale lang="pt" messages="locales/pt_ALL.xml"/>
+   <Locale lang="sv" messages="locales/sv_ALL.xml"/>
+   <Locale lang="th" messages="locales/th_ALL.xml"/>
+   <Locale lang="vi" messages="locales/vi_ALL.xml"/>
+   <Locale lang="zh" country="TW" messages="locales/zh_TW.xml"/>
+   <Locale lang="zh" messages="locales/zh_ALL.xml"/>
+ -->
+
    <!-- Commonly used features -->
-   <Require feature="dynamic-height" />
-   <Require feature="jive-core-v2" />
-   <Require feature="jquery-1.6" />
+   <Require feature="dynamic-height"/>
+   <Require feature="jquery-1.6"/>
    <Require feature="osapi"/>
    <Require feature="settitle"/>
-   <Require feature="views" />
-   <Require feature="jive-core-v3" />
-   <Require feature="embedded-experiences" />
-	  <Require feature="actions">
+   <Require feature="views"/>
+   <Require feature="jive-core-v3"/>
+   <Require feature="jive-core-v3-resolver"/>
+   <Require feature="embedded-experiences"/>
+   <Require feature="jive-custom-settings-1.0.0"/>
+   <Require feature="jive-opensocial-ext-v1"/>
+   <Require feature="opensocial-data"/>
+   <Require feature="setprefs"/>
+   <Require feature="selection"/>
+   <Require feature="embedded-experiences"/>
+	 <Require feature="actions">
 		    <Param name="action-contributions">
    			<![CDATA[
            <!--
@@ -191,7 +226,7 @@
  </ModulePrefs>
 
  <Content type="html"
-          view="home,canvas,ext-object,place-all-tab,place-space-tab,place-group-tab,place-project-tab,actions-tab,profile-tab,rte-action,content-action-all,content-action-document,content-action-discussion,content-action-question,content-action-document-binary,content-action-blogpost,content-action-poll,content-action-video,content-action-idea,content-action-event,createmenu-action,place-all-action,place-space-action,place-group-action,place-project-action,place-settings-all-action,place-settings-space-action,place-settings-group-action,place-settings-project-action"
+          view="home,system-settings,user-prefs,settings,preferences,canvas,ext-object,place-all-tab,place-space-tab,place-group-tab,place-project-tab,actions-tab,profile-tab,rte-action,content-action-all,content-action-document,content-action-discussion,content-action-question,content-action-document-binary,content-action-blogpost,content-action-poll,content-action-video,content-action-idea,content-action-event,createmenu-action,place-all-action,place-space-action,place-group-action,place-project-action,place-settings-all-action,place-settings-space-action,place-settings-group-action,place-settings-project-action"
           href="canvas.html"
           preferred_height="800" />
 
