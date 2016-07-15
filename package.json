@@ -76,6 +76,7 @@
     "type": "git",
     "url": "http://github.com/jivesoftware/jive-sdk"
   },
+  "license": "Apache-2.0",
   "keywords": [
     "jive",
     "framework",
