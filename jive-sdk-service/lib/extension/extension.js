@@ -453,20 +453,20 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
         });
 }
 
-function addCacheBuster(items) {
-  if (items) {
-    for (x in items) {
-      ["action","view","config"].forEach(
+function addCacheBuster(tiles) {
+  if (tiles) {
+    for (x in tiles) {
+      ["action","view","config","url"].forEach(
         function(key) {
-          if (items[x][key]) {
-            items[x][key] += (items[x][key].indexOf("?") > -1) ? "&" : "?";
-            items[x][key] += "ts="+new Date().getTime();
+          if (tiles[x][key]) {
+            tiles[x][key] += (tiles[x][key].indexOf("?") > -1) ? "&" : "?";
+            tiles[x][key] += "ts="+new Date().getTime();
           } // end if
         }
       );
     } // end for item
   } // end if
-  return items;
+  return tiles;
 } // end addCacheBuster
 
 function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, servicesDir, extensionSrcDir, extensionPublicDir,
@@ -499,7 +499,7 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
                             },
                             'tiles': (definitions && definitions.length > 0) ? addCacheBuster(definitions) : undefined,
                             'templates': (templates && templates.length > 0) ? templates : undefined,
-                            'osapps': (apps && apps.length > 0) ? apps : undefined,
+                            'osapps': (apps && apps.length > 0) ? addCacheBuster(apps) : undefined,
                             'storageDefinitions':(storages && storages.length > 0) ? storages : undefined,
                             'jabCartridges': cartridges
                         };
