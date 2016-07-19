@@ -455,12 +455,13 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
 
 function addCacheBuster(tiles) {
   if (tiles) {
+    var ts = new Date().getTime();
     for (x in tiles) {
       ["action","view","config","url"].forEach(
         function(key) {
           if (tiles[x][key]) {
             tiles[x][key] += (tiles[x][key].indexOf("?") > -1) ? "&" : "?";
-            tiles[x][key] += "ts="+new Date().getTime();
+            tiles[x][key] += "ts="+ts;
           } // end if
         }
       );
