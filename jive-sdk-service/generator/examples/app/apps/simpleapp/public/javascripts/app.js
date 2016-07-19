@@ -26,13 +26,18 @@ var ACTION_IDS = [
 ];
 
 /************************************************************************
-  STEP 2 - Use this method if you only want to perform something once the full context has loaded
-  NOTE: SINCE DATA IS OPTIONALLY AVAILABLE, WE CANT BLOCK ON IT; HOWEVER, USING ACTION_ID CHECKS, YOU CAN DETERMINE IF YOU NEED TO WAIT FOR onData to FIRE
+  STEP 2 - Use this method if you want to run code after OpenSocial has loaded the environemnt
+  NOTE: This is marginally better than jQuery onReady, but not required.
+        //var jiveURL = opensocial.getEnvironment()['jiveUrl'];
+  NOTE: If not needed, you can remove the entire function
 ************************************************************************/
-function onReady(viewer,context,env) {
-    console.log('onReady','jiveURL',env["jiveUrl"]);
+function onReady(env) {
+  console.log('onReady',env);
+  var jiveURL = env["jiveUrl"];
 
-    app.resize();
+  //TODO: ADD IN UI INIT STUFF
+
+  app.resize();
 } // end function
 
 /************************************************************************
@@ -45,14 +50,14 @@ function onViewer(viewer) {
 } // end function
 
 /************************************************************************
-  STEP 4 - Use this method if you only want to perform something once the Context has been resolved
+  STEP 4 - Use this method if you only want to perform something once the View Context has been resolved
   NOTE: If not needed, you can remove the entire function
 ************************************************************************/
-function onContext(currentView,context) {
-  console.log("onContext",currentView,context);
+function onView(context) {
+  console.log("onView",context);
 
-  if (currentView) {
-    $('span.viewContext').append('<em>'+currentView+"</em>");
+  if (context["currentView"]) {
+    $('span.viewContext').append('<em>'+context["currentView"]+"</em>");
   } // end if
 
   if (context["params"]) {
@@ -61,14 +66,24 @@ function onContext(currentView,context) {
     $('#paramsContext').html('No Params Found');
   } // end if
 
-  $('span.actionContext').append('<em>blah</em>');
-
-  if (context["type"] == "view") {
+  if (context["object"]) {
     $("#currentViewContext").append("<pre>"+JSON.stringify(context["object"],null,2)+"</pre>");
-  } else if (context["type"] == "action") {
-    $('span.actionContext').append('<em>'+context["name"]+'</em>');
-    $("#currentActionContext").append("<hr/><p><strong>After Resolve</strong></p><pre>"+JSON.stringify(context["object"],null,2)+"</pre>");
   } // end if
+
+  $('#paramsSampleLink').click(function() {
+    gadgets.views.requestNavigateTo(context["currentView"], { timestamp: new Date().toString() });
+  });
+
+} // end function
+
+/************************************************************************
+  STEP 5 - Use this method if you only want to perform something once the Action Context has been resolved
+  NOTE: If not needed, you can remove the entire function
+************************************************************************/
+function onAction(context) {
+  console.log("onAction",context);
+  $('span.actionContext').append('<em>'+context["action"]+'</em>');
+  $("#currentActionContext").append("<pre>"+JSON.stringify(context["object"],null,2)+"</pre>");
 
   if (context["isRTE"]) {
     $('#btnEmbedApp').click(embedAppReferenceSimple);
@@ -76,20 +91,15 @@ function onContext(currentView,context) {
     $('#btnEmbedMarkup').click(embedMarkUp);
     $('#embed-actions').show();
   } // end if
-
-  $('#paramsSampleLink').click(function() {
-    gadgets.views.requestNavigateTo(currentView, { timestamp: new Date().toString() });
-  });
-
 } // end function
 
 /************************************************************************
-  STEP 5 - Use this method if you only want to perform something once the Data Context has been resolved
+  STEP 6 - Use this method if you only want to perform something once the Data Context has been resolved
   NOTE: If not needed, you can remove the entire function
 ************************************************************************/
 function onData(data) {
   console.log("onData",data);
-  $("#currentActionContext").html("<p><strong>Raw Context</strong></p>");
+  $("#currentActionContext").html("<p><strong>Data Context</strong></p>");
   $("#currentActionContext").append("<pre>"+JSON.stringify(data,null,2)+"</pre>");
 } // end function
 

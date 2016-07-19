@@ -7,9 +7,8 @@ var app = {
 
     NO_CONTEXT : "NO_CONTEXT",
 
-    hasFiredViewer : false,
-    hasFiredContext : false,
-    context : { },
+    viewContext : { },
+    actionContext : { },
     data : null,
     viewer : null,
 
@@ -28,29 +27,45 @@ var app = {
       return currentView;
     },
 
-    loadUI : function() {
-      if (!this.hasFiredViewer && this.viewer && onViewer && typeof onViewer === "function") {
-        this.hasFiredViewer = true;
+    fireOnViewer : function() {
+      if (onViewer && typeof onViewer === "function") {
         onViewer(this.viewer);
       } // end if
+    }, // end function
 
-      if (!this.hasFiredContext && this.context["object"] && onContext && typeof onContext === "function") {
-        this.hasFiredContext = true;
-        if (this.context["object"] === app.NO_CONTEXT) {
-          delete this.context.object;
+    fireOnReady : function() {
+      if (onReady && typeof onReady === "function") {
+        onReady(opensocial.getEnvironment());
+      } // end if
+    }, // end function
+
+    fireOnViewContext : function() {
+      if (onView && typeof onView === "function") {
+        /*** DATA CLEANSING ***/
+        if (this.viewContext.object === app.NO_CONTEXT) {
+          delete this.viewContext.object;
         } // end if
-        onContext(this.getCurrentView(),this.context);
+        onView(this.viewContext);
       } // end if
+    }, // end function
 
-      if (this.viewer && this.context["object"] && onReady && typeof onReady === "function") {
-        onReady(this.viewer,this.context,opensocial.getEnvironment());
+    fireOnActionContext : function() {
+      if (onAction && typeof onAction === "function") {
+        /*** DATA CLEANSING ***/
+        if (this.actionContext.object === app.NO_CONTEXT) {
+          delete this.actionContext.object;
+        } // end if
+        onAction(this.actionContext);
       } // end if
+    }, // end function
 
+    fireOnDataContext : function() {
+      if (onData && typeof onData === "function") {
+        onData(this.data);
+      } // end if
     }, // end function
 
     init : function() {
-      app.context["params"] = gadgets.views.getParams();
-
       // RESOLVE THE DATA CONTEXT (IF AVAILABLE)
       // NOTE: THIS WONT FIRE IF NOT PRESENT, SO CANT BE PART OF THE CONTEXT
       opensocial.data.getDataContext().registerListener('org.opensocial.ee.context',gadgets.util.makeClosure(this, this.handleDataContext));
@@ -72,21 +87,24 @@ var app = {
       if (ACTION_IDS && ACTION_IDS.constructor === Array && ACTION_IDS.length > 0) {
         registerActionLoaders(ACTION_IDS);
       } // end if
+
+      this.fireOnReady();
     },
 
     /*** PROCESS THE VIEW CONTEXT ****/
     handleViewContext : function(context) {
-      app.context["type"] = "view";
-      app.context["name"] = app.getCurrentView();
+      app.viewContext["currentView"] = app.getCurrentView();
+      app.viewContext["params"] = gadgets.views.getParams();
       if (context) {
         osapi.jive.corev3.resolveContext(context,
           function(object) {
-            app.context["object"] = object["content"];
-            app.loadUI();
+            app.viewContext["object"] = object["content"];
+
+            app.fireOnViewContext();
         });
       } else {
-        app.context["object"] = app.NO_CONTEXT;
-        app.loadUI();
+        app.viewContext["object"] = app.NO_CONTEXT;
+        app.fireOnViewContext();
       } // end if
     }, // end handleViewContext
 
@@ -94,9 +112,7 @@ var app = {
     handleDataContext : function(key) {
       //console.log('handleDataContext',key);
       app.data = opensocial.data.getDataContext().getDataSet(key);
-      if (app.data && onData && typeof onData === "function") {
-        onData(app.data);
-      } // end if
+      app.fireOnDataContext();
     }, // end handleViewContext
 
     /*************************************************************************************
@@ -105,21 +121,20 @@ var app = {
      *************************************************************************************/
     handleActionContext : function(action,context) {
       //console.log('handleActionContext',action,context);
+      app.actionContext["currentView"] = app.getCurrentView();
+      app.actionContext["action"] = action;
+      app.actionContext["params"] = gadgets.views.getParams();
+      app.actionContext["isRTE"] = (context["jive"]["content"]["id"] === -1);
       if (context) {
-
-        app.context["type"] = "action";
-        app.context["name"] = action;
-        app.context["isRTE"] = (context["jive"]["content"]["id"] === -1);
-
-        if (!app.context["isRTE"]) {
+        if (!app.actionContext["isRTE"]) {
           osapi.jive.corev3.resolveContext(context,
             function(object) {
-              app.context["object"] = object["content"];
-              app.loadUI();
+              app.actionContext["object"] = object["content"];
+              app.fireOnActionContext();
           });
         } else {
-          app.context["object"] = app.NO_CONTEXT;
-          app.loadUI();
+          app.actionContext["object"] = app.NO_CONTEXT;
+          app.fireOnActionContext();
         } // end if
       } // end if
     }, // end handleActionContext
@@ -127,7 +142,7 @@ var app = {
     handleViewer : function(viewer) {
       //console.log('handleViewer',viewer);
       app.viewer = viewer;
-      app.loadUI();
+      app.fireOnViewer();
     } // end handleViewer
 };
 

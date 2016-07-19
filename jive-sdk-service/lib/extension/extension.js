@@ -210,7 +210,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
     var name = extensionInfo['name'];
     var type = extensionInfo['type'] || 'client-app'; // by default
     var id = extensionInfo['uuid'];
-    
+
     var hasCartridges = cartridges && cartridges.length > 0;
     var hasOsapps = definitions['osapps'] && definitions['osapps'].length > 0;
     var hasTiles = definitions['tiles'] && definitions['tiles'].length > 0;
@@ -303,21 +303,21 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         "service_url": jive.service.serviceURL(),
         "redirect_url": extensionInfo['redirectURL'] || "%serviceURL%"
     }, jive.service.options['extensionInfo']);
-   
+
     if (extensionInfo["minimum_edition"]) {
     	extensionMeta["minimum_edition"] = extensionInfo["minimum_edition"];
     } // end if
-    
+
     if (extensionInfo['author']) {
     	extensionMeta["author"] = extensionInfo['author'];
     	extensionMeta["author_affiliation"] = extensionInfo['author_affiliation'];
     	extensionMeta["author_email"] = extensionInfo['author_email'];
     } // end if
-    
+
     if (extensionInfo["config_url"]) {
     	extensionMeta["config_url"] = extensionInfo["config_url"];
     } // end if
-    
+
     if (extensionInfo["health_url"]) {
     	extensionMeta["health_url"] = extensionInfo["health_url"];
     } // end if
@@ -341,7 +341,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
     if (extensionInfo["tags"]) {
     	extensionMeta["tags"] = extensionInfo["tags"];
     } // end if
-    
+
     if (extensionInfo["overview"]) {
     	extensionMeta["overview"] = extensionInfo["overview"];
     } // end if
@@ -377,13 +377,13 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
     if (extensionInfo["jive_technology_partner_id"]) {
     	extensionMeta["jive_technology_partner_id"] = extensionInfo["jive_technology_partner_id"];
     } // end if
-    
+
     // these should never be there
     delete extensionMeta['uuid'];
     delete extensionMeta['jiveServiceSignature'];
 
     // suppress the register and unregister URLs if configured to do so
-    if ( (jive.service.options['suppressAddonRegistration'] == true ) || 
+    if ( (jive.service.options['suppressAddonRegistration'] == true ) ||
           // assuming that if clientUrl is still localhost that we shouldn't initiate a register event
     	  // In the event this causes issue, clientUrl can be set to 127.0.0.1 to bring back original behavior
     	 (jive.service.options['clientUrl'] && jive.service.options['clientUrl'].indexOf('localhost') > -1)
@@ -424,14 +424,14 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
                     definition['view'] = !view ? view : view.replace(host, '/public/tiles');
                     definition['action'] = !action ? action : action.replace(host, '/public/tiles');
                     definition['config'] = !config ? config : config.replace(host, '/public/tiles');
-                    
+
                     //*** NEEDED TO PREVENT SDK FROM ADDING IN REGISTER URLS ***
                     if (definition['transform']) {
                     	definition['config'] = definition['config'].substring(definition['config'].indexOf('/public/configuration'));
                     	delete definition['unregister'];
                     	delete definition['register'];
                     } // end if
-                    
+
                     delete definition['definitionDirName'];
 
                     // post-process
@@ -453,6 +453,22 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
         });
 }
 
+function addCacheBuster(items) {
+  if (items) {
+    for (x in items) {
+      ["action","view","config"].forEach(
+        function(key) {
+          if (items[x][key]) {
+            items[x][key] += (items[x][key].indexOf("?") > -1) ? "&" : "?";
+            items[x][key] += "ts="+new Date().getTime();
+          } // end if
+        }
+      );
+    } // end for item
+  } // end if
+  return items;
+} // end addCacheBuster
+
 function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, servicesDir, extensionSrcDir, extensionPublicDir,
                                       extensionInfo, definitions, packageApps) {
     return getTemplates(tilesDir).then(function (templates) {
@@ -469,8 +485,11 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
                             });
                         });
 
+                        jive.logger.debug("definitions:\n" + JSON.stringify(definitions, null, 4));
+                        jive.logger.debug("templates:\n" + JSON.stringify(templates, null, 4));
                         jive.logger.debug("apps:\n" + JSON.stringify(apps, null, 4));
-                        jive.logger.debug("packaged cartridges:\n" + JSON.stringify(cartridges, null, 4));
+                        jive.logger.debug("storageDefinitions:\n" + JSON.stringify(storages, null, 4));
+                        jive.logger.debug("cartridges:\n" + JSON.stringify(cartridges, null, 4));
 
                         var definitionsJson = {
                             'integrationUser': {
@@ -478,7 +497,7 @@ function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storages
                                 'jiveServiceSignature': extensionInfo['jiveServiceSignature'],
                                 'runAsStrategy': extensionInfo['runAsStrategy']
                             },
-                            'tiles': (definitions && definitions.length > 0) ? definitions : undefined,
+                            'tiles': (definitions && definitions.length > 0) ? addCacheBuster(definitions) : undefined,
                             'templates': (templates && templates.length > 0) ? templates : undefined,
                             'osapps': (apps && apps.length > 0) ? apps : undefined,
                             'storageDefinitions':(storages && storages.length > 0) ? storages : undefined,
@@ -713,7 +732,7 @@ function getCartridges(cartridgesRootDir, extensionSrcDir) {
 }
 
 function getTemplates(tilesDir) {
-	
+
     var templatesPath = tilesDir + '/templates.json';
 
     var toTemplateArray = function(allDefinitions, templates) {
@@ -744,7 +763,7 @@ function getTemplates(tilesDir) {
         }
         return templateArray;
     };
-    
+
     return getAllDefinitions().then( function(allDefinitions) {
         return jive.util.fsexists(tilesDir).then(function(exists) {
             if ( !exists ) {
@@ -754,7 +773,7 @@ function getTemplates(tilesDir) {
                     return jive.util.fsexists(templatesPath.trim()).then(function (exists) {
                         if (!exists) {
                             // create it
-                            return buildDefaultTemplate(allDefinitions, extension).then( 
+                            return buildDefaultTemplate(allDefinitions, extension).then(
                             		function(defaultTemplate) {
 		                                if (!defaultTemplate) {
 		                                	return toTemplateArray(allDefinitions, null);
@@ -763,7 +782,7 @@ function getTemplates(tilesDir) {
 		                                    templates['default'] = defaultTemplate;
 		                                    return jive.util.fswrite(
 		                                    			JSON.stringify(templates, null, 4), tilesDir + '/templates.json'
-		                                    		).then( 
+		                                    		).then(
 			                                    		function () {
 			                                    			return toTemplateArray(allDefinitions, templates);
 			                                    		}
@@ -808,11 +827,11 @@ function getAllDefinitions() {
         });
 }
 
-function buildDefaultTemplate(allDefinitions, extension) {	
+function buildDefaultTemplate(allDefinitions, extension) {
 	if (!extension) {
 		return q.resolve(null);
 	} // end if
-	
+
     var extensionName = extension['name'];
     var extensionDescription = extension['description'];
 
@@ -887,4 +906,3 @@ function getPersistedExtensionInfo(config) {
         }
     });
 }
-
