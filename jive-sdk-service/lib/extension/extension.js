@@ -453,21 +453,21 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
         });
 }
 
-function addCacheBuster(tiles) {
-  if (tiles) {
+function addCacheBuster(definitions) {
+  if (definitions) {
     var ts = new Date().getTime();
-    for (x in tiles) {
+    for (x in definitions) {
       ["action","view","config","url"].forEach(
         function(key) {
-          if (tiles[x][key]) {
-            tiles[x][key] += (tiles[x][key].indexOf("?") > -1) ? "&" : "?";
-            tiles[x][key] += "ts="+ts;
+          if (definitions[x][key]) {
+            definitions[x][key] += (definitions[x][key].indexOf("?") > -1) ? "&" : "?";
+            definitions[x][key] += "ts="+ts;
           } // end if
         }
       );
     } // end for item
   } // end if
-  return tiles;
+  return definitions;
 } // end addCacheBuster
 
 function setupExtensionDefinitionJson(tilesDir, appsDir, cartridgesDir, storagesDir, servicesDir, extensionSrcDir, extensionPublicDir,

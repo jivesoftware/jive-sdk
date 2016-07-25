@@ -171,7 +171,8 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
             postBodyStr = '';
             var contentType = headers['Content-Type'];
 
-            if (contentType === 'application/json') {
+            /*** MOVING TO STARTS WITH TO MATCH Content-Type's WITH EMBEDDED CHARSET SUFFIX ***/
+            if (contentType && contentType.startsWith('application/json')) {
                 if (typeof body === 'object') {
                     postBodyStr = JSON.stringify(body);
                 } else if (typeof body === 'string') {
@@ -179,7 +180,8 @@ var requestMaker = function (method, serverInfo, path, headers, body, secure, re
                 } else {
                     throw new Error("Illegal type of post body; only object or string is permitted.");
                 }
-            } else if (contentType === 'application/x-www-form-urlencoded') {
+            /*** MOVING TO STARTS WITH TO MATCH Content-Type's WITH EMBEDDED CHARSET SUFFIX ***/
+            } else if (contentType && contentType.startsWith('application/x-www-form-urlencoded')) {
                 var postObject;
                 if (typeof body === 'string') {
                     try {
@@ -286,4 +288,3 @@ exports.parseJiveExtensionHeaders = function(req) {
         return undefined;
     }
 };
-
