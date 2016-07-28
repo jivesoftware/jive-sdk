@@ -21,6 +21,7 @@ var fs = require('fs'),
 
 var express = require('express');
 var consolidate = require('consolidate');
+var mustache = consolidate.mustache;
 var baseSetup = require('./baseSetup');
 var appSetup = Object.create(baseSetup);
 module.exports = appSetup;
@@ -48,7 +49,7 @@ appSetup.setupOneApp = function( app, osAppDir, osAppID ) {
     return setupAppPublicRoutes(osAppDir, app, osAppID).then( function() {
         var appApp = express();
 
-        appApp.engine('html', consolidate.mustache);
+        appApp.engine('html', mustache);
         appApp.set('view engine', 'html');
         appApp.set('views', osAppDir + '/public');
         app.use( appApp );

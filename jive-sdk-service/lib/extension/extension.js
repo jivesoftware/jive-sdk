@@ -304,79 +304,23 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         "redirect_url": extensionInfo['redirectURL'] || "%serviceURL%"
     }, jive.service.options['extensionInfo']);
 
-    if (extensionInfo["minimum_edition"]) {
-    	extensionMeta["minimum_edition"] = extensionInfo["minimum_edition"];
-    } // end if
-
     if (extensionInfo['author']) {
     	extensionMeta["author"] = extensionInfo['author'];
     	extensionMeta["author_affiliation"] = extensionInfo['author_affiliation'];
     	extensionMeta["author_email"] = extensionInfo['author_email'];
     } // end if
 
-    if (extensionInfo["config_url"]) {
-    	extensionMeta["config_url"] = extensionInfo["config_url"];
-    } // end if
-
-    if (extensionInfo["health_url"]) {
-    	extensionMeta["health_url"] = extensionInfo["health_url"];
-    } // end if
-
-    if (extensionInfo["website_url"]) {
-    	extensionMeta["website_url"] = extensionInfo["website_url"];
-    } // end if
-
-    if (extensionInfo["community_url"]) {
-    	extensionMeta["community_url"] = extensionInfo["community_url"];
-    } // end if
-
-    if (extensionInfo["support_info"]) {
-    	extensionMeta["support_info"] = extensionInfo["support_info"];
-    } // end if
-
-    if (extensionInfo["info_email"]) {
-    	extensionMeta["info_email"] = extensionInfo["info_email"];
-    } // end if
-
-    if (extensionInfo["tags"]) {
-    	extensionMeta["tags"] = extensionInfo["tags"];
-    } // end if
-
-    if (extensionInfo["overview"]) {
-    	extensionMeta["overview"] = extensionInfo["overview"];
-    } // end if
-
-    if (extensionInfo["install_instructions"]) {
-    	extensionMeta["install_instructions"] = extensionInfo["install_instructions"];
-    } // end if
-
-    if (extensionInfo["eula_filename"]) {
-    	extensionMeta["eula_filename"] = extensionInfo["eula_filename"];
-    } // end if
-
-    if (extensionInfo["privacy_policy"]) {
-    	extensionMeta["privacy_policy"] = extensionInfo["privacy_policy"];
-    } // end if
-
-    if (extensionInfo["screen_shots"]) {
-    	extensionMeta["screen_shots"] = extensionInfo["screen_shots"];
-    } // end if
-
-    if (extensionInfo["solution_categories"]) {
-    	extensionMeta["solution_categories"] = extensionInfo["solution_categories"];
-    } // end if
-
-    if (extensionInfo["target_integrations"]) {
-    	extensionMeta["target_integrations"] = extensionInfo["target_integrations"];
-    } // end if
-
-    if (extensionInfo["key_features"]) {
-    	extensionMeta["key_features"] = extensionInfo["key_features"];
-    } // end if
-
-    if (extensionInfo["jive_technology_partner_id"]) {
-    	extensionMeta["jive_technology_partner_id"] = extensionInfo["jive_technology_partner_id"];
-    } // end if
+    [
+      'minimum_edition','config_url','health_url','website_url','community_url','support_info','info_email',
+      'tags','overview','install_instructions','eula_filename','privacy_policy','screen_shots','solution_categories',
+      'target_integrations','key_features','jive_technology_partner_id'
+    ].forEach(
+      function(extMeta) {
+        if (extensionInfo[extMeta]) {
+          extensionMeta[extMeta] = extensionInfo[extMeta];
+        } // end if
+      } // end function
+    ); // end forEach
 
     // these should never be there
     delete extensionMeta['uuid'];

@@ -21,7 +21,6 @@ var fs = require('fs'),
     service = require('./service');
 
 var express = require('express');
-var consolidate = require('consolidate');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Private
@@ -107,19 +106,29 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
                         }
                     }
 
-                    httpVerb = candidate['verb'] || 'get';  // default to GET verb
-                    httpVerb = httpVerb.toLowerCase();
-                    app[httpVerb](routeContextPath, candidate['route']);
+                    httpVerb = candidate['verb'] || [ 'get' ];    // default to GET verb
+                    if (!Array.isArray(httpVerb)) {
+                      httpVerb = [ httpVerb];
+                    } // end if
 
-                    // lock the route if its marked to be locked
-                    if ( candidate['jiveLocked'] ) {
-                        service.security().lockRoute(  {
-                            'verb' : httpVerb,
-                            'path' : routeContextPath
-                        }  );
+                    httpVerb.forEach(
+                      function(verb) {
+                        verb = verb.toLowerCase();
+                        app[verb](routeContextPath, candidate['route']);
 
-                        jive.logger.info("locked route:", httpVerb, routeContextPath);
-                    }
+                        // lock the route if its marked to be locked
+                        if ( candidate['jiveLocked'] ) {
+                            service.security().lockRoute({
+                              'verb' : verb,
+                              'path' : routeContextPath
+                            });
+                            jive.logger.info("locked route:", verb, routeContextPath);
+                        } // end if
+                      } // end function
+                    ); // end forEach
+
+                    /*** CONVERTING TO UPPER CASE FOR DISPLAY ***/
+                    httpVerb = httpVerb.map(function(x){ return x.toUpperCase() });
 
                     added = true;
                 }
@@ -127,7 +136,7 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
 
             if ( added ) {
                 jive.logger.debug('Route added for', definitionName, ':',
-                    httpVerb.toUpperCase(), routeContextPath, ' -> ',
+                    Array.isArray(httpVerb) ? httpVerb : '['+httpVerb.toUpperCase()+']',routeContextPath, ' -> ',
                     routeHandlerPath + ".js" );
             }
         }

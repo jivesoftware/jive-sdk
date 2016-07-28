@@ -22,6 +22,7 @@ var fs = require('fs'),
 
 var express = require('express');
 var consolidate = require('consolidate');
+var mustache = consolidate.mustache;
 
 var baseSetup = require('./baseSetup');
 var serviceSetup = Object.create(baseSetup);
@@ -91,7 +92,7 @@ serviceSetup.setupOneService = function( app, serviceDir ) {
             // setup services public directory
             var servicesApp = express();
 
-            servicesApp.engine('html', consolidate.mustache);
+            servicesApp.engine('html', mustache);
             servicesApp.set('view engine', 'html');
             servicesApp.set('views', serviceDir + '/public');
             app.use( servicesApp );

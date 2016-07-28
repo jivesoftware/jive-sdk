@@ -24,7 +24,6 @@ var url = require('url');
 var http = require('http');
 var q = require('q');
 var jive = require("../api");
-var mustache = require('mustache');
 
 /**
  * <b>GET /tiles</b>
@@ -78,4 +77,3 @@ exports.installTiles = function( req, res ) {
     req.writeHead( 400 );
     req.end('Deprecated');
 };
-

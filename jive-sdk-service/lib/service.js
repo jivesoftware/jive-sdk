@@ -34,7 +34,8 @@ var osAppConfigurator = require('./appSetup');
 var serviceConfigurator = require('./serviceSetup');
 var jive = require('../api');
 var log4js = require('log4js');
-var mustache = require('mustache');
+var consolidate = require('consolidate');
+var mustache = consolidate.mustache;
 var url = require('url');
 var traverse = require('traverse');
 
@@ -320,7 +321,14 @@ exports.init = function(expressApp, options ) {
             .then( function(jiveConfig) {
                 traverse(jiveConfig).forEach(function(value) {
                     if (typeof (value) === 'string') {
-                        this.update(mustache.render(value, process.env));
+                        var self = this;
+                        mustache.render(value, process.env)
+                          .then(
+                            function(processed) {
+                              self.update(processed);
+                            } // end function
+                          );
+
                     }
                 });
 
@@ -668,7 +676,7 @@ exports.extensions = function() {
 exports.getExpandedTileDefinitions = function(all) {
     var conf = exports.options;
     var host = exports.serviceURL();
-    var processed = [];
+    var processedTiles = [];
     all.forEach( function( tile ) {
         if ( !tile ) {
             return;
@@ -676,86 +684,89 @@ exports.getExpandedTileDefinitions = function(all) {
 
         var name = tile.name;
         var stringified = JSON.stringify(tile);
-        stringified =  mustache.render(stringified, {
+
+        mustache.render(stringified, {
             host: host,
             tile_public: host + '/' + name,
             tile_route: host + '/' + name,
             clientId: conf.clientId
-        });
+        }).then(
+          function(processed) {
+            var processedTile = JSON.parse(processed);
 
-        var processedTile = JSON.parse(stringified);
-
-        // defaults
-        if ( processedTile['action'] ) {
-            if ( processedTile['action'].indexOf('http') != 0 && processedTile['action'].indexOf('%serviceURL%') === -1) {
-                // assume its relative to host then
-                processedTile['action'] = host + ( processedTile['action'].indexOf('/') == 0 ? "" : "/" ) + processedTile['action'];
-            }
-        }
-        if ( processedTile['view'] ) {
-            if ( processedTile['view'].indexOf('http') != 0 && processedTile['view'].indexOf('%serviceURL%') === -1) {
-                // assume its relative to host then
-                processedTile['view'] = host + ( processedTile['view'].indexOf('/') == 0 ? "" : "/" ) + processedTile['view'];
-            }
-        }
-        if ( !processedTile['config'] ) {
-            // compute if a configure URL is required based on presence of the autowired route
-            var path = _dir('/tiles') + '/' + name.toLowerCase() + '/backend/routes/configure/get.js';
-            if ( fs.existsSync(path) ) {
-                processedTile['config'] = host + '/' + processedTile['definitionDirName'] + '/configure';
-            }
-        } else {
-            if ( processedTile['config'].indexOf('http') != 0 && processedTile['config'].indexOf('%serviceURL%') === -1) {
-            	// ADDITIONAL CHECK FOR A PUBLIC CONFIGURATION SCREEN HOSTED IN JIVE
-            	if (processedTile['config'] && processedTile['config'].indexOf('/public') != 0) {
+            // defaults
+            if ( processedTile['action'] ) {
+                if ( processedTile['action'].indexOf('http') != 0 && processedTile['action'].indexOf('%serviceURL%') === -1) {
                     // assume its relative to host then
-                    processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];
-            	}// end if
+                    processedTile['action'] = host + ( processedTile['action'].indexOf('/') == 0 ? "" : "/" ) + processedTile['action'];
+                }
             }
-        }
-        if ( !processedTile['unregister']) {
-            // compute an unregister URL only if not an internal tile type
-            if ( processedTile['dataProviderKey'] !== 'internal' ) {
-                processedTile['unregister'] = host + '/unregister';
+            if ( processedTile['view'] ) {
+                if ( processedTile['view'].indexOf('http') != 0 && processedTile['view'].indexOf('%serviceURL%') === -1) {
+                    // assume its relative to host then
+                    processedTile['view'] = host + ( processedTile['view'].indexOf('/') == 0 ? "" : "/" ) + processedTile['view'];
+                }
             }
-        } else {
-            if ( processedTile['unregister'].indexOf('http') != 0 && processedTile['unregister'].indexOf('%serviceURL%') === -1 ) {
-                // assume its relative to host then
-                processedTile['unregister'] = host + ( processedTile['unregister'].indexOf('/') == 0 ? "" : "/" ) + processedTile['unregister'];
+            if ( !processedTile['config'] ) {
+                // compute if a configure URL is required based on presence of the autowired route
+                var path = _dir('/tiles') + '/' + name.toLowerCase() + '/backend/routes/configure/get.js';
+                if ( fs.existsSync(path) ) {
+                    processedTile['config'] = host + '/' + processedTile['definitionDirName'] + '/configure';
+                }
+            } else {
+                if ( processedTile['config'].indexOf('http') != 0 && processedTile['config'].indexOf('%serviceURL%') === -1) {
+                	// ADDITIONAL CHECK FOR A PUBLIC CONFIGURATION SCREEN HOSTED IN JIVE
+                	if (processedTile['config'] && processedTile['config'].indexOf('/public') != 0) {
+                        // assume its relative to host then
+                        processedTile['config'] = host + ( processedTile['config'].indexOf('/') == 0 ? "" : "/" ) + processedTile['config'];
+                	}// end if
+                }
             }
-        }
+            if ( !processedTile['unregister']) {
+                // compute an unregister URL only if not an internal tile type
+                if ( processedTile['dataProviderKey'] !== 'internal' ) {
+                    processedTile['unregister'] = host + '/unregister';
+                }
+            } else {
+                if ( processedTile['unregister'].indexOf('http') != 0 && processedTile['unregister'].indexOf('%serviceURL%') === -1 ) {
+                    // assume its relative to host then
+                    processedTile['unregister'] = host + ( processedTile['unregister'].indexOf('/') == 0 ? "" : "/" ) + processedTile['unregister'];
+                }
+            }
 
-        if ( !processedTile['register'] ) {
-            // compute a register URL only if not an internal tile type
-            if ( processedTile['dataProviderKey'] !== 'internal' ) {
-                processedTile['register'] = host + '/registration';
+            if ( !processedTile['register'] ) {
+                // compute a register URL only if not an internal tile type
+                if ( processedTile['dataProviderKey'] !== 'internal' ) {
+                    processedTile['register'] = host + '/registration';
+                }
+            } else {
+                if ( processedTile['register'].indexOf('http') != 0 && processedTile['register'].indexOf('%serviceURL%') === -1 ) {
+                    // assume its relative to host then
+                    processedTile['register'] = host + ( processedTile['register'].indexOf('/') == 0 ? "" : "/" ) + processedTile['register'];
+                }
             }
-        } else {
-            if ( processedTile['register'].indexOf('http') != 0 && processedTile['register'].indexOf('%serviceURL%') === -1 ) {
-                // assume its relative to host then
-                processedTile['register'] = host + ( processedTile['register'].indexOf('/') == 0 ? "" : "/" ) + processedTile['register'];
+            if ( !processedTile['client_id'] ) {
+                processedTile['client_id'] = conf.clientId;
             }
-        }
-        if ( !processedTile['client_id'] ) {
-            processedTile['client_id'] = conf.clientId;
-        }
-        if ( !processedTile['id'] ) {
-            processedTile['id'] = '{{{definition_id}}}';
-        }
+            if ( !processedTile['id'] ) {
+                processedTile['id'] = '{{{definition_id}}}';
+            }
 
-        if (conf.clientId) {
-            processedTile.description += ' for ' + conf.clientId;
-        }
+            if (conf.clientId) {
+                processedTile.description += ' for ' + conf.clientId;
+            }
 
-        /*** NEED TO REMOVE register/unregister IF IT IS A JIVE HOSTED APP ***/
-        if (processedTile['config'] && processedTile['config'].indexOf('/public') == 0) {
-            delete processedTile['register'];
-            delete processedTile['unregister'];
-        } // end if
+            /*** NEED TO REMOVE register/unregister IF IT IS A JIVE HOSTED APP ***/
+            if (processedTile['config'] && processedTile['config'].indexOf('/public') == 0) {
+                delete processedTile['register'];
+                delete processedTile['unregister'];
+            } // end if
 
-        processed.push( processedTile );
-    });
-    return processed;
+            processedTiles.push( processedTile );
+          } // end function
+        ); // end then
+    }); // end forEach
+    return processedTiles;
 };
 
 /**

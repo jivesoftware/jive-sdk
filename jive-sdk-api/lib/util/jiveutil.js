@@ -26,7 +26,8 @@ var q = require('q');
 var fs = require('fs-extra');
 var mv = require('mv');
 var uuid = require('node-uuid');
-var mustache = require('mustache');
+var consolidate = require('consolidate');
+var mustache = consolidate.mustache;
 var jive = require('../../api');
 var oauth = require('./oauth');
 var iterator = require('./iterator');
@@ -429,8 +430,12 @@ exports.fsTemplateCopy = function (source, target, substitutions) {
     	jive.logger.debug('Templatized Copying', source, '->', target);
         return exports.fsread(source).then(function (data) {
             var raw = data.toString();
-            var processed = mustache.render(raw, substitutions || {});
-            return exports.fswrite(processed, target);
+            mustache.render(raw, substitutions || {})
+            .then(
+              function(processed) {
+                return exports.fswrite(processed, target);
+              } // end function
+            );
         });
     }
 };
@@ -448,8 +453,12 @@ exports.fsTemplateWrite = function (data, target, substitutions) {
         return exports.fswrite(data, target);
     } else {
         jive.logger.debug('Templatized write ->', target);
-        var processed = mustache.render(data, substitutions || {});
-        return exports.fswrite(processed, target);
+        mustache.render(data, substitutions || {})
+        .then(
+          function(processed) {
+            return exports.fswrite(processed, target);
+          } // end function
+        );
     }
 };
 
@@ -461,7 +470,12 @@ exports.fsTemplateWrite = function (data, target, substitutions) {
 exports.fsTemplateRead = function (source, substitutions) {
     return exports.fsread(source).then(function (data) {
         var raw = data.toString();
-        return mustache.render(raw, substitutions || {});
+        mustache.render(raw, substitutions || {})
+        .then(
+            function(processed) {
+              return processed;
+            } // end function
+        );
     });
 };
 
@@ -581,7 +595,7 @@ exports.sortObject = function (o) {
  * @return {Promise} Promise
  */
 exports.recursiveDirectoryProcessor = function (currentFsItem, root, targetRoot, force, processor) {
-    
+
     var recurseDirectory = function (directory) {
         return q.nfcall(fs.readdir, directory).then(function (subItems) {
             var promises = [];
@@ -644,7 +658,7 @@ var copyFileProcessor = function (type, currentFsItem, targetPath, substitutions
  * @return {Promise} Promise
  */
 exports.recursiveCopy = function (root, target, force, substitutions, file) {
-	
+
     return exports.fsisdir(root).then( function(isDir) {
         if( !isDir ) {
             return copyFileProcessor("file", root, target, substitutions);

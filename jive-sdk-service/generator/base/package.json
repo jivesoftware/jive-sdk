@@ -12,13 +12,9 @@
         "errorhandler": "1.4.3",
         "serve-favicon": "2.3.0",
         "jive-sdk":"*",
-        "mustache": "2.2.1",
         "consolidate": "0.14.1",
-        "poplib" : "0.1.7",
         "q": "1.4.1",
-        "multipart-parser" : "0.0.2",
-        "q-io":     "1.13.2",
-        "request": "2.72.0",
-        "xml2js": "0.4.16"
+        "q-io": "1.13.2",
+        "request": "2.74.0"
     }
 }

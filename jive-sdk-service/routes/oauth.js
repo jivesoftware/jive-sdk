@@ -23,7 +23,8 @@
 var http = require('http');
 var url = require('url');
 var jive = require('../api');
-var mustache = require('mustache');
+var consolidate = require('consolidate');
+var mustache = consolidate.mustache;
 var q = require('q');
 var util = require("util");
 
@@ -255,13 +256,16 @@ exports.oauth2Callback = function(req, res ) {
                     }
                 }
 
-                var redirect = decodeURIComponent(jiveRedirectUrl) + ( redirectParams ? '?' : '') +
-                    redirectParams;
-                var redirectHtml = mustache.render(self.redirectHtmlTxt, { 'redirect': redirect });
+                var redirect = decodeURIComponent(jiveRedirectUrl) + ( redirectParams ? '?' : '') + redirectParams;
 
-                res.status(200);
-                res.set({'Content-Type': 'text/html'});
-                res.send(redirectHtml);
+                mustache.render(self.redirectHtmlTxt, { 'redirect': redirect })
+                .then(
+                  function(processed) {
+                    res.status(200);
+                    res.set({'Content-Type': 'text/html'});
+                    res.send(processed);
+                  } // end function
+                );
             };
 
             var oauth2SuccessCallback = self.oauth2SuccessCallback;
@@ -307,7 +311,7 @@ exports.buildAuthorizeUrlResponseMap = function (oauth2Conf, callback, context, 
     if (context) {
         stateToEncode = util._extend(stateToEncode, context);
     }
-    
+
     var redirectUri = oauth2Conf['clientOAuth2CallbackUrl'];
     if (redirectUri.substring(0,1) == "/") {
        redirectUri = jive.service.serviceURL() + redirectUri;
@@ -318,7 +322,7 @@ exports.buildAuthorizeUrlResponseMap = function (oauth2Conf, callback, context, 
         "&redirect_uri=" + encodeURIComponent(redirectUri) +
         "&client_id=" + oauth2Conf['oauth2ConsumerKey'] +
         "&response_type=" + "code";
-        
+
     if (oauth2Conf['oauth2Scope']) {
         url += "&scope=" + encodeURIComponent(oauth2Conf['oauth2Scope']);
     } // end if
@@ -340,12 +344,12 @@ exports.buildAuthorizeUrlResponseMap = function (oauth2Conf, callback, context, 
 };
 
 exports.buildOauth2CallbackObject = function (oauth2Conf, code, extraParams) {
-    
+
     var redirectUri = oauth2Conf['clientOAuth2CallbackUrl'];
     if (redirectUri.substring(0,1) == "/") {
        redirectUri = jive.service.serviceURL() + redirectUri;
     } // end if
-    
+
     var postObject = {
         'grant_type': 'authorization_code',
         'redirect_uri': redirectUri,
@@ -360,5 +364,3 @@ exports.buildOauth2CallbackObject = function (oauth2Conf, code, extraParams) {
 
     return postObject;
 };
-
-

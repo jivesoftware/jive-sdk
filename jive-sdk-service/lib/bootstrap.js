@@ -19,10 +19,10 @@ var express = require('express'),
     path = require('path'),
     errorHandler = require('errorhandler'),
     logger = require('morgan'),
-    favicon = require('serve-favicon'),
     service = require('./service'),
     jive = require('../api'),
     consolidate = require('consolidate'),
+    mustache = consolidate.mustache,
     q = require('q'),
     extension = require('./extension/extension'),
     security = require("./security");
@@ -61,7 +61,7 @@ var setupExpressApp = function (app, rootDir, config) {
 
     primaryApp = app;
 
-    app.engine('html', consolidate.mustache);
+    app.engine('html', mustache);
     app.set('view engine', 'html');
     app.set('views', rootDir + '/public/tiles');
     app.use(express.static(path.join(rootDir, 'public')));
@@ -92,8 +92,8 @@ var setupExpressApp = function (app, rootDir, config) {
     // wire in an sdk app with its own views
     var jiveSdkApp = express();
 
-    jiveSdkApp.engine('html js', consolidate.mustache);
-    jiveSdkApp.engine('js', consolidate.mustache);
+    jiveSdkApp.engine('html js', mustache);
+    jiveSdkApp.engine('js', mustache);
     jiveSdkApp.set('view engine', 'html js');
     jiveSdkApp.set('views', __dirname + '/../views' );    // assume that views will be in the root jive-sdk folder
 

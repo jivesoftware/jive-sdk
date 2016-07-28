@@ -22,6 +22,7 @@ var fs = require('fs'),
 
 var express = require('express');
 var consolidate = require('consolidate');
+var mustache = consolidate.mustache;
 
 var baseSetup = require('./baseSetup');
 var definitionSetup = Object.create(baseSetup);
@@ -196,7 +197,7 @@ definitionSetup.setupOneDefinition = function( app, definitionDir, definitionNam
             // setup tile public directory
             var definitionApp = express();
 
-            definitionApp.engine('html', consolidate.mustache);
+            definitionApp.engine('html', mustache);
             definitionApp.set('view engine', 'html');
             definitionApp.set('views', definitionDir + '/public');
 
