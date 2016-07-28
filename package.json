@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "grunt": "*",
+    "iconv-lite": "*",
     "jive-testing-framework" : "*",
     "mockery" : "*",
     "jscoverage" : "*",
