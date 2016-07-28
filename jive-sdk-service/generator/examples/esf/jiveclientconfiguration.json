@@ -1,6 +1,4 @@
 {
-    "clientUrl": "http://localhost",
-    "port": "8090",
     "rootFolder" : "JiveStorage",
     "extensionInfo": {
         "name": "File System Storage",

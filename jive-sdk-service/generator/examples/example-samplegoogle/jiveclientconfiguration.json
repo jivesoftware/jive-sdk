@@ -1,7 +1,4 @@
 {
-    "clientUrl": "http://localhost",
-    "port": "8090",
-
     "oauth2-google" :{
         "originServerAuthorizationUrl" : "https://accounts.google.com/o/oauth2/auth",
         "originServerTokenRequestUrl" : "https://accounts.google.com/o/oauth2/token",

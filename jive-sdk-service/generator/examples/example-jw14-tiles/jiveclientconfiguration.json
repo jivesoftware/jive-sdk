@@ -1,7 +1,4 @@
 {
-  "clientUrl": "http://localhost",
-  "port": "8090",
-  "development" : true,
   "fileFlushInterval": 2000,
   "extensionInfo": {
     "name": "JiveWorld Purposeful Places Add-on",

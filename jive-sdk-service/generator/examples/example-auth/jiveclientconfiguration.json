@@ -1,7 +1,4 @@
 {
-    "clientUrl": "http://localhost",
-    "port": "8090",
-    "development": true,
     "extensionInfo" : {
         "jiveServiceSignature" : "TODO REPLACE:  Ctrl+Click on Upload Package in Add-On Manager, then use above UUID to get Signature",
         "name" : "Auth Example - Description",

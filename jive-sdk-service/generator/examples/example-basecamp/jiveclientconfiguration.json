@@ -1,7 +1,4 @@
 {
-    "clientUrl": "http://localhost",
-    "port": "8090",
-
     "oauth2-basecamp" :{
         "originServerAuthorizationUrl" : "https://launchpad.37signals.com/authorization/new",
         "originServerTokenRequestUrl" : "https://launchpad.37signals.com/authorization/token",

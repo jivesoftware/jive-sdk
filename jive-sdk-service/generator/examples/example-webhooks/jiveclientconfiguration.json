@@ -1,7 +1,4 @@
 {
-    "clientUrl": "http://localhost",
-    "port": "8090",
-
     "oauth2-webhooks" :{
         "clientOAuth2CallbackUrl" : "http://localhost:8090/oauth/oauth2Callback"
     }

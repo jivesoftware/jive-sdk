@@ -1,6 +1,4 @@
 {
-    "clientUrl": "http://localhost",
-    "port": "8090",
     "oauth2-sfdc" :{
         "originServerAuthorizationUrl" : "https://login.salesforce.com/services/oauth2/authorize",
         "originServerTokenRequestUrl" : "https://login.salesforce.com/services/oauth2/token",
