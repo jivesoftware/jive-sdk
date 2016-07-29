@@ -1,7 +1,7 @@
 {
   "name": "jive-sdk",
   "description": "Node.js SDK for Jive Software to assist with the development of add-ons",
-  "version": "0.2.03",
+  "version": "0.2.04",
   "main": "jive-sdk-service/api.js",
   "author": {
     "name": "Jive Software",
@@ -14,6 +14,7 @@
     "errorhandler": "1.4.3",
     "serve-favicon": "2.3.0",
     "consolidate": "0.14.1",
+    "mustache": "^2.2.1",
     "underscore": "1.8.3",
     "morgan": "1.7.0",
     "q": "1.4.1",
