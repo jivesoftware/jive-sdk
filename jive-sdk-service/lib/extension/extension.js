@@ -404,8 +404,10 @@ function addCacheBuster(definitions) {
       ["action","view","config","url"].forEach(
         function(key) {
           if (definitions[x][key]) {
-            definitions[x][key] += (definitions[x][key].indexOf("?") > -1) ? "&" : "?";
-            definitions[x][key] += "ts="+ts;
+            if (key !== "url" || definitions[x][key].indexOf("/public") !== 0) {
+              definitions[x][key] += (definitions[x][key].indexOf("?") > -1) ? "&" : "?";
+              definitions[x][key] += "ts="+ts;              
+            } // end if
           } // end if
         }
       );
