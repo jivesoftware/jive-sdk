@@ -11,7 +11,7 @@
 function onReady(tileConfig,tileOptions,viewer,container) {
 
   if ( typeof tileConfig !== 'object' ) {
-      tileConfig = JSON.parse(JSON.parse(tileConfig || {} ));
+      tileConfig = JSON.parse(tileConfig || {} );
   }
 
   // update HTML with data pushed from service

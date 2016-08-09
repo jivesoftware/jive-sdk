@@ -9,7 +9,7 @@
 //NOTE: CALLED AS SOON AS THE FULL CONTEXT IS RESOLVED
 //************************************************************************
 function onReady(tileConfig,tileOptions,viewer,container) {
-  $("#config_string").text(config["configString"]);
+  $("#config_string").text(tileConfig["configString"]);
   app.resize();
 } // end function
 

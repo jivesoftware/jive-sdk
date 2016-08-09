@@ -24,10 +24,10 @@ function onReady(tileConfig,tileOptions,viewer,container) {
   $("#btn_submit").click( function() {
 
       // update config data from input dialog
-      tileConfig["pushData"] = $("#config_val").val();
+      json["pushData"] = $("#config_val").val();
 
       // send config to service
-      jive.tile.close(tileConfig, {} );
+      jive.tile.close(json, {} );
   });
 
   app.resize();
