@@ -14,6 +14,6 @@
         "48": "https://developer.jivesoftware.com/DeveloperAssets/images/icons/jivedev-small.png",
         "128": "https://developer.jivesoftware.com/DeveloperAssets/images/icons/jivedev-med.png"
     },
-    "config": "/{{{TILE_NAME}}}/configuration.html",
-    "view": "/{{{TILE_NAME}}}/view.html"
+    "config": "/{{{TILE_NAME}}}/configuration.html?features=responsive",
+    "view": "/{{{TILE_NAME}}}/view.html?features=responsive"
 }
