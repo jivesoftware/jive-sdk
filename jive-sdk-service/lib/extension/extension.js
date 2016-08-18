@@ -205,7 +205,6 @@ function cartridgeIsNotConfigured(type) {
     return type != 'jab-cartridges-app';
 }
 function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridges) {
-
     var description = extensionInfo['description'];
     var name = extensionInfo['name'];
     var type = extensionInfo['type'] || 'client-app'; // by default
@@ -358,6 +357,7 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
             } else {
                 var proms = [];
                 var host = jive.service.serviceURL();
+
                 definitions.forEach( function(definition) {
                     var name = definition['name'];
                     var view = definition['view'];
@@ -374,6 +374,12 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
                     	definition['config'] = definition['config'].substring(definition['config'].indexOf('/public/configuration'));
                     	delete definition['unregister'];
                     	delete definition['register'];
+                    } // end if
+
+                    /*** NEED TO REMOVE register/unregister IF IT IS A JIVE HOSTED APP ***/
+                    if (definition['config'] && definition['config'].indexOf('/public') == 0) {
+                        delete definition['register'];
+                        delete definition['unregister'];
                     } // end if
 
                     delete definition['definitionDirName'];
@@ -406,7 +412,7 @@ function addCacheBuster(definitions) {
           if (definitions[x][key]) {
             if (key !== "url" || definitions[x][key].indexOf("/public") !== 0) {
               definitions[x][key] += (definitions[x][key].indexOf("?") > -1) ? "&" : "?";
-              definitions[x][key] += "ts="+ts;              
+              definitions[x][key] += "ts="+ts;
             } // end if
           } // end if
         }
