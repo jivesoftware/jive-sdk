@@ -15,5 +15,5 @@
         "128": "https://developer.jivesoftware.com/DeveloperAssets/images/icons/jivedev-med.png"
     },
     "config": "/{{{TILE_NAME}}}/configuration.html?features=responsive,tile,core-v3",
-    "view": "/{{{TILE_NAME}}}/view.html?features=responsive,tile, core-v3"
+    "view": "/{{{TILE_NAME}}}/view.html?features=responsive,tile,core-v3"
 }
