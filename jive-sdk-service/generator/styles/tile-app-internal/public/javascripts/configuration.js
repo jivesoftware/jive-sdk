@@ -14,7 +14,7 @@ function onReady(tileConfig,tileOptions,viewer,container) {
   // make sure config has default value
   if (tileConfig === null) tileConfig = { };
   if (!tileConfig["data"]) {
-      config["data"] = { };
+      tileConfig["data"] = { };
   }
   if (!tileConfig["data"]["configString"]) {
       tileConfig["data"]["configString"] = "default data";
