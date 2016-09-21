@@ -1,6 +1,6 @@
 # Jive Node SDK
 
-This repository contains the Jive Node.js library to help you get started using the [Jive Development Platform](https://developer.jivesoftware.com).
+This repository contains the Jive Node.js SDK to help you get started using the [Jive Development Platform](https://developer.jivesoftware.com).
 
 ## Let's get started
 
@@ -10,9 +10,8 @@ You can also access the API documentation [here](https://cdn.rawgit.com/jivesoft
 
 **Enjoy!**
 
-# License 
-
-   Copyright 2014 Jive Software
+# License
+   Copyright 2016 Jive Software
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
