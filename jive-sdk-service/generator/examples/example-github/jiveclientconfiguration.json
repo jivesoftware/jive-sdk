@@ -1,7 +1,4 @@
 {
-    "clientUrl":"http://localhost",
-    "port": "8090",
-
     "oauth2-github" :{
         "originServerAuthorizationUrl" : "https://github.com/login/oauth/authorize",
         "originServerTokenRequestUrl" : "https://github.com/login/oauth/access_token",

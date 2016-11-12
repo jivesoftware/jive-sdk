@@ -9,6 +9,9 @@
 //NOTE: CALLED AS SOON AS THE FULL CONTEXT IS RESOLVED
 //************************************************************************
 function onReady(tileConfig,tileOptions,viewer,container) {
+  if ( typeof tileConfig !== 'object' ) {
+      tileConfig = JSON.parse(tileConfig || {} );
+  }
 
   // Update field with config data
   $("#config_string").text(tileConfig["configString"]);

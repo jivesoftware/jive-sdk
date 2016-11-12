@@ -524,6 +524,23 @@ exports.basicAuthorizationHeaderValid = function (auth, clientId, clientSecret, 
 };
 
 /**
+ * @param auth - Request Header "Authorization" value
+ * @param key - JiveEXTN token key ("i.e. tenant_id, client_id, jive_url ")
+ * @returns {*|string}
+ */
+exports.getJiveAuthorizationHeaderValue = function (auth,key) {
+    if (auth.indexOf("JiveEXTN") !== 0) {
+      return null;
+    } // end if
+    var startIdx = auth.indexOf(key) + key.length + 1; /**** = ****/
+    var endIdx = auth.indexOf("&",startIdx);
+    if (startIdx > -1) {
+      return (endIdx > -1) ? auth.substring(startIdx,endIdx) : auth.substring(startIdx);
+    } // end if
+    return null;
+};
+
+/**
  * @param auth
  * @param clientId
  * @param clientSecret

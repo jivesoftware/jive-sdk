@@ -28,13 +28,6 @@ activityInfo.object.description = body.description;
 
 // Optional ... Removes the Go To Item Link in the Activity Stream Link (User will use the tile)
 //activityInfo.object.hideGoToItem = true;
-
-/*** TEMPORARY WORKAROUND NEEDED FOR REFERENCING STRUCTURES IN body, headers, options RATHER THAN INDIVIDUALLY TRAVERSING EACH KEY ***/
-function clone(obj) {  if (null == obj || "object" != typeof obj) return obj;  var copy = {};  for (var attr in obj) {   copy[attr] = clone(obj[attr]);   }  return copy;  }  
-body = clone(body);  
-headers = clone(headers);  
-options = clone(options);  
-/*** END TEMPORARY WORK AROUND ****/
   
 activityInfo.jive.app = {  
   'appUUID': "{{{GENERATED_APP_UUID}}}",  

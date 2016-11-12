@@ -30,7 +30,7 @@ var app = {
       } // end if
 
       if (this.container && this.viewer && onReady && typeof onReady === "function") {
-        onReady(this.tileConfig,this.options,this.viewer,this.container);
+        onReady(this.config,this.options,this.viewer,this.container);
       } // end if
 
   }, // end function

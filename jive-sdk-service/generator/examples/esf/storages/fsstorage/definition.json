@@ -1,6 +1,6 @@
 {
-    "displayName": "File System Storage",
-    "description": "Saves files on the node.js machine",
+    "displayName": "Jive SDK - External File Storage",
+    "description": "Implements a simple ESP using the Jive SDK and Node.js",
     "registerPlace": "%serviceURL%/fsstorage/register",
     "userMappingOptions": [
         "EMAIL"

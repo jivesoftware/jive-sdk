@@ -1,7 +1,4 @@
 {
-    "clientUrl": "http://localhost",
-    "port": "8090",
-
     "oauth2-podio" :{
         "originServerAuthorizationUrl" : "https://podio.com/oauth/authorize",
         "originServerTokenRequestUrl" : "https://podio.com/oauth/token",

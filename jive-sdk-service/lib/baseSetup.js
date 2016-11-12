@@ -20,6 +20,8 @@ var fs = require('fs'),
     jive = require('../api'),
     service = require('./service');
 
+var multer  = require('multer');
+var upload = multer({ dest: 'tmp-multer-uploads/' });
 var express = require('express');
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +88,7 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
                 if ( prefix ) {
                     routeContextPath = prefix + routeContextPath;
                 }
-                app[httpVerb](routeContextPath, routeHandler.route.bind(app));
+                app[httpVerb](routeContextPath, upload.any(), routeHandler.route.bind(app));
                 added = true;
                 // autowired verb file routes are never locked; explicitly wire if
                 // lock is wanted
@@ -114,7 +116,7 @@ exports.setupRoutes = function(app, definitionName, routesPath, prefix) {
                     httpVerb.forEach(
                       function(verb) {
                         verb = verb.toLowerCase();
-                        app[verb](routeContextPath, candidate['route']);
+                        app[verb](routeContextPath, upload.any(), candidate['route']);
 
                         // lock the route if its marked to be locked
                         if ( candidate['jiveLocked'] ) {

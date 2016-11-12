@@ -31,7 +31,7 @@ var APP5_GUID = jive.util.guid();
  * jive-sdk create -type
  */
 
-var argv = require('optimist').argv;
+var argv = require('minimist')(process.argv.slice(2));
 
 var validCommands = ['create','help','list', 'createExtension', 'build', 'version', 'unpack'];
 var groups = ['tiles', 'apps', 'services', 'storages', 'cartridges', 'examples'];

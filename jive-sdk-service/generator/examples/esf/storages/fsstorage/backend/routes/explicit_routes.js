@@ -32,10 +32,13 @@ exports.place = {
     'verb': 'delete',
     'route': service.deleteContainer
 };
+exports.updateFile = {
+    'path': '/fsstorage/file',
+    'verb': 'put',
+    'route': service.updateFile
+};
 exports.file = {
     'path': '/fsstorage/file',
     'verb': 'delete',
     'route': service.deleteFile
 };
-
-

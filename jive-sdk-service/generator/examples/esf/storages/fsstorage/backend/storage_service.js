@@ -15,7 +15,9 @@ exports.registerPlace = function (req, res) {
     var containerPath = jive.service.options.rootFolder + "/" + registerReq.container.name;
     var containerGuid = jive.util.guid();
 
-    jive.community.requestAccessToken(registerReq.jiveUrl, registerReq.oauthCode)
+    var tenantId = jive.util.getJiveAuthorizationHeaderValue(req.headers["authorization"],"tenant_id");
+
+    jive.community.requestAccessToken(tenantId, registerReq.oauthCode)
         .then(function (oauthResponse) {
             registerReq.oauth = oauthResponse.entity;
             return jive.util.fsexists(containerPath);
@@ -54,7 +56,7 @@ exports.registerPlace = function (req, res) {
                 ]
             };
 
-            res.send(responseBody, 200);
+            res.status(200).send(responseBody);
         })
         .catch(function (err) {
             logger.error(err);
@@ -68,6 +70,7 @@ exports.registerPlace = function (req, res) {
  */
 exports.uploadFile = function (req, res) {
     logger.info("Upload file...");
+
     var containerGuid = req.query['container'];
     var fileGuid = jive.util.guid();
     var fileObj = JSON.parse(req.body.metadata);
@@ -76,7 +79,7 @@ exports.uploadFile = function (req, res) {
     jive.context.persistence.findByID("places", containerGuid)
         .then(function (container) {
             if (container) {
-                fileDirectory = container.containerPath + "/" + req.files.file.name;
+                fileDirectory = container.containerPath + "/" + req.files[0].originalname;
                 return q.fcall(function () {
                 });
             }
@@ -96,12 +99,12 @@ exports.uploadFile = function (req, res) {
             }
         })
         .then(function () {
-            logger.info("Directory for file " + req.files.file.name + " was created in: " + fileDirectory);
+            logger.info("Directory for file " + req.files[0].originalname + " was created in: " + fileDirectory);
             fileObj.fileDirectoryPath = fileDirectory;
-            return handleFileVersion(fileGuid, fileObj, fileObj.version, req.files.file);
+            return handleFileVersion(fileGuid, fileObj, fileObj.version, req.files[0]);
         })
         .then(function (responseData) {
-            res.send(responseData, 200);
+            res.status(200).send(responseData);
         })
         .catch(function (err) {
             logger.error(err);
@@ -119,10 +122,10 @@ exports.uploadVersion = function (req, res) {
     var versionObj = JSON.parse(req.body.metadata);
     jive.context.persistence.findByID("files", fileGuid)
         .then(function (fileObj) {
-            return handleFileVersion(fileGuid, fileObj, versionObj, req.files.file);
+            return handleFileVersion(fileGuid, fileObj, versionObj, req.files[0]);
         })
         .then(function (responseData) {
-            res.send(responseData, 200);
+            res.status(200).send(responseData);
         })
         .catch(function (err) {
             logger.error(err);
@@ -140,13 +143,29 @@ exports.downloadVersion = function (req, res) {
 
     jive.context.persistence.findByID("fileVersions", versionGuid)
         .then(function (versionObj) {
-            res.sendfile(versionObj.fileVersionPath);
+            res.sendFile(process.cwd()+"/"+versionObj.fileVersionPath);
         })
         .catch(function (err) {
             logger.error(err);
             res.writeHead(500);
             res.end();
         });
+};
+
+exports.updateFile = function (req,res) {
+  logger.info("updateFile...");
+
+  var fileGuid = req.query['file'];
+  var versionObj = req.body.version;
+
+  jive.context.persistence.findByID("files", fileGuid)
+      .then(
+        function (fileObj) {
+          return handleFileVersion(fileGuid,fileObj,versionObj,null)
+      })
+      .then(function (responseData) {
+          res.status(200).send(responseData);
+      });
 };
 
 /**
@@ -240,27 +259,31 @@ function handleFileVersion(fileGuid, fileObj, versionObj, tempFile) {
     var versionGuid = jive.util.guid();
     if (fileObj.versionsList) {
         fileObj.versionsList.push(versionGuid);
-    }
-    else {
+    } else {
         fileObj.versionsList = [versionGuid];
-    }
-    var fileExt = tempFile.name.split('.').pop();
-    var fileVersionPath = fileObj.fileDirectoryPath + "/version" + fileObj.versionsList.length + "." + fileExt;
-    return jive.util.fsrename(tempFile.path, fileVersionPath)
-        .then(function () {
-            logger.info("File version binary was saved to: " + fileVersionPath);
-            return jive.context.persistence.save("files", fileGuid, fileObj);
-        })
-        .then(function () {
-            versionObj.fileVersionPath = fileVersionPath;
-            return jive.context.persistence.save("fileVersions", versionGuid, versionObj);
-        })
-        .then(function () {
+    } // end if
+
+    var firstStep = q.fcall(function () { });
+    if (tempFile) {
+      var fileExt = tempFile.originalname.split('.').pop();
+      var fileVersionPath = fileObj.fileDirectoryPath + "/version" + fileObj.versionsList.length + "." + fileExt;
+      firstStep = jive.util.fsrename(tempFile.path, fileVersionPath);
+    } // end if
+
+    return firstStep.then(function () {
+        if (tempFile) {
+          logger.info("File version binary was saved to: " + fileVersionPath);
+        } // end if
+        return jive.context.persistence.save("files", fileGuid, fileObj);
+    }).then(function () {
+        versionObj.fileVersionPath = fileVersionPath;
+        return jive.context.persistence.save("fileVersions", versionGuid, versionObj);
+    }).then(
+      function () {
             var version = {
                 'contentType': versionObj.contentType,
                 'fileName': versionObj.fileName,
                 'externalId': versionGuid,
-                'size': tempFile.size,
                 'resources': [
                     {
                         'name': 'self',
@@ -278,6 +301,9 @@ function handleFileVersion(fileGuid, fileObj, versionObj, tempFile) {
                         'verbs': ['GET']
                     }
                 ]};
+                if (tempFile) {
+                  version["size"] = tempFile.size;
+                } // end if
 
             var responseData = {
                 'externalId': fileGuid,
