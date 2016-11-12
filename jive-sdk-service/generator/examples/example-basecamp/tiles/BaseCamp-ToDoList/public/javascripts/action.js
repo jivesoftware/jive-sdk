@@ -43,7 +43,7 @@ function doIt( host ) {
     });
 
     $("#basecampview").click(function() {
-        //window.parent.open(jirahost+"/issues/?filter="+config['filter']);
+        gala && typeof gala === "object" ? window.open(jirahost+"/issues/?filter="+config['filter']) : window.parent.open(jirahost+"/issues/?filter="+config['filter']);
     });
 
     /*  This was borrowed from another tile, probably don't need it here at all ...

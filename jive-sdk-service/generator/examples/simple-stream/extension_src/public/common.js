@@ -1,4 +1,9 @@
 function getAddonURL() {
+    // If Gala tile service is enabled, there will be a gala object present
+    if (typeof gala === "object"){
+        return jive.tile.getAppURL();
+    }
+
     var matches = window.location.href.match(/.*?[?&]url=([^&]+)%2F.*$/);
     if (matches.length == 2) {
         return decodeURIComponent(matches[1]);
@@ -9,18 +14,14 @@ function getAddonURL() {
 }
 
 function getJiveURL() {
-    var href = getAddonURL();
-    return href.substring(0, href.indexOf('/resources/add-ons'));
-}
+    // If Gala tile service is enabled, there will be a gala object present
+    if (typeof gala === "object"){
+        return jive.tile.getJiveURL();
+    }
 
-function showError(error, extra) {
-    extra = extra || '';
-    osapi.jive.core.container.sendNotification(
-        {
-            "severity" : "error",
-            "message": (i18n(error) || error) + extra
-        }
-    );
+    var href = getAddonURL();
+    var JiveUrl = href.substring(0, href.indexOf('/resources/add-ons'));
+    return JiveUrl;
 }
 
 function showNotification(notice, extra) {

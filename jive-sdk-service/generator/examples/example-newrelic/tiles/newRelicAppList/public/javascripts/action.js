@@ -36,7 +36,11 @@ function initialize(config, options, host) {
     });
 
     $("#newrelicview").click(function() {
-        window.parent.open("https://rpm.newrelic.com/accounts/"+config.acctID+"/applications/"+config.appID);
+        if (gala && typeof gala === "object"){
+            window.open("https://rpm.newrelic.com/accounts/"+config.acctID+"/applications/"+config.appID);
+        } else{
+            window.parent.open("https://rpm.newrelic.com/accounts/"+config.acctID+"/applications/"+config.appID);
+        }
     });
 
     //debugger

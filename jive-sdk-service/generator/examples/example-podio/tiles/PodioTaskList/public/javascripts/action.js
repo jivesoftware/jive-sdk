@@ -36,7 +36,7 @@ function initialize(config, options, host) {
     });
 
     $("#podioview").click(function() {
-        window.parent.open(config.taskUrl);
+        gala && typeof gala === "object" ? window.open(config.taskUrl) : window.parent.open(config.taskUrl);
     });
 
     //debugger
