@@ -108,7 +108,7 @@ exports.lockRoute = function( routePath ) {
     }
 
     var key = routePath['verb'] + '.' + routePath['path'];
-    lockedRoutes[key] = routePath;
+    lockedRoutes[key.toLowerCase()] = routePath;
 };
 
 exports.getLockedRoutes = function() {
@@ -122,8 +122,8 @@ exports.isLocked = function( req ) {
         return false;
     }
 
-    var key = req.method.toLowerCase() + '.' + req.path;
-    return lockedRoutes[key];
+    var key = req.method + '.' + req.path;
+    return lockedRoutes[key.toLowerCase()];
 };
 
 function invalidAuthResponse(res) {
