@@ -702,14 +702,28 @@ exports.recursiveCopy = function (root, target, force, substitutions, file) {
  * @return {Promise} Promise
  */
 exports.unzipFile = function (zipFile, targetDirectory) {
-    var deferred = q.defer();
 	var fs = require('fs');
-	var unzip = require('unzip');
+	var decompressZip = require('decompress-zip');
 
-    fs.createReadStream(zipFile).pipe(unzip.Extract({ path: targetDirectory }));
-    deferred.resolve();
+    return new Promise((resolve,reject) =>{
+        var unzipper = new decompressZip(zipFile);
 
-    return deferred.promise;
+        unzipper
+            .on('error', (err) =>{
+                jive.logger.error(err);
+                reject(err);
+            })
+            .on('extract', (log) =>{
+                jive.logger.info('Finished extracting!');
+                resolve(log);
+            })
+            .on('progress', (index, count) =>{
+                jive.logger.info(`Extracted file ${index} of ${count}`);
+            })
+            .extract({
+                path : targetDirectory
+            })
+    })
 };
 
 /**

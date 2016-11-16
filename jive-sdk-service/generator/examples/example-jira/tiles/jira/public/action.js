@@ -31,7 +31,7 @@ function initialize(config, options, host, jirahost) {
     });
 
     $("#jiraview").click(function() {
-        window.parent.open(jirahost+"/issues/?filter="+config['filter']);
+        gala && typeof gala === "object" ? window.open(jirahost+"/issues/?filter="+config['filter']) : window.parent.open(jirahost+"/issues/?filter="+config['filter']);
     });
 
     var rows = config.rows;

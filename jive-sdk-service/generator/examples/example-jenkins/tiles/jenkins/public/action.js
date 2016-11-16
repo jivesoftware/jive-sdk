@@ -100,7 +100,7 @@ function initialize(config, options) {
 
     $("#jobname").html(config.name);
     $("#gotojenkins").click(function() {
-        window.parent.open(config.url);
+        gala && typeof gala === "object" ? window.open(config.url) : window.parent.open(config.url);
     });
 
     $("#postdiscussion").click(function() {

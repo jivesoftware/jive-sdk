@@ -1,7 +1,7 @@
 {
   "name": "jive-sdk",
   "description": "Node.js SDK for Jive Software to assist with the development of add-ons",
-  "version": "0.2.08",
+  "version": "0.2.09",
   "main": "jive-sdk-service/api.js",
   "author": {
     "name": "Jive Software",
@@ -20,10 +20,10 @@
     "morgan": "1.7.0",
     "q": "1.4.1",
     "request": "2.74.0",
-    "mocha": "2.5.3",
+    "mocha": "3.1.2",
     "minimist": "1.2.0",
     "node-uuid": "1.4.7",
-    "fs-extra": "0.30.0",
+    "fs-extra": "1",
     "log4js": "0.6.37",
     "archiver" : "1.0.1",
     "http-proxy" : "1.14.0",
@@ -31,7 +31,7 @@
     "traverse" : "0.6.6",
     "mv" : "~2.1.1",
     "node-statsd-client": "1.0.3",
-    "unzip": "0.1.11"
+    "decompress-zip" : "0.3.0"
   },
   "devDependencies": {
     "grunt": "*",
