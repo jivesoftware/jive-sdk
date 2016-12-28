@@ -22,7 +22,7 @@
     "request": "2.74.0",
     "mocha": "3.1.2",
     "minimist": "1.2.0",
-    "node-uuid": "1.4.7",
+    "uuid": "3.0.1",
     "fs-extra": "1",
     "log4js": "0.6.37",
     "archiver" : "1.0.1",
