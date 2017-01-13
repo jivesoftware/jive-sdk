@@ -96,6 +96,10 @@ var app = {
       app.viewContext["currentView"] = app.getCurrentView();
       app.viewContext["params"] = gadgets.views.getParams();
       if (context) {
+        if (context["jive"] && context["jive"]["context"]) {
+          app.data = context["jive"]["context"];
+          app.fireOnDataContext();
+        } // end if
         osapi.jive.corev3.resolveContext(context,
           function(object) {
             app.viewContext["object"] = object["content"];

@@ -296,12 +296,15 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         "icon_16": extensionInfo['icon_16'] || extensionInfo['icon16'] || "extension-16.png",
         "icon_48": extensionInfo['icon_48'] || extensionInfo['icon48'] || "extension-48.png",
         "icon_128": extensionInfo['icon_128'] || extensionInfo['icon128'] || "extension-128.png",
-        "released_on": extensionInfo['releasedOn'] || "2013-03-08T19:11:11.234Z",
-        "register_url": extensionInfo['registerURL'] || "%serviceURL%/jive/oauth/register",
-        "unregister_url": extensionInfo['unregisterURL'] || "%serviceURL%/jive/oauth/unregister",
-        "service_url": jive.service.serviceURL(),
-        "redirect_url": extensionInfo['redirectURL'] || "%serviceURL%"
-    }, jive.service.options['extensionInfo']);
+        "register_url": extensionInfo['register_url'] || extensionInfo['registerURL'] || "%serviceURL%/jive/oauth/register",
+        "unregister_url": extensionInfo['unregister_url'] || extensionInfo['unregisterURL'] || "%serviceURL%/jive/oauth/unregister",
+        "redirect_url": extensionInfo['redirect_url'] || extensionInfo['redirectURL'] || "%serviceURL%",
+        "released_on": extensionInfo['released_on'] || extensionInfo['releasedOn'] || new Date().toISOString(),
+        "service_url": jive.service.serviceURL()
+    },
+      /*** NOTE: _.omit is used to transition away from older properties in favor of new ones ****/
+      _.omit(extensionInfo,"redirectURL","registerURL","unregisterURL","releasedOn")
+    );
 
     if (extensionInfo['author']) {
     	extensionMeta["author"] = extensionInfo['author'];
@@ -326,7 +329,7 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
     delete extensionMeta['jiveServiceSignature'];
 
     // suppress the register and unregister URLs if configured to do so
-    if ( (jive.service.options['suppressAddonRegistration'] == true ) ||
+    if ( (jive.service.options['suppressAddonRegistration'] === true ) ||
           // assuming that if clientUrl is still localhost that we shouldn't initiate a register event
     	  // In the event this causes issue, clientUrl can be set to 127.0.0.1 to bring back original behavior
     	 (jive.service.options['clientUrl'] && jive.service.options['clientUrl'].indexOf('localhost') > -1)
@@ -334,6 +337,8 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         delete extensionMeta['register_url'];
         delete extensionMeta['unregister_url'];
     }
+
+    console.log('after',extensionMeta);
 
     return extensionMeta;
 }

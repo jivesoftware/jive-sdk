@@ -3,6 +3,6 @@
 	"clientUrlExcludesPort": true,
 	"extensionInfo": {
 		"description": "This is an OAuth2 Client add-on for {{{NAME}}}",
-		"redirectURL" : "{{{OAUTH_AUTHORIZE_URL}}}"
+		"redirect_url" : "{{{OAUTH_AUTHORIZE_URL}}}"
 	}
 }

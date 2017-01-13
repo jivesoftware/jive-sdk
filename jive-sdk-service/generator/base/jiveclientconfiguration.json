@@ -42,9 +42,9 @@
     "role" : "worker",
     "scheduler": {},
 		"extensionInfo": {
-			"registerURL": "%serviceURL%/jive/oauth/register",
-			"unregisterURL": "%serviceURL%/jive/oauth/unregister",
-			"redirectURL" : "%serviceURL%/oauth/authorize",
+			"register_url": "%serviceURL%/jive/oauth/register",
+			"unregister_url": "%serviceURL%/jive/oauth/unregister",
+			"redirect_url" : "%serviceURL%/oauth/authorize",
 			"health_url": "%serviceURL%/monitor/health",
 			"config_url": "%serviceURL%/configure",
 			"author" : "Developer Name",

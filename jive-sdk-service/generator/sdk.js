@@ -699,20 +699,10 @@ function doUnpackAddOn( zipFile, options ) {
                                 } // end if
 
                                 clientConfiguration["extensionInfo"] = {};
-                                clientConfiguration["extensionInfo"]["id"] = metaJson["id"];
+
+                                /** NON-SYMETRICAL VALUES **/
                                 clientConfiguration["extensionInfo"]["uuid"] = metaJson["id"];
-                                clientConfiguration["extensionInfo"]["name"] = metaJson["name"];
-                                clientConfiguration["extensionInfo"]["type"] = metaJson["type"];
-                                clientConfiguration["extensionInfo"]["description"] = metaJson["description"];
                                 clientConfiguration["extensionInfo"]["packageVersion"] = metaJson["package_version"];
-                                clientConfiguration["extensionInfo"]["minimum_version"] = metaJson["minimum_version"];
-                                clientConfiguration["extensionInfo"]["minimum_edition"] = metaJson["minimum_edition"];
-                                clientConfiguration["extensionInfo"]["status"] = metaJson["status"];
-
-                                clientConfiguration["extensionInfo"]["icon_16"] = metaJson["icon_16"];
-                                clientConfiguration["extensionInfo"]["icon_48"] = metaJson["icon_48"];
-                                clientConfiguration["extensionInfo"]["icon_128"] = metaJson["icon_128"];
-
                                 clientConfiguration["extensionInfo"]["releasedOn"] = metaJson["released_on"];
 
                                 if (metaJson["author"]) {
@@ -721,81 +711,15 @@ function doUnpackAddOn( zipFile, options ) {
                                     clientConfiguration["extensionInfo"]["author_email"] = metaJson["author_email"];
                                 } // end if
 
-                                if (metaJson["register_url"]) {
-                                    clientConfiguration["extensionInfo"]["registerURL"] = metaJson["register_url"];
-                                } // end if
-
-                                if (metaJson["unregister_url"]) {
-                                    clientConfiguration["extensionInfo"]["unregisterURL"] = metaJson["unregister_url"];
-                                } // end if
-
-                                if (metaJson["redirect_url"]) {
-                                    clientConfiguration["extensionInfo"]["redirectURL"] = metaJson["redirect_url"];
-                                } // end if
-
-                                if (metaJson["config_url"]) {
-                                    clientConfiguration["extensionInfo"]["config_url"] = metaJson["config_url"];
-                                } // end if
-
-                                if (metaJson["health_url"]) {
-                                    clientConfiguration["extensionInfo"]["health_url"] = metaJson["health_url"];
-                                } // end if
-
-                                if (metaJson["website_url"]) {
-                                    clientConfiguration["extensionInfo"]["website_url"] = metaJson["website_url"];
-                                } // end if
-
-                                if (metaJson["community_url"]) {
-                                    clientConfiguration["extensionInfo"]["community_url"] = metaJson["community_url"];
-                                } // end if
-
-                                if (metaJson["support_info"]) {
-                                    clientConfiguration["extensionInfo"]["support_info"] = metaJson["support_info"];
-                                } // end if
-
-                                if (metaJson["info_email"]) {
-                                    clientConfiguration["extensionInfo"]["info_email"] = metaJson["info_email"];
-                                } // end if
-
-                                if (metaJson["tags"]) {
-                                    clientConfiguration["extensionInfo"]["tags"] = metaJson["tags"];
-                                } // end if
-
-                                if (metaJson["overview"]) {
-                                    clientConfiguration["extensionInfo"]["overview"] = metaJson["overview"];
-                                } // end if
-
-                                if (metaJson["install_instructions"]) {
-                                    clientConfiguration["extensionInfo"]["install_instructions"] = metaJson["install_instructions"];
-                                } // end if
-
-                                if (metaJson["eula_filename"]) {
-                                    clientConfiguration["extensionInfo"]["eula_filename"] = metaJson["eula_filename"];
-                                } // end if
-
-                                if (metaJson["privacy_policy"]) {
-                                    clientConfiguration["extensionInfo"]["privacy_policy"] = metaJson["privacy_policy"];
-                                } // end if
-
-                                if (metaJson["screen_shots"]) {
-                                    clientConfiguration["extensionInfo"]["screen_shots"] = metaJson["screen_shots"];
-                                } // end if
-
-                                if (metaJson["solution_categories"]) {
-                                    clientConfiguration["extensionInfo"]["solution_categories"] = metaJson["solution_categories"];
-                                } // end if
-
-                                if (metaJson["target_integrations"]) {
-                                    clientConfiguration["extensionInfo"]["target_integrations"] = metaJson["target_integrations"];
-                                } // end if
-
-                                if (metaJson["key_features"]) {
-                                    clientConfiguration["extensionInfo"]["key_features"] = metaJson["key_features"];
-                                } // end if
-
-                                if (metaJson["jive_technology_partner_id"]) {
-                                    clientConfiguration["extensionInfo"]["jive_technology_partner_id"] = metaJson["jive_technology_partner_id"];
-                                } // end if
+                                ["id","name","type","description","minimum_version","minimum_edition","status","icon_16","icon_48","icon_128",
+                                 "register_url","unregister_url","redirect_url","config_url","health_url","website_url","community_url",
+                                 "support_info","info_email","tags","overview","install_instructions","eula_filename","privacy_policy",
+                                 "screen_shots", "solution_categories","target_integrations","key_features","target_integrations"
+                                ].forEach(
+                                   function(key) {
+                                    clientConfiguration["extensionInfo"][key] = metaJson[key];
+                                   } // end function
+                                 );
 
                                 clientConfiguration["logLevel"] = "DEBUG";
                                 clientConfiguration["ignoreExtensionRegistrationSource"] = "false";
