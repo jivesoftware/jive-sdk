@@ -8,13 +8,13 @@
                "listStyle" : "contentList"
         }
     },
-    "displayName" : "Watch this place!",
-    "name" : "Webhooks",
+    "displayName" : "{{{TILE_NAME}}}",
+    "name" : "{{{TILE_NAME}}}",
     "description" : "Watch a place with a webhook.",
     "style" : "LIST",
     "icons" : {
-        "16" : "http://ctflyfishing.com/wp-content/uploads/2011/11/set-fishing-hook1.jpg",
-        "48" : "http://ctflyfishing.com/wp-content/uploads/2011/11/set-fishing-hook1.jpg",
-        "128" : "http://ctflyfishing.com/wp-content/uploads/2011/11/set-fishing-hook1.jpg"
+        "16" : "https://cdn.pixabay.com/photo/2014/04/02/16/19/fish-306943_1280.png",
+        "48" : "https://cdn.pixabay.com/photo/2014/04/02/16/19/fish-306943_1280.png",
+        "128" : "https://cdn.pixabay.com/photo/2014/04/02/16/19/fish-306943_1280.png"
     }
 }
