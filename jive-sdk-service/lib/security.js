@@ -43,7 +43,7 @@ var findCredentials = function(req) {
     var authorization = req.headers['authorization'];
     var tenantID;
 
-    if ( !jiveUrl && authorization ) {
+    if ( authorization ) {
         jive.logger.debug("Trying to parse jiveURL/tenantID from JiveEXTN authorization header...");
 
         // check authorization header
@@ -164,6 +164,7 @@ exports.checkAuthHeaders = function(req, res) {
 
                 var passedBasic  =  jive.util.basicAuthorizationHeaderValid(auth, clientId, secret, true );
                 var passedJiveEXTN = jive.util.jiveAuthorizationHeaderValid(auth, clientId, secret, true );
+                console.log('***',auth,clientId,secret);
 
                 if ( !passedBasic && !passedJiveEXTN ) {
                     jive.logger.debug("Unauthorized access. Failed basic auth, and jiveEXTN header checks.");
