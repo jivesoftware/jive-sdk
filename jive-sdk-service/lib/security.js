@@ -164,7 +164,6 @@ exports.checkAuthHeaders = function(req, res) {
 
                 var passedBasic  =  jive.util.basicAuthorizationHeaderValid(auth, clientId, secret, true );
                 var passedJiveEXTN = jive.util.jiveAuthorizationHeaderValid(auth, clientId, secret, true );
-                console.log('***',auth,clientId,secret);
 
                 if ( !passedBasic && !passedJiveEXTN ) {
                     jive.logger.debug("Unauthorized access. Failed basic auth, and jiveEXTN header checks.");
