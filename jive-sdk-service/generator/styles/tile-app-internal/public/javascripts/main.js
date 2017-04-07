@@ -10,7 +10,7 @@ var app = {
   config : null,
   options : null,
   viewer : null,
-  container : (isAddOnConfigure || null),
+  container : (window["isAddOnConfigure"]) ? (window["isAddOnConfigure"]) : null,
 
   resize : function() {
     /*** DELAYED TO MAKE SURE DOM HAS SETTLED ***/
