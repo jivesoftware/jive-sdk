@@ -60,21 +60,30 @@ exports.registration = function(context) {
                         jive.logger.info("registered instance", tileInstance);
                         instanceLibrary.save(tileInstance).then(function () {
                             jive.events.emit("newInstance", tileInstance);
-                            var jiveCommunity = tileInstance['jiveCommunity'];
-                            if (jiveCommunity) {
-                                jive.community.findByCommunity(jiveCommunity).then( function( community ) {
-                                    if ( !jiveUrl ) {
-                                        // try to derive jiveURL from push URL
-                                        jiveUrl = pushUrl.split('/api')[0];
-                                    }
+                            var jiveTenantID = tileInstance['tenantId'];
+                            if (jiveTenantID) {
+                                jive.community.findByTenantID(jiveTenantID).then(
+                                  function( community ) {
+                                    if (community) {
+                                      jive.logger.debug("tile instance created, and found matching community, continuing..");
+                                      deferred.resolve(tileInstance);
+                                      return;
+                                    } else {
+                                      jive.logger.debug("tile instance created, but community not found, unexpected so trying to recover.  Saving minimal community.");
+                                      // /*** NOT SURE WHAT THIS CODE IS DOING, POSSIBLY REMNANT OF findByJiveURL ***/
+                                      if ( !jiveUrl ) {
+                                          // try to derive jiveURL from push URL
+                                          jiveUrl = pushUrl.split('/api')[0];
+                                      } // end if
 
-                                    community = community || {};
-                                    community['tenantId'] = tenantID;
-                                    community['jiveUrl'] = jiveUrl;
-                                    community['jiveCommunity'] = jiveCommunity;
-                                    jive.community.save(community).then(function () {
-                                        deferred.resolve(tileInstance);
-                                    });
+                                      jive.community.save({
+                                        tenantId : jiveTenantID,
+                                        jiveUrl : jiveUrl,
+                                        jiveCommunity : tileInstance['jiveCommunity']
+                                      }).then(function () {
+                                          deferred.resolve(tileInstance);
+                                      });
+                                    } // end if
                                 });
                             } else {
                                 deferred.resolve();

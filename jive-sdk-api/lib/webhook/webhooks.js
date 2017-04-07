@@ -158,13 +158,13 @@ exports.findByCommunity = function(community) {
  * tokens ({'access_token' : '...', 'refresh_token' : '...' }). If not provided, the community will be updated with the new access tokens.
  * @returns {Promise} Promise
  */
-exports.register = function( jiveCommunity, events, object, webhookCallbackURL,
+exports.register = function( tenantId, events, object, webhookCallbackURL,
                              accessToken, refreshToken, tokenPersistenceFunction ) {
     var deferred = q.defer();
 
     var self = this;
 
-    jive.community.findByCommunity(jiveCommunity).then( function(community) {
+    jive.community.findByTenantID(tenantId).then( function(community) {
         if ( community ) {
 
             var webhookRequest = {
@@ -215,7 +215,7 @@ exports.register = function( jiveCommunity, events, object, webhookCallbackURL,
                 }
             );
         } else {
-            deferred.reject( { "error" : "No such jive community " + jiveCommunity} );
+            deferred.reject( { "error" : "No such jive community " + tenantId} );
         }
     });
 

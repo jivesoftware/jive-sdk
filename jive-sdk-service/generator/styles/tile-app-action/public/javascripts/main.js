@@ -10,7 +10,7 @@ var app = {
   config : null,
   options : null,
   viewer : null,
-  container : null,
+  container : (isAddOnConfigure || null),
 
   resize : function() {
     /*** DELAYED TO MAKE SURE DOM HAS SETTLED ***/
@@ -20,18 +20,38 @@ var app = {
     },200);
   },
 
+  fireState : function(func,arguments,requireAllArguments) {
+    //console.log('****','Function',func,window[func]);
+    if (window[func] && typeof window[func] === "function") {
+        if (requireAllArguments) {
+          if (arguments && arguments.length > 0) {
+            var checkArgs = arguments.filter(
+              function(arg) {
+                  return (arg !== null && arg != null && typeof arg !== "undefined" && arg !== undefined && arg != undefined);
+              } // end function
+            );
+            if (checkArgs.length == arguments.length) {
+              //console.log('****',func,'arguments check PASSED, firing...');
+              window[func].apply(null,arguments);
+            } else {
+              //console.log('****',func,'arguments are required NOT required, firing...');
+            } // end if
+          }
+        } else {
+          //console.log('****',func,'arguments check not required, firing...');
+          window[func].apply(null,arguments);
+        } // end if
+    } else {
+      //console.log('****',func,'not defined, ignoring...');
+    } // end if
+  }, // end function
+
   loadUI : function() {
-      if (this.viewer && onViewer && typeof onViewer === "function") {
-        onViewer(this.viewer);
-      } // end if
+      this.fireState("onViewer",[ this.viewer ],true);
 
-      if (this.container && onContainer && typeof onContainer === "function") {
-        onContainer(this.container);
-      } // end if
+      this.fireState("onContainer",[ this.container ],true);
 
-      if (this.container && this.viewer && onReady && typeof onReady === "function") {
-        onReady(this.config,this.options,this.viewer,this.container);
-      } // end if
+      this.fireState("onReady",[ this.config,this.options,this.viewer,this.container ],true);
 
   }, // end function
 
@@ -39,9 +59,7 @@ var app = {
     this.config = config;
     this.options = options;
 
-    if (this.config && onConfig && typeof onConfig === "function") {
-      onConfig(this.config,this.options);
-    } // end if
+    this.fireState("onConfig",[ this.config,this.options],true);
 
     /*** CALLS APP FRAMEWORK AND ASKS FOR THE VIEWER TO BE PASSED BACK ***/
     osapi.jive.corev3.people.getViewer().execute(gadgets.util.makeClosure(this, this.handleViewer));

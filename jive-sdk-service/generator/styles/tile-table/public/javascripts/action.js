@@ -14,54 +14,13 @@
  *    limitations under the License.
  */
 
-jive.tile.onOpen(function(config, options) {
-
-    config = JSON.parse(JSON.parse(config));
-    console.log("config:", config);
-    console.log("options:", options);
-
-    var parent;
-    jive.tile.getContainer(function(container) {
-        parent = container.resources.self.ref;
-    });
-
-
-
-    $("#create-discussion").click(function() {
-
-        var message = $("#message").val();
-
-        var obj = {
-            "content": {
-                "type": "text/html",
-                "text": '<p>'+message+'</p><p>Last Updated at </p>'+config.date
-            },
-            "subject": $("#subject").val(),
-            "visibility": "place",
-            "parent": parent
-
-        }
-
-        osapi.jive.corev3.discussions.create(obj).execute(function(result) {
-            console.log("result:", result);
-        });
-        $("#message").val('');
-        $("#subject").val('');
-        alertBox('success', "The discussion has been posted.");
-        setTimeout(function() {
-            jive.tile.close(config, {} );
-        }, 1000);
-    });
-
-    window.setTimeout( function() {
-         gadgets.window.adjustHeight();
-     }, 1000);
-
-    gadgets.window.adjustHeight();
-
-//    }, 1000);
-});
-
+/****************************************************
+* This file should load AFTER view/configuration/container.js, or whichever .js file that defines the onReady, onContainer and onViewer
+*
+* Note:  This implmentation has been provided for convenience, developers are not required to use this pattern.
+*
+* SEE: Tile API & Development FAQ - https://community.jivesoftware.com/docs/DOC-185776
+****************************************************/
 function alertBox(type, message) {
     if(!type) {
         type = 'success';
@@ -76,3 +35,76 @@ function alertBox(type, message) {
         jive.tile.close({"message": "The discussion has been created."});
     }, 2000);
 }
+
+//************************************************************************
+//NOTE: CALLED AS SOON AS THE FULL CONTEXT IS RESOLVED
+//************************************************************************
+function onReady(tileConfig,tileOptions,viewer,container) {
+  console.log('onReady',tileConfig,tileOptions,viewer,container);
+
+  if ( typeof tileConfig === "string" ) {
+      tileConfig = JSON.parse(tileConfig);
+  }
+
+  $("#create-discussion").click(
+    function() {
+      var message = $("#message").val();
+      var obj = {
+          "content": {
+              "type": "text/html",
+              "text": '<p>'+message+'</p><p>Last Updated at </p>'+config.date
+          },
+          "subject": $("#subject").val(),
+          "visibility": "place",
+          "parent": container
+      };
+
+      osapi.jive.corev3.discussions.create(obj).execute(
+        function(result) {
+          console.log("result:", result);
+        }
+      );
+
+      $("#message").val('');
+      $("#subject").val('');
+
+      alertBox('success', "The discussion has been posted.");
+
+      setTimeout(
+        function() {
+          jive.tile.close(config, {} );
+        },
+        1000
+      );
+  });
+
+
+  window.setTimeout(
+    function() {
+      app.resize();
+    },
+    1000
+  );
+  app.resize();
+} // end function
+
+// //************************************************************************
+// //NOTE: CALLED AS SOON AS THE CONFIG IS RESOLVED
+// //************************************************************************
+// function onConfig(tileConfig,tileOptions) {
+//   console.log('onConfig',tileConfig,tileOptions);
+// } // end function
+//
+// //************************************************************************
+// //NOTE: CALLED AS SOON AS THE CONTAINER IS RESOLVED
+// //************************************************************************
+// function onContainer(container) {
+//   console.log('onContainer',container);
+// } // end function
+//
+// //************************************************************************
+// //NOTE: CALLED AS SOON AS THE VIEWER IS RESOLVED
+// //************************************************************************
+// function onViewer(viewer) {
+//   console.log('onViewer',viewer);
+// } // end function

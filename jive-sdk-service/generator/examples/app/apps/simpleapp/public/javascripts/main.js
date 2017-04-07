@@ -27,42 +27,58 @@ var app = {
       return currentView;
     },
 
-    fireOnViewer : function() {
-      if (onViewer && typeof onViewer === "function") {
-        onViewer(this.viewer);
+    fireState : function(func,arguments,requireAllArguments) {
+      //console.log('****','Function',func,window[func]);
+      if (window[func] && typeof window[func] === "function") {
+          if (requireAllArguments) {
+            if (arguments && arguments.length > 0) {
+              var checkArgs = arguments.filter(
+                function(arg) {
+                    return (arg !== null && arg != null && typeof arg !== "undefined" && arg !== undefined && arg != undefined);
+                } // end function
+              );
+              if (checkArgs.length == arguments.length) {
+                //console.log('****',func,'arguments check PASSED, firing...');
+                window[func].apply(null,arguments);
+              } else {
+                //console.log('****',func,'arguments are required NOT required, firing...');
+              } // end if
+            }
+          } else {
+            //console.log('****',func,'arguments check not required, firing...');
+            window[func].apply(null,arguments);
+          } // end if
+      } else {
+        //console.log('****',func,'not defined, ignoring...');
       } // end if
+    }, // end function
+
+    fireOnViewer : function() {
+      this.fireState("onViewer",[ this.viewer ],true);
     }, // end function
 
     fireOnReady : function() {
-      if (onReady && typeof onReady === "function") {
-        onReady(opensocial.getEnvironment());
-      } // end if
+      this.fireState("onReady",[ opensocial.getEnvironment() ],true);
     }, // end function
 
     fireOnViewContext : function() {
-      if (onView && typeof onView === "function") {
-        /*** DATA CLEANSING ***/
-        if (this.viewContext.object === app.NO_CONTEXT) {
-          delete this.viewContext.object;
-        } // end if
-        onView(this.viewContext);
+      /*** DATA CLEANSING ***/
+      if (this.viewContext.object === app.NO_CONTEXT) {
+        delete this.viewContext.object;
       } // end if
+      this.fireState("onView",[ this.viewContext ],true);
     }, // end function
 
     fireOnActionContext : function() {
-      if (onAction && typeof onAction === "function") {
-        /*** DATA CLEANSING ***/
-        if (this.actionContext.object === app.NO_CONTEXT) {
-          delete this.actionContext.object;
-        } // end if
-        onAction(this.actionContext);
+      /*** DATA CLEANSING ***/
+      if (this.actionContext.object === app.NO_CONTEXT) {
+        delete this.actionContext.object;
       } // end if
+      this.fireState("onAction",[ this.actionContext ],true);
     }, // end function
 
     fireOnDataContext : function() {
-      if (onData && typeof onData === "function") {
-        onData(this.data);
-      } // end if
+      this.fireState("onData",[ this.data ],true);
     }, // end function
 
     init : function() {
