@@ -112,7 +112,7 @@ var setupExpressApp = function (app, rootDir, config) {
 
     /*** MOVED THIS FROM SERVICE.JS - NEEDS TO BE LAST!!!!!????? ****/
     /*** SEE: http://expressjs.com/en/guide/error-handling.html ***/
-    app.use(errorHandler);
+    app.use(errorHandler());
 
     return q.fcall(function() {
         jive.logger.debug("setupExpressApp - Complete.");
