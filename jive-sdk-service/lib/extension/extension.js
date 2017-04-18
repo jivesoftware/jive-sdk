@@ -358,7 +358,11 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
                     delete definition['id'];
                     delete definition['definitionDirName'];
                 });
-                return definitions;
+                return definitions.filter(
+                  function(definition) {
+                    return (!definition["suppressTileDefinition"]);
+                  } // end function
+                );
             } else {
                 var proms = [];
                 var host = jive.service.serviceURL();
@@ -402,7 +406,11 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
                 });
 
                 return q.all(proms).then( function() {
-                    return definitions;
+                    return definitions.filter(
+                      function(definition) {
+                        return (!definition["suppressTileDefinition"]);
+                      } // end function
+                    );
                 });
             }
         });
