@@ -328,6 +328,15 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
     delete extensionMeta['uuid'];
     delete extensionMeta['jiveServiceSignature'];
 
+    /*** ADDING IN PACKAGED APPS LOGIC FOR config_url IN meta.json ***/
+    if (packageApps && jive.service.options["packageAddOnConfigure"] && extensionMeta['config_url']) {
+      var cfgPackageDir = '/public';
+      if (typeof jive.service.options["packageAddOnConfigure"] === 'string') {
+        cfgPackageDir += jive.service.options["packageAddOnConfigure"]
+      } //end if
+      extensionMeta['config_url'] = extensionMeta['config_url'].replace("%serviceURL%",cfgPackageDir).replace(jive.service.serviceURL(),cfgPackageDir);
+    } // end if
+
     // suppress the register and unregister URLs if configured to do so
     if ( (jive.service.options['suppressAddonRegistration'] === true ) ||
           // assuming that if clientUrl is still localhost that we shouldn't initiate a register event
