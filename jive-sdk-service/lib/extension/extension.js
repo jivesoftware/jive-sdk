@@ -393,9 +393,13 @@ function getTileDefinitions(extensionPublicDir, tilesRootDir, packageApps) {
                     } // end if
 
                     /*** NEED TO REMOVE register/unregister IF IT IS A JIVE HOSTED APP ***/
-                    if (definition['config'] && definition['config'].indexOf('/public') == 0) {
-                        delete definition['register'];
-                        delete definition['unregister'];
+                    if (!definition['registerTileWhenPackaged']) {
+                      if (definition['config'] && definition['config'].indexOf('/public') == 0) {
+                          delete definition['register'];
+                          delete definition['unregister'];
+                      } // end if
+                    } else {
+                      delete definition['registerTileWhenPackaged'];
                     } // end if
 
                     delete definition['definitionDirName'];
