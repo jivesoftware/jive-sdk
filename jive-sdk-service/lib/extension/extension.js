@@ -347,8 +347,6 @@ function fillExtensionMetadata(extensionInfo, definitions, packageApps, cartridg
         delete extensionMeta['unregister_url'];
     }
 
-    console.log('after',extensionMeta);
-
     return extensionMeta;
 }
 
